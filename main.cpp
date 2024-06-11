@@ -3,6 +3,7 @@
 #include <map>
 #include <limits>
 #include <fstream>
+#include "debug_util.h"
 
 class Module {
 public:
@@ -43,9 +44,11 @@ public:
 
     void edgeCheck(Module* mod) {
         if (coordmat.count(std::make_pair(mod->x - 1, mod->y)) != 0) {
+            DEBUG("Module at " << mod->x << ", " << mod->y << " Adjacent to module at " << mod->x - 1 << ", " << mod->y << std::endl);
             addEdge(mod, coordmat[std::make_pair(mod->x - 1, mod->y)]);
         }
         if (coordmat.count(std::make_pair(mod->x, mod->y - 1)) != 0) {
+            DEBUG("Module at " << mod->x << ", " << mod->y << " Adjacent to module at " << mod->x << ", " << mod->y - 1 << std::endl);
             addEdge(mod, coordmat[std::make_pair(mod->x, mod->y - 1)]);
         }
     }
@@ -107,7 +110,7 @@ public:
 
 int main() {
     Lattice lattice;
-    const int ORIGIN = 1;
+    const int ORIGIN = 0;
     int x = ORIGIN;
     int y = ORIGIN;
     std::vector<std::vector<char>> image;
@@ -136,7 +139,7 @@ int main() {
     file.close();
     lattice.AP();
     for (auto i: lattice.articulationPoints) {
-        image[i.second-1][i.first-1] = '*';
+        image[i.second][i.first] = '*';
     }
     for (auto imageRow: image) {
         for (auto c: imageRow) {
