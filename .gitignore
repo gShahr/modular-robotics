@@ -4,3 +4,7 @@
 .out
 .swp
 .~
+.idea
+cmake-build-debug
+cmake-build-release
+CMakeLists.txt
