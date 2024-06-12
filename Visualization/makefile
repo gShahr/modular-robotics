@@ -7,7 +7,7 @@ ifeq ($(OS), Windows_NT)
 	DELCMD = Remove-Item
 	LIBSUBFOLDER=win64
 	CC=x86_64-w64-mingw32-g++
-	OSCFLAGS+= -lgdi32
+	OSCFLAGS+= -lgdi32 -static
 else
 	DIRSLASH=/
 	DELCMD=rm -f
@@ -30,7 +30,7 @@ _LIBS=libglfw3.a OpenGL32.Lib
 LIBS = $(patsubst %,$(LDIR)/$(LIBSUBFOLDER)/%,$(_LIBS))
 _DEPS = glfw.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
-_OBJ = main.o
+_OBJ = main.o glad.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 # $(info LIBS is $(LIBS))
