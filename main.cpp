@@ -133,13 +133,13 @@ int main() {
             x++;
         }
         image.push_back(row);
-        x = 0;
+        x = ORIGIN;
         y++;
     }
     file.close();
     lattice.AP();
     for (auto i: lattice.articulationPoints) {
-        image[i.second][i.first] = '*';
+        image[i.second - ORIGIN][i.first - ORIGIN] = '*';
     }
     for (auto imageRow: image) {
         for (auto c: imageRow) {
