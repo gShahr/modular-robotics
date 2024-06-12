@@ -1,4 +1,5 @@
 CFLAGS=-I$(IDIR) 
+_COMMA:=,
 
 ifeq ($(OS), Windows_NT)
 	SHELL=powershell
@@ -42,5 +43,10 @@ $(ODIR)/%.o: $(SDIR)/%.c
 main: $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS) $(OSCFLAGS)
 
+_JUNKFILES = *.exe *.out $(ODIR)$(DIRSLASH)*.o
+ifeq ($(OS), Windows_NT)
+	JUNKFILES = $(subst $() $(),$(_COMMA),$(_JUNKFILES))
+endif
+# $(info JUNKFILES is $(JUNKFILES))
 clean:
-	$(DELCMD) *.exe *.out $(ODIR)$(DIRSLASH)*.o
+	$(DELCMD) $(JUNKFILES)
