@@ -30,7 +30,7 @@ _LIBS=libglfw3.a OpenGL32.Lib
 LIBS = $(patsubst %,$(LDIR)/$(LIBSUBFOLDER)/%,$(_LIBS))
 _DEPS = glfw.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
-_OBJ = main.o glad.o
+_OBJ = main.opp glad.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 # $(info LIBS is $(LIBS))
@@ -39,11 +39,13 @@ OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 $(ODIR)/%.o: $(SDIR)/%.c
 	$(CC) -c -o $@ $< $(CFLAGS)
+$(ODIR)/%.opp: $(SDIR)/%.cpp
+	$(CC) -c -o $@ $< $(CFLAGS)
 
 main: $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS) $(OSCFLAGS)
 
-_JUNKFILES = *.exe *.out $(ODIR)$(DIRSLASH)*.o
+_JUNKFILES = *.exe *.out $(ODIR)$(DIRSLASH)*.o $(ODIR)$(DIRSLASH)*.opp
 ifeq ($(OS), Windows_NT)
 	JUNKFILES = $(subst $() $(),$(_COMMA),$(_JUNKFILES))
 endif
