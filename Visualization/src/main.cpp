@@ -4,24 +4,22 @@
 #include "glad/glad.h"
 #include "glfw3.h"
 #include "Shader.hpp"
+#include "stb_image.h"
 
 const char *vertexShaderPath = "resources/shaders/vshader.glsl";
 const char *fragmentShaderPath = "resources/shaders/fshader.glsl";
 
+    // coordinates      color               texture coordinates
 float vertices[] = {
-    0.0f, 0.9f, 0.0f,   1.0f, 0.0f, 0.0f, // top
-    -0.7f, 0.2f, 0.0f,  0.0f, 0.0f, 0.0f, // top left
-    -0.3f, -0.9f, 0.0f, 0.0f, 1.0f, 0.0f, // bottom left
-    0.3f, -0.9f, 0.0f,  0.0f, 0.0f, 1.0f, // bottom right
-    0.7f, 0.2f, 0.0f,   1.0f, 1.0f, 1.0f  // top right
+    1.0f, 1.0f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
+    1.0f, -1.0f, 0.0f,  0.0f, 0.0f, 0.0f,   1.0f, 0.0f, // bottom right
+    -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,   0.0f, 0.0f, // bottom left
+    -1.0f, 1.0f, 0.0f,  0.0f, 0.0f, 1.0f,   0.0f, 1.0f  // top left
 };
 
 unsigned int indices[] = { // For our Element Buffer Object
     0, 1, 2,    // first triangle
-    1, 2, 3,    // second triangle
-    2, 3, 4,    // third triangle
-    3, 4, 0,    // fourth triangle
-    4, 0, 1,    // fifth triangle
+    0, 2, 3,    // second triangle
 };
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
@@ -67,6 +65,21 @@ int main(int argc, char** argv) {
     // Register the window-resizing callback
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
+
+    stbi_set_flip_vertically_on_load(true);
+    int twidth, theight, tchan;
+    unsigned char *tdata = stbi_load("resources/textures/face_debug.png", &twidth, &theight, &tchan, 0);
+    unsigned int texture;
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // Texture wrapping: repeat
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); // Use mipmaps for distant textures
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // Use linear filtering for close objects
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, twidth, theight, 0, GL_RGB, GL_UNSIGNED_BYTE, tdata);
+    glGenerateMipmap(GL_TEXTURE_2D);
+    stbi_image_free(tdata);
+
     // Create a Vertex Array Object to store our vertex attribute configuration, and bind it now
     // Create a Vertex Buffer Object on the GPU to store Vertex data, and bind it now
     unsigned int VAO, VBO, EBO;
@@ -78,10 +91,12 @@ int main(int argc, char** argv) {
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); // Cp vertex data into VBO
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);     // Bind the EBO to the active GL_ELEMENT_ARRAY_BUFFER
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW); // Cp index data into EBO
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0); // Configure vertex attribs
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3*sizeof(float)));
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0); // Configure vertex attribs
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3*sizeof(float)));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6*sizeof(float)));
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(2);
 
     // std::cout << sizeof(vertices) << std::endl;
 
@@ -93,8 +108,10 @@ int main(int argc, char** argv) {
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         shader.use();
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture);
         glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 15, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
