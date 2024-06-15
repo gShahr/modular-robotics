@@ -5,6 +5,9 @@
 #include "glfw3.h"
 #include "Shader.hpp"
 #include "stb_image.h"
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
 
 const char *vertexShaderPath = "resources/shaders/vshader.glsl";
 const char *fragmentShaderPath = "resources/shaders/fshader.glsl";
@@ -99,6 +102,12 @@ int main(int argc, char** argv) {
     glEnableVertexAttribArray(2);
 
     // std::cout << sizeof(vertices) << std::endl;
+    
+    glm::vec4 vec(1.0f, 0.0f, 0.0f, 1.0f);
+    glm::mat4 trans = glm::mat4(1.0f);
+    trans = glm::translate(trans, glm::vec3(1.0f, 1.0f, 0.0f));
+    vec = trans * vec;
+    std::cout << vec.x << vec.y << vec.z << std::endl;
 
     while(!glfwWindowShouldClose(window)) {
         // -- Input ---
