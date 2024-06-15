@@ -12,17 +12,47 @@
 const char *vertexShaderPath = "resources/shaders/vshader.glsl";
 const char *fragmentShaderPath = "resources/shaders/fshader.glsl";
 
-    // coordinates      color               texture coordinates
-float vertices[] = {
-    1.0f, 1.0f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
-    1.0f, -1.0f, 0.0f,  0.0f, 0.0f, 0.0f,   1.0f, 0.0f, // bottom right
-    -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,   0.0f, 0.0f, // bottom left
-    -1.0f, 1.0f, 0.0f,  0.0f, 0.0f, 1.0f,   0.0f, 1.0f  // top left
+float cubeVertices[] = { 
+    //    Coords              Vertex color         Tex Coord
+    // Back face:
+    -0.5f, -0.5f, -0.5f,    1.0f, 1.0f, 1.0f,     0.0f, 0.0f, // Bottom left    0
+     0.5f, -0.5f, -0.5f,    1.0f, 1.0f, 1.0f,     1.0f, 0.0f, // Bottom right   1
+     0.5f,  0.5f, -0.5f,    1.0f, 1.0f, 1.0f,     1.0f, 1.0f, // Top right      2
+    -0.5f,  0.5f, -0.5f,    1.0f, 1.0f, 1.0f,     0.0f, 1.0f, // Top left       3
+    // Front face:
+    -0.5f, -0.5f,  0.5f,    1.0f, 1.0f, 1.0f,     0.0f, 0.0f, // Bottom left    4
+     0.5f, -0.5f,  0.5f,    1.0f, 1.0f, 1.0f,     1.0f, 0.0f, // Bottom right   5
+     0.5f,  0.5f,  0.5f,    1.0f, 1.0f, 1.0f,     1.0f, 1.0f, // Top right      6
+    -0.5f,  0.5f,  0.5f,    1.0f, 1.0f, 1.0f,     0.0f, 1.0f, // Top left       7
+    // Left face:
+    -0.5f,  0.5f,  0.5f,    1.0f, 1.0f, 1.0f,     1.0f, 0.0f, // Bottom left    8
+    -0.5f,  0.5f, -0.5f,    1.0f, 1.0f, 1.0f,     1.0f, 1.0f, // Bottom right   9
+    -0.5f, -0.5f, -0.5f,    1.0f, 1.0f, 1.0f,     0.0f, 1.0f, // Top right      10
+    -0.5f, -0.5f,  0.5f,    1.0f, 1.0f, 1.0f,     0.0f, 0.0f, // Top left       11
+    // Right face:
+     0.5f,  0.5f,  0.5f,    1.0f, 1.0f, 1.0f,     1.0f, 0.0f, // Bottom left    12
+     0.5f,  0.5f, -0.5f,    1.0f, 1.0f, 1.0f,     1.0f, 1.0f, // Bottom right   13
+     0.5f, -0.5f, -0.5f,    1.0f, 1.0f, 1.0f,     0.0f, 1.0f, // Top right      14
+     0.5f, -0.5f,  0.5f,    1.0f, 1.0f, 1.0f,     0.0f, 0.0f, // Top left       15
+    // Bottom face:
+    -0.5f, -0.5f, -0.5f,    1.0f, 1.0f, 1.0f,     0.0f, 1.0f, // Bottom left    16
+     0.5f, -0.5f, -0.5f,    1.0f, 1.0f, 1.0f,     1.0f, 1.0f, // Bottom right   17
+     0.5f, -0.5f,  0.5f,    1.0f, 1.0f, 1.0f,     1.0f, 0.0f, // Top right      18
+    -0.5f, -0.5f,  0.5f,    1.0f, 1.0f, 1.0f,     0.0f, 0.0f, // Top left       19
+    // Top face:
+    -0.5f,  0.5f, -0.5f,    1.0f, 1.0f, 1.0f,     0.0f, 1.0f, // Bottom left    20
+     0.5f,  0.5f, -0.5f,    1.0f, 1.0f, 1.0f,     1.0f, 1.0f, // Bottom right   21
+     0.5f,  0.5f,  0.5f,    1.0f, 1.0f, 1.0f,     1.0f, 0.0f, // Top right      22
+    -0.5f,  0.5f,  0.5f,    1.0f, 1.0f, 1.0f,     0.0f, 0.0f, // Top left       23
 };
 
-unsigned int indices[] = { // For our Element Buffer Object
-    0, 1, 2,    // first triangle
-    0, 2, 3,    // second triangle
+unsigned int indices[] = {  // For the Element Buffer Object
+    0, 1, 2,    0, 2, 3,    // Back face
+    4, 5, 6,    4, 6, 7,    // Front face
+    8, 9, 10,   8, 10, 11,  // Left face
+    12, 13, 14, 12, 14, 15, // Right face
+    16, 17, 18, 16, 18, 19, // Bottom face
+    20, 21, 22, 20, 22, 23  // Top face
 };
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
@@ -64,6 +94,8 @@ int main(int argc, char** argv) {
 
     // Establish the Viewport
     glViewport(0, 0, 800, 600);
+    // Enable z-buffer depth testing
+    glEnable(GL_DEPTH_TEST);
 
     // Register the window-resizing callback
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
@@ -91,7 +123,7 @@ int main(int argc, char** argv) {
     glGenBuffers(1, &EBO);                          // Create an EBO
     glBindVertexArray(VAO);                         // Bind the VAO
     glBindBuffer(GL_ARRAY_BUFFER, VBO);             // Bind the VBO to the active GL_ARRAY_BUFFER
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); // Cp vertex data into VBO
+    glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), cubeVertices, GL_STATIC_DRAW); // Cp vertex data into VBO
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);     // Bind the EBO to the active GL_ELEMENT_ARRAY_BUFFER
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW); // Cp index data into EBO
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0); // Configure vertex attribs
@@ -101,26 +133,41 @@ int main(int argc, char** argv) {
     glEnableVertexAttribArray(1);
     glEnableVertexAttribArray(2);
 
-    // std::cout << sizeof(vertices) << std::endl;
-    
-    glm::vec4 vec(1.0f, 0.0f, 0.0f, 1.0f);
-    glm::mat4 trans = glm::mat4(1.0f);
-    trans = glm::translate(trans, glm::vec3(1.0f, 1.0f, 0.0f));
-    vec = trans * vec;
-    std::cout << vec.x << vec.y << vec.z << std::endl;
+    glm::mat4 modelmat = glm::mat4(1.0f);
 
+    glm::mat4 viewmat = glm::mat4(1.0f);
+    viewmat = glm::translate(viewmat, glm::vec3(0.0f, 0.0f, -3.0f));
+
+    glm::mat4 projmat;
+    projmat = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+
+    glm::mat4 transform = glm::mat4(1.0f);
+    transform = glm::rotate(transform, glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
+    //transform = glm::translate(transform, glm::vec3(-0.5f, -0.5f, 0.0f));
+
+    unsigned int transformLoc, modelLoc, viewLoc, projLoc;
     while(!glfwWindowShouldClose(window)) {
         // -- Input ---
         processInput(window);
+
+        modelmat = glm::rotate(modelmat, 0.01f, glm::vec3(0.5f, 1.0f, 0.0f));
         
         // -- Rendering --
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         shader.use();
+        transformLoc = glGetUniformLocation(shader.ID, "transform");
+        modelLoc = glGetUniformLocation(shader.ID, "modelmat");
+        viewLoc = glGetUniformLocation(shader.ID, "viewmat");
+        projLoc = glGetUniformLocation(shader.ID, "projmat");
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
+        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelmat));
+        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(viewmat));
+        glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projmat));
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture);
         glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
