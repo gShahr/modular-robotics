@@ -20,6 +20,23 @@ float asprat = resolution[0] / resolution[1];
 const char *vertexShaderPath = "resources/shaders/vshader.glsl";
 const char *fragmentShaderPath = "resources/shaders/fshader.glsl";
 
+float deltaTime = 0.0f;
+float lastFrame = 0.0f;
+
+const float CAMERA_MAX_SPEED = 25.0f;
+const float CAMERA_ACCEL = 0.10f;
+const float CAMERA_DECEL_FACTOR = 0.95f;
+const float CAMERA_SENSITIVITY = 0.1f;
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, -3.0f);
+glm::vec3 cameraDirection = glm::vec3(0.0f, 0.0f, 1.0f);
+glm::vec3 cameraUp = glm::cross(cameraDirection, glm::normalize(glm::cross(glm::vec3(0.0f, 1.0f, 0.0f), cameraDirection)));
+glm::vec3 cameraSpeed = glm::vec3(0.0f, 0.0f, 0.0f);
+bool firstMouse = true;
+float lastX = resolution[0]/2.0;
+float lastY = resolution[1]/2.0;
+float yaw = 90.0f;
+float pitch = 0.0f;
+
 glm::mat4 viewmat, projmat, transform;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
@@ -29,10 +46,61 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     asprat = resolution[0] / resolution[1];
 }
 
+void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
+    if (firstMouse) {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
+
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos;
+    lastX = xpos;
+    lastY = ypos;
+
+    xoffset *= CAMERA_SENSITIVITY;
+    yoffset *= CAMERA_SENSITIVITY;
+
+    yaw += xoffset;
+    pitch += yoffset;
+
+    pitch = glm::clamp(pitch, -89.0f, 89.0f);
+
+    glm::vec3 direction;
+    direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+    direction.y = sin(glm::radians(pitch));
+    direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+    cameraDirection = glm::normalize(direction);
+    std::cout << "POS: " << glm::to_string(cameraPos) << " PITCH/YAW: " << pitch << " | " << yaw << " | DIR: " << glm::to_string(cameraDirection) << std::endl;
+}
+
 void processInput(GLFWwindow *window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
     }
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+        if (cameraSpeed[2] < 0) { cameraSpeed[2] *= CAMERA_DECEL_FACTOR; }
+        cameraSpeed[2] = cameraSpeed[2] + CAMERA_ACCEL;
+    } else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+        if (cameraSpeed[2] > 0) { cameraSpeed[2] *= CAMERA_DECEL_FACTOR; }
+        cameraSpeed[2] = cameraSpeed[2] - CAMERA_ACCEL;
+    } else { cameraSpeed[2] *= CAMERA_DECEL_FACTOR; }
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+        if (cameraSpeed[0] > 0) { cameraSpeed[0] *= CAMERA_DECEL_FACTOR; }
+        cameraSpeed[0] = cameraSpeed[0] - CAMERA_ACCEL;
+    } else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+        if (cameraSpeed[0] < 0) { cameraSpeed[0] *= CAMERA_DECEL_FACTOR; }
+        cameraSpeed[0] = cameraSpeed[0] + CAMERA_ACCEL;
+    } else { cameraSpeed[0] *= CAMERA_DECEL_FACTOR; }
+    if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
+        if (cameraSpeed[1] < 0) { cameraSpeed[1] *= CAMERA_DECEL_FACTOR; }
+        cameraSpeed[1] = cameraSpeed[1] + CAMERA_ACCEL;
+    } else if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
+        if (cameraSpeed[1] > 0) { cameraSpeed[1] *= CAMERA_DECEL_FACTOR; }
+        cameraSpeed[1] = cameraSpeed[1] - CAMERA_ACCEL;
+    } else { cameraSpeed[1] *= CAMERA_DECEL_FACTOR; }
+    cameraSpeed = glm::step(0.00001f, glm::abs(cameraSpeed)) * cameraSpeed;
+    cameraSpeed = glm::clamp(cameraSpeed, -CAMERA_MAX_SPEED, CAMERA_MAX_SPEED);
 }
 
 int loadTexture(const char *texturePath) {
@@ -70,49 +138,65 @@ int main(int argc, char** argv) {
         return -1;
     }
     glfwMakeContextCurrent(window);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    // Register window callbacks
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetCursorPosCallback(window, mouse_callback);
 
     // Invoke GLAD to load addresses of OpenGL functions in the GPU drivers
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         std::cout << "Failed to initialize GLAD" << std::endl;
         return -1;
     }
-    //
+
     // Establish the Viewport
     glViewport(0, 0, resolution[0], resolution[1]);
     // Enable z-buffer depth testing and transparency
     glEnable(GL_DEPTH_TEST);
-    // Register the window-resizing callback
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
     Shader shader = Shader(vertexShaderPath, fragmentShaderPath);
     int texture = loadTexture("resources/textures/face_debug.png");
     unsigned int VAO = _createCubeVAO();
 
     ObjectCollection* cubes = new ObjectCollection(&shader, VAO, texture);
-    Cube* cube1 = new Cube(0.0f, 0.0f, 0.0f);
-    Cube* cube2 = new Cube(0.0f, 1.0f, 0.0f);
-    cubes->addObj(cube1);
-    cubes->addObj(cube2);
+    cubes->addObj(new Cube(1.0f, 0.0f, 0.0f));  // Bottom layer
+    cubes->addObj(new Cube(0.0f, 0.0f, 0.0f));
+    cubes->addObj(new Cube(0.0f, 0.0f, -1.0f));
+    cubes->addObj(new Cube(0.0f, 1.0f, -1.0f));  // Middle layer part 1
+    cubes->addObj(new Cube(0.0f, 1.0f, -2.0f));
+    cubes->addObj(new Cube(1.0f, 1.0f, -2.0f));
+    cubes->addObj(new Cube(1.0f, 2.0f, -2.0f)); // Top layer
+    cubes->addObj(new Cube(2.0f, 2.0f, -2.0f));
+    cubes->addObj(new Cube(2.0f, 2.0f, -1.0f));
+    cubes->addObj(new Cube(2.0f, 1.0f, -1.0f));  // Middle layer part 2
+    cubes->addObj(new Cube(2.0f, 1.0f, 0.0f));
+    cubes->addObj(new Cube(1.0f, 1.0f, 0.0f));
 
     projmat;
     viewmat = glm::mat4(1.0f);
     transform = glm::mat4(1.0f);
-    viewmat = glm::translate(viewmat, glm::vec3(0.0f, 0.0f, -3.0f));
     projmat = glm::perspective(glm::radians(45.0f), asprat, 0.1f, 100.0f);
-    transform = glm::rotate(transform, glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
+    transform = glm::scale(transform, glm::vec3(0.9f, 0.9f, 0.9f));
 
 
     while(!glfwWindowShouldClose(window)) {
         // -- Input ---
+        
+        float currentFrame = glfwGetTime();
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
+
         processInput(window);
+        cameraPos += (cameraSpeed.z * cameraDirection * deltaTime);
+        cameraPos += (cameraSpeed.x * glm::cross(cameraDirection, cameraUp) * deltaTime);
+        cameraPos += (cameraSpeed.y * cameraUp * deltaTime);
+        viewmat = glm::lookAt(cameraPos, cameraPos + cameraDirection, cameraUp);
 
         // -- Rendering --
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // std::cout << glm::to_string(viewmat) << std::endl;
-        viewmat = glm::mat4(1.0f);
-        viewmat = glm::translate(viewmat, glm::vec3(cos(glfwGetTime()), sin(glfwGetTime()), -3.0f));
         cubes->drawAll();
 
         glfwSwapBuffers(window);

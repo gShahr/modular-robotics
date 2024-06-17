@@ -12,7 +12,8 @@ uniform mat4 projmat;
 
 void main()
 {
-    gl_Position = projmat * viewmat * modelmat * transform * vec4(aPos, 1.0);
+    gl_Position = projmat * viewmat * modelmat * transform * vec4(aPos.xyz, 1.0);
+	// gl_Position.w = gl_Position.w * (length(gl_Position.xyz) + 1.);
     vertexColor = vec4(1.0, 1.0, 1.0, 1.0);
 	texCoord = aTexCoord;
 }
