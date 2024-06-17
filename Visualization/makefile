@@ -30,7 +30,7 @@ _LIBS=libglfw3.a OpenGL32.Lib
 LIBS = $(patsubst %,$(LDIR)/$(LIBSUBFOLDER)/%,$(_LIBS))
 _DEPS = glfw.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
-_OBJ = main.opp Shader.opp glad.o stb_image.opp
+_OBJ = main.opp Shader.opp glad.o stb_image.opp Cube.opp ObjectCollection.opp
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 # $(info LIBS is $(LIBS))

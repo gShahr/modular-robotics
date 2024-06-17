@@ -8,6 +8,7 @@
 #include <sstream>
 #include <iostream>
 
+
 class Shader
 {
 public:
@@ -16,7 +17,7 @@ public:
     // Constructor. Pass a vertex and fragment shader filepath and it will create a Shader program.
     Shader(const char* vertexPath, const char* fragmentPath);
 
-    // Effectively just a call to glUseProgram().
+    // Call to glUseProgram() and update global modelLoc, transformLoc, etc.
     void use();
 
     // Set uniform values in the shader.

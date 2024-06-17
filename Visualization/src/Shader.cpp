@@ -1,5 +1,7 @@
 #include "Shader.hpp"
 
+unsigned int modelLoc, viewLoc, projLoc, transformLoc;
+
 Shader::Shader(const char* vertexPath, const char* fragmentPath)
 {
     // 1. Load vertex & fragment shader source code from paths
@@ -70,6 +72,11 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
 }
 
 void Shader::use() {
+    modelLoc = glGetUniformLocation(this->ID, "modelmat");
+    viewLoc = glGetUniformLocation(this->ID, "viewmat");
+    projLoc = glGetUniformLocation(this->ID, "projmat");
+    transformLoc = glGetUniformLocation(this->ID, "transform");
+    // std::cout << modelLoc << " | " << transformLoc << " | " << viewLoc << " | " << projLoc << std::endl;
     glUseProgram(ID);
 }
 
