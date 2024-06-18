@@ -1,6 +1,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <math.h>
+#include <algorithm> // clamp
 
 #include "glad/glad.h"
 #include "glfw3.h"
@@ -28,6 +29,7 @@ const float CAMERA_ACCEL = 0.10f;
 const float CAMERA_DECEL_FACTOR = 0.95f;
 const float CAMERA_SENSITIVITY = 0.1f;
 float FOV = 45.0f;
+float cameraZoom = 0.0f;
 bool perspective = true;
 glm::vec3 cameraPos; // Camera variables initialized in resetCamera()
 glm::vec3 cameraDirection;
@@ -46,6 +48,7 @@ glm::mat4 viewmat, projmat, transform;
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void cursormove_callback(GLFWwindow* window, double xpos, double ypos);
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
+void mouse_scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow *window);
 int loadTexture(const char *texturePath);
 void resetCamera();
@@ -78,7 +81,7 @@ void cursormove_callback(GLFWwindow* window, double xpos, double ypos) {
         yaw += xoffset;
         pitch += yoffset;
 
-        pitch = glm::clamp(pitch, -89.0f, 89.0f);
+        pitch = std::clamp(pitch, -89.0f, 89.0f);
 
         glm::vec3 direction;
         direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
@@ -98,6 +101,12 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
         firstMouse = true;
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     }
+}
+
+void mouse_scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
+    cameraZoom += yoffset;
+    cameraZoom = std::clamp(cameraZoom, -25.0f, 25.0f);
+    resetProjMat();
 }
 
 void processInput(GLFWwindow *window) {
@@ -145,8 +154,16 @@ void processInput(GLFWwindow *window) {
 }
 
 void resetProjMat() {
-    if (perspective) { projmat = glm::perspective(glm::radians(FOV), asprat, 0.1f, 100.0f); }
-    else { projmat = glm::ortho(-5.0f * asprat, 5.0f * asprat, -5.0f, 5.0f, 0.1f, 100.0f); }
+    float scalar;
+    if (perspective) {
+        scalar = 2.0 / (1.0 + std::exp(cameraZoom / 4.0));
+        projmat = glm::perspective(glm::radians(FOV * scalar), asprat, 0.1f, 100.0f); 
+    } else {
+        scalar = 2.0 / (1.0 + std::exp(cameraZoom / 10.0));
+        scalar *= scalar;
+        projmat = glm::ortho(-2.0f * asprat * scalar, 2.0f * asprat * scalar, -2.0f * scalar, 2.0f * scalar, 0.1f, 100.0f); 
+    }
+    // std::cout << "cameraZoom: " << cameraZoom << " | scalar: " << scalar << std::endl;
 }
 
 int loadTexture(const char *texturePath) {
@@ -175,6 +192,8 @@ void resetCamera() {
     lastY = resolution[1]/2.0;
     yaw = 90.0f;
     pitch = 0.0f;
+    cameraZoom = 0.0f;
+    resetProjMat();
 }
 
 int main(int argc, char** argv) {
@@ -200,6 +219,7 @@ int main(int argc, char** argv) {
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetCursorPosCallback(window, cursormove_callback);
     glfwSetMouseButtonCallback(window, mouse_button_callback);
+    glfwSetScrollCallback(window, mouse_scroll_callback);
 
     // Invoke GLAD to load addresses of OpenGL functions in the GPU drivers
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
