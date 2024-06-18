@@ -3,6 +3,7 @@
 #include <map>
 #include <limits>
 #include <fstream>
+#include <set>
 // CoordTensor not used yet, but it's all set up, just need to refactor main.cpp
 #include "CoordTensor.h"
 #include "debug_util.h"
@@ -50,13 +51,7 @@ private:
 
 public:
     CoordTensor coordTensor;
-    std::vector<std::pair<int, int>> articulationPoints;
-    enum State {
-        EMPTY,
-        INITIAL,
-        FINAL,
-        STATIC
-    };
+    std::vector<std::vector<int>> articulationPoints;
 
     Lattice(int order, int axisSize) : coordTensor(order, axisSize), time(0), moduleCount(0) {}
 
@@ -64,7 +59,7 @@ public:
         Module mod(coords);
         ModuleIdManager::RegisterModule(mod);
         coordmat[{coords}] = ModuleIdManager::Modules()[moduleCount].id;
-        edgeCheck(ModuleIdManager::Modules()[moduleCount]);
+        edgeCheck(ModuleIdManager::Modules()[moduleCount], {});
         moduleCount++;
         adjlist.resize(moduleCount + 1);
     }
@@ -143,10 +138,29 @@ public:
         for (int id = 0; id < moduleCount; id++) {
             if (ap[id]) {
                 auto& mod = ModuleIdManager::Modules()[id];
-                std::cout << "Module at (" << mod.coords[0] << ", " << mod.coords[1] << ") is an articulation point\n";
-                articulationPoints.emplace_back(mod.coords[0], mod.coords[1]);
+                DEBUG("Module at (" << mod.coords[0] << ", " << mod.coords[1] << ") is an articulation point" << std::endl);
+                articulationPoints.emplace_back(mod.coords);
             }
         }
+    }
+};
+
+class Move {
+private:
+    enum State {
+        EMPTY,
+        INITIAL,
+        FINAL,
+        STATIC
+    };
+    std::set<std::map<std::vector<int>, State>> moves;
+public:
+    void readMove() {
+        
+    }
+
+    void rotateMove() {
+
     }
 };
 
@@ -184,7 +198,7 @@ int main() {
     file.close();
     lattice.AP();
     for (auto i: lattice.articulationPoints) {
-        image[i.second - ORIGIN][i.first - ORIGIN] = '*';
+        image[i[1] - ORIGIN][i[0] - ORIGIN] = '*';
     }
     for (const auto& imageRow: image) {
         for (auto c: imageRow) {
