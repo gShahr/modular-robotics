@@ -4,6 +4,7 @@
 #include <limits>
 #include <fstream>
 #include <set>
+#include <string>
 // CoordTensor not used yet, but it's all set up, just need to refactor main.cpp
 #include "CoordTensor.h"
 #include "debug_util.h"
@@ -39,6 +40,17 @@ public:
 
     Module(std::vector<int> coords) : coords(coords), id(ModuleIdManager::GetNextId()) { }
 };
+
+std::ostream& operator<<(std::ostream& out, const Module& mod) {
+    out << "Module with ID " << mod.id << " at ";
+    std::string sep = "(";
+    for (auto coord : mod.coords) {
+        out << sep << coord;
+        sep = ", ";
+    }
+    out << ")";
+    return out;
+}
 
 class Lattice {
 private:
