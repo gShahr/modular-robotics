@@ -56,6 +56,8 @@ class Lattice {
 private:
     std::map<std::vector<int>, int> coordmat;
     std::vector<std::vector<int>> adjlist;
+    int order;
+    int axisSize;
     int time;
     int moduleCount;
     int width;
@@ -65,29 +67,41 @@ public:
     CoordTensor coordTensor;
     std::vector<std::vector<int>> articulationPoints;
 
-    Lattice(int order, int axisSize) : coordTensor(order, axisSize), time(0), moduleCount(0) {}
+    Lattice(int order, int axisSize) : coordTensor(order, axisSize), order(order), axisSize(axisSize), time(0), moduleCount(0) {}
 
-    void addModule(std::vector<int> coords) {
+    void addModule(const std::vector<int>& coords) {
         Module mod(coords);
         ModuleIdManager::RegisterModule(mod);
         coordmat[{coords}] = ModuleIdManager::Modules()[moduleCount].id;
-        edgeCheck(ModuleIdManager::Modules()[moduleCount], {});
+        // bothWays bool set to false due to how the lattice should be built
+        edgeCheck(ModuleIdManager::Modules()[moduleCount], false);
         moduleCount++;
         adjlist.resize(moduleCount + 1);
     }
 
-    void edgeCheck(const Module& mod, std::vector<int> coords) {
-        if (coords.size() >= mod.coords.size()) {
-            if (coordmat.count(coords)) {
-                addEdge(mod.id, coordmat[{coords}]);
+    void edgeCheck(const Module& mod, bool bothWays = true) {
+        // adjCoords will be used
+        auto adjCoords = mod.coords;
+        for (int i = 0; i < order; i++) {
+            // Don't want to check index -1
+            if (adjCoords[i] == 0) continue;
+            adjCoords[i]--;
+            if (coordmat.count(adjCoords) != 0) {
+                DEBUG(mod << " Adjacent to " << ModuleIdManager::Modules()[coordmat[adjCoords]] << std::endl);
+                addEdge(mod.id, coordmat[adjCoords]);
             }
+            // Don't want to check both ways if it can be avoided, also don't want to check index beyond max value
+            if (!bothWays || adjCoords[i] + 1 == axisSize) {
+                adjCoords[i]++;
+                continue;
+            }
+            adjCoords[i] += 2;
+            if (coordmat.count(adjCoords) != 0) {
+                DEBUG(mod << " Adjacent to " << ModuleIdManager::Modules()[coordmat[adjCoords]] << std::endl);
+                addEdge(mod.id, coordmat[adjCoords]);
+            }
+            adjCoords[i]--;
         }
-        int i = coords.size();
-        coords.push_back(mod.coords[i]+1);
-        edgeCheck(mod, coords);
-        coords.pop_back();
-        coords.push_back(mod.coords[i]-1);
-        edgeCheck(mod, coords);
     }
 
     void edgeCheck2D(const Module& mod) {
