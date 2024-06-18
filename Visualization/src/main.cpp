@@ -27,6 +27,7 @@ const float CAMERA_MAX_SPEED = 25.0f;
 const float CAMERA_ACCEL = 0.10f;
 const float CAMERA_DECEL_FACTOR = 0.95f;
 const float CAMERA_SENSITIVITY = 0.1f;
+float FOV = 45.0f;
 bool perspective = true;
 glm::vec3 cameraPos; // Camera variables initialized in resetCamera()
 glm::vec3 cameraDirection;
@@ -48,12 +49,14 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 void processInput(GLFWwindow *window);
 int loadTexture(const char *texturePath);
 void resetCamera();
+void resetProjMat();
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
     resolution[0] = width;
     resolution[1] = height;
     asprat = resolution[0] / resolution[1];
+    resetProjMat();
 }
 
 void cursormove_callback(GLFWwindow* window, double xpos, double ypos) {
@@ -132,16 +135,18 @@ void processInput(GLFWwindow *window) {
     cameraSpeed = glm::step(0.00001f, glm::abs(cameraSpeed)) * cameraSpeed;
     cameraSpeed = glm::clamp(cameraSpeed, -CAMERA_MAX_SPEED, CAMERA_MAX_SPEED);
 
-
     if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS && !pkeyPressed) {
         pkeyPressed = true;
         perspective = !perspective; // TODO Scroll controls FOV for perspective, frustrum size for ortho
-        if (perspective) { projmat = glm::perspective(glm::radians(45.0f), asprat, 0.1f, 100.0f); }
-        else { projmat = glm::ortho(-5.0f, 5.0f, -5.0f, 5.0f, 0.1f, 100.0f); }
+        resetProjMat();
     } else if (glfwGetKey(window, GLFW_KEY_P) == GLFW_RELEASE && pkeyPressed) {
         pkeyPressed = false;
     }
+}
 
+void resetProjMat() {
+    if (perspective) { projmat = glm::perspective(glm::radians(FOV), asprat, 0.1f, 100.0f); }
+    else { projmat = glm::ortho(-5.0f * asprat, 5.0f * asprat, -5.0f, 5.0f, 0.1f, 100.0f); }
 }
 
 int loadTexture(const char *texturePath) {
