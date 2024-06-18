@@ -64,9 +64,23 @@ public:
         Module mod(coords);
         ModuleIdManager::RegisterModule(mod);
         coordmat[{coords}] = ModuleIdManager::Modules()[moduleCount].id;
-        edgeCheck2D(ModuleIdManager::Modules()[moduleCount]);
+        edgeCheck(ModuleIdManager::Modules()[moduleCount]);
         moduleCount++;
         adjlist.resize(moduleCount + 1);
+    }
+
+    void edgeCheck(const Module& mod, std::vector<int> coords) {
+        if (coords.size() >= mod.coords.size()) {
+            if (coordmat.count(coords)) {
+                addEdge(mod.id, coordmat[{coords}]);
+            }
+        }
+        int i = coords.size();
+        coords.push_back(mod.coords[i]+1);
+        edgeCheck(mod, coords);
+        coords.pop_back();
+        coords.push_back(mod.coords[i]-1);
+        edgeCheck(mod, coords);
     }
 
     void edgeCheck2D(const Module& mod) {
