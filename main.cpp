@@ -171,7 +171,13 @@ public:
     }
 };
 
-class Move {
+class IMove {
+public:
+    virtual void InitMove() = 0;
+    virtual bool MoveCheck(Module mod) = 0;
+};
+
+class Move2d : IMove {
 private:
     enum State {
         EMPTY,
@@ -181,8 +187,35 @@ private:
     };
     std::set<std::map<std::vector<int>, State>> moves;
 public:
-    void readMove() {
-        
+    void InitMove() override {
+
+    }
+
+    bool MoveCheck(Module mod) override {
+
+    }
+
+    void rotateMove() {
+
+    }
+};
+
+class Move3d : IMove {
+private:
+    enum State {
+        EMPTY,
+        INITIAL,
+        FINAL,
+        STATIC
+    };
+    std::set<std::map<std::vector<int>, State>> moves;
+public:
+    void InitMove() override {
+
+    }
+
+    bool MoveCheck(Module mod) override {
+
     }
 
     void rotateMove() {
