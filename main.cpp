@@ -3,6 +3,8 @@
 #include <map>
 #include <limits>
 #include <fstream>
+// CoordTensor not used yet, but it's all set up, just need to refactor main.cpp
+#include "CoordTensor.h"
 #include "debug_util.h"
 
 class Module;
