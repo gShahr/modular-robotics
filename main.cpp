@@ -5,22 +5,48 @@
 #include <fstream>
 #include "debug_util.h"
 
+class Module;
+
+class ModuleIdManager {
+private:
+    static int _nextId;
+    static std::vector<Module> _modules;
+
+public:
+    static void RegisterModule(Module& module) {
+        _modules.emplace_back(module);
+    }
+
+    static int GetNextId() {
+        return _nextId++;
+    }
+
+    static const std::vector<Module>& Modules() {
+        return _modules;
+    }
+};
+
+int ModuleIdManager::_nextId = 0;
+std::vector<Module> ModuleIdManager::_modules;
+
 class Module {
 public:
+    int id;
     int x, y;
 
-    Module(int x, int y) : x(x), y(y) {}
+    Module(int x, int y) : x(x), y(y), id(ModuleIdManager::GetNextId()) { }
 
     std::pair<int, int> getPosition() {
-        return std::make_pair(x, y);
+        return {x, y};
     }
 };
 
 class Lattice {
 private:
-    std::map<std::pair<int, int>, Module*> coordmat;
-    std::map<Module*, std::vector<Module*>> adjlist;
+    std::map<std::pair<int, int>, int> coordmat;
+    std::vector<std::vector<int>> adjlist;
     int time;
+    int moduleCount;
     int width;
     int height;
 
@@ -34,49 +60,52 @@ public:
         STATIC
     };
 
-    Lattice() : time(0) {}
+    Lattice() : time(0), moduleCount(0) {}
 
     void addModule(int x, int y) {
-        Module* mod = new Module(x, y);
-        coordmat[std::make_pair(x, y)] = mod;
-        edgeCheck(mod);
+        Module mod(x, y);
+        ModuleIdManager::RegisterModule(mod);
+        coordmat[{x, y}] = ModuleIdManager::Modules()[moduleCount].id;
+        edgeCheck(ModuleIdManager::Modules()[moduleCount]);
+        moduleCount++;
+        adjlist.resize(moduleCount + 1);
     }
 
-    void edgeCheck(Module* mod) {
-        if (coordmat.count(std::make_pair(mod->x - 1, mod->y)) != 0) {
-            DEBUG("Module at " << mod->x << ", " << mod->y << " Adjacent to module at " << mod->x - 1 << ", " << mod->y << std::endl);
-            addEdge(mod, coordmat[std::make_pair(mod->x - 1, mod->y)]);
+    void edgeCheck(const Module& mod) {
+        if (coordmat.count({mod.x - 1, mod.y}) != 0) {
+            DEBUG("Module at " << mod.x << ", " << mod.y << " Adjacent to module at " << mod.x - 1 << ", " << mod.y << std::endl);
+            addEdge(mod.id, coordmat[{mod.x - 1, mod.y}]);
         }
-        if (coordmat.count(std::make_pair(mod->x, mod->y - 1)) != 0) {
-            DEBUG("Module at " << mod->x << ", " << mod->y << " Adjacent to module at " << mod->x << ", " << mod->y - 1 << std::endl);
-            addEdge(mod, coordmat[std::make_pair(mod->x, mod->y - 1)]);
+        if (coordmat.count({mod.x, mod.y - 1}) != 0) {
+            DEBUG("Module at " << mod.x << ", " << mod.y << " Adjacent to module at " << mod.x << ", " << mod.y - 1 << std::endl);
+            addEdge(mod.id, coordmat[{mod.x, mod.y - 1}]);
         }
     }
 
-    void addEdge(Module* u, Module* v) {
+    void addEdge(int u, int v) {
         adjlist[u].push_back(v);
         adjlist[v].push_back(u);
     }
 
-    void APUtil(Module* u, std::map<Module*, bool>& visited, std::map<Module*, bool>& ap, std::map<Module*, Module*>& parent, std::map<Module*, int>& low, std::map<Module*, int>& disc) {
+    void APUtil(int u, std::vector<bool>& visited, std::vector<bool>& ap, std::vector<int>& parent, std::vector<int>& low, std::vector<int>& disc) {
         int children = 0;
         visited[u] = true;
         disc[u] = time;
         low[u] = time;
         time++;
 
-        for (Module* v : adjlist[u]) {
+        for (int v : adjlist[u]) {
             if (!visited[v]) {
                 parent[v] = u;
                 children++;
                 APUtil(v, visited, ap, parent, low, disc);
                 low[u] = std::min(low[u], low[v]);
 
-                if (parent[u] == nullptr && children > 1) {
+                if (parent[u] == -1 && children > 1) {
                     ap[u] = true;
                 }
 
-                if (parent[u] != nullptr && low[v] >= disc[u]) {
+                if (parent[u] != -1 && low[v] >= disc[u]) {
                     ap[u] = true;
                 }
             } else if (v != parent[u]) {
@@ -87,22 +116,23 @@ public:
 
     void AP() {
         time = 0;
-        std::map<Module*, bool> visited;
-        std::map<Module*, int> disc;
-        std::map<Module*, int> low;
-        std::map<Module*, Module*> parent;
-        std::map<Module*, bool> ap;
+        std::vector<bool> visited(moduleCount, false);
+        std::vector<int> disc(moduleCount, -1);
+        std::vector<int> low(moduleCount, -1);
+        std::vector<int> parent(moduleCount, -1);
+        std::vector<bool> ap(moduleCount, false);
 
-        for (auto& kv : adjlist) {
-            if (!visited[kv.first]) {
-                APUtil(kv.first, visited, ap, parent, low, disc);
+        for (int id = 0; id < moduleCount; id++) {
+            if (!visited[id]) {
+                APUtil(id, visited, ap, parent, low, disc);
             }
         }
 
-        for (auto& kv : ap) {
-            if (kv.second) {
-                std::cout << "Module at (" << kv.first->getPosition().first << ", " << kv.first->getPosition().second << ") is an articulation point\n";
-                articulationPoints.emplace_back(kv.first->getPosition().first, kv.first->getPosition().second);
+        for (int id = 0; id < moduleCount; id++) {
+            if (ap[id]) {
+                auto& mod = ModuleIdManager::Modules()[id];
+                std::cout << "Module at (" << mod.x << ", " << mod.y << ") is an articulation point\n";
+                articulationPoints.emplace_back(mod.x, mod.y);
             }
         }
     }
@@ -127,7 +157,7 @@ int main() {
             if (c == '1') {
                 lattice.addModule(x, y);
                 row.push_back('1');
-            } else {
+            } else if (c == '0') {
                 row.push_back('0');
             }
             x++;
@@ -141,7 +171,7 @@ int main() {
     for (auto i: lattice.articulationPoints) {
         image[i.second - ORIGIN][i.first - ORIGIN] = '*';
     }
-    for (auto imageRow: image) {
+    for (const auto& imageRow: image) {
         for (auto c: imageRow) {
             std::cout << c;
         }
