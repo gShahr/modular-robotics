@@ -33,19 +33,15 @@ std::vector<Module> ModuleIdManager::_modules;
 
 class Module {
 public:
+    std::vector<int> coords;
     int id;
-    int x, y;
 
-    Module(int x, int y) : x(x), y(y), id(ModuleIdManager::GetNextId()) { }
-
-    std::pair<int, int> getPosition() {
-        return {x, y};
-    }
+    Module(std::vector<int> coords) : coords(coords), id(ModuleIdManager::GetNextId()) { }
 };
 
 class Lattice {
 private:
-    std::map<std::pair<int, int>, int> coordmat;
+    std::map<std::vector<int>, int> coordmat;
     std::vector<std::vector<int>> adjlist;
     int time;
     int moduleCount;
@@ -53,8 +49,8 @@ private:
     int height;
 
 public:
+    CoordTensor coordTensor;
     std::vector<std::pair<int, int>> articulationPoints;
-
     enum State {
         EMPTY,
         INITIAL,
@@ -62,25 +58,25 @@ public:
         STATIC
     };
 
-    Lattice() : time(0), moduleCount(0) {}
+    Lattice(int order, int axisSize) : coordTensor(order, axisSize), time(0), moduleCount(0) {}
 
-    void addModule(int x, int y) {
-        Module mod(x, y);
+    void addModule(std::vector<int> coords) {
+        Module mod(coords);
         ModuleIdManager::RegisterModule(mod);
-        coordmat[{x, y}] = ModuleIdManager::Modules()[moduleCount].id;
-        edgeCheck(ModuleIdManager::Modules()[moduleCount]);
+        coordmat[{coords}] = ModuleIdManager::Modules()[moduleCount].id;
+        edgeCheck2D(ModuleIdManager::Modules()[moduleCount]);
         moduleCount++;
         adjlist.resize(moduleCount + 1);
     }
 
-    void edgeCheck(const Module& mod) {
-        if (coordmat.count({mod.x - 1, mod.y}) != 0) {
-            DEBUG("Module at " << mod.x << ", " << mod.y << " Adjacent to module at " << mod.x - 1 << ", " << mod.y << std::endl);
-            addEdge(mod.id, coordmat[{mod.x - 1, mod.y}]);
+    void edgeCheck2D(const Module& mod) {
+        if (coordmat.count({mod.coords[0] - 1, mod.coords[1]}) != 0) {
+            DEBUG("Module at " << mod.coords[0] << ", " << mod.coords[1] << " Adjacent to module at " << mod.coords[0] - 1 << ", " << mod.coords[1] << std::endl);
+            addEdge(mod.id, coordmat[{mod.coords[0] - 1, mod.coords[1]}]);
         }
-        if (coordmat.count({mod.x, mod.y - 1}) != 0) {
-            DEBUG("Module at " << mod.x << ", " << mod.y << " Adjacent to module at " << mod.x << ", " << mod.y - 1 << std::endl);
-            addEdge(mod.id, coordmat[{mod.x, mod.y - 1}]);
+        if (coordmat.count({mod.coords[0], mod.coords[1] - 1}) != 0) {
+            DEBUG("Module at " << mod.coords[0] << ", " << mod.coords[1] << " Adjacent to module at " << mod.coords[0] << ", " << mod.coords[1] - 1 << std::endl);
+            addEdge(mod.id, coordmat[{mod.coords[0], mod.coords[1] - 1}]);
         }
     }
 
@@ -133,15 +129,17 @@ public:
         for (int id = 0; id < moduleCount; id++) {
             if (ap[id]) {
                 auto& mod = ModuleIdManager::Modules()[id];
-                std::cout << "Module at (" << mod.x << ", " << mod.y << ") is an articulation point\n";
-                articulationPoints.emplace_back(mod.x, mod.y);
+                std::cout << "Module at (" << mod.coords[0] << ", " << mod.coords[1] << ") is an articulation point\n";
+                articulationPoints.emplace_back(mod.coords[0], mod.coords[1]);
             }
         }
     }
 };
 
 int main() {
-    Lattice lattice;
+    int order = 2;
+    int axisSize = 9;
+    Lattice lattice(order, axisSize);
     const int ORIGIN = 0;
     int x = ORIGIN;
     int y = ORIGIN;
@@ -157,7 +155,8 @@ int main() {
         std::vector<char> row;
         for (char c: line) {
             if (c == '1') {
-                lattice.addModule(x, y);
+                std::vector<int> coords = {x, y};
+                lattice.addModule(coords);
                 row.push_back('1');
             } else if (c == '0') {
                 row.push_back('0');
