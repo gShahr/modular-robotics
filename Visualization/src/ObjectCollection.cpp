@@ -13,6 +13,8 @@ void ObjectCollection::drawAll() {
     this->shader->use();
 
     //std::cout << glm::to_string(viewmat) << std::endl;
+    
+    glUniform1f(timeLoc, lastFrame);
 
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(viewmat));
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projmat));

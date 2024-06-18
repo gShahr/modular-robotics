@@ -8,8 +8,9 @@
 #include "Shader.hpp"
 #include "Cube.hpp"
 
-extern unsigned int transformLoc, viewLoc, projLoc; // Assigned whenever a shader is loaded
+extern unsigned int timeLoc, transformLoc, viewLoc, projLoc; // Assigned whenever a shader is loaded
 extern glm::mat4 viewmat, projmat, transform; // main()
+extern float lastFrame;
 
 class ObjectCollection
 {
