@@ -11,20 +11,26 @@
 
 class Module;
 
+// Class responsible for module ID assignment and providing a central place where modules are stored
 class ModuleIdManager {
 private:
+    // ID to be assigned to next module during construction
     static int _nextId;
+    // Vector holding all modules, indexed by module ID
     static std::vector<Module> _modules;
 
 public:
+    // Emplace newly created module into the vector
     static void RegisterModule(Module& module) {
         _modules.emplace_back(module);
     }
 
+    // Get ID for assignment to newly created module
     static int GetNextId() {
         return _nextId++;
     }
 
+    // Get read access to vector of modules, indexed by ID
     static const std::vector<Module>& Modules() {
         return _modules;
     }
@@ -35,12 +41,15 @@ std::vector<Module> ModuleIdManager::_modules;
 
 class Module {
 public:
+    // Coordinate information
     std::vector<int> coords;
+    // Module ID
     int id;
 
     Module(std::vector<int> coords) : coords(coords), id(ModuleIdManager::GetNextId()) { }
 };
 
+// Stream insertion operator overloaded for easy printing of module info
 std::ostream& operator<<(std::ostream& out, const Module& mod) {
     out << "Module with ID " << mod.id << " at ";
     std::string sep = "(";
@@ -54,24 +63,35 @@ std::ostream& operator<<(std::ostream& out, const Module& mod) {
 
 class Lattice {
 private:
+    // Map-based coordinate tensor, to be replaced with CoordTensor at some point
     std::map<std::vector<int>, int> coordmat;
+    // Vector that holds the IDs of adjacent modules, indexed by ID
     std::vector<std::vector<int>> adjlist;
+    // Order of coordinate tensor / # of dimensions
     int order;
+    // Length of every axis
     int axisSize;
+    // Time variable for DFS
     int time;
+    // # of modules
     int moduleCount;
     int width;
     int height;
 
 public:
+    // CoordTensor, should eventually replace coordmat
     CoordTensor coordTensor;
+    // Holds coordinate info for articulation points / cut vertices
     std::vector<std::vector<int>> articulationPoints;
 
     Lattice(int order, int axisSize) : coordTensor(order, axisSize), order(order), axisSize(axisSize), time(0), moduleCount(0) {}
 
+    // Add a new module
     void addModule(const std::vector<int>& coords) {
+        // Create and register new module
         Module mod(coords);
         ModuleIdManager::RegisterModule(mod);
+        // Insert module ID at given coordinates
         coordmat[{coords}] = ModuleIdManager::Modules()[moduleCount].id;
         // bothWays bool set to false due to how the lattice should be built
         edgeCheck(ModuleIdManager::Modules()[moduleCount], false);
@@ -79,8 +99,9 @@ public:
         adjlist.resize(moduleCount + 1);
     }
 
+    // New generalized edgeCheck
     void edgeCheck(const Module& mod, bool bothWays = true) {
-        // adjCoords will be used
+        // copy module coordinates to adjCoords
         auto adjCoords = mod.coords;
         for (int i = 0; i < order; i++) {
             // Don't want to check index -1
@@ -104,6 +125,7 @@ public:
         }
     }
 
+    // Original edgeCheck
     void edgeCheck2D(const Module& mod) {
         if (coordmat.count({mod.coords[0] - 1, mod.coords[1]}) != 0) {
             DEBUG("Module at " << mod.coords[0] << ", " << mod.coords[1] << " Adjacent to module at " << mod.coords[0] - 1 << ", " << mod.coords[1] << std::endl);
@@ -115,11 +137,13 @@ public:
         }
     }
 
+    // Update adjacency lists for module IDs u and v
     void addEdge(int u, int v) {
         adjlist[u].push_back(v);
         adjlist[v].push_back(u);
     }
 
+    // Find articulation points / cut vertices using DFS
     void APUtil(int u, std::vector<bool>& visited, std::vector<bool>& ap, std::vector<int>& parent, std::vector<int>& low, std::vector<int>& disc) {
         int children = 0;
         visited[u] = true;
@@ -147,6 +171,7 @@ public:
         }
     }
 
+    // Find articulation points / cut vertices using DFS
     void AP() {
         time = 0;
         std::vector<bool> visited(moduleCount, false);
