@@ -43,6 +43,15 @@ unsigned int _cubeIndices[] = {  // For the Element Buffer Object
     20, 21, 22, 20, 22, 23  // Top face
 };
 
+glm::vec3 _cubeSurfaceNorms[] = {
+    glm::vec3(0.0, 0.0, -1.0), 
+    glm::vec3(0.0, 0.0, 1.0), 
+    glm::vec3(-1.0, 0.0, 0.0), 
+    glm::vec3(1.0, 0.0, 0.0), 
+    glm::vec3(0.0, -1.0, 0.0), 
+    glm::vec3(0.0, 1.0, 0.0)
+};
+
 unsigned int _createCubeVAO() {
     unsigned int VAO, VBO, EBO;
     glGenVertexArrays(1, &VAO);
@@ -73,5 +82,13 @@ void Cube::setPos(float x, float y, float z) {
 void Cube::draw() {
     glm::mat4 modelmat = glm::translate(glm::mat4(1.0f), glm::vec3(this->x, this->y, this->z));
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelmat));
-    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+    if (surfaceNormalLoc >= 0) {
+        // std::cout << "surfaceNormalLoc: " << surfaceNormalLoc << std::endl;
+        for (int i = 0; i < 6; i++) {
+            glUniform3fv(surfaceNormalLoc, 1, glm::value_ptr(_cubeSurfaceNorms[i]));
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)((6 * i * sizeof(GLuint))));
+        }
+    } else { 
+        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+    }
 }

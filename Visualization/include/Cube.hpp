@@ -11,7 +11,7 @@
 #include "glfw3.h"
 
 unsigned int _createCubeVAO();
-extern unsigned int modelLoc; // Assigned whenever a shader is loaded
+extern unsigned int modelLoc, surfaceNormalLoc; // Assigned whenever a shader is loaded
 
 class Cube
 {
