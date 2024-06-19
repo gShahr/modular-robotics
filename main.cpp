@@ -194,6 +194,15 @@ public:
     }
 };
 
+namespace Move {
+    enum State {
+        EMPTY,
+        INITIAL,
+        FINAL,
+        STATIC
+    };
+}
+
 class IMove {
 public:
     // Load in move info from a given file
@@ -204,13 +213,8 @@ public:
 
 class Move2d : IMove {
 private:
-    enum State {
-        EMPTY,
-        INITIAL,
-        FINAL,
-        STATIC
-    };
-    std::set<std::map<std::vector<int>, State>> moves;
+
+    std::set<std::map<std::vector<int>, Move::State>> moves;
 public:
     void InitMove(std::ifstream moveFile) override {
 
@@ -227,13 +231,7 @@ public:
 
 class Move3d : IMove {
 private:
-    enum State {
-        EMPTY,
-        INITIAL,
-        FINAL,
-        STATIC
-    };
-    std::set<std::map<std::vector<int>, State>> moves;
+    std::set<std::map<std::vector<int>, Move::State>> moves;
 public:
     void InitMove(std::ifstream moveFile) override {
 
