@@ -238,10 +238,19 @@ int main(int argc, char** argv) {
     unsigned int VAO = _createCubeVAO();
 
     ObjectCollection* cubes = new ObjectCollection(&shader, VAO, texture);
-    cubes->addObj(new Cube(1.0f, 0.0f, 0.0f));  // Bottom layer
-    cubes->addObj(new Cube(0.0f, 0.0f, 0.0f));
-    cubes->addObj(new Cube(0.0f, 0.0f, 1.0f));
-    cubes->addObj(new Cube(0.0f, 1.0f, 1.0f));  // Middle layer part 1
+    float _x, _y, _z;
+    const float _scale = 8.0f;
+    for (int i = 0; i < 150; i++) {
+        _x = floor(float(std::rand()) / RAND_MAX * _scale);
+        _y = floor(float(std::rand()) / RAND_MAX * _scale);
+        _z = floor(float(std::rand()) / RAND_MAX * _scale);
+        // std::cout << _x << " | ";
+        cubes->addObj(new Cube(_x, _y, _z));
+    }
+   // cubes->addObj(new Cube(1.0f, 0.0f, 0.0f));  // Bottom layer
+   // cubes->addObj(new Cube(0.0f, 0.0f, 0.0f));
+   // cubes->addObj(new Cube(0.0f, 0.0f, 1.0f));
+   // cubes->addObj(new Cube(0.0f, 1.0f, 1.0f));  // Middle layer part 1
    // cubes->addObj(new Cube(0.0f, 1.0f, 2.0f));
    // cubes->addObj(new Cube(1.0f, 1.0f, 2.0f));
    // cubes->addObj(new Cube(1.0f, 2.0f, 2.0f)); // Top layer
@@ -255,7 +264,7 @@ int main(int argc, char** argv) {
     viewmat = glm::mat4(1.0f);
     transform = glm::mat4(1.0f);
     projmat = glm::perspective(glm::radians(45.0f), asprat, 0.1f, 100.0f);
-    transform = glm::scale(transform, glm::vec3(0.9f, 0.9f, 0.9f));
+    transform = glm::scale(transform, glm::vec3(0.95f, 0.95f, 0.95f));
 
 
     while(!glfwWindowShouldClose(window)) {
@@ -267,7 +276,7 @@ int main(int argc, char** argv) {
 
         processInput(window);
         //transform = glm::rotate(transform, glm::radians(10.0f * deltaTime), glm::vec3(0.08, 0.3, 0.41));
-        transform = glm::rotate(transform, glm::radians(10.0f * deltaTime), glm::vec3(0.08, 0.08, 0.0));
+        // transform = glm::rotate(transform, glm::radians(10.0f * deltaTime), glm::vec3(0.08, 0.08, 0.0));
         cameraPos += (cameraSpeed.z * cameraDirection * deltaTime);
         cameraPos += (cameraSpeed.x * glm::cross(cameraDirection, cameraUp) * deltaTime);
         cameraPos += (cameraSpeed.y * cameraUp * deltaTime);
@@ -282,7 +291,7 @@ int main(int argc, char** argv) {
 
         glfwSwapBuffers(window);
         glfwPollEvents();
-        std::cout << "yaw: " << yaw << " | pitch: " << pitch << std::endl;
+        // std::cout << "yaw: " << yaw << " | pitch: " << pitch << std::endl;
     }
 
     glDeleteVertexArrays(1, &VAO);

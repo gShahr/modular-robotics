@@ -16,6 +16,20 @@ uniform vec3 baseSurfaceNorm;
 #define fragCoord gl_FragCoord
 #define fragColor FragColor
 
+mat4 rotation3d(vec3 axis, float angle) {
+  axis = normalize(axis);
+  float s = sin(angle);
+  float c = cos(angle);
+  float oc = 1.0 - c;
+
+  return mat4(
+    oc * axis.x * axis.x + c,           oc * axis.x * axis.y - axis.z * s,  oc * axis.z * axis.x + axis.y * s,  0.0,
+    oc * axis.x * axis.y + axis.z * s,  oc * axis.y * axis.y + c,           oc * axis.y * axis.z - axis.x * s,  0.0,
+    oc * axis.z * axis.x - axis.y * s,  oc * axis.y * axis.z + axis.x * s,  oc * axis.z * axis.z + c,           0.0,
+    0.0,                                0.0,                                0.0,                                1.0
+  );
+}
+
 float random (in float x) {
     return fract(sin(x*33577.));
 }
@@ -51,6 +65,15 @@ float Map(float fromLow, float fromHigh, float toLow, float toHigh, float v) {
 
 void main()
 {
+
+	vec3 lightSource = vec3(4.0, 4.0, -10.0);
+	float lightAngle = Map(-1.0, 1.0, radians(-120.0), radians(120.0), sin(iTime));
+	lightSource = (rotation3d(vec3(0.0, 1.0, 0.0), lightAngle) * vec4(lightSource, 1.0)).xyz;
+	float incidentLight = max(0.0, dot(normalize(lightSource - worldPos.xyz), surfaceNorm));
+	incidentLight += 0.2;
+	incidentLight = clamp(incidentLight, 0.0, 1.0);
+
+
 	float borderWidth = 0.005;
 	float borderMask = 1.0 - Rectangle(vec2(borderWidth), vec2(1.0 - 2*borderWidth), texCoord);
 	float interiorMask = 1.0 - borderMask;
@@ -83,9 +106,7 @@ void main()
 
 	vec3 color = border * borderColor;
 	FragColor = texture(tex, texCoord) * interiorMask + vec4(color, 1.0);
-	FragColor = mix(FragColor, vec4(interior, 1.0), 0.35);
-
-	// FragColor = vec4(surfaceNorm, 1.0);
+	FragColor = mix(FragColor, vec4(interior, 1.0), 0.35) * incidentLight;
 
 	//FragColor = texture(tex, texCoord);
 }
