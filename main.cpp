@@ -3,80 +3,164 @@
 #include <map>
 #include <limits>
 #include <fstream>
+#include <set>
+#include <string>
+// CoordTensor not used yet, but it's all set up, just need to refactor main.cpp
+#include "CoordTensor.h"
 #include "debug_util.h"
 
-class Module {
+class Module;
+
+// Class responsible for module ID assignment and providing a central place where modules are stored
+class ModuleIdManager {
+private:
+    // ID to be assigned to next module during construction
+    static int _nextId;
+    // Vector holding all modules, indexed by module ID
+    static std::vector<Module> _modules;
+
 public:
-    int x, y;
+    // Emplace newly created module into the vector
+    static void RegisterModule(Module& module) {
+        _modules.emplace_back(module);
+    }
 
-    Module(int x, int y) : x(x), y(y) {}
+    // Get ID for assignment to newly created module
+    static int GetNextId() {
+        return _nextId++;
+    }
 
-    std::pair<int, int> getPosition() {
-        return std::make_pair(x, y);
+    // Get read access to vector of modules, indexed by ID
+    static const std::vector<Module>& Modules() {
+        return _modules;
     }
 };
 
+int ModuleIdManager::_nextId = 0;
+std::vector<Module> ModuleIdManager::_modules;
+
+class Module {
+public:
+    // Coordinate information
+    std::vector<int> coords;
+    // Module ID
+    int id;
+
+    explicit Module(const std::vector<int>& coords) : coords(coords), id(ModuleIdManager::GetNextId()) { }
+};
+
+// Stream insertion operator overloaded for easy printing of module info
+std::ostream& operator<<(std::ostream& out, const Module& mod) {
+    out << "Module with ID " << mod.id << " at ";
+    std::string sep = "(";
+    for (auto coord : mod.coords) {
+        out << sep << coord;
+        sep = ", ";
+    }
+    out << ")";
+    return out;
+}
+
 class Lattice {
 private:
-    std::map<std::pair<int, int>, Module*> coordmat;
-    std::map<Module*, std::vector<Module*>> adjlist;
+    // Map-based coordinate tensor, to be replaced with CoordTensor at some point
+    std::map<std::vector<int>, int> coordmat;
+    // Vector that holds the IDs of adjacent modules, indexed by ID
+    std::vector<std::vector<int>> adjlist;
+    // Order of coordinate tensor / # of dimensions
+    int order;
+    // Length of every axis
+    int axisSize;
+    // Time variable for DFS
     int time;
-    int width;
-    int height;
+    // # of modules
+    int moduleCount;
 
 public:
-    std::vector<std::pair<int, int>> articulationPoints;
+    // CoordTensor, should eventually replace coordmat
+    CoordTensor coordTensor;
+    // Holds coordinate info for articulation points / cut vertices
+    std::vector<std::vector<int>> articulationPoints;
 
-    enum State {
-        EMPTY,
-        INITIAL,
-        FINAL,
-        STATIC
-    };
+    Lattice(int order, int axisSize) : coordTensor(order, axisSize), order(order), axisSize(axisSize), time(0), moduleCount(0) {}
 
-    Lattice() : time(0) {}
-
-    void addModule(int x, int y) {
-        Module* mod = new Module(x, y);
-        coordmat[std::make_pair(x, y)] = mod;
-        edgeCheck(mod);
+    // Add a new module
+    void addModule(const std::vector<int>& coords) {
+        // Create and register new module
+        Module mod(coords);
+        ModuleIdManager::RegisterModule(mod);
+        // Insert module ID at given coordinates
+        coordmat[{coords}] = mod.id;
+        // bothWays bool set to false due to how the lattice should be built
+        edgeCheck(mod, false);
+        moduleCount++;
+        adjlist.resize(moduleCount + 1);
     }
 
-    void edgeCheck(Module* mod) {
-        if (coordmat.count(std::make_pair(mod->x - 1, mod->y)) != 0) {
-            DEBUG("Module at " << mod->x << ", " << mod->y << " Adjacent to module at " << mod->x - 1 << ", " << mod->y << std::endl);
-            addEdge(mod, coordmat[std::make_pair(mod->x - 1, mod->y)]);
-        }
-        if (coordmat.count(std::make_pair(mod->x, mod->y - 1)) != 0) {
-            DEBUG("Module at " << mod->x << ", " << mod->y << " Adjacent to module at " << mod->x << ", " << mod->y - 1 << std::endl);
-            addEdge(mod, coordmat[std::make_pair(mod->x, mod->y - 1)]);
+    // New generalized edgeCheck
+    void edgeCheck(const Module& mod, bool bothWays = true) {
+        // copy module coordinates to adjCoords
+        auto adjCoords = mod.coords;
+        for (int i = 0; i < order; i++) {
+            // Don't want to check index -1
+            if (adjCoords[i] == 0) continue;
+            adjCoords[i]--;
+            if (coordmat.count(adjCoords) != 0) {
+                DEBUG(mod << " Adjacent to " << ModuleIdManager::Modules()[coordmat[adjCoords]] << std::endl);
+                addEdge(mod.id, coordmat[adjCoords]);
+            }
+            // Don't want to check both ways if it can be avoided, also don't want to check index beyond max value
+            if (!bothWays || adjCoords[i] + 1 == axisSize) {
+                adjCoords[i]++;
+                continue;
+            }
+            adjCoords[i] += 2;
+            if (coordmat.count(adjCoords) != 0) {
+                DEBUG(mod << " Adjacent to " << ModuleIdManager::Modules()[coordmat[adjCoords]] << std::endl);
+                addEdge(mod.id, coordmat[adjCoords]);
+            }
+            adjCoords[i]--;
         }
     }
 
-    void addEdge(Module* u, Module* v) {
+    // Original edgeCheck
+    void edgeCheck2D(const Module& mod) {
+        if (coordmat.count({mod.coords[0] - 1, mod.coords[1]}) != 0) {
+            DEBUG("Module at " << mod.coords[0] << ", " << mod.coords[1] << " Adjacent to module at " << mod.coords[0] - 1 << ", " << mod.coords[1] << std::endl);
+            addEdge(mod.id, coordmat[{mod.coords[0] - 1, mod.coords[1]}]);
+        }
+        if (coordmat.count({mod.coords[0], mod.coords[1] - 1}) != 0) {
+            DEBUG("Module at " << mod.coords[0] << ", " << mod.coords[1] << " Adjacent to module at " << mod.coords[0] << ", " << mod.coords[1] - 1 << std::endl);
+            addEdge(mod.id, coordmat[{mod.coords[0], mod.coords[1] - 1}]);
+        }
+    }
+
+    // Update adjacency lists for module IDs u and v
+    void addEdge(int u, int v) {
         adjlist[u].push_back(v);
         adjlist[v].push_back(u);
     }
 
-    void APUtil(Module* u, std::map<Module*, bool>& visited, std::map<Module*, bool>& ap, std::map<Module*, Module*>& parent, std::map<Module*, int>& low, std::map<Module*, int>& disc) {
+    // Find articulation points / cut vertices using DFS
+    void APUtil(int u, std::vector<bool>& visited, std::vector<bool>& ap, std::vector<int>& parent, std::vector<int>& low, std::vector<int>& disc) {
         int children = 0;
         visited[u] = true;
         disc[u] = time;
         low[u] = time;
         time++;
 
-        for (Module* v : adjlist[u]) {
+        for (int v : adjlist[u]) {
             if (!visited[v]) {
                 parent[v] = u;
                 children++;
                 APUtil(v, visited, ap, parent, low, disc);
                 low[u] = std::min(low[u], low[v]);
 
-                if (parent[u] == nullptr && children > 1) {
+                if (parent[u] == -1 && children > 1) {
                     ap[u] = true;
                 }
 
-                if (parent[u] != nullptr && low[v] >= disc[u]) {
+                if (parent[u] != -1 && low[v] >= disc[u]) {
                     ap[u] = true;
                 }
             } else if (v != parent[u]) {
@@ -85,31 +169,87 @@ public:
         }
     }
 
+    // Find articulation points / cut vertices using DFS
     void AP() {
         time = 0;
-        std::map<Module*, bool> visited;
-        std::map<Module*, int> disc;
-        std::map<Module*, int> low;
-        std::map<Module*, Module*> parent;
-        std::map<Module*, bool> ap;
+        std::vector<bool> visited(moduleCount, false);
+        std::vector<int> disc(moduleCount, -1);
+        std::vector<int> low(moduleCount, -1);
+        std::vector<int> parent(moduleCount, -1);
+        std::vector<bool> ap(moduleCount, false);
 
-        for (auto& kv : adjlist) {
-            if (!visited[kv.first]) {
-                APUtil(kv.first, visited, ap, parent, low, disc);
+        for (int id = 0; id < moduleCount; id++) {
+            if (!visited[id]) {
+                APUtil(id, visited, ap, parent, low, disc);
             }
         }
 
-        for (auto& kv : ap) {
-            if (kv.second) {
-                std::cout << "Module at (" << kv.first->getPosition().first << ", " << kv.first->getPosition().second << ") is an articulation point\n";
-                articulationPoints.emplace_back(kv.first->getPosition().first, kv.first->getPosition().second);
+        for (int id = 0; id < moduleCount; id++) {
+            if (ap[id]) {
+                auto& mod = ModuleIdManager::Modules()[id];
+                DEBUG("Module at (" << mod.coords[0] << ", " << mod.coords[1] << ") is an articulation point" << std::endl);
+                articulationPoints.emplace_back(mod.coords);
             }
         }
     }
 };
 
+namespace Move {
+    enum State {
+        EMPTY,
+        INITIAL,
+        FINAL,
+        STATIC
+    };
+}
+
+class IMove {
+public:
+    // Load in move info from a given file
+    virtual void InitMove(std::ifstream moveFile) = 0;
+    // Check to see if move is possible for a given module
+    virtual bool MoveCheck(Module mod) = 0;
+};
+
+class Move2d : IMove {
+private:
+
+    std::set<std::map<std::vector<int>, Move::State>> moves;
+public:
+    void InitMove(std::ifstream moveFile) override {
+
+    }
+
+    bool MoveCheck(Module mod) override {
+
+    }
+
+    void rotateMove() {
+
+    }
+};
+
+class Move3d : IMove {
+private:
+    std::set<std::map<std::vector<int>, Move::State>> moves;
+public:
+    void InitMove(std::ifstream moveFile) override {
+
+    }
+
+    bool MoveCheck(Module mod) override {
+
+    }
+
+    void rotateMove() {
+
+    }
+};
+
 int main() {
-    Lattice lattice;
+    int order = 2;
+    int axisSize = 9;
+    Lattice lattice(order, axisSize);
     const int ORIGIN = 0;
     int x = ORIGIN;
     int y = ORIGIN;
@@ -125,9 +265,10 @@ int main() {
         std::vector<char> row;
         for (char c: line) {
             if (c == '1') {
-                lattice.addModule(x, y);
+                std::vector<int> coords = {x, y};
+                lattice.addModule(coords);
                 row.push_back('1');
-            } else {
+            } else if (c == '0') {
                 row.push_back('0');
             }
             x++;
@@ -139,9 +280,9 @@ int main() {
     file.close();
     lattice.AP();
     for (auto i: lattice.articulationPoints) {
-        image[i.second - ORIGIN][i.first - ORIGIN] = '*';
+        image[i[1] - ORIGIN][i[0] - ORIGIN] = '*';
     }
-    for (auto imageRow: image) {
+    for (const auto& imageRow: image) {
         for (auto c: imageRow) {
             std::cout << c;
         }
