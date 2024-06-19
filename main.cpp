@@ -173,7 +173,9 @@ public:
 
 class IMove {
 public:
-    virtual void InitMove() = 0;
+    // Load in move info from a given file
+    virtual void InitMove(std::ifstream moveFile) = 0;
+    // Check to see if move is possible for a given module
     virtual bool MoveCheck(Module mod) = 0;
 };
 
@@ -187,7 +189,7 @@ private:
     };
     std::set<std::map<std::vector<int>, State>> moves;
 public:
-    void InitMove() override {
+    void InitMove(std::ifstream moveFile) override {
 
     }
 
@@ -210,7 +212,7 @@ private:
     };
     std::set<std::map<std::vector<int>, State>> moves;
 public:
-    void InitMove() override {
+    void InitMove(std::ifstream moveFile) override {
 
     }
 
