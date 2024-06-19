@@ -82,3 +82,7 @@ int& CoordTensor::IdAt3rdOrder (const std::valarray<int>& coords) {
 int& CoordTensor::IdAtNthOrder (const std::valarray<int>& coords) {
     return _arrayInternal[(coords * _axisMultipliers).sum()];
 }
+
+int &CoordTensor::operator[](const std::valarray<int> &coords) {
+    return (this->*IdAtInternal)(coords);
+}

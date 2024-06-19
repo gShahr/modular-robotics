@@ -21,6 +21,9 @@ public:
     // coordinates. An ID of -1 means no module is present.
     int& IdAt(const std::valarray<int>& coords);
 
+    // Identical to IdAt but uses the subscript operator, mostly here to
+    // make moving to CoordTensor easier.
+    int& operator[](const std::valarray<int>& coords);
 private:
     // Coordinate multiplier cache for tensors of order > 3
     std::valarray<int> _axisMultipliers;
