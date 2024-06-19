@@ -46,7 +46,7 @@ public:
     // Module ID
     int id;
 
-    Module(std::vector<int> coords) : coords(coords), id(ModuleIdManager::GetNextId()) { }
+    explicit Module(const std::vector<int>& coords) : coords(coords), id(ModuleIdManager::GetNextId()) { }
 };
 
 // Stream insertion operator overloaded for easy printing of module info
@@ -75,8 +75,6 @@ private:
     int time;
     // # of modules
     int moduleCount;
-    int width;
-    int height;
 
 public:
     // CoordTensor, should eventually replace coordmat
@@ -92,9 +90,9 @@ public:
         Module mod(coords);
         ModuleIdManager::RegisterModule(mod);
         // Insert module ID at given coordinates
-        coordmat[{coords}] = ModuleIdManager::Modules()[moduleCount].id;
+        coordmat[{coords}] = mod.id;
         // bothWays bool set to false due to how the lattice should be built
-        edgeCheck(ModuleIdManager::Modules()[moduleCount], false);
+        edgeCheck(mod, false);
         moduleCount++;
         adjlist.resize(moduleCount + 1);
     }
