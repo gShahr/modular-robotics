@@ -40,8 +40,10 @@ float lastY;
 float yaw;
 float pitch;
 bool pkeyPressed = false;
+bool spacebarPressed = false;
 bool rmbClicked = false;
 bool firstMouse = true;
+bool animating = true;
 
 glm::mat4 viewmat, projmat, transform;
 
@@ -145,9 +147,16 @@ void processInput(GLFWwindow *window) {
     cameraSpeed = glm::step(0.00001f, glm::abs(cameraSpeed)) * cameraSpeed;
     cameraSpeed = glm::clamp(cameraSpeed, -CAMERA_MAX_SPEED, CAMERA_MAX_SPEED);
 
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && !spacebarPressed) {
+        spacebarPressed = true;
+        animating = !animating;
+    } else if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_RELEASE && spacebarPressed) {
+        spacebarPressed = false;
+    }
+
     if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS && !pkeyPressed) {
         pkeyPressed = true;
-        perspective = !perspective; // TODO Scroll controls FOV for perspective, frustrum size for ortho
+        perspective = !perspective;
         resetProjMat();
     } else if (glfwGetKey(window, GLFW_KEY_P) == GLFW_RELEASE && pkeyPressed) {
         pkeyPressed = false;
@@ -238,27 +247,29 @@ int main(int argc, char** argv) {
     unsigned int VAO = _createCubeVAO();
 
     ObjectCollection* cubes = new ObjectCollection(&shader, VAO, texture);
-    float _x, _y, _z;
-    const float _scale = 8.0f;
-    for (int i = 0; i < 150; i++) {
-        _x = floor(float(std::rand()) / RAND_MAX * _scale);
-        _y = floor(float(std::rand()) / RAND_MAX * _scale);
-        _z = floor(float(std::rand()) / RAND_MAX * _scale);
-        // std::cout << _x << " | ";
-        cubes->addObj(new Cube(_x, _y, _z));
-    }
-   // cubes->addObj(new Cube(1.0f, 0.0f, 0.0f));  // Bottom layer
-   // cubes->addObj(new Cube(0.0f, 0.0f, 0.0f));
-   // cubes->addObj(new Cube(0.0f, 0.0f, 1.0f));
-   // cubes->addObj(new Cube(0.0f, 1.0f, 1.0f));  // Middle layer part 1
-   // cubes->addObj(new Cube(0.0f, 1.0f, 2.0f));
-   // cubes->addObj(new Cube(1.0f, 1.0f, 2.0f));
-   // cubes->addObj(new Cube(1.0f, 2.0f, 2.0f)); // Top layer
-   // cubes->addObj(new Cube(2.0f, 2.0f, 2.0f));
-   // cubes->addObj(new Cube(2.0f, 2.0f, 1.0f));
-   // cubes->addObj(new Cube(2.0f, 1.0f, 1.0f));  // Middle layer part 2
-   // cubes->addObj(new Cube(2.0f, 1.0f, 0.0f));
-   // cubes->addObj(new Cube(1.0f, 1.0f, 0.0f));
+    // float _x, _y, _z;
+    // const float _scale = 8.0f;
+    // for (int i = 0; i < 150; i++) {
+    //     _x = floor(float(std::rand()) / RAND_MAX * _scale);
+    //     _y = floor(float(std::rand()) / RAND_MAX * _scale);
+    //     _z = floor(float(std::rand()) / RAND_MAX * _scale);
+    //     // std::cout << _x << " | ";
+    //     cubes->addObj(new Cube(_x, _y, _z));
+    // }
+    Cube* TEST_CUBE = new Cube(0.0f, 1.0f, 1.0f);
+    cubes->addObj(TEST_CUBE);
+    cubes->addObj(new Cube(1.0f, 0.0f, 0.0f));  // Bottom layer
+    cubes->addObj(new Cube(0.0f, 0.0f, 0.0f));
+    cubes->addObj(new Cube(0.0f, 0.0f, 1.0f));
+    //cubes->addObj(new Cube(0.0f, 1.0f, 1.0f));  // Middle layer part 1 (TEST CUBE)
+    // cubes->addObj(new Cube(0.0f, 1.0f, 2.0f));
+    // cubes->addObj(new Cube(1.0f, 1.0f, 2.0f));
+    // cubes->addObj(new Cube(1.0f, 2.0f, 2.0f)); // Top layer
+    // cubes->addObj(new Cube(2.0f, 2.0f, 2.0f));
+    // cubes->addObj(new Cube(2.0f, 2.0f, 1.0f));
+    // cubes->addObj(new Cube(2.0f, 1.0f, 1.0f));  // Middle layer part 2
+    // cubes->addObj(new Cube(2.0f, 1.0f, 0.0f));
+    // cubes->addObj(new Cube(1.0f, 1.0f, 0.0f));
 
     resetCamera();
     viewmat = glm::mat4(1.0f);
@@ -266,6 +277,7 @@ int main(int argc, char** argv) {
     projmat = glm::perspective(glm::radians(45.0f), asprat, 0.1f, 100.0f);
     transform = glm::scale(transform, glm::vec3(0.95f, 0.95f, 0.95f));
 
+    float PROTOTYPE_ANIM_ANGLE = 0.0f;
 
     while(!glfwWindowShouldClose(window)) {
         // -- Input ---
@@ -273,6 +285,12 @@ int main(int argc, char** argv) {
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
+
+        if (animating && PROTOTYPE_ANIM_ANGLE <= 180.0f) {
+            TEST_CUBE->setPreTranslation(glm::vec3(-0.5f, 0.5f, 0.0f));
+            TEST_CUBE->setRotation(glm::radians(PROTOTYPE_ANIM_ANGLE));
+            PROTOTYPE_ANIM_ANGLE += deltaTime * 25.0f;
+        }
 
         processInput(window);
         //transform = glm::rotate(transform, glm::radians(10.0f * deltaTime), glm::vec3(0.08, 0.3, 0.41));

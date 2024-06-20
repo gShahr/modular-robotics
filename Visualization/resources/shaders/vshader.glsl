@@ -32,5 +32,5 @@ void main()
 	//gl_Position.w = 1. / gl_Position.w * (sin(timeSec / 4.) + 1.) / 2.;
     vertexColor = vec4(1.0, 1.0, 1.0, 1.0);
 	texCoord = aTexCoord;
-	surfaceNorm = (ExtractRotationMatrix(transform) * vec4(baseSurfaceNorm, 1.0)).xyz;
+	surfaceNorm = (ExtractRotationMatrix(modelmat) * vec4(baseSurfaceNorm, 1.0)).xyz;
 }

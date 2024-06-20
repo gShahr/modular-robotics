@@ -69,18 +69,36 @@ unsigned int _createCubeVAO() {
     return VAO;
 }
 
-Cube::Cube(float x, float y, float z) {
-    this->setPos(x, y, z);
-}
-
 void Cube::setPos(float x, float y, float z) {
     this->x = x;
     this->y = y;
     this->z = z;
 }
 
+void Cube::setRotation(float angle) {
+    this->angle = angle;
+}
+void Cube::setRotation(float angle, glm::vec3 rotAxis) {
+    this->angle = angle;
+    this->rotAxis = rotAxis;
+}
+
+void Cube::setPreTranslation(glm::vec3 pt) {
+    this->pt = pt;
+}
+
+Cube::Cube(float x, float y, float z) {
+    this->setPos(x, y, z);
+    this->setRotation(0.0f, glm::vec3(0.0f, 0.0f, 1.0f));
+    this->setPreTranslation(glm::vec3(0.0f));
+}
+
+// TODO refactor to bool; when a Movement event finishes, return False, and have ObjectCollection delete the object and add a new one at the new location
 void Cube::draw() {
-    glm::mat4 modelmat = glm::translate(glm::mat4(1.0f), glm::vec3(this->x, this->y, this->z));
+    glm::mat4 modelmat = glm::translate(glm::mat4(1.0f), this->pt);
+    modelmat = glm::rotate(modelmat, this->angle, this->rotAxis);
+    modelmat = glm::translate(modelmat, -(this->pt));
+    modelmat = glm::translate(modelmat, glm::vec3(this->x, this->y, this->z));
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelmat));
     if (surfaceNormalLoc >= 0) {
         // std::cout << "surfaceNormalLoc: " << surfaceNormalLoc << std::endl;

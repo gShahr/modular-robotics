@@ -19,8 +19,14 @@ public:
     Cube(float x, float y, float z);
     void setPos(float x, float y, float z);
     void draw();
+    void setRotation(float angle);
+    void setRotation(float angle, glm::vec3 rotAxis);
+    void setPreTranslation(glm::vec3 pt);
 private:
     float x, y, z;
+    float angle;
+    glm::vec3 rotAxis;
+    glm::vec3 pt;
 };
 
 #endif
