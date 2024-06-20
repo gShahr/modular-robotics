@@ -194,32 +194,64 @@ public:
 
 namespace Move {
     enum State {
-        EMPTY,
-        INITIAL,
-        FINAL,
-        STATIC
+        EMPTY = 'x',
+        INITIAL = '?',
+        FINAL = '!',
+        STATIC = '#'
     };
 }
 
 class IMove {
 public:
     // Load in move info from a given file
-    virtual void InitMove(std::ifstream moveFile) = 0;
+    virtual void InitMove(std::ifstream& moveFile) = 0;
     // Check to see if move is possible for a given module
-    virtual bool MoveCheck(Module mod) = 0;
+    virtual bool MoveCheck(CoordTensor& tensor, const Module& mod) = 0;
 };
 
 class Move2d : IMove {
 private:
+    std::vector<std::pair<std::valarray<int>, bool>> moves;
+    int yMultiplier;
+    std::valarray<int> initPos, finalPos;
 
-    std::set<std::map<std::vector<int>, Move::State>> moves;
 public:
-    void InitMove(std::ifstream moveFile) override {
+    explicit Move2d(int axisSize) : yMultiplier(axisSize) {}
 
+    void InitMove(std::ifstream& moveFile) override {
+        int x = 0, y = 0;
+        std::string line;
+        while (std::getline(moveFile, line)) {
+            for (auto c : line) {
+                if (c == Move::EMPTY) {
+                    moves.push_back({{x, y}, false});
+                } else if (c == Move::STATIC) {
+                    moves.push_back({{x, y}, true});
+                } else if (c == Move::FINAL) {
+                    moves.push_back({{x, y}, false});
+                    finalPos = {x, y};
+                } else if (c == Move::INITIAL) {
+                    initPos = {x, y};
+                }
+                x++;
+            }
+            x = 0;
+            y++;
+        }
+        for (auto& move : moves) {
+            move.first -= initPos;
+            DEBUG("Check Offset: " << move.first[0] << ", " << move.first[1] << (move.second ? " Static" : " Empty") << std::endl);
+        }
+        finalPos - initPos;
     }
 
-    bool MoveCheck(Module mod) override {
-
+    bool MoveCheck(CoordTensor& tensor, const Module& mod) override {
+        for (const auto& move : moves) {
+            if ((tensor[mod.coords + move.first] < 0) == move.second) {
+                return false;
+            }
+        }
+        return true;
     }
 
     void rotateMove() {
@@ -230,12 +262,13 @@ public:
 class Move3d : IMove {
 private:
     std::set<std::map<std::vector<int>, Move::State>> moves;
+
 public:
-    void InitMove(std::ifstream moveFile) override {
+    void InitMove(std::ifstream& moveFile) override {
 
     }
 
-    bool MoveCheck(Module mod) override {
+    bool MoveCheck(CoordTensor& tensor, const Module& mod) override {
 
     }
 
@@ -286,5 +319,22 @@ int main() {
         }
         std::cout << std::endl;
     }
+
+    //
+    //  MOVE TESTING BELOW
+    //
+    std::ifstream moveFile("Moves/Slide_1.txt");
+    if (!moveFile) {
+        std::cerr << "Unable to open file Moves/Slide_1.txt";
+        return 1;
+    }
+    Move2d move(axisSize);
+    move.InitMove(moveFile);
+    bool test = move.MoveCheck(lattice.coordTensor, ModuleIdManager::Modules()[1]);
+    std::cout << (test ? "MoveCheck Passed!" : "MoveCheck Failed!") << std::endl;
+    moveFile.close();
+    //
+    //  END TESTING
+    //
     return 0;
 }
