@@ -298,7 +298,12 @@ public:
     }
 
     bool MoveCheck(CoordTensor& tensor, const Module& mod) override {
-
+        for (const auto& move : moves) {
+            if ((tensor[mod.coords + move.first] < 0) == move.second) {
+                return false;
+            }
+        }
+        return true;
     }
 
     void rotateMove() {
