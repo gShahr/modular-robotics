@@ -42,11 +42,11 @@ std::vector<Module> ModuleIdManager::_modules;
 class Module {
 public:
     // Coordinate information
-    std::vector<int> coords;
+    std::valarray<int> coords;
     // Module ID
     int id;
 
-    explicit Module(const std::vector<int>& coords) : coords(coords), id(ModuleIdManager::GetNextId()) { }
+    explicit Module(const std::valarray<int>& coords) : coords(coords), id(ModuleIdManager::GetNextId()) { }
 };
 
 // Stream insertion operator overloaded for easy printing of module info
@@ -63,8 +63,6 @@ std::ostream& operator<<(std::ostream& out, const Module& mod) {
 
 class Lattice {
 private:
-    // Map-based coordinate tensor, to be replaced with CoordTensor at some point
-    std::map<std::vector<int>, int> coordmat;
     // Vector that holds the IDs of adjacent modules, indexed by ID
     std::vector<std::vector<int>> adjlist;
     // Order of coordinate tensor / # of dimensions
@@ -80,17 +78,17 @@ public:
     // CoordTensor, should eventually replace coordmat
     CoordTensor coordTensor;
     // Holds coordinate info for articulation points / cut vertices
-    std::vector<std::vector<int>> articulationPoints;
+    std::vector<std::valarray<int>> articulationPoints;
 
     Lattice(int order, int axisSize) : coordTensor(order, axisSize), order(order), axisSize(axisSize), time(0), moduleCount(0) {}
 
     // Add a new module
-    void addModule(const std::vector<int>& coords) {
+    void addModule(const std::valarray<int>& coords) {
         // Create and register new module
         Module mod(coords);
         ModuleIdManager::RegisterModule(mod);
         // Insert module ID at given coordinates
-        coordmat[{coords}] = mod.id;
+        coordTensor[{coords}] = mod.id;
         // bothWays bool set to false due to how the lattice should be built
         edgeCheck(mod, false);
         moduleCount++;
@@ -105,9 +103,9 @@ public:
             // Don't want to check index -1
             if (adjCoords[i] == 0) continue;
             adjCoords[i]--;
-            if (coordmat.count(adjCoords) != 0) {
-                DEBUG(mod << " Adjacent to " << ModuleIdManager::Modules()[coordmat[adjCoords]] << std::endl);
-                addEdge(mod.id, coordmat[adjCoords]);
+            if (coordTensor[adjCoords] >= 0) {
+                DEBUG(mod << " Adjacent to " << ModuleIdManager::Modules()[coordTensor[adjCoords]] << std::endl);
+                addEdge(mod.id, coordTensor[adjCoords]);
             }
             // Don't want to check both ways if it can be avoided, also don't want to check index beyond max value
             if (!bothWays || adjCoords[i] + 1 == axisSize) {
@@ -115,9 +113,9 @@ public:
                 continue;
             }
             adjCoords[i] += 2;
-            if (coordmat.count(adjCoords) != 0) {
-                DEBUG(mod << " Adjacent to " << ModuleIdManager::Modules()[coordmat[adjCoords]] << std::endl);
-                addEdge(mod.id, coordmat[adjCoords]);
+            if (coordTensor[adjCoords] >= 0) {
+                DEBUG(mod << " Adjacent to " << ModuleIdManager::Modules()[coordTensor[adjCoords]] << std::endl);
+                addEdge(mod.id, coordTensor[adjCoords]);
             }
             adjCoords[i]--;
         }
@@ -125,13 +123,13 @@ public:
 
     // Original edgeCheck
     void edgeCheck2D(const Module& mod) {
-        if (coordmat.count({mod.coords[0] - 1, mod.coords[1]}) != 0) {
+        if (coordTensor[{mod.coords[0] - 1, mod.coords[1]}] >= 0) {
             DEBUG("Module at " << mod.coords[0] << ", " << mod.coords[1] << " Adjacent to module at " << mod.coords[0] - 1 << ", " << mod.coords[1] << std::endl);
-            addEdge(mod.id, coordmat[{mod.coords[0] - 1, mod.coords[1]}]);
+            addEdge(mod.id, coordTensor[{mod.coords[0] - 1, mod.coords[1]}]);
         }
-        if (coordmat.count({mod.coords[0], mod.coords[1] - 1}) != 0) {
+        if (coordTensor[{mod.coords[0], mod.coords[1] - 1}] >= 0) {
             DEBUG("Module at " << mod.coords[0] << ", " << mod.coords[1] << " Adjacent to module at " << mod.coords[0] << ", " << mod.coords[1] - 1 << std::endl);
-            addEdge(mod.id, coordmat[{mod.coords[0], mod.coords[1] - 1}]);
+            addEdge(mod.id, coordTensor[{mod.coords[0], mod.coords[1] - 1}]);
         }
     }
 
@@ -265,7 +263,7 @@ int main() {
         std::vector<char> row;
         for (char c: line) {
             if (c == '1') {
-                std::vector<int> coords = {x, y};
+                std::valarray<int> coords = {x, y};
                 lattice.addModule(coords);
                 row.push_back('1');
             } else if (c == '0') {
