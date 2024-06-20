@@ -261,11 +261,40 @@ public:
 
 class Move3d : IMove {
 private:
-    std::set<std::map<std::vector<int>, Move::State>> moves;
+    std::vector<std::pair<std::valarray<int>, bool>> moves;
+    std::valarray<int> initPos, finalPos;
 
 public:
     void InitMove(std::ifstream& moveFile) override {
-
+        int x = 0, y = 0, z = 0;
+        std::string line;
+        while (std::getline(moveFile, line)) {
+            if (line.empty()) {
+                z++;
+                y = 0;
+                continue;
+            }
+            for (auto c : line) {
+                if (c == Move::EMPTY) {
+                    moves.push_back({{x, y, z}, false});
+                } else if (c == Move::STATIC) {
+                    moves.push_back({{x, y, z}, true});
+                } else if (c == Move::FINAL) {
+                    moves.push_back({{x, y, z}, false});
+                    finalPos = {x, y, z};
+                } else if (c == Move::INITIAL) {
+                    initPos = {x, y, z};
+                }
+                x++;
+            }
+            x = 0;
+            y++;
+        }
+        for (auto& move : moves) {
+            move.first -= initPos;
+            DEBUG("Check Offset: " << move.first[0] << ", " << move.first[1] << ", " << move.first[2] << (move.second ? " Static" : " Empty") << std::endl);
+        }
+        finalPos - initPos;
     }
 
     bool MoveCheck(CoordTensor& tensor, const Module& mod) override {
