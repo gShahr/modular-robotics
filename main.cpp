@@ -8,6 +8,7 @@
 // CoordTensor not used yet, but it's all set up, just need to refactor main.cpp
 #include "CoordTensor.h"
 #include "debug_util.h"
+#include <boost/functional/hash.hpp>
 
 class Module;
 
@@ -309,6 +310,24 @@ public:
     void rotateMove() {
 
     }
+};
+
+class State {
+private:
+    size_t seed;
+public:
+    State() : seed(0) {}
+
+    State(size_t seed) : seed(seed) {}
+
+    size_t getSeed() const { return seed; }
+
+    template <typename T, int N>
+    static std::size_t hasharray(const T (&arr)[N]) {
+        return boost::hash_range(arr, arr + N);
+    }
+
+    bool compareStates(const State& other) const { return seed == other.getSeed(); }
 };
 
 int main() {
