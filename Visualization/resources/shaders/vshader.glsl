@@ -26,9 +26,18 @@ void main()
 {
 	mat4 toModel = modelmat * transform;
 	worldPos = toModel * vec4(aPos.xyz, 1.0);
-    gl_Position = projmat * viewmat * worldPos;
-	gl_Position.x = gl_Position.x * (sin(iTime * 3.0 + gl_Position.x) / 70.0 + 1);
-	gl_Position.y = gl_Position.y * (cos(iTime * 1.4 + gl_Position.y * 2) / 70.0 + 1.0);
+	//worldPos.xyz = worldPos.xyz - 20.0;
+	
+	//worldPos.x = worldPos.x * (1.0 + sin(iTime * 3.0 + worldPos.x) / 45.0);
+	//worldPos.y = worldPos.y * (1.0 + cos(iTime * 1.4 + worldPos.y * 2.0) / 45.0);
+	//worldPos.z = worldPos.z * (1.0 + sin(iTime * 1.1 + worldPos.z * 3.0) / 45.0);
+    
+	gl_Position = projmat * viewmat * worldPos;
+	//gl_Position.x = pow(abs(gl_Position.x), 0.8) * sign(gl_Position.x);
+	//gl_Position.y = pow(abs(gl_Position.y), 0.8) * sign(gl_Position.y);
+	
+	// gl_Position.x = gl_Position.x * (sin(iTime * 3.0 + gl_Position.x) / 70.0 + 1.0);
+	// gl_Position.y = gl_Position.y * (cos(iTime * 1.4 + gl_Position.y * 2.0) / 70.0 + 1.0);
 	//gl_Position.w = 1. / gl_Position.w * (sin(timeSec / 4.) + 1.) / 2.;
     vertexColor = vec4(1.0, 1.0, 1.0, 1.0);
 	texCoord = aTexCoord;

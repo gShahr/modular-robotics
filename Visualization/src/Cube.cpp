@@ -75,30 +75,56 @@ void Cube::setPos(float x, float y, float z) {
     this->z = z;
 }
 
-void Cube::setRotation(float angle) {
-    this->angle = angle;
-}
-void Cube::setRotation(float angle, glm::vec3 rotAxis) {
-    this->angle = angle;
-    this->rotAxis = rotAxis;
-}
-
-void Cube::setPreTranslation(glm::vec3 pt) {
-    this->pt = pt;
-}
-
 Cube::Cube(float x, float y, float z) {
     this->setPos(x, y, z);
-    this->setRotation(0.0f, glm::vec3(0.0f, 0.0f, 1.0f));
-    this->setPreTranslation(glm::vec3(0.0f));
+    this->anim = NULL;
 }
 
-// TODO refactor to bool; when a Movement event finishes, return False, and have ObjectCollection delete the object and add a new one at the new location
+void Cube::startAnimation(glm::vec3 AnchorDirection, glm::vec3 DeltaPos) {
+    this->anim = new Animation(AnchorDirection, DeltaPos);
+    this->animProgress = 0.0f;
+}
+
+// Interpolation function used for animation progress: Should map [0.0, 1.0] -> [0.0, 1.0]
+inline float _animInterp(float pct) {
+    return pct;
+}
+
+glm::mat4 Cube::processAnimation(bool *animFinished) {
+    // increment animation progress
+    if (ANIMATE) {
+        this->animProgress += (ANIM_SPEED * deltaTime);
+    }
+    if (animProgress > 1.0f) { // Animation finished
+        animProgress = 1.0f;
+        *animFinished = true; 
+    }
+    
+    // calculate rotation angle based on progress
+    float angle = _animInterp(this->animProgress) * this->anim->MaxAngle;
+
+    // construct model matrix
+    glm::mat4 transform = glm::mat4(1.0f);
+    transform = glm::translate(transform, this->anim->PreTranslation);
+    transform = glm::rotate(transform, glm::radians(angle), this->anim->RotationAxis);
+    transform = glm::translate(transform, -(this->anim->PreTranslation));
+
+    // std::cout << "PreTrans / RotationAxis / angle: " << glm::to_string(this->anim->PreTranslation) << " | " << glm::to_string(this->anim->RotationAxis) << " | " << angle << std::endl;
+
+    return transform;
+}
+
 void Cube::draw() {
-    glm::mat4 modelmat = glm::translate(glm::mat4(1.0f), this->pt);
-    modelmat = glm::rotate(modelmat, this->angle, this->rotAxis);
-    modelmat = glm::translate(modelmat, -(this->pt));
-    modelmat = glm::translate(modelmat, glm::vec3(this->x, this->y, this->z));
+
+    glm::mat4 transform;
+    if (this->anim) {
+        bool dummy;
+        transform = this->processAnimation(&dummy);
+    } else { transform = glm::mat4(1.0f); }
+    transform = glm::scale(transform, glm::vec3(0.95f, 0.95f, 0.95f));
+    glm::mat4 modelmat = glm::translate(glm::mat4(1.0f), glm::vec3(this->x, this->y, this->z));
+
+    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelmat));
     if (surfaceNormalLoc >= 0) {
         // std::cout << "surfaceNormalLoc: " << surfaceNormalLoc << std::endl;

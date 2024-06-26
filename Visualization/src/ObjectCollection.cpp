@@ -18,7 +18,6 @@ void ObjectCollection::drawAll() {
 
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(viewmat));
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projmat));
-    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, this->textureID);

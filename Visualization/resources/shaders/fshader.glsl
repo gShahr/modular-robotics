@@ -70,6 +70,8 @@ void main()
 	float lightAngle = Map(-1.0, 1.0, radians(-120.0), radians(120.0), sin(iTime));
 	lightSource = (rotation3d(vec3(0.0, 1.0, 0.0), lightAngle) * vec4(lightSource, 1.0)).xyz;
 	float incidentLight = max(0.0, dot(normalize(lightSource - worldPos.xyz), surfaceNorm));
+	incidentLight /= length(lightSource - worldPos.xyz);
+	incidentLight *= 4.0;
 	incidentLight += 0.2;
 	incidentLight = clamp(incidentLight, 0.0, 1.0);
 

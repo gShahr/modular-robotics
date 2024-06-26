@@ -15,6 +15,8 @@
 #include "Cube.hpp"
 #include "ObjectCollection.hpp"
 
+#define AUTO_ROTATE 0
+
 float resolution[2] = {800.0f, 600.0f};
 float asprat = resolution[0] / resolution[1];
 
@@ -23,6 +25,9 @@ const char *fragmentShaderPath = "resources/shaders/fshader.glsl";
 
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
+
+float ANIM_SPEED = 0.2f;
+bool ANIMATE = true;
 
 const float CAMERA_MAX_SPEED = 25.0f;
 const float CAMERA_ACCEL = 0.10f;
@@ -45,7 +50,7 @@ bool rmbClicked = false;
 bool firstMouse = true;
 bool animating = true;
 
-glm::mat4 viewmat, projmat, transform;
+glm::mat4 viewmat, projmat;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void cursormove_callback(GLFWwindow* window, double xpos, double ypos);
@@ -149,7 +154,7 @@ void processInput(GLFWwindow *window) {
 
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && !spacebarPressed) {
         spacebarPressed = true;
-        animating = !animating;
+        ANIMATE = !ANIMATE;
     } else if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_RELEASE && spacebarPressed) {
         spacebarPressed = false;
     }
@@ -194,7 +199,7 @@ int loadTexture(const char *texturePath) {
 }
 
 void resetCamera() {
-    cameraPos = glm::vec3(0.0f, 0.0f, -6.0f);
+    cameraPos = glm::vec3(0.0f, 2.0f, -6.0f);
     cameraDirection = glm::vec3(0.0f, 0.0f, 1.0f);
     cameraUp = glm::cross(cameraDirection, glm::normalize(glm::cross(glm::vec3(0.0f, 1.0f, 0.0f), cameraDirection)));
     cameraSpeed = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -247,58 +252,56 @@ int main(int argc, char** argv) {
     unsigned int VAO = _createCubeVAO();
 
     ObjectCollection* cubes = new ObjectCollection(&shader, VAO, texture);
+    
+    // --- Stress testing ---
     // float _x, _y, _z;
-    // const float _scale = 8.0f;
-    // for (int i = 0; i < 150; i++) {
+    // const float _scale = 35.0f;
+    // for (int i = 0; i < 20000; i++) {
     //     _x = floor(float(std::rand()) / RAND_MAX * _scale);
     //     _y = floor(float(std::rand()) / RAND_MAX * _scale);
     //     _z = floor(float(std::rand()) / RAND_MAX * _scale);
     //     // std::cout << _x << " | ";
     //     cubes->addObj(new Cube(_x, _y, _z));
     // }
+
     Cube* TEST_CUBE = new Cube(0.0f, 1.0f, 1.0f);
     cubes->addObj(TEST_CUBE);
     cubes->addObj(new Cube(1.0f, 0.0f, 0.0f));  // Bottom layer
     cubes->addObj(new Cube(0.0f, 0.0f, 0.0f));
     cubes->addObj(new Cube(0.0f, 0.0f, 1.0f));
     //cubes->addObj(new Cube(0.0f, 1.0f, 1.0f));  // Middle layer part 1 (TEST CUBE)
-    // cubes->addObj(new Cube(0.0f, 1.0f, 2.0f));
-    // cubes->addObj(new Cube(1.0f, 1.0f, 2.0f));
-    // cubes->addObj(new Cube(1.0f, 2.0f, 2.0f)); // Top layer
-    // cubes->addObj(new Cube(2.0f, 2.0f, 2.0f));
-    // cubes->addObj(new Cube(2.0f, 2.0f, 1.0f));
-    // cubes->addObj(new Cube(2.0f, 1.0f, 1.0f));  // Middle layer part 2
-    // cubes->addObj(new Cube(2.0f, 1.0f, 0.0f));
-    // cubes->addObj(new Cube(1.0f, 1.0f, 0.0f));
+    cubes->addObj(new Cube(0.0f, 1.0f, 2.0f));
+    cubes->addObj(new Cube(1.0f, 1.0f, 2.0f));
+    cubes->addObj(new Cube(1.0f, 2.0f, 2.0f)); // Top layer
+    cubes->addObj(new Cube(2.0f, 2.0f, 2.0f));
+    cubes->addObj(new Cube(2.0f, 2.0f, 1.0f));
+    cubes->addObj(new Cube(2.0f, 1.0f, 1.0f));  // Middle layer part 2
+    cubes->addObj(new Cube(2.0f, 1.0f, 0.0f));
+    cubes->addObj(new Cube(1.0f, 1.0f, 0.0f));
+    TEST_CUBE->startAnimation(glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 0.0f));
 
     resetCamera();
     viewmat = glm::mat4(1.0f);
-    transform = glm::mat4(1.0f);
     projmat = glm::perspective(glm::radians(45.0f), asprat, 0.1f, 100.0f);
-    transform = glm::scale(transform, glm::vec3(0.95f, 0.95f, 0.95f));
 
     float PROTOTYPE_ANIM_ANGLE = 0.0f;
 
     while(!glfwWindowShouldClose(window)) {
-        // -- Input ---
-        
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
-        if (animating && PROTOTYPE_ANIM_ANGLE <= 180.0f) {
-            TEST_CUBE->setPreTranslation(glm::vec3(-0.5f, 0.5f, 0.0f));
-            TEST_CUBE->setRotation(glm::radians(PROTOTYPE_ANIM_ANGLE));
-            PROTOTYPE_ANIM_ANGLE += deltaTime * 25.0f;
-        }
-
         processInput(window);
-        //transform = glm::rotate(transform, glm::radians(10.0f * deltaTime), glm::vec3(0.08, 0.3, 0.41));
-        // transform = glm::rotate(transform, glm::radians(10.0f * deltaTime), glm::vec3(0.08, 0.08, 0.0));
+
+#if AUTO_ROTATE < 1
         cameraPos += (cameraSpeed.z * cameraDirection * deltaTime);
         cameraPos += (cameraSpeed.x * glm::cross(cameraDirection, cameraUp) * deltaTime);
         cameraPos += (cameraSpeed.y * cameraUp * deltaTime);
         viewmat = glm::lookAt(cameraPos, cameraPos + cameraDirection, cameraUp);
+#else
+        cameraPos = glm::rotate(cameraPos, glm::radians(10.0f * deltaTime), glm::vec3(0.0, 1.0, 0.0));
+        viewmat = glm::lookAt(cameraPos, glm::vec3(0.0, 0.0, 0.0), cameraUp);
+#endif
 
         // -- Rendering --
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
