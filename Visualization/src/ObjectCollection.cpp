@@ -3,7 +3,7 @@
 ObjectCollection::ObjectCollection(Shader *shader, unsigned int VAO, int textureID) {
     this->shader = shader;
     this->VAO = VAO;
-    this->objects = {};
+    this->objects = std::vector<Cube*>();
     this->numObjs = 0;
     this->textureID = textureID;
 }
