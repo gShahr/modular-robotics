@@ -84,7 +84,7 @@ void cursormove_callback(GLFWwindow* window, double xpos, double ypos) {
         pitch += yoffset;
 
         yaw = std::fmod(yaw, 360.0f);
-        pitch = std::clamp(pitch, -89.0f, 89.0f);
+        pitch = glm::clamp(pitch, -89.0f, 89.0f);
 
         glm::vec3 direction;
         direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
@@ -108,7 +108,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 
 void mouse_scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
     cameraZoom += yoffset;
-    cameraZoom = std::clamp(cameraZoom, -25.0f, 25.0f);
+    cameraZoom = glm::clamp(cameraZoom, -25.0f, 25.0f);
     resetProjMat();
 }
 
