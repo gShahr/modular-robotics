@@ -2,13 +2,13 @@
 CXX = g++
 
 # Compiler flags
-CXXFLAGS = -Wall -std=c++11
+CXXFLAGS = -Wall -std=c++11 -I D:/boost_1_85_0
 
 # Linker flags
 LDFLAGS = 
 
 # Boost libraries
-BOOST_LIBS = -lboost_system
+BOOST_LIBS =
 
 # Source files
 SOURCES = main.cpp CoordTensor.cpp
