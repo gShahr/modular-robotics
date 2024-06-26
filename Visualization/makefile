@@ -56,7 +56,7 @@ main: $(OBJ)
 
 JUNKFILES = *.exe *.out $(ODIR)$(DIRSLASH)*.o $(ODIR)$(DIRSLASH)*.opp
 ifeq ($(OS), Windows_NT)
-	JUNKFILES = $(subst $() $(),$(_COMMA),$(JUNKFILES))
+	JUNKFILES := $(subst $() $(),$(_COMMA),$(JUNKFILES))
 endif
 # $(info JUNKFILES is $(JUNKFILES))
 clean:
