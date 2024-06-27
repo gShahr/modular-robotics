@@ -24,6 +24,8 @@ public:
     // Identical to IdAt but uses the subscript operator, mostly here to
     // make moving to CoordTensor easier.
     int& operator[](const std::valarray<int>& coords);
+
+    std::vector<int>::size_type size(void);
 private:
     // Coordinate multiplier cache for tensors of order > 3
     std::valarray<int> _axisMultipliers;
