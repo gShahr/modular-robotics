@@ -75,6 +75,19 @@ private:
     // # of modules
     int moduleCount;
 
+    // Clear adjacency list for module id, and remove module id from other lists
+    void ClearAdjacencies(int moduleId) {
+        for (auto id : adjlist[moduleId]) {
+            for (int i = 0; i < adjlist[id].size(); i++) {
+                if (adjlist[id][i] == moduleId) {
+                    adjlist[id].erase(adjlist[id].begin() + i);
+                    break;
+                }
+            }
+        }
+        adjlist[moduleId].clear();
+    }
+
 public:
     // CoordTensor, should eventually replace coordmat
     CoordTensor coordTensor;
