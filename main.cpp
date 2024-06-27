@@ -222,6 +222,19 @@ public:
         }
     }
 
+    bool operator==(const Lattice& other) {
+        bool result = false;
+        if (grid.size() == other.grid.size()) {
+            result = true;
+            for (int i = 0; i < grid.size(); i++) {
+                if (grid[i] != other.grid[i]) {
+                    return false;
+                }
+            }
+        }
+        return result;
+    }
+
     friend std::ostream& operator<<(std::ostream& out, /*const*/ Lattice& mod);
 };
 
