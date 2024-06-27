@@ -109,6 +109,15 @@ public:
         adjlist.resize(moduleCount + 1);
     }
 
+    // Move
+    void moveModule(Module& mod, const std::valarray<int>& offset) {
+        ClearAdjacencies(mod.id);
+        coordTensor.IdAt(mod.coords) = -1;
+        mod.coords += offset;
+        coordTensor.IdAt(mod.coords) = mod.id;
+        edgeCheck(mod);
+    }
+
     // New generalized edgeCheck
     void edgeCheck(const Module& mod, bool bothWays = true) {
         // copy module coordinates to adjCoords
