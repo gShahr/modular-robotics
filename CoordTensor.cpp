@@ -87,6 +87,6 @@ int &CoordTensor::operator[](const std::valarray<int> &coords) {
     return (this->*IdAtInternal)(coords);
 }
 
-std::vector<int>::size_type CoordTensor::size() {
+std::vector<int>::size_type CoordTensor::size() const {
     return _arrayInternal.size();
 }
