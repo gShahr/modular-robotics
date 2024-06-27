@@ -9,6 +9,7 @@
 #include "CoordTensor.h"
 #include "debug_util.h"
 #include <boost/functional/hash.hpp>
+#include <queue>
 
 class Module;
 
@@ -408,12 +409,58 @@ public:
     bool compareLattice(const Lattice& Lattice1, const Lattice& Lattice2) {}
 };
 
-/*
-run bfs on configuration space
-return path of bfs via states taken
-*/
-std::vector<State*> bfs(const State& initialState, const State& finalState) {
-}
+class Configuration {
+private:
+    Configuration* parent;
+    Lattice lattice;
+    State state;
+public:
+    std::vector<std::vector<Lattice>> makeAllMoves(const Lattice& lattice) {
+        std::vector<std::vector<Lattice>> result;
+        for (auto module: ModuleIdManager::Modules()) {
+            result.emplace_back(makeMoves(lattice, module));
+        }
+        return result;
+    }
+
+    /*
+    Returns upto 8 possible lattice configurations from given lattice per movable modules
+    */
+    std::vector<Lattice> makeMoves(const Lattice& lattice, const Module& module) {
+        std::vector<Lattice> result;
+        for (auto move: moves) {
+            result.emplace_back(applyMove(lattice, module, move));
+        }
+        return result;
+    }
+
+    Lattice applyMove(const Lattice& lattice, const Module& module, cosnt Move& move) {
+
+    }
+};
+
+class ConfigurationSpace {
+private:
+public:
+    /*
+    run bfs on configuration space
+    return path of bfs via states taken
+    */
+    void bfs(const Lattice& initialLattice, const Lattice& finalLattice) {
+        std::vector<Lattice> visited;
+        std::queue<Lattice> q;
+        q.push(initialLattice);
+        while (!q.empty()) {
+            Lattice current = q.front();
+            q.pop();
+            Lattice next = current;
+            if (std::find(visited.begin(), visited.end(), next) == visited.end()) {
+                q.push(next);
+                visited.push_back(next);
+            }
+        }
+    }
+};
 
 int main() {
     int order = 2;
