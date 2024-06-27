@@ -9,9 +9,12 @@
 #include "glm/ext.hpp"
 #include "glad/glad.h"
 #include "glfw3.h"
+#include "Animation.hpp"
 
 unsigned int _createCubeVAO();
-extern unsigned int modelLoc, surfaceNormalLoc; // Assigned whenever a shader is loaded
+extern unsigned int transformLoc, modelLoc, surfaceNormalLoc; // Assigned whenever a shader is loaded
+extern float deltaTime, ANIM_SPEED;
+extern bool ANIMATE;
 
 class Cube
 {
@@ -19,14 +22,12 @@ public:
     Cube(float x, float y, float z);
     void setPos(float x, float y, float z);
     void draw();
-    void setRotation(float angle);
-    void setRotation(float angle, glm::vec3 rotAxis);
-    void setPreTranslation(glm::vec3 pt);
+    void startAnimation(glm::vec3 AnchorDirection, glm::vec3 DeltaPos);
+    glm::mat4 processAnimation(bool *animFinished);
 private:
     float x, y, z;
-    float angle;
-    glm::vec3 rotAxis;
-    glm::vec3 pt;
+    Animation *anim;
+    float animProgress;
 };
 
 #endif
