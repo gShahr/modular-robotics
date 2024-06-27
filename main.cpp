@@ -89,15 +89,23 @@ private:
     }
 
 public:
+    std::vector<bool> grid;
     // CoordTensor, should eventually replace coordmat
     CoordTensor coordTensor;
     // Holds coordinate info for articulation points / cut vertices
     std::vector<std::valarray<int>> articulationPoints;
 
-    Lattice(int order, int axisSize) : coordTensor(order, axisSize), order(order), axisSize(axisSize), time(0), moduleCount(0) {}
+    Lattice(int order, int axisSize) : coordTensor(order, axisSize), order(order), axisSize(axisSize), time(0), moduleCount(0) {
+        grid.resize(pow(axisSize, order), false);
+    }
 
     // Add a new module
     void addModule(const std::valarray<int>& coords) {
+        int index = 0;
+        for (int i = 0; i < coords.size(); i++) {
+             index += i * pow(axisSize, i) * coords[i];
+        }
+        grid[index] = true;
         // Create and register new module
         Module mod(coords);
         ModuleIdManager::RegisterModule(mod);
