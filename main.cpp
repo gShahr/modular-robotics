@@ -32,7 +32,7 @@ public:
     }
 
     // Get read access to vector of modules, indexed by ID
-    static const std::vector<Module>& Modules() {
+    static std::vector<Module>& Modules() {
         return _modules;
     }
 };
@@ -397,7 +397,7 @@ std::vector<State*> bfs(const State& initialState, const State& finalState) {
 
 int main() {
     int order = 2;
-    int axisSize = 9;
+    int axisSize = 4;
     Lattice lattice(order, axisSize);
     const int ORIGIN = 0;
     int x = ORIGIN;
@@ -441,6 +441,7 @@ int main() {
     //
     //  MOVE TESTING BELOW
     //
+    std::cout << "Lattice Initial State:\n" << lattice;
     std::ifstream moveFile("Moves/Slide_1.txt");
     if (!moveFile) {
         std::cerr << "Unable to open file Moves/Slide_1.txt";
@@ -451,6 +452,12 @@ int main() {
     bool test = move.MoveCheck(lattice.coordTensor, ModuleIdManager::Modules()[1]);
     std::cout << (test ? "MoveCheck Passed!" : "MoveCheck Failed!") << std::endl;
     moveFile.close();
+    if (test) {
+        std::cout << "Moving!\n";
+        lattice.moveModule(ModuleIdManager::Modules()[1], move.MoveOffset());
+        std::cout << "Lattice Final State:\n" << lattice;
+    }
+    std::cout << "(Note: Lattice output is rotated 90 degrees counterclockwise for some reason)\n";
     //
     //  END TESTING
     //
