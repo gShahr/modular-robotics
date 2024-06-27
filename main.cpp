@@ -322,28 +322,28 @@ public:
 
     size_t getSeed() const { return seed; }
 
-    '''
+    /*
     pass in information about lattice (hash bool of where modules are or bitfield c++)
     return hash value
-    '''
+    */
     template <typename T, int N>
     static std::size_t hasharray(const T (&arr)[N]) {
         return boost::hash_range(arr, arr + N);
     }
 
     bool compareStates(const State& other) const { return seed == other.getSeed(); }
-    '''
+    /*
     check how to do this properly (operator overload function in lattice function)
     return true iff lattice have the same structure of modules
-    '''
-    bool compareLattice(const& Lattice1, const& Lattice2) {}
+    */
+    bool compareLattice(const Lattice& Lattice1, const Lattice& Lattice2) {}
 };
 
-'''
-run bfs on confirugaiton space
+/*
+run bfs on configuration space
 return path of bfs via states taken
-'''
-std::vector<State*> bfs(const& State initialState, cosnt& State finalState) {
+*/
+std::vector<State*> bfs(const State& initialState, const State& finalState) {
 }
 
 int main() {
