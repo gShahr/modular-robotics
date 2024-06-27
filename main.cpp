@@ -213,7 +213,24 @@ public:
             }
         }
     }
+
+    friend std::ostream& operator<<(std::ostream& out, /*const*/ Lattice& mod);
 };
+
+std::ostream& operator<<(std::ostream& out, /*const*/ Lattice& lattice) {
+    out << "Lattice State:\n";
+    for (int i = 0; i < lattice.coordTensor.size(); i++) {
+        if (lattice.coordTensor.GetIdDirect(i) >= 0) {
+            out << '#';
+        } else {
+            out << '-';
+        }
+        if ((i + 1) % lattice.axisSize == 0) {
+            out << '\n';
+        }
+    }
+    return out;
+}
 
 namespace Move {
     enum State {
