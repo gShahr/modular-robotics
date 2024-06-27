@@ -383,9 +383,8 @@ public:
     pass in information about lattice (hash bool of where modules are or bitfield c++)
     return hash value
     */
-    template <typename T, int N>
-    static std::size_t hasharray(const T (&arr)[N]) {
-        return boost::hash_range(arr, arr + N);
+    static std::size_t hashLattice(const Lattice& lattice) {
+        return boost::hash_range(lattice.grid.begin(), lattice.grid.end());
     }
 
     bool compareStates(const State& other) const { return seed == other.getSeed(); }
