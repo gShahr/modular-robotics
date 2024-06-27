@@ -282,7 +282,8 @@ public:
             move.first -= initPos;
             DEBUG("Check Offset: " << move.first[0] << ", " << move.first[1] << (move.second ? " Static" : " Empty") << std::endl);
         }
-        finalPos - initPos;
+        finalPos -= initPos;
+        DEBUG("Move Offset: " << finalPos[0] << ", " << finalPos[1] << std::endl);
     }
 
     bool MoveCheck(CoordTensor& tensor, const Module& mod) override {
@@ -292,6 +293,10 @@ public:
             }
         }
         return true;
+    }
+
+    const std::valarray<int>& MoveOffset() {
+        return finalPos;
     }
 
     void rotateMove() {
@@ -334,7 +339,8 @@ public:
             move.first -= initPos;
             DEBUG("Check Offset: " << move.first[0] << ", " << move.first[1] << ", " << move.first[2] << (move.second ? " Static" : " Empty") << std::endl);
         }
-        finalPos - initPos;
+        finalPos -= initPos;
+        DEBUG("Move Offset: " << finalPos[0] << ", " << finalPos[1] << ", " << finalPos[2] << std::endl);
     }
 
     bool MoveCheck(CoordTensor& tensor, const Module& mod) override {
@@ -344,6 +350,10 @@ public:
             }
         }
         return true;
+    }
+
+    const std::valarray<int>& MoveOffset() {
+        return finalPos;
     }
 
     void rotateMove() {
