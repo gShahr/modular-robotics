@@ -69,14 +69,12 @@ unsigned int _createCubeVAO() {
     return VAO;
 }
 
-void Cube::setPos(float x, float y, float z) {
-    this->x = x;
-    this->y = y;
-    this->z = z;
+void Cube::setPos(glm::vec3 newPos) {
+    this->pos = newPos;
 }
 
-Cube::Cube(float x, float y, float z) {
-    this->setPos(x, y, z);
+Cube::Cube(glm::vec3 pos) {
+    this->setPos(pos);
     this->anim = NULL;
 }
 
@@ -85,12 +83,24 @@ void Cube::startAnimation(glm::vec3 AnchorDirection, glm::vec3 DeltaPos) {
     this->animProgress = 0.0f;
 }
 
+void Cube::stopAnimation() {
+    if (!this->anim) { return; }
+
+    glm::mat4 transform = glm::mat4(1.0f);
+    this->setPos(this->anim->DeltaPos + this->pos);
+    this->animProgress = 0.0f;
+    delete this->anim;
+    this->anim = NULL;
+}
+
 // Interpolation function used for animation progress: Should map [0.0, 1.0] -> [0.0, 1.0]
 inline float _animInterp(float pct) {
     return pct;
 }
 
 glm::mat4 Cube::processAnimation(bool *animFinished) {
+    glm::mat4 transform = glm::mat4(1.0f);
+
     // increment animation progress
     if (ANIMATE) {
         this->animProgress += (ANIM_SPEED * deltaTime);
@@ -98,18 +108,18 @@ glm::mat4 Cube::processAnimation(bool *animFinished) {
     if (animProgress > 1.0f) { // Animation finished
         animProgress = 1.0f;
         *animFinished = true; 
+        this->stopAnimation();
+    } else {
+        // calculate rotation angle based on progress
+        float angle = _animInterp(this->animProgress) * this->anim->MaxAngle;
+
+        // construct model matrix
+        transform = glm::translate(transform, this->anim->PreTranslation);
+        transform = glm::rotate(transform, glm::radians(angle), this->anim->RotationAxis);
+        transform = glm::translate(transform, -(this->anim->PreTranslation));
+
+        // std::cout << "PreTrans / RotationAxis / angle: " << glm::to_string(this->anim->PreTranslation) << " | " << glm::to_string(this->anim->RotationAxis) << " | " << angle << std::endl;
     }
-    
-    // calculate rotation angle based on progress
-    float angle = _animInterp(this->animProgress) * this->anim->MaxAngle;
-
-    // construct model matrix
-    glm::mat4 transform = glm::mat4(1.0f);
-    transform = glm::translate(transform, this->anim->PreTranslation);
-    transform = glm::rotate(transform, glm::radians(angle), this->anim->RotationAxis);
-    transform = glm::translate(transform, -(this->anim->PreTranslation));
-
-    // std::cout << "PreTrans / RotationAxis / angle: " << glm::to_string(this->anim->PreTranslation) << " | " << glm::to_string(this->anim->RotationAxis) << " | " << angle << std::endl;
 
     return transform;
 }
@@ -122,7 +132,7 @@ void Cube::draw() {
         transform = this->processAnimation(&dummy);
     } else { transform = glm::mat4(1.0f); }
     transform = glm::scale(transform, glm::vec3(0.95f, 0.95f, 0.95f));
-    glm::mat4 modelmat = glm::translate(glm::mat4(1.0f), glm::vec3(this->x, this->y, this->z));
+    glm::mat4 modelmat = glm::translate(glm::mat4(1.0f), glm::vec3(this->pos));
 
     glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelmat));
