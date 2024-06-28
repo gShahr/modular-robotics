@@ -69,12 +69,19 @@ unsigned int _createCubeVAO() {
     return VAO;
 }
 
-void Cube::setPos(glm::vec3 newPos) {
-    this->pos = newPos;
+void Cube::setPos(int x, int y, int z) {
+    this->pos = glm::vec3(x, y, z);
 }
 
-Cube::Cube(glm::vec3 pos) {
-    this->setPos(pos);
+Cube::Cube(int x, int y, int z) {
+    this->id = -1;
+    this->setPos(x, y, z);
+    this->anim = NULL;
+}
+
+Cube::Cube(int id, int x, int y, int z) {
+    this->id = id;
+    this->setPos(x, y, z);
     this->anim = NULL;
 }
 
@@ -87,7 +94,8 @@ void Cube::stopAnimation() {
     if (!this->anim) { return; }
 
     glm::mat4 transform = glm::mat4(1.0f);
-    this->setPos(this->anim->DeltaPos + this->pos);
+    glm::vec3 newPos = this->pos + this->anim->DeltaPos;
+    this->setPos(newPos[0], newPos[1], newPos[2]);
     this->animProgress = 0.0f;
     delete this->anim;
     this->anim = NULL;

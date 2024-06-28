@@ -19,16 +19,17 @@ extern bool ANIMATE;
 class Cube
 {
 public:
-    Cube(glm::vec3 pos);
-    void setPos(glm::vec3 newPos);
-    void getPos();
+    Cube(int x, int y, int z);
+    Cube(int id, int x, int y, int z);
+    void setPos(int x, int y, int z);
     void draw();
     void startAnimation(glm::vec3 AnchorDirection, glm::vec3 DeltaPos);
     void stopAnimation();
     glm::mat4 processAnimation(bool *animFinished);
-private:
     glm::vec3 pos;
     Animation *anim;
+    int id;
+private:
     float animProgress;
 };
 

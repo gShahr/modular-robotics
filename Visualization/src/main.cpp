@@ -14,6 +14,7 @@
 #include "Shader.hpp"
 #include "Cube.hpp"
 #include "ObjectCollection.hpp"
+#include "Scenario.hpp"
 
 #define AUTO_ROTATE 0
 
@@ -264,20 +265,20 @@ int main(int argc, char** argv) {
     //     cubes->addObj(new Cube(_x, _y, _z));
     // }
 
-    Cube* TEST_CUBE = new Cube(glm::vec3(0.0f, 1.0f, 1.0f));
+    Cube* TEST_CUBE = new Cube(0.0f, 1.0f, 1.0f);
     cubes->addObj(TEST_CUBE);
-    cubes->addObj(new Cube(glm::vec3(1.0f, 0.0f, 0.0f)));  // Bottom layer
-    cubes->addObj(new Cube(glm::vec3(0.0f, 0.0f, 0.0f)));
-    cubes->addObj(new Cube(glm::vec3(0.0f, 0.0f, 1.0f)));
-    //cubes->addObj(new Cubglm::vec3(e(0.0f, 1.0f, 1.0f)));  // Middle layer part 1 (TEST CUBE)
-    cubes->addObj(new Cube(glm::vec3(0.0f, 1.0f, 2.0f)));
-    cubes->addObj(new Cube(glm::vec3(1.0f, 1.0f, 2.0f)));
-    cubes->addObj(new Cube(glm::vec3(1.0f, 2.0f, 2.0f))); // Top layer
-    cubes->addObj(new Cube(glm::vec3(2.0f, 2.0f, 2.0f)));
-    cubes->addObj(new Cube(glm::vec3(2.0f, 2.0f, 1.0f)));
-    cubes->addObj(new Cube(glm::vec3(2.0f, 1.0f, 1.0f)));  // Middle layer part 2
-    cubes->addObj(new Cube(glm::vec3(2.0f, 1.0f, 0.0f)));
-    cubes->addObj(new Cube(glm::vec3(1.0f, 1.0f, 0.0f)));
+    cubes->addObj(new Cube(1.0f, 0.0f, 0.0f));  // Bottom layer
+    cubes->addObj(new Cube(0.0f, 0.0f, 0.0f));
+    cubes->addObj(new Cube(0.0f, 0.0f, 1.0f));
+    //cubes->addObj(new Cube(0.0f, 1.0f, 1.0f)));  // Middle layer part 1 (TEST CUBE)
+    cubes->addObj(new Cube(0.0f, 1.0f, 2.0f));
+    cubes->addObj(new Cube(1.0f, 1.0f, 2.0f));
+    cubes->addObj(new Cube(1.0f, 2.0f, 2.0f)); // Top layer
+    cubes->addObj(new Cube(2.0f, 2.0f, 2.0f));
+    cubes->addObj(new Cube(2.0f, 2.0f, 1.0f));
+    cubes->addObj(new Cube(2.0f, 1.0f, 1.0f));  // Middle layer part 2
+    cubes->addObj(new Cube(2.0f, 1.0f, 0.0f));
+    cubes->addObj(new Cube(1.0f, 1.0f, 0.0f));
     TEST_CUBE->startAnimation(glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 0.0f));
 
     resetCamera();
@@ -285,6 +286,8 @@ int main(int argc, char** argv) {
     projmat = glm::perspective(glm::radians(45.0f), asprat, 0.1f, 100.0f);
 
     float PROTOTYPE_ANIM_ANGLE = 0.0f;
+
+    Scenario testScenario = Scenario("Scenarios/Testing/Simple.scen");
 
     while(!glfwWindowShouldClose(window)) {
         float currentFrame = glfwGetTime();
