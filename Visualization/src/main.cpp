@@ -17,7 +17,7 @@
 #include "ObjectCollection.hpp"
 #include "Scenario.hpp"
 
-#define AUTO_ROTATE 0
+#define AUTO_ROTATE 1
 
 std::unordered_map<int, Cube*> gObjects; // Hashmap of all <ID, object>
 
@@ -30,7 +30,7 @@ const char *fragmentShaderPath = "resources/shaders/fshader.glsl";
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
-float ANIM_SPEED = 0.4f;
+float ANIM_SPEED = 0.7f;
 bool ANIMATE = true;
 
 const float CAMERA_MAX_SPEED = 25.0f;
@@ -294,6 +294,7 @@ int main(int argc, char** argv) {
     MoveSequence* scenMoveSeq = testScenario.toMoveSequence();
 
     bool readyForNewAnim = true;
+    bool forward = true;
 
     while(!glfwWindowShouldClose(window)) {
         float currentFrame = glfwGetTime();
@@ -317,13 +318,24 @@ int main(int argc, char** argv) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         if (readyForNewAnim) {
-            Move* move = scenMoveSeq->pop();
+            Move* move;
+            glm::vec3 deltaPos, anchorDir;
+            if (forward) {
+                move = scenMoveSeq->pop();
+                deltaPos = move->deltaPos;
+            } else {
+                move = scenMoveSeq->undo();
+                deltaPos = -move->deltaPos;
+            }
+            if ((scenMoveSeq->currentMove == 0) || (scenMoveSeq->remainingMoves == 0)) { 
+                std::cout << "Reversing..." << std::endl;
+                forward = !forward; 
+            }
             Cube* mover = gObjects.at(move->moverId);
             Cube* anchor = gObjects.at(move->anchorId);
-            glm::vec3 anchorDir;
             anchorDir = anchor->pos - mover->pos;
-            mover->startAnimation(&readyForNewAnim, anchorDir, move->deltaPos);
-            std::cout << "Beginning animation of move with mover " << move->moverId << " and anchor " << move->anchorId << ": anchorDir = " << glm::to_string(anchorDir) << std::endl;
+            mover->startAnimation(&readyForNewAnim, anchorDir, deltaPos);
+            std::cout << "Beginning animation of move with mover " << move->moverId << " and anchor " << move->anchorId << ": anchorDir = " << glm::to_string(anchorDir) << ", deltaPos = " << glm::to_string(deltaPos) << std::endl;
             readyForNewAnim = false;
         }
 

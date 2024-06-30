@@ -88,7 +88,8 @@ void Cube::startAnimation(bool* markWhenAnimFinished, glm::vec3 AnchorDirection,
 
 // Interpolation function used for animation progress: Should map [0.0, 1.0] -> [0.0, 1.0]
 inline float _animInterp(float pct) {
-    return pct < 0.5 ? 4 * pct * pct * pct : 1 - std::pow(-2 * pct + 2, 3) / 2;
+    //return pct < 0.5 ? 4 * pct * pct * pct : 1 - std::pow(-2 * pct + 2, 3) / 2; // Cubic ease in-out
+    return pct < 0.5 ? 2 * pct * pct : 1 - std::pow(-2 * pct + 2, 2) / 2; // Quadratic ease in-out
     //return pct;
 }
 
