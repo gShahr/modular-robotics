@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <algorithm> // clamp
+#include <deque> // Animation sequences
 
 #include "glad/glad.h"
 #include "glfw3.h"
@@ -265,29 +266,29 @@ int main(int argc, char** argv) {
     //     cubes->addObj(new Cube(_x, _y, _z));
     // }
 
-    Cube* TEST_CUBE = new Cube(0.0f, 1.0f, 1.0f);
+    Cube* TEST_CUBE = new Cube(3.0f, 3.0f, 3.0f);
     cubes->addObj(TEST_CUBE);
-    cubes->addObj(new Cube(1.0f, 0.0f, 0.0f));  // Bottom layer
-    cubes->addObj(new Cube(0.0f, 0.0f, 0.0f));
-    cubes->addObj(new Cube(0.0f, 0.0f, 1.0f));
+    //cubes->addObj(new Cube(1.0f, 0.0f, 0.0f));  // Bottom layer
+    //cubes->addObj(new Cube(0.0f, 0.0f, 0.0f));
+    //cubes->addObj(new Cube(0.0f, 0.0f, 1.0f));
     //cubes->addObj(new Cube(0.0f, 1.0f, 1.0f)));  // Middle layer part 1 (TEST CUBE)
-    cubes->addObj(new Cube(0.0f, 1.0f, 2.0f));
-    cubes->addObj(new Cube(1.0f, 1.0f, 2.0f));
-    cubes->addObj(new Cube(1.0f, 2.0f, 2.0f)); // Top layer
-    cubes->addObj(new Cube(2.0f, 2.0f, 2.0f));
-    cubes->addObj(new Cube(2.0f, 2.0f, 1.0f));
-    cubes->addObj(new Cube(2.0f, 1.0f, 1.0f));  // Middle layer part 2
-    cubes->addObj(new Cube(2.0f, 1.0f, 0.0f));
-    cubes->addObj(new Cube(1.0f, 1.0f, 0.0f));
+    //cubes->addObj(new Cube(0.0f, 1.0f, 2.0f));
+    //cubes->addObj(new Cube(1.0f, 1.0f, 2.0f));
+    //cubes->addObj(new Cube(1.0f, 2.0f, 2.0f)); // Top layer
+    //cubes->addObj(new Cube(2.0f, 2.0f, 2.0f));
+    //cubes->addObj(new Cube(2.0f, 2.0f, 1.0f));
+    //cubes->addObj(new Cube(2.0f, 1.0f, 1.0f));  // Middle layer part 2
+    //cubes->addObj(new Cube(2.0f, 1.0f, 0.0f));
+    //cubes->addObj(new Cube(1.0f, 1.0f, 0.0f));
     TEST_CUBE->startAnimation(glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 0.0f));
 
     resetCamera();
     viewmat = glm::mat4(1.0f);
     projmat = glm::perspective(glm::radians(45.0f), asprat, 0.1f, 100.0f);
 
-    float PROTOTYPE_ANIM_ANGLE = 0.0f;
-
     Scenario testScenario = Scenario("Scenarios/Testing/Simple.scen");
+    ObjectCollection* scenCubes = testScenario.toObjectCollection(&shader, VAO, texture);
+    AnimationSequence* scenAnimSeq = testScenario.toAnimationSequence();
 
     while(!glfwWindowShouldClose(window)) {
         float currentFrame = glfwGetTime();
@@ -312,6 +313,7 @@ int main(int argc, char** argv) {
 
         // std::cout << glm::to_string(viewmat) << std::endl;
         cubes->drawAll();
+        scenCubes->drawAll();
 
         glfwSwapBuffers(window);
         glfwPollEvents();

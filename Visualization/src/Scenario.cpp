@@ -38,10 +38,25 @@ Scenario::Scenario(const char* filepath) {
 
         if (!parsedInitials) {
             std::cout << "Creating Cube with ID " << buf[0] << " at location " << buf[1] << ", " << buf[2] << ", " << buf[3] << std::endl;
-            cubes.push_back(new Cube(buf[0], buf[1], buf[2], buf[3]));
+            this->cubes.push_back(new Cube(buf[0], buf[1], buf[2], buf[3]));
         } else {
             std::cout << "Creating Animation of Cube ID " << buf[0] << " anchored to Cube " << buf[1] << " with delta position " << buf[2] << ", " << buf[3] << ", " << buf[4] << std::endl;
-
+            this->anims.push_back(new Animation(glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(buf[2], buf[3], buf[4])));
+            // TODO IMPLEMENT ME!!! The hard part is figuring out the anchor vector for each anim, based on the two cube IDs
         }
     }
+}
+
+ObjectCollection* Scenario::toObjectCollection(Shader* pshader, unsigned int vaoId, int texId) {
+    ObjectCollection* cubes = new ObjectCollection(pshader, vaoId, texId);
+
+    for (Cube* cube : this->cubes) {
+        cubes->addObj(cube);
+    }
+
+    return cubes;
+}
+
+AnimationSequence* Scenario::toAnimationSequence() {
+    return new AnimationSequence(this->anims);
 }

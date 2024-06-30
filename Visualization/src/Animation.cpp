@@ -11,10 +11,10 @@ Animation::Animation(glm::vec3 AnchorDirection, glm::vec3 DeltaPos) {
         throw std::domain_error("Failed to calculate rotation axis for animation: target path is parallel to anchor direction");
     }
 
-    std::cout << "AnchorDirection: " << glm::to_string(this->AnchorDirection) << std::endl;
-    std::cout << "DeltaPos: " << glm::to_string(this->DeltaPos) << std::endl;
-    std::cout << "PreTranslation: " << glm::to_string(this->PreTranslation) << std::endl;
-    std::cout << "MaxAngle: " << this->MaxAngle << std::endl;
-    std::cout << "RotationAxis: " << glm::to_string(this->RotationAxis) << std::endl;
+    // std::cout << "AnchorDirection: " << glm::to_string(this->AnchorDirection) << std::endl;
+    // std::cout << "DeltaPos: " << glm::to_string(this->DeltaPos) << std::endl;
+    // std::cout << "PreTranslation: " << glm::to_string(this->PreTranslation) << std::endl;
+    // std::cout << "MaxAngle: " << this->MaxAngle << std::endl;
+    // std::cout << "RotationAxis: " << glm::to_string(this->RotationAxis) << std::endl;
 }
 
