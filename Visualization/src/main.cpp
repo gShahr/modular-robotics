@@ -1,8 +1,9 @@
 #include <iostream>
 #include <stdio.h>
 #include <math.h>
-#include <algorithm> // clamp
-
+#include <algorithm>            // clamp
+#include <deque>                // Animation sequences
+#include <unordered_map>        // Hashmap of all <ID, object>
 #include "glad/glad.h"
 #include "glfw3.h"
 #include "stb_image.h"
@@ -16,7 +17,9 @@
 #include "ObjectCollection.hpp"
 #include "Scenario.hpp"
 
-#define AUTO_ROTATE 0
+#define AUTO_ROTATE 1
+
+std::unordered_map<int, Cube*> gObjects; // Hashmap of all <ID, object>
 
 float resolution[2] = {800.0f, 600.0f};
 float asprat = resolution[0] / resolution[1];
@@ -27,7 +30,7 @@ const char *fragmentShaderPath = "resources/shaders/fshader.glsl";
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
-float ANIM_SPEED = 0.2f;
+float ANIM_SPEED = 0.7f;
 bool ANIMATE = true;
 
 const float CAMERA_MAX_SPEED = 25.0f;
@@ -265,29 +268,33 @@ int main(int argc, char** argv) {
     //     cubes->addObj(new Cube(_x, _y, _z));
     // }
 
-    Cube* TEST_CUBE = new Cube(0.0f, 1.0f, 1.0f);
-    cubes->addObj(TEST_CUBE);
-    cubes->addObj(new Cube(1.0f, 0.0f, 0.0f));  // Bottom layer
-    cubes->addObj(new Cube(0.0f, 0.0f, 0.0f));
-    cubes->addObj(new Cube(0.0f, 0.0f, 1.0f));
-    //cubes->addObj(new Cube(0.0f, 1.0f, 1.0f)));  // Middle layer part 1 (TEST CUBE)
-    cubes->addObj(new Cube(0.0f, 1.0f, 2.0f));
-    cubes->addObj(new Cube(1.0f, 1.0f, 2.0f));
-    cubes->addObj(new Cube(1.0f, 2.0f, 2.0f)); // Top layer
-    cubes->addObj(new Cube(2.0f, 2.0f, 2.0f));
-    cubes->addObj(new Cube(2.0f, 2.0f, 1.0f));
-    cubes->addObj(new Cube(2.0f, 1.0f, 1.0f));  // Middle layer part 2
-    cubes->addObj(new Cube(2.0f, 1.0f, 0.0f));
-    cubes->addObj(new Cube(1.0f, 1.0f, 0.0f));
-    TEST_CUBE->startAnimation(glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 0.0f));
+    //Cube* TEST_CUBE = new Cube(100, 3.0f, 3.0f, 3.0f);
+    //cubes->addObj(TEST_CUBE);
+    //cubes->addObj(new Cube(101, 1.0f, 0.0f, 0.0f));  // Bottom layer
+    //cubes->addObj(new Cube(102, 0.0f, 0.0f, 0.0f));
+    //cubes->addObj(new Cube(103, 0.0f, 0.0f, 1.0f));
+    //cubes->addObj(new Cube(104, 0.0f, 1.0f, 1.0f)));  // Middle layer part 1 (TEST CUBE)
+    //cubes->addObj(new Cube(105, 0.0f, 1.0f, 2.0f));
+    //cubes->addObj(new Cube(106, 1.0f, 1.0f, 2.0f));
+    //cubes->addObj(new Cube(107, 1.0f, 2.0f, 2.0f)); // Top layer
+    //cubes->addObj(new Cube(108, 2.0f, 2.0f, 2.0f));
+    //cubes->addObj(new Cube(109, 2.0f, 2.0f, 1.0f));
+    //cubes->addObj(new Cube(110, 2.0f, 1.0f, 1.0f));  // Middle layer part 2
+    //cubes->addObj(new Cube(111, 2.0f, 1.0f, 0.0f));
+    //cubes->addObj(new Cube(112, 1.0f, 1.0f, 0.0f));
+    //bool dummy;
+    //TEST_CUBE->startAnimation(&dummy, glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 0.0f));
 
     resetCamera();
     viewmat = glm::mat4(1.0f);
     projmat = glm::perspective(glm::radians(45.0f), asprat, 0.1f, 100.0f);
 
-    float PROTOTYPE_ANIM_ANGLE = 0.0f;
-
     Scenario testScenario = Scenario("Scenarios/Testing/Simple.scen");
+    ObjectCollection* scenCubes = testScenario.toObjectCollection(&shader, VAO, texture);
+    MoveSequence* scenMoveSeq = testScenario.toMoveSequence();
+
+    bool readyForNewAnim = true;
+    bool forward = true;
 
     while(!glfwWindowShouldClose(window)) {
         float currentFrame = glfwGetTime();
@@ -310,8 +317,31 @@ int main(int argc, char** argv) {
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        if (readyForNewAnim) {
+            Move* move;
+            glm::vec3 deltaPos, anchorDir;
+            if (forward) {
+                move = scenMoveSeq->pop();
+                deltaPos = move->deltaPos;
+            } else {
+                move = scenMoveSeq->undo();
+                deltaPos = -move->deltaPos;
+            }
+            if ((scenMoveSeq->currentMove == 0) || (scenMoveSeq->remainingMoves == 0)) { 
+                std::cout << "Reversing..." << std::endl;
+                forward = !forward; 
+            }
+            Cube* mover = gObjects.at(move->moverId);
+            Cube* anchor = gObjects.at(move->anchorId);
+            anchorDir = anchor->pos - mover->pos;
+            mover->startAnimation(&readyForNewAnim, anchorDir, deltaPos);
+            std::cout << "Beginning animation of move with mover " << move->moverId << " and anchor " << move->anchorId << ": anchorDir = " << glm::to_string(anchorDir) << ", deltaPos = " << glm::to_string(deltaPos) << std::endl;
+            readyForNewAnim = false;
+        }
+
         // std::cout << glm::to_string(viewmat) << std::endl;
         cubes->drawAll();
+        scenCubes->drawAll();
 
         glfwSwapBuffers(window);
         glfwPollEvents();

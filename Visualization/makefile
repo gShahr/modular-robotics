@@ -8,7 +8,7 @@ SDIR=src
 
 _DEPS = glfw.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
-_OBJ = main.opp Shader.opp glad.o stb_image.opp Cube.opp ObjectCollection.opp Animation.opp Scenario.opp
+_OBJ = main.opp Shader.opp glad.o stb_image.opp Cube.opp ObjectCollection.opp Animation.opp Scenario.opp MoveSequence.opp Move.opp
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 ifeq ($(OS), Windows_NT)
