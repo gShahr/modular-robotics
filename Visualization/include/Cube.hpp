@@ -2,6 +2,7 @@
 #define CUBE_H
 
 #include <iostream>
+#include <cmath>
 #define GLM_ENABLE_EXPERIMENTAL
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
@@ -22,11 +23,12 @@ public:
     Cube(int id, int x, int y, int z);
     void setPos(int x, int y, int z);
     void draw();
-    void startAnimation(glm::vec3 AnchorDirection, glm::vec3 DeltaPos);
+    void startAnimation(bool* markWhenAnimFinished, glm::vec3 AnchorDirection, glm::vec3 DeltaPos);
     void stopAnimation();
-    glm::mat4 processAnimation(bool *animFinished);
+    glm::mat4 processAnimation();
     glm::vec3 pos;
     Animation *anim;
+    bool* markWhenAnimFinished;
     int id;
 private:
     float animProgress;

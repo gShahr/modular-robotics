@@ -80,28 +80,19 @@ Cube::Cube(int id, int x, int y, int z) {
     gObjects.insert(std::pair<int, Cube*>(id, this));
 }
 
-void Cube::startAnimation(glm::vec3 AnchorDirection, glm::vec3 DeltaPos) {
+void Cube::startAnimation(bool* markWhenAnimFinished, glm::vec3 AnchorDirection, glm::vec3 DeltaPos) {
+    this->markWhenAnimFinished = markWhenAnimFinished;
     this->anim = new Animation(AnchorDirection, DeltaPos);
     this->animProgress = 0.0f;
 }
 
-void Cube::stopAnimation() {
-    if (!this->anim) { return; }
-
-    glm::mat4 transform = glm::mat4(1.0f);
-    glm::vec3 newPos = this->pos + this->anim->DeltaPos;
-    this->setPos(newPos[0], newPos[1], newPos[2]);
-    this->animProgress = 0.0f;
-    delete this->anim;
-    this->anim = NULL;
-}
-
 // Interpolation function used for animation progress: Should map [0.0, 1.0] -> [0.0, 1.0]
 inline float _animInterp(float pct) {
-    return pct;
+    return pct < 0.5 ? 4 * pct * pct * pct : 1 - std::pow(-2 * pct + 2, 3) / 2;
+    //return pct;
 }
 
-glm::mat4 Cube::processAnimation(bool *animFinished) {
+glm::mat4 Cube::processAnimation() {
     glm::mat4 transform = glm::mat4(1.0f);
 
     // increment animation progress
@@ -110,8 +101,14 @@ glm::mat4 Cube::processAnimation(bool *animFinished) {
     }
     if (animProgress > 1.0f) { // Animation finished
         animProgress = 1.0f;
-        *animFinished = true; 
-        this->stopAnimation();
+        *(this->markWhenAnimFinished) = true; 
+        glm::mat4 transform = glm::mat4(1.0f);
+        glm::vec3 newPos = this->pos + this->anim->DeltaPos;
+        this->setPos(newPos[0], newPos[1], newPos[2]);
+        this->animProgress = 0.0f;
+        delete this->anim;
+        this->anim = NULL;
+        this->markWhenAnimFinished = NULL;
     } else {
         // calculate rotation angle based on progress
         float angle = _animInterp(this->animProgress) * this->anim->MaxAngle;
@@ -131,8 +128,7 @@ void Cube::draw() {
 
     glm::mat4 transform;
     if (this->anim) {
-        bool dummy;
-        transform = this->processAnimation(&dummy);
+        transform = this->processAnimation();
     } else { transform = glm::mat4(1.0f); }
     transform = glm::scale(transform, glm::vec3(0.95f, 0.95f, 0.95f));
     glm::mat4 modelmat = glm::translate(glm::mat4(1.0f), glm::vec3(this->pos));

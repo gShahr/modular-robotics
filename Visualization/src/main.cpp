@@ -30,7 +30,7 @@ const char *fragmentShaderPath = "resources/shaders/fshader.glsl";
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
-float ANIM_SPEED = 0.2f;
+float ANIM_SPEED = 0.4f;
 bool ANIMATE = true;
 
 const float CAMERA_MAX_SPEED = 25.0f;
@@ -268,8 +268,8 @@ int main(int argc, char** argv) {
     //     cubes->addObj(new Cube(_x, _y, _z));
     // }
 
-    Cube* TEST_CUBE = new Cube(100, 3.0f, 3.0f, 3.0f);
-    cubes->addObj(TEST_CUBE);
+    //Cube* TEST_CUBE = new Cube(100, 3.0f, 3.0f, 3.0f);
+    //cubes->addObj(TEST_CUBE);
     //cubes->addObj(new Cube(101, 1.0f, 0.0f, 0.0f));  // Bottom layer
     //cubes->addObj(new Cube(102, 0.0f, 0.0f, 0.0f));
     //cubes->addObj(new Cube(103, 0.0f, 0.0f, 1.0f));
@@ -282,7 +282,8 @@ int main(int argc, char** argv) {
     //cubes->addObj(new Cube(110, 2.0f, 1.0f, 1.0f));  // Middle layer part 2
     //cubes->addObj(new Cube(111, 2.0f, 1.0f, 0.0f));
     //cubes->addObj(new Cube(112, 1.0f, 1.0f, 0.0f));
-    TEST_CUBE->startAnimation(glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 0.0f));
+    //bool dummy;
+    //TEST_CUBE->startAnimation(&dummy, glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 0.0f));
 
     resetCamera();
     viewmat = glm::mat4(1.0f);
@@ -291,6 +292,8 @@ int main(int argc, char** argv) {
     Scenario testScenario = Scenario("Scenarios/Testing/Simple.scen");
     ObjectCollection* scenCubes = testScenario.toObjectCollection(&shader, VAO, texture);
     MoveSequence* scenMoveSeq = testScenario.toMoveSequence();
+
+    bool readyForNewAnim = true;
 
     while(!glfwWindowShouldClose(window)) {
         float currentFrame = glfwGetTime();
@@ -312,6 +315,17 @@ int main(int argc, char** argv) {
         // -- Rendering --
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        if (readyForNewAnim) {
+            Move* move = scenMoveSeq->pop();
+            Cube* mover = gObjects.at(move->moverId);
+            Cube* anchor = gObjects.at(move->anchorId);
+            glm::vec3 anchorDir;
+            anchorDir = anchor->pos - mover->pos;
+            mover->startAnimation(&readyForNewAnim, anchorDir, move->deltaPos);
+            std::cout << "Beginning animation of move with mover " << move->moverId << " and anchor " << move->anchorId << ": anchorDir = " << glm::to_string(anchorDir) << std::endl;
+            readyForNewAnim = false;
+        }
 
         // std::cout << glm::to_string(viewmat) << std::endl;
         cubes->drawAll();
