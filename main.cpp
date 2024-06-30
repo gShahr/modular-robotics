@@ -428,13 +428,14 @@ public:
     */
     std::vector<Lattice> makeMoves(const Lattice& lattice, const Module& module) {
         std::vector<Lattice> result;
-        for (auto move: moves) {
+        // to be implemented
+        /*for (auto move : moves) {
             result.emplace_back(applyMove(lattice, module, move));
-        }
+        }*/
         return result;
     }
 
-    Lattice applyMove(const Lattice& lattice, const Module& module, cosnt Move& move) {
+    Lattice applyMove(const Lattice& lattice, const Module& module, const IMove& move) {
 
     }
 };
