@@ -1,9 +1,9 @@
 #include <iostream>
 #include <stdio.h>
 #include <math.h>
-#include <algorithm> // clamp
-#include <deque> // Animation sequences
-
+#include <algorithm>            // clamp
+#include <deque>                // Animation sequences
+#include <unordered_map>        // Hashmap of all <ID, object>
 #include "glad/glad.h"
 #include "glfw3.h"
 #include "stb_image.h"
@@ -18,6 +18,8 @@
 #include "Scenario.hpp"
 
 #define AUTO_ROTATE 0
+
+std::unordered_map<int, Cube*> gObjects; // Hashmap of all <ID, object>
 
 float resolution[2] = {800.0f, 600.0f};
 float asprat = resolution[0] / resolution[1];
@@ -266,20 +268,20 @@ int main(int argc, char** argv) {
     //     cubes->addObj(new Cube(_x, _y, _z));
     // }
 
-    Cube* TEST_CUBE = new Cube(3.0f, 3.0f, 3.0f);
+    Cube* TEST_CUBE = new Cube(100, 3.0f, 3.0f, 3.0f);
     cubes->addObj(TEST_CUBE);
-    //cubes->addObj(new Cube(1.0f, 0.0f, 0.0f));  // Bottom layer
-    //cubes->addObj(new Cube(0.0f, 0.0f, 0.0f));
-    //cubes->addObj(new Cube(0.0f, 0.0f, 1.0f));
-    //cubes->addObj(new Cube(0.0f, 1.0f, 1.0f)));  // Middle layer part 1 (TEST CUBE)
-    //cubes->addObj(new Cube(0.0f, 1.0f, 2.0f));
-    //cubes->addObj(new Cube(1.0f, 1.0f, 2.0f));
-    //cubes->addObj(new Cube(1.0f, 2.0f, 2.0f)); // Top layer
-    //cubes->addObj(new Cube(2.0f, 2.0f, 2.0f));
-    //cubes->addObj(new Cube(2.0f, 2.0f, 1.0f));
-    //cubes->addObj(new Cube(2.0f, 1.0f, 1.0f));  // Middle layer part 2
-    //cubes->addObj(new Cube(2.0f, 1.0f, 0.0f));
-    //cubes->addObj(new Cube(1.0f, 1.0f, 0.0f));
+    //cubes->addObj(new Cube(101, 1.0f, 0.0f, 0.0f));  // Bottom layer
+    //cubes->addObj(new Cube(102, 0.0f, 0.0f, 0.0f));
+    //cubes->addObj(new Cube(103, 0.0f, 0.0f, 1.0f));
+    //cubes->addObj(new Cube(104, 0.0f, 1.0f, 1.0f)));  // Middle layer part 1 (TEST CUBE)
+    //cubes->addObj(new Cube(105, 0.0f, 1.0f, 2.0f));
+    //cubes->addObj(new Cube(106, 1.0f, 1.0f, 2.0f));
+    //cubes->addObj(new Cube(107, 1.0f, 2.0f, 2.0f)); // Top layer
+    //cubes->addObj(new Cube(108, 2.0f, 2.0f, 2.0f));
+    //cubes->addObj(new Cube(109, 2.0f, 2.0f, 1.0f));
+    //cubes->addObj(new Cube(110, 2.0f, 1.0f, 1.0f));  // Middle layer part 2
+    //cubes->addObj(new Cube(111, 2.0f, 1.0f, 0.0f));
+    //cubes->addObj(new Cube(112, 1.0f, 1.0f, 0.0f));
     TEST_CUBE->startAnimation(glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 0.0f));
 
     resetCamera();
@@ -288,7 +290,7 @@ int main(int argc, char** argv) {
 
     Scenario testScenario = Scenario("Scenarios/Testing/Simple.scen");
     ObjectCollection* scenCubes = testScenario.toObjectCollection(&shader, VAO, texture);
-    AnimationSequence* scenAnimSeq = testScenario.toAnimationSequence();
+    MoveSequence* scenMoveSeq = testScenario.toMoveSequence();
 
     while(!glfwWindowShouldClose(window)) {
         float currentFrame = glfwGetTime();

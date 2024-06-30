@@ -19,7 +19,6 @@ extern bool ANIMATE;
 class Cube
 {
 public:
-    Cube(int x, int y, int z);
     Cube(int id, int x, int y, int z);
     void setPos(int x, int y, int z);
     void draw();
@@ -32,5 +31,7 @@ public:
 private:
     float animProgress;
 };
+
+extern std::unordered_map<int, Cube*> gObjects; // This is ugly, sorry
 
 #endif

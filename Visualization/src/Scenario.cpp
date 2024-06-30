@@ -2,9 +2,9 @@
 
 Scenario::Scenario(const char* filepath) {
     this->cubes = std::vector<Cube*>();
-    this->anims = std::vector<Animation*>();
+    this->moves = std::vector<Move*>();
 
-    // -- Load file and parse data into Cube and Animation objects --
+    // -- Load file and parse data into Cube and Move objects --
     std::string raw;
     std::ifstream scenFile;
     std::stringstream stream;
@@ -40,9 +40,8 @@ Scenario::Scenario(const char* filepath) {
             std::cout << "Creating Cube with ID " << buf[0] << " at location " << buf[1] << ", " << buf[2] << ", " << buf[3] << std::endl;
             this->cubes.push_back(new Cube(buf[0], buf[1], buf[2], buf[3]));
         } else {
-            std::cout << "Creating Animation of Cube ID " << buf[0] << " anchored to Cube " << buf[1] << " with delta position " << buf[2] << ", " << buf[3] << ", " << buf[4] << std::endl;
-            this->anims.push_back(new Animation(glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(buf[2], buf[3], buf[4])));
-            // TODO IMPLEMENT ME!!! The hard part is figuring out the anchor vector for each anim, based on the two cube IDs
+            std::cout << "Creating Move of Cube ID " << buf[0] << " anchored to Cube " << buf[1] << " with delta position " << buf[2] << ", " << buf[3] << ", " << buf[4] << std::endl;
+            this->moves.push_back(new Move(buf[0], buf[1], glm::vec3(buf[2], buf[3], buf[4])));
         }
     }
 }
@@ -57,6 +56,6 @@ ObjectCollection* Scenario::toObjectCollection(Shader* pshader, unsigned int vao
     return cubes;
 }
 
-AnimationSequence* Scenario::toAnimationSequence() {
-    return new AnimationSequence(this->anims);
+MoveSequence* Scenario::toMoveSequence() {
+    return new MoveSequence(this->moves);
 }

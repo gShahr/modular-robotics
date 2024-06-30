@@ -73,16 +73,11 @@ void Cube::setPos(int x, int y, int z) {
     this->pos = glm::vec3(x, y, z);
 }
 
-Cube::Cube(int x, int y, int z) {
-    this->id = -1;
-    this->setPos(x, y, z);
-    this->anim = NULL;
-}
-
 Cube::Cube(int id, int x, int y, int z) {
     this->id = id;
     this->setPos(x, y, z);
     this->anim = NULL;
+    gObjects.insert(std::pair<int, Cube*>(id, this));
 }
 
 void Cube::startAnimation(glm::vec3 AnchorDirection, glm::vec3 DeltaPos) {
