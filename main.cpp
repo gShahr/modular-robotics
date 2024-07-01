@@ -22,6 +22,10 @@ private:
     static std::vector<Module> _modules;
 
 public:
+    // Never instantiate ModuleIdManager
+    ModuleIdManager() = delete;
+    ModuleIdManager(const ModuleIdManager&) = delete;
+
     // Emplace newly created module into the vector
     static void RegisterModule(Module& module) {
         _modules.emplace_back(module);
@@ -312,6 +316,10 @@ private:
     // Vector containing only generated moves
     static std::vector<MoveBase*> _movesToFree;
 public:
+    // Never instantiate MoveManager
+    MoveManager() = delete;
+    MoveManager(const MoveManager&) = delete;
+
     // To be used to generate multiple moves from a single move
     static void GenerateMovesFrom(MoveBase* origMove) {
         std::vector<MoveBase*> movesGen;
