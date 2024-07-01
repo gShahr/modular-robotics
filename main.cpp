@@ -298,6 +298,8 @@ public:
         return finalPos;
     }
 
+    virtual ~IMove() = default;
+
     // MoveManager will need to see moves and offsets
     friend class MoveManager;
 };
@@ -306,6 +308,8 @@ class MoveManager {
 private:
     // Vector containing every move
     static std::vector<IMove*> _moves;
+    // Vector containing only generated moves
+    static std::vector<IMove*> _movesToFree;
 public:
     // To be used to generate multiple moves from a single move
     static void GenerateMovesFrom(IMove* origMove) {
@@ -317,6 +321,7 @@ public:
             auto moveRotated = origMove->CopyMove();
             moveRotated->RotateMove(i);
             movesGen.push_back(moveRotated);
+            _movesToFree.push_back(moveRotated);
         }
         // Reflections
         for (int i = 0; i < origMove->order; i++) {
@@ -325,6 +330,7 @@ public:
                 auto moveReflected = move->CopyMove();
                 moveReflected->ReflectMove(i);
                 movesGen.push_back(moveReflected);
+                _movesToFree.push_back(moveReflected);
             }
         }
         // Add everything to _moves
@@ -351,9 +357,16 @@ public:
         }
         return LegalMoves;
     }
+
+    static void CleanMoves() {
+        for (auto move : _movesToFree) {
+            delete move;
+        }
+    }
 };
 
 std::vector<IMove*> MoveManager::_moves;
+std::vector<IMove*> MoveManager::_movesToFree;
 
 class Move2d : public IMove {
 public:
@@ -676,6 +689,7 @@ int main() {
         lattice.moveModule(ModuleIdManager::Modules()[0], legalMoves[0]->MoveOffset());
         std::cout << lattice;
     }
+    MoveManager::CleanMoves();
     //
     //  END TESTING
     //
