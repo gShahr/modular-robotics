@@ -264,21 +264,109 @@ namespace Move {
 }
 
 class IMove {
+protected:
+    // each pair represents a coordinate offset to check and whether a module should be there or not
+    std::vector<std::pair<std::valarray<int>, bool>> moves;
+    std::valarray<int> initPos, finalPos;
+    int order;
 public:
+    // Create a copy of a move
+    [[nodiscard]]
+    virtual IMove* CopyMove() const = 0;
     // Load in move info from a given file
     virtual void InitMove(std::ifstream& moveFile) = 0;
     // Check to see if move is possible for a given module
     virtual bool MoveCheck(CoordTensor<int>& tensor, const Module& mod) = 0;
+
+    void RotateMove(int index) {
+        std::swap(initPos[0], initPos[index]);
+        std::swap(finalPos[0], finalPos[index]);
+        for (auto& move : moves) {
+            std::swap(move.first[0], move.first[index]);
+        }
+    }
+
+    void ReflectMove(int index) {
+        initPos[index] *= -1;
+        finalPos[index] *= -1;
+        for (auto& move : moves) {
+            move.first[index] *= -1;
+        }
+    }
+
+    const std::valarray<int>& MoveOffset() {
+        return finalPos;
+    }
+
+    // MoveManager will need to see moves and offsets
+    friend class MoveManager;
 };
 
-class Move2d : IMove {
+class MoveManager {
 private:
-    std::vector<std::pair<std::valarray<int>, bool>> moves;
-    int yMultiplier;
-    std::valarray<int> initPos, finalPos;
-
+    // Vector containing every move
+    static std::vector<IMove*> _moves;
 public:
-    explicit Move2d(int axisSize) : yMultiplier(axisSize) {}
+    // To be used to generate multiple moves from a single move
+    static void GenerateMovesFrom(IMove* origMove) {
+        std::vector<IMove*> movesGen;
+        // Add initial move to working vector
+        movesGen.push_back(origMove);
+        // Add rotations to working vector
+        for (int i = 1; i < origMove->order; i++) {
+            auto moveRotated = origMove->CopyMove();
+            moveRotated->RotateMove(i);
+            movesGen.push_back(moveRotated);
+        }
+        // Reflections
+        for (int i = 0; i < origMove->order; i++) {
+            auto movesToReflect = movesGen;
+            for (auto move : movesToReflect) {
+                auto moveReflected = move->CopyMove();
+                moveReflected->ReflectMove(i);
+                movesGen.push_back(moveReflected);
+            }
+        }
+        // Add everything to _moves
+        for (auto move : movesGen) {
+            _moves.push_back(move);
+        }
+    }
+
+    // To be used when no additional moves should be generated
+    static void RegisterSingleMove(IMove* move) {
+        _moves.push_back(move);
+    }
+
+    static const std::vector<IMove*> Moves() {
+        return _moves;
+    }
+
+    static std::vector<IMove*> CheckAllMoves(CoordTensor<int>& tensor, Module& mod) {
+        std::vector<IMove*> LegalMoves = {};
+        for (auto move : _moves) {
+            if (move->MoveCheck(tensor, mod)) {
+                LegalMoves.push_back(move);
+            }
+        }
+        return LegalMoves;
+    }
+};
+
+std::vector<IMove*> MoveManager::_moves;
+
+class Move2d : public IMove {
+public:
+    Move2d() {
+        order = 2;
+    }
+
+    [[nodiscard]]
+    IMove* CopyMove() const override {
+        auto copy = new Move2d();
+        *copy = *this;
+        return copy;
+    }
 
     void InitMove(std::ifstream& moveFile) override {
         int x = 0, y = 0;
@@ -316,22 +404,21 @@ public:
         }
         return true;
     }
-
-    const std::valarray<int>& MoveOffset() {
-        return finalPos;
-    }
-
-    void rotateMove() {
-
-    }
 };
 
-class Move3d : IMove {
-private:
-    std::vector<std::pair<std::valarray<int>, bool>> moves;
-    std::valarray<int> initPos, finalPos;
-
+class Move3d : public IMove {
 public:
+    Move3d() {
+        order = 3;
+    }
+
+    [[nodiscard]]
+    IMove* CopyMove() const override {
+        auto copy = new Move3d();
+        *copy = *this;
+        return copy;
+    }
+
     void InitMove(std::ifstream& moveFile) override {
         int x = 0, y = 0, z = 0;
         std::string line;
@@ -372,14 +459,6 @@ public:
             }
         }
         return true;
-    }
-
-    const std::valarray<int>& MoveOffset() {
-        return finalPos;
-    }
-
-    void rotateMove() {
-
     }
 };
 
@@ -509,23 +588,94 @@ int main() {
     //
     //  MOVE TESTING BELOW
     //
-    std::cout << "Lattice Initial State:\n" << lattice;
+    std::cout << lattice;
     std::ifstream moveFile("Moves/Slide_1.txt");
     if (!moveFile) {
         std::cerr << "Unable to open file Moves/Slide_1.txt";
         return 1;
     }
-    Move2d move(axisSize);
+    Move2d move;
     move.InitMove(moveFile);
-    bool test = move.MoveCheck(lattice.coordTensor, ModuleIdManager::Modules()[1]);
+    bool test = move.MoveCheck(lattice.coordTensor, ModuleIdManager::Modules()[0]);
     std::cout << (test ? "MoveCheck Passed!" : "MoveCheck Failed!") << std::endl;
     moveFile.close();
     if (test) {
         std::cout << "Moving!\n";
-        lattice.moveModule(ModuleIdManager::Modules()[1], move.MoveOffset());
-        std::cout << "Lattice Final State:\n" << lattice;
+        lattice.moveModule(ModuleIdManager::Modules()[0], move.MoveOffset());
+        std::cout << lattice;
     }
-    std::cout << "(Note: Lattice output is rotated 90 degrees counterclockwise for some reason)\n";
+    MoveManager::GenerateMovesFrom(&move);
+    // movegen testing
+    // test = move.MoveCheck(lattice.coordTensor, ModuleIdManager::Modules()[2]);
+    auto legalMoves = MoveManager::CheckAllMoves(lattice.coordTensor, ModuleIdManager::Modules()[2]);
+    test = !legalMoves.empty();
+    std::cout << (test ? "MoveCheck Passed!" : "MoveCheck Failed!") << std::endl;
+    moveFile.close();
+    if (test) {
+        std::cout << "Moving!\n";
+        lattice.moveModule(ModuleIdManager::Modules()[2], legalMoves[0]->MoveOffset());
+        std::cout << lattice;
+    }
+    // test2
+    legalMoves = MoveManager::CheckAllMoves(lattice.coordTensor, ModuleIdManager::Modules()[1]);
+    test = !legalMoves.empty();
+    std::cout << (test ? "MoveCheck Passed!" : "MoveCheck Failed!") << std::endl;
+    moveFile.close();
+    if (test) {
+        std::cout << "Moving!\n";
+        lattice.moveModule(ModuleIdManager::Modules()[1], legalMoves[0]->MoveOffset());
+        std::cout << lattice;
+    }
+    // test3
+    legalMoves = MoveManager::CheckAllMoves(lattice.coordTensor, ModuleIdManager::Modules()[0]);
+    test = !legalMoves.empty();
+    std::cout << (test ? "MoveCheck Passed!" : "MoveCheck Failed!") << std::endl;
+    moveFile.close();
+    if (test) {
+        std::cout << "Moving!\n";
+        lattice.moveModule(ModuleIdManager::Modules()[0], legalMoves[0]->MoveOffset());
+        std::cout << lattice;
+    }
+    // test4
+    legalMoves = MoveManager::CheckAllMoves(lattice.coordTensor, ModuleIdManager::Modules()[0]);
+    test = !legalMoves.empty();
+    std::cout << (test ? "MoveCheck Passed!" : "MoveCheck Failed!") << std::endl;
+    moveFile.close();
+    if (test) {
+        std::cout << "Moving!\n";
+        lattice.moveModule(ModuleIdManager::Modules()[0], legalMoves[0]->MoveOffset());
+        std::cout << lattice;
+    }
+    // test5
+    legalMoves = MoveManager::CheckAllMoves(lattice.coordTensor, ModuleIdManager::Modules()[1]);
+    test = !legalMoves.empty();
+    std::cout << (test ? "MoveCheck Passed!" : "MoveCheck Failed!") << std::endl;
+    moveFile.close();
+    if (test) {
+        std::cout << "Moving!\n";
+        lattice.moveModule(ModuleIdManager::Modules()[1], legalMoves[0]->MoveOffset());
+        std::cout << lattice;
+    }
+    // test6
+    legalMoves = MoveManager::CheckAllMoves(lattice.coordTensor, ModuleIdManager::Modules()[2]);
+    test = !legalMoves.empty();
+    std::cout << (test ? "MoveCheck Passed!" : "MoveCheck Failed!") << std::endl;
+    moveFile.close();
+    if (test) {
+        std::cout << "Moving!\n";
+        lattice.moveModule(ModuleIdManager::Modules()[2], legalMoves[0]->MoveOffset());
+        std::cout << lattice;
+    }
+    // test7
+    legalMoves = MoveManager::CheckAllMoves(lattice.coordTensor, ModuleIdManager::Modules()[0]);
+    test = !legalMoves.empty();
+    std::cout << (test ? "MoveCheck Passed!" : "MoveCheck Failed!") << std::endl;
+    moveFile.close();
+    if (test) {
+        std::cout << "Moving!\n";
+        lattice.moveModule(ModuleIdManager::Modules()[0], legalMoves[0]->MoveOffset());
+        std::cout << lattice;
+    }
     //
     //  END TESTING
     //
