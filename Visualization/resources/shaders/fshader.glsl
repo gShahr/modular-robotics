@@ -84,19 +84,18 @@ void main()
 	vec3 borderColor = vec3(0.0);
 	vec3 border = borderMask * borderColor;
 
-	float worldSeed = fract( round(worldPos.x + 100.) * 5.4321 + round(worldPos.y + 100.) * 0.1234 + round(worldPos.z + 100.) * 0.6251 );
+	//float worldSeed = fract( round(worldPos.x + 100.) * 5.4321 + round(worldPos.y + 100.) * 0.1234 + round(worldPos.z + 100.) * 0.6251 );
 
     vec3 interior = vec3(0.0);
     float pct = 0.0;
 	float thisWaveContribution;
 	vec3 thisWaveColor;
-	int numwaves = int(Map(0.0, 1.0, 3.0, 9.0, random(worldSeed)));
-	//int numwaves = 6;
+	int numwaves = 6;
 	float alpha = (0.8/numwaves);
     for (int i = 0; i < numwaves; i ++) {
-		thisWaveColor = vec3(random(float(i) + worldSeed), random(float(i)+.1 + worldSeed), random(float(i)+.3 + worldSeed));
+		thisWaveColor = vec3(random(float(i)), random(float(i)+.1), random(float(i)+.3));
 		thisWaveColor = clamp(thisWaveColor, 0.1, 0.8);
-        thisWaveContribution = noise((texCoord.x + texCoord.y + worldSeed) *(3.0 + float(i)*WAVEGROWTH) + iTime*WAVESPEED, float(i));
+        thisWaveContribution = noise((texCoord.x + texCoord.y) *(3.0 + float(i)*WAVEGROWTH) + iTime*WAVESPEED, float(i));
 		thisWaveContribution = alpha * plot(texCoord, thisWaveContribution, WIDTH);
 		interior += thisWaveContribution * thisWaveColor * 2.;
     }

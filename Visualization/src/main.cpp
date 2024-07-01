@@ -309,7 +309,7 @@ int main(int argc, char** argv) {
         cameraPos += (cameraSpeed.y * cameraUp * deltaTime);
         viewmat = glm::lookAt(cameraPos, cameraPos + cameraDirection, cameraUp);
 #else
-        cameraPos = glm::rotate(cameraPos, glm::radians(10.0f * deltaTime), glm::vec3(0.0, 1.0, 0.0));
+        cameraPos = glm::rotate(cameraPos, glm::radians(30.0f * deltaTime), glm::vec3(0.0, 1.0, 0.0));
         viewmat = glm::lookAt(cameraPos, glm::vec3(0.0, 0.0, 0.0), cameraUp);
 #endif
 
@@ -328,14 +328,14 @@ int main(int argc, char** argv) {
                 deltaPos = -move->deltaPos;
             }
             if ((scenMoveSeq->currentMove == 0) || (scenMoveSeq->remainingMoves == 0)) { 
-                std::cout << "Reversing..." << std::endl;
+                //std::cout << "Reversing..." << std::endl;
                 forward = !forward; 
             }
             Cube* mover = gObjects.at(move->moverId);
             Cube* anchor = gObjects.at(move->anchorId);
             anchorDir = anchor->pos - mover->pos;
             mover->startAnimation(&readyForNewAnim, anchorDir, deltaPos);
-            std::cout << "Beginning animation of move with mover " << move->moverId << " and anchor " << move->anchorId << ": anchorDir = " << glm::to_string(anchorDir) << ", deltaPos = " << glm::to_string(deltaPos) << std::endl;
+            // std::cout << "Beginning animation of move with mover " << move->moverId << " and anchor " << move->anchorId << ": anchorDir = " << glm::to_string(anchorDir) << ", deltaPos = " << glm::to_string(deltaPos) << std::endl;
             readyForNewAnim = false;
         }
 

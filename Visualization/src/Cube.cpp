@@ -3,35 +3,35 @@
 float _cubeVertices[] = { 
     //    Coords            Tex Coord
     // Back face:
-    -0.5f, -0.5f, -0.5f,    0.0f, 0.0f, // Bottom left    0
-     0.5f, -0.5f, -0.5f,    1.0f, 0.0f, // Bottom right   1
-     0.5f,  0.5f, -0.5f,    1.0f, 1.0f, // Top right      2
-    -0.5f,  0.5f, -0.5f,    0.0f, 1.0f, // Top left       3
+     0.5f, -0.5f, -0.5f,    0.0f, 0.0f, // Bottom left    0
+    -0.5f, -0.5f, -0.5f,    1.0f, 0.0f, // Bottom right   1
+    -0.5f,  0.5f, -0.5f,    1.0f, 1.0f, // Top right      2
+     0.5f,  0.5f, -0.5f,    0.0f, 1.0f, // Top left       3
     // Front face:
     -0.5f, -0.5f,  0.5f,    0.0f, 0.0f, // Bottom left    4
      0.5f, -0.5f,  0.5f,    1.0f, 0.0f, // Bottom right   5
      0.5f,  0.5f,  0.5f,    1.0f, 1.0f, // Top right      6
     -0.5f,  0.5f,  0.5f,    0.0f, 1.0f, // Top left       7
     // Left face:
-    -0.5f,  0.5f,  0.5f,    1.0f, 0.0f, // Bottom left    8
-    -0.5f,  0.5f, -0.5f,    1.0f, 1.0f, // Bottom right   9
-    -0.5f, -0.5f, -0.5f,    0.0f, 1.0f, // Top right      10
-    -0.5f, -0.5f,  0.5f,    0.0f, 0.0f, // Top left       11
+    -0.5f, -0.5f, -0.5f,    0.0f, 0.0f, // Bottom left    8
+    -0.5f, -0.5f,  0.5f,    1.0f, 0.0f, // Bottom right   9
+    -0.5f,  0.5f,  0.5f,    1.0f, 1.0f, // Top right      10
+    -0.5f,  0.5f, -0.5f,    0.0f, 1.0f, // Top left       11
     // Right face:
-     0.5f,  0.5f,  0.5f,    1.0f, 0.0f, // Bottom left    12
-     0.5f,  0.5f, -0.5f,    1.0f, 1.0f, // Bottom right   13
-     0.5f, -0.5f, -0.5f,    0.0f, 1.0f, // Top right      14
-     0.5f, -0.5f,  0.5f,    0.0f, 0.0f, // Top left       15
-    // Bottom face:         
-    -0.5f, -0.5f, -0.5f,    0.0f, 1.0f, // Bottom left    16
-     0.5f, -0.5f, -0.5f,    1.0f, 1.0f, // Bottom right   17
-     0.5f, -0.5f,  0.5f,    1.0f, 0.0f, // Top right      18
-    -0.5f, -0.5f,  0.5f,    0.0f, 0.0f, // Top left       19
-    // Top face:            
-    -0.5f,  0.5f, -0.5f,    0.0f, 1.0f, // Bottom left    20
-     0.5f,  0.5f, -0.5f,    1.0f, 1.0f, // Bottom right   21
-     0.5f,  0.5f,  0.5f,    1.0f, 0.0f, // Top right      22
-    -0.5f,  0.5f,  0.5f,    0.0f, 0.0f, // Top left       23
+     0.5f, -0.5f,  0.5f,    0.0f, 0.0f, // Bottom left    12
+     0.5f, -0.5f, -0.5f,    1.0f, 0.0f, // Bottom right   13
+     0.5f,  0.5f, -0.5f,    1.0f, 1.0f, // Top right      14
+     0.5f,  0.5f,  0.5f,    0.0f, 1.0f, // Top left       15
+    // Bottom face:                   
+    -0.5f, -0.5f,  0.5f,    0.0f, 0.0f, // Bottom left    16
+     0.5f, -0.5f,  0.5f,    1.0f, 0.0f, // Bottom right   17
+     0.5f, -0.5f, -0.5f,    1.0f, 1.0f, // Top right      18
+    -0.5f, -0.5f, -0.5f,    0.0f, 1.0f, // Top left       19
+    // Top face:                      
+    -0.5f,  0.5f, -0.5f,    0.0f, 0.0f, // Bottom left    20
+     0.5f,  0.5f, -0.5f,    1.0f, 0.0f, // Bottom right   21
+     0.5f,  0.5f,  0.5f,    1.0f, 1.0f, // Top right      22
+    -0.5f,  0.5f,  0.5f,    0.0f, 1.0f, // Top left       23
 };
 
 unsigned int _cubeIndices[] = {  // For the Element Buffer Object
@@ -77,6 +77,8 @@ Cube::Cube(int id, int x, int y, int z) {
     this->id = id;
     this->setPos(x, y, z);
     this->anim = NULL;
+    this->scale = glm::vec3(0.95f);
+    this->rotation = glm::vec3(0.0f);
     gObjects.insert(std::pair<int, Cube*>(id, this));
 }
 
@@ -100,44 +102,52 @@ glm::mat4 Cube::processAnimation() {
     if (ANIMATE) {
         this->animProgress += (ANIM_SPEED * deltaTime);
     }
+
     if (animProgress > 1.0f) { // Animation finished
-        animProgress = 1.0f;
-        *(this->markWhenAnimFinished) = true; 
-        glm::mat4 transform = glm::mat4(1.0f);
+        this->rotation = glm::mod(this->rotation + (this->anim->MaxAngle * this->anim->RotationAxis), 360.0f);
+
+        transform = glm::translate(transform, this->anim->PreTranslation);
+        transform = glm::rotate(transform, glm::radians(this->anim->MaxAngle), this->anim->RotationAxis);
+        transform = glm::translate(transform, -(this->anim->PreTranslation));
+
         glm::vec3 newPos = this->pos + this->anim->DeltaPos;
         this->setPos(newPos[0], newPos[1], newPos[2]);
         this->animProgress = 0.0f;
+
         delete this->anim;
         this->anim = NULL;
+
+        *(this->markWhenAnimFinished) = true; 
         this->markWhenAnimFinished = NULL;
     } else {
         // calculate rotation angle based on progress
         float angle = _animInterp(this->animProgress) * this->anim->MaxAngle;
 
-        // construct model matrix
+        // construct transform matrix
         transform = glm::translate(transform, this->anim->PreTranslation);
         transform = glm::rotate(transform, glm::radians(angle), this->anim->RotationAxis);
         transform = glm::translate(transform, -(this->anim->PreTranslation));
-
-        // std::cout << "PreTrans / RotationAxis / angle: " << glm::to_string(this->anim->PreTranslation) << " | " << glm::to_string(this->anim->RotationAxis) << " | " << angle << std::endl;
     }
 
     return transform;
 }
 
 void Cube::draw() {
-
-    glm::mat4 transform;
-    if (this->anim) {
-        transform = this->processAnimation();
-    } else { transform = glm::mat4(1.0f); }
-    transform = glm::scale(transform, glm::vec3(0.95f, 0.95f, 0.95f));
+    // If an animation finishes, it may update the position. So, calculate modelmatrix now; animation will handle its own relevant translations/offsets
     glm::mat4 modelmat = glm::translate(glm::mat4(1.0f), glm::vec3(this->pos));
+
+    glm::mat4 transform = glm::mat4(1.0f);
+    transform = glm::scale(transform, this->scale);
+    transform = glm::rotate(transform, glm::radians(this->rotation[2]), glm::vec3(0.0f, 0.0f, 1.0f));
+    transform = glm::rotate(transform, glm::radians(this->rotation[1]), glm::vec3(0.0f, 1.0f, 0.0f));
+    transform = glm::rotate(transform, glm::radians(this->rotation[0]), glm::vec3(1.0f, 0.0f, 0.0f));
+    if (this->anim) {
+        transform = this->processAnimation() * transform;
+    };
 
     glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelmat));
     if (surfaceNormalLoc >= 0) {
-        // std::cout << "surfaceNormalLoc: " << surfaceNormalLoc << std::endl;
         for (int i = 0; i < 6; i++) {
             glUniform3fv(surfaceNormalLoc, 1, glm::value_ptr(_cubeSurfaceNorms[i]));
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)((6 * i * sizeof(GLuint))));

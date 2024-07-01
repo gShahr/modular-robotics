@@ -26,6 +26,7 @@ void main()
 {
 	mat4 toModel = modelmat * transform;
 	worldPos = toModel * vec4(aPos.xyz, 1.0);
+	worldPos.xyz = worldPos.xyz - 0.5;
 	//worldPos.xyz = worldPos.xyz - 20.0;
 	
 	//worldPos.x = worldPos.x * (1.0 + sin(iTime * 3.0 + worldPos.x) / 45.0);
@@ -41,5 +42,5 @@ void main()
 	//gl_Position.w = 1. / gl_Position.w * (sin(timeSec / 4.) + 1.) / 2.;
     vertexColor = vec4(1.0, 1.0, 1.0, 1.0);
 	texCoord = aTexCoord;
-	surfaceNorm = (ExtractRotationMatrix(modelmat) * vec4(baseSurfaceNorm, 1.0)).xyz;
+	surfaceNorm = (ExtractRotationMatrix(modelmat) * ExtractRotationMatrix(transform) * vec4(baseSurfaceNorm, 1.0)).xyz;
 }
