@@ -78,7 +78,7 @@ Cube::Cube(int id, int x, int y, int z) {
     this->setPos(x, y, z);
     this->anim = NULL;
     this->scale = glm::vec3(0.95f);
-    this->rotation = glm::vec3(0.0f);
+    this->rotation = glm::mat4(1.0f);
     gObjects.insert(std::pair<int, Cube*>(id, this));
 }
 
@@ -104,11 +104,12 @@ glm::mat4 Cube::processAnimation() {
     }
 
     if (animProgress > 1.0f) { // Animation finished
-        this->rotation = glm::mod(this->rotation + (this->anim->MaxAngle * this->anim->RotationAxis), 360.0f);
+        this->rotation = glm::rotate(glm::mat4(1.0f), glm::radians(this->anim->MaxAngle), this->anim->RotationAxis) * this->rotation;
 
         transform = glm::translate(transform, this->anim->PreTranslation);
         transform = glm::rotate(transform, glm::radians(this->anim->MaxAngle), this->anim->RotationAxis);
         transform = glm::translate(transform, -(this->anim->PreTranslation));
+
 
         glm::vec3 newPos = this->pos + this->anim->DeltaPos;
         this->setPos(newPos[0], newPos[1], newPos[2]);
@@ -138,9 +139,7 @@ void Cube::draw() {
 
     glm::mat4 transform = glm::mat4(1.0f);
     transform = glm::scale(transform, this->scale);
-    transform = glm::rotate(transform, glm::radians(this->rotation[2]), glm::vec3(0.0f, 0.0f, 1.0f));
-    transform = glm::rotate(transform, glm::radians(this->rotation[1]), glm::vec3(0.0f, 1.0f, 0.0f));
-    transform = glm::rotate(transform, glm::radians(this->rotation[0]), glm::vec3(1.0f, 0.0f, 0.0f));
+    transform = this->rotation * transform;
     if (this->anim) {
         transform = this->processAnimation() * transform;
     };

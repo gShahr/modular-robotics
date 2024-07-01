@@ -33,7 +33,7 @@ public:
 private:
     float animProgress;
     glm::vec3 scale;
-    glm::vec3 rotation;
+    glm::mat4 rotation;
 };
 
 extern std::unordered_map<int, Cube*> gObjects; // This is ugly, sorry
