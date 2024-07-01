@@ -125,12 +125,12 @@ T& CoordTensor<T>::IdAt(const std::valarray<int>& coords) {
 
 template <typename T>
 T& CoordTensor<T>::IdAt2ndOrder (const std::valarray<int>& coords) {
-    return _arrayInternal2D[coords[0]][coords[1]];
+    return _arrayInternal2D[coords[1]][coords[0]];
 }
 
 template <typename T>
 T& CoordTensor<T>::IdAt3rdOrder (const std::valarray<int>& coords) {
-    return _arrayInternal3D[coords[0]][coords[1]][coords[2]];
+    return _arrayInternal3D[coords[2]][coords[1]][coords[0]];
 }
 
 template <typename T>
