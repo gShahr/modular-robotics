@@ -92,7 +92,7 @@ private:
 public:
     std::vector<bool> grid;
     // CoordTensor, should eventually replace coordmat
-    CoordTensor coordTensor;
+    CoordTensor<int> coordTensor;
     // Holds coordinate info for articulation points / cut vertices
     std::vector<std::valarray<int>> articulationPoints;
 
@@ -241,7 +241,7 @@ public:
 
 std::ostream& operator<<(std::ostream& out, /*const*/ Lattice& lattice) {
     out << "Lattice State:\n";
-    for (int i = 0; i < lattice.coordTensor.size(); i++) {
+    for (int i = 0; i < lattice.coordTensor.GetArrayInternal().size(); i++) {
         if (lattice.coordTensor.GetIdDirect(i) >= 0) {
             out << '#';
         } else {
@@ -268,7 +268,7 @@ public:
     // Load in move info from a given file
     virtual void InitMove(std::ifstream& moveFile) = 0;
     // Check to see if move is possible for a given module
-    virtual bool MoveCheck(CoordTensor& tensor, const Module& mod) = 0;
+    virtual bool MoveCheck(CoordTensor<int>& tensor, const Module& mod) = 0;
 };
 
 class Move2d : IMove {
@@ -308,7 +308,7 @@ public:
         DEBUG("Move Offset: " << finalPos[0] << ", " << finalPos[1] << std::endl);
     }
 
-    bool MoveCheck(CoordTensor& tensor, const Module& mod) override {
+    bool MoveCheck(CoordTensor<int>& tensor, const Module& mod) override {
         for (const auto& move : moves) {
             if ((tensor[mod.coords + move.first] < 0) == move.second) {
                 return false;
@@ -365,7 +365,7 @@ public:
         DEBUG("Move Offset: " << finalPos[0] << ", " << finalPos[1] << ", " << finalPos[2] << std::endl);
     }
 
-    bool MoveCheck(CoordTensor& tensor, const Module& mod) override {
+    bool MoveCheck(CoordTensor<int>& tensor, const Module& mod) override {
         for (const auto& move : moves) {
             if ((tensor[mod.coords + move.first] < 0) == move.second) {
                 return false;
