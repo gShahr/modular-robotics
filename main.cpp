@@ -22,6 +22,10 @@ private:
     static std::vector<Module> _modules;
 
 public:
+    // Never instantiate ModuleIdManager
+    ModuleIdManager() = delete;
+    ModuleIdManager(const ModuleIdManager&) = delete;
+
     // Emplace newly created module into the vector
     static void RegisterModule(Module& module) {
         _modules.emplace_back(module);
@@ -92,7 +96,7 @@ private:
 public:
     std::vector<bool> grid;
     // CoordTensor, should eventually replace coordmat
-    CoordTensor coordTensor;
+    CoordTensor<int> coordTensor;
     // Holds coordinate info for articulation points / cut vertices
     std::vector<std::valarray<int>> articulationPoints;
 
@@ -154,6 +158,7 @@ public:
     }
 
     // Original edgeCheck
+    [[maybe_unused]]
     void edgeCheck2D(const Module& mod) {
         if (coordTensor[{mod.coords[0] - 1, mod.coords[1]}] >= 0) {
             DEBUG("Module at " << mod.coords[0] << ", " << mod.coords[1] << " Adjacent to module at " << mod.coords[0] - 1 << ", " << mod.coords[1] << std::endl);
@@ -236,12 +241,12 @@ public:
         return result;
     }
 
-    friend std::ostream& operator<<(std::ostream& out, /*const*/ Lattice& mod);
+    friend std::ostream& operator<<(std::ostream& out, /*const*/ Lattice& lattice);
 };
 
 std::ostream& operator<<(std::ostream& out, /*const*/ Lattice& lattice) {
     out << "Lattice State:\n";
-    for (int i = 0; i < lattice.coordTensor.size(); i++) {
+    for (int i = 0; i < lattice.coordTensor.GetArrayInternal().size(); i++) {
         if (lattice.coordTensor.GetIdDirect(i) >= 0) {
             out << '#';
         } else {
@@ -263,22 +268,127 @@ namespace Move {
     };
 }
 
-class IMove {
+class MoveBase {
+protected:
+    // each pair represents a coordinate offset to check and whether a module should be there or not
+    std::vector<std::pair<std::valarray<int>, bool>> moves;
+    std::valarray<int> initPos, finalPos;
+    int order = -1;
 public:
+    // Create a copy of a move
+    [[nodiscard]]
+    virtual MoveBase* CopyMove() const = 0;
     // Load in move info from a given file
     virtual void InitMove(std::ifstream& moveFile) = 0;
     // Check to see if move is possible for a given module
-    virtual bool MoveCheck(CoordTensor& tensor, const Module& mod) = 0;
+    virtual bool MoveCheck(CoordTensor<int>& tensor, const Module& mod) = 0;
+
+    void RotateMove(int index) {
+        std::swap(initPos[0], initPos[index]);
+        std::swap(finalPos[0], finalPos[index]);
+        for (auto& move : moves) {
+            std::swap(move.first[0], move.first[index]);
+        }
+    }
+
+    void ReflectMove(int index) {
+        initPos[index] *= -1;
+        finalPos[index] *= -1;
+        for (auto& move : moves) {
+            move.first[index] *= -1;
+        }
+    }
+
+    const std::valarray<int>& MoveOffset() {
+        return finalPos;
+    }
+
+    virtual ~MoveBase() = default;
+
+    // MoveManager will need to see moves and offsets
+    friend class MoveManager;
 };
 
-class Move2d : IMove {
+class MoveManager {
 private:
-    std::vector<std::pair<std::valarray<int>, bool>> moves;
-    int yMultiplier;
-    std::valarray<int> initPos, finalPos;
-
+    // Vector containing every move
+    static std::vector<MoveBase*> _moves;
+    // Vector containing only generated moves
+    static std::vector<MoveBase*> _movesToFree;
 public:
-    explicit Move2d(int axisSize) : yMultiplier(axisSize) {}
+    // Never instantiate MoveManager
+    MoveManager() = delete;
+    MoveManager(const MoveManager&) = delete;
+
+    // To be used to generate multiple moves from a single move
+    static void GenerateMovesFrom(MoveBase* origMove) {
+        std::vector<MoveBase*> movesGen;
+        // Add initial move to working vector
+        movesGen.push_back(origMove);
+        // Add rotations to working vector
+        for (int i = 1; i < origMove->order; i++) {
+            auto moveRotated = origMove->CopyMove();
+            moveRotated->RotateMove(i);
+            movesGen.push_back(moveRotated);
+            _movesToFree.push_back(moveRotated);
+        }
+        // Reflections
+        for (int i = 0; i < origMove->order; i++) {
+            auto movesToReflect = movesGen;
+            for (auto move : movesToReflect) {
+                auto moveReflected = move->CopyMove();
+                moveReflected->ReflectMove(i);
+                movesGen.push_back(moveReflected);
+                _movesToFree.push_back(moveReflected);
+            }
+        }
+        // Add everything to _moves
+        for (auto move : movesGen) {
+            _moves.push_back(move);
+        }
+    }
+
+    // To be used when no additional moves should be generated
+    static void RegisterSingleMove(MoveBase* move) {
+        _moves.push_back(move);
+    }
+
+    static const std::vector<MoveBase*>& Moves() {
+        return _moves;
+    }
+
+    static std::vector<MoveBase*> CheckAllMoves(CoordTensor<int>& tensor, Module& mod) {
+        std::vector<MoveBase*> LegalMoves = {};
+        for (auto move : _moves) {
+            if (move->MoveCheck(tensor, mod)) {
+                LegalMoves.push_back(move);
+            }
+        }
+        return LegalMoves;
+    }
+
+    static void CleanMoves() {
+        for (auto move : _movesToFree) {
+            delete move;
+        }
+    }
+};
+
+std::vector<MoveBase*> MoveManager::_moves;
+std::vector<MoveBase*> MoveManager::_movesToFree;
+
+class Move2d : public MoveBase {
+public:
+    Move2d() {
+        order = 2;
+    }
+
+    [[nodiscard]]
+    MoveBase* CopyMove() const override {
+        auto copy = new Move2d();
+        *copy = *this;
+        return copy;
+    }
 
     void InitMove(std::ifstream& moveFile) override {
         int x = 0, y = 0;
@@ -308,7 +418,7 @@ public:
         DEBUG("Move Offset: " << finalPos[0] << ", " << finalPos[1] << std::endl);
     }
 
-    bool MoveCheck(CoordTensor& tensor, const Module& mod) override {
+    bool MoveCheck(CoordTensor<int>& tensor, const Module& mod) override {
         for (const auto& move : moves) {
             if ((tensor[mod.coords + move.first] < 0) == move.second) {
                 return false;
@@ -316,22 +426,21 @@ public:
         }
         return true;
     }
-
-    const std::valarray<int>& MoveOffset() {
-        return finalPos;
-    }
-
-    void rotateMove() {
-
-    }
 };
 
-class Move3d : IMove {
-private:
-    std::vector<std::pair<std::valarray<int>, bool>> moves;
-    std::valarray<int> initPos, finalPos;
-
+class Move3d : public MoveBase {
 public:
+    Move3d() {
+        order = 3;
+    }
+
+    [[nodiscard]]
+    MoveBase* CopyMove() const override {
+        auto copy = new Move3d();
+        *copy = *this;
+        return copy;
+    }
+
     void InitMove(std::ifstream& moveFile) override {
         int x = 0, y = 0, z = 0;
         std::string line;
@@ -365,21 +474,13 @@ public:
         DEBUG("Move Offset: " << finalPos[0] << ", " << finalPos[1] << ", " << finalPos[2] << std::endl);
     }
 
-    bool MoveCheck(CoordTensor& tensor, const Module& mod) override {
+    bool MoveCheck(CoordTensor<int>& tensor, const Module& mod) override {
         for (const auto& move : moves) {
             if ((tensor[mod.coords + move.first] < 0) == move.second) {
                 return false;
             }
         }
         return true;
-    }
-
-    const std::valarray<int>& MoveOffset() {
-        return finalPos;
-    }
-
-    void rotateMove() {
-
     }
 };
 
@@ -428,13 +529,14 @@ public:
     */
     std::vector<Lattice> makeMoves(const Lattice& lattice, const Module& module) {
         std::vector<Lattice> result;
-        for (auto move: moves) {
+        // to be implemented
+        /*for (auto move : moves) {
             result.emplace_back(applyMove(lattice, module, move));
-        }
+        }*/
         return result;
     }
 
-    Lattice applyMove(const Lattice& lattice, const Module& module, cosnt Move& move) {
+    Lattice applyMove(const Lattice& lattice, const Module& module, const MoveBase& move) {
 
     }
 };
@@ -508,23 +610,95 @@ int main() {
     //
     //  MOVE TESTING BELOW
     //
-    std::cout << "Lattice Initial State:\n" << lattice;
+    std::cout << lattice;
     std::ifstream moveFile("Moves/Slide_1.txt");
     if (!moveFile) {
         std::cerr << "Unable to open file Moves/Slide_1.txt";
         return 1;
     }
-    Move2d move(axisSize);
+    Move2d move;
     move.InitMove(moveFile);
-    bool test = move.MoveCheck(lattice.coordTensor, ModuleIdManager::Modules()[1]);
+    bool test = move.MoveCheck(lattice.coordTensor, ModuleIdManager::Modules()[0]);
     std::cout << (test ? "MoveCheck Passed!" : "MoveCheck Failed!") << std::endl;
     moveFile.close();
     if (test) {
         std::cout << "Moving!\n";
-        lattice.moveModule(ModuleIdManager::Modules()[1], move.MoveOffset());
-        std::cout << "Lattice Final State:\n" << lattice;
+        lattice.moveModule(ModuleIdManager::Modules()[0], move.MoveOffset());
+        std::cout << lattice;
     }
-    std::cout << "(Note: Lattice output is rotated 90 degrees counterclockwise for some reason)\n";
+    MoveManager::GenerateMovesFrom(&move);
+    // movegen testing
+    // test = move.MoveCheck(lattice.coordTensor, ModuleIdManager::Modules()[2]);
+    auto legalMoves = MoveManager::CheckAllMoves(lattice.coordTensor, ModuleIdManager::Modules()[2]);
+    test = !legalMoves.empty();
+    std::cout << (test ? "MoveCheck Passed!" : "MoveCheck Failed!") << std::endl;
+    moveFile.close();
+    if (test) {
+        std::cout << "Moving!\n";
+        lattice.moveModule(ModuleIdManager::Modules()[2], legalMoves[0]->MoveOffset());
+        std::cout << lattice;
+    }
+    // test2
+    legalMoves = MoveManager::CheckAllMoves(lattice.coordTensor, ModuleIdManager::Modules()[1]);
+    test = !legalMoves.empty();
+    std::cout << (test ? "MoveCheck Passed!" : "MoveCheck Failed!") << std::endl;
+    moveFile.close();
+    if (test) {
+        std::cout << "Moving!\n";
+        lattice.moveModule(ModuleIdManager::Modules()[1], legalMoves[0]->MoveOffset());
+        std::cout << lattice;
+    }
+    // test3
+    legalMoves = MoveManager::CheckAllMoves(lattice.coordTensor, ModuleIdManager::Modules()[0]);
+    test = !legalMoves.empty();
+    std::cout << (test ? "MoveCheck Passed!" : "MoveCheck Failed!") << std::endl;
+    moveFile.close();
+    if (test) {
+        std::cout << "Moving!\n";
+        lattice.moveModule(ModuleIdManager::Modules()[0], legalMoves[0]->MoveOffset());
+        std::cout << lattice;
+    }
+    // test4
+    legalMoves = MoveManager::CheckAllMoves(lattice.coordTensor, ModuleIdManager::Modules()[0]);
+    test = !legalMoves.empty();
+    std::cout << (test ? "MoveCheck Passed!" : "MoveCheck Failed!") << std::endl;
+    moveFile.close();
+    if (test) {
+        std::cout << "Moving!\n";
+        lattice.moveModule(ModuleIdManager::Modules()[0], legalMoves[0]->MoveOffset());
+        std::cout << lattice;
+    }
+    // test5
+    legalMoves = MoveManager::CheckAllMoves(lattice.coordTensor, ModuleIdManager::Modules()[1]);
+    test = !legalMoves.empty();
+    std::cout << (test ? "MoveCheck Passed!" : "MoveCheck Failed!") << std::endl;
+    moveFile.close();
+    if (test) {
+        std::cout << "Moving!\n";
+        lattice.moveModule(ModuleIdManager::Modules()[1], legalMoves[0]->MoveOffset());
+        std::cout << lattice;
+    }
+    // test6
+    legalMoves = MoveManager::CheckAllMoves(lattice.coordTensor, ModuleIdManager::Modules()[2]);
+    test = !legalMoves.empty();
+    std::cout << (test ? "MoveCheck Passed!" : "MoveCheck Failed!") << std::endl;
+    moveFile.close();
+    if (test) {
+        std::cout << "Moving!\n";
+        lattice.moveModule(ModuleIdManager::Modules()[2], legalMoves[0]->MoveOffset());
+        std::cout << lattice;
+    }
+    // test7
+    legalMoves = MoveManager::CheckAllMoves(lattice.coordTensor, ModuleIdManager::Modules()[0]);
+    test = !legalMoves.empty();
+    std::cout << (test ? "MoveCheck Passed!" : "MoveCheck Failed!") << std::endl;
+    moveFile.close();
+    if (test) {
+        std::cout << "Moving!\n";
+        lattice.moveModule(ModuleIdManager::Modules()[0], legalMoves[0]->MoveOffset());
+        std::cout << lattice;
+    }
+    MoveManager::CleanMoves();
     //
     //  END TESTING
     //
