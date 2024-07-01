@@ -116,7 +116,7 @@ T& CoordTensor<T>::GetIdDirect(int index) {
 }
 
 template <typename T>
-T& CoordTensor<T>::IdAt(const std::valarray<int>& coords) {
+inline T& CoordTensor<T>::IdAt(const std::valarray<int>& coords) {
     // Told you calling member function pointers looks weird
     return (this->*IdAtInternal)(coords);
     // This would look even worse if IdAtInternal were called from outside,

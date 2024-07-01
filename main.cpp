@@ -154,6 +154,7 @@ public:
     }
 
     // Original edgeCheck
+    [[maybe_unused]]
     void edgeCheck2D(const Module& mod) {
         if (coordTensor[{mod.coords[0] - 1, mod.coords[1]}] >= 0) {
             DEBUG("Module at " << mod.coords[0] << ", " << mod.coords[1] << " Adjacent to module at " << mod.coords[0] - 1 << ", " << mod.coords[1] << std::endl);
@@ -236,7 +237,7 @@ public:
         return result;
     }
 
-    friend std::ostream& operator<<(std::ostream& out, /*const*/ Lattice& mod);
+    friend std::ostream& operator<<(std::ostream& out, /*const*/ Lattice& lattice);
 };
 
 std::ostream& operator<<(std::ostream& out, /*const*/ Lattice& lattice) {
@@ -263,16 +264,16 @@ namespace Move {
     };
 }
 
-class IMove {
+class MoveBase {
 protected:
     // each pair represents a coordinate offset to check and whether a module should be there or not
     std::vector<std::pair<std::valarray<int>, bool>> moves;
     std::valarray<int> initPos, finalPos;
-    int order;
+    int order = -1;
 public:
     // Create a copy of a move
     [[nodiscard]]
-    virtual IMove* CopyMove() const = 0;
+    virtual MoveBase* CopyMove() const = 0;
     // Load in move info from a given file
     virtual void InitMove(std::ifstream& moveFile) = 0;
     // Check to see if move is possible for a given module
@@ -298,7 +299,7 @@ public:
         return finalPos;
     }
 
-    virtual ~IMove() = default;
+    virtual ~MoveBase() = default;
 
     // MoveManager will need to see moves and offsets
     friend class MoveManager;
@@ -307,13 +308,13 @@ public:
 class MoveManager {
 private:
     // Vector containing every move
-    static std::vector<IMove*> _moves;
+    static std::vector<MoveBase*> _moves;
     // Vector containing only generated moves
-    static std::vector<IMove*> _movesToFree;
+    static std::vector<MoveBase*> _movesToFree;
 public:
     // To be used to generate multiple moves from a single move
-    static void GenerateMovesFrom(IMove* origMove) {
-        std::vector<IMove*> movesGen;
+    static void GenerateMovesFrom(MoveBase* origMove) {
+        std::vector<MoveBase*> movesGen;
         // Add initial move to working vector
         movesGen.push_back(origMove);
         // Add rotations to working vector
@@ -340,16 +341,16 @@ public:
     }
 
     // To be used when no additional moves should be generated
-    static void RegisterSingleMove(IMove* move) {
+    static void RegisterSingleMove(MoveBase* move) {
         _moves.push_back(move);
     }
 
-    static const std::vector<IMove*> Moves() {
+    static const std::vector<MoveBase*>& Moves() {
         return _moves;
     }
 
-    static std::vector<IMove*> CheckAllMoves(CoordTensor<int>& tensor, Module& mod) {
-        std::vector<IMove*> LegalMoves = {};
+    static std::vector<MoveBase*> CheckAllMoves(CoordTensor<int>& tensor, Module& mod) {
+        std::vector<MoveBase*> LegalMoves = {};
         for (auto move : _moves) {
             if (move->MoveCheck(tensor, mod)) {
                 LegalMoves.push_back(move);
@@ -365,17 +366,17 @@ public:
     }
 };
 
-std::vector<IMove*> MoveManager::_moves;
-std::vector<IMove*> MoveManager::_movesToFree;
+std::vector<MoveBase*> MoveManager::_moves;
+std::vector<MoveBase*> MoveManager::_movesToFree;
 
-class Move2d : public IMove {
+class Move2d : public MoveBase {
 public:
     Move2d() {
         order = 2;
     }
 
     [[nodiscard]]
-    IMove* CopyMove() const override {
+    MoveBase* CopyMove() const override {
         auto copy = new Move2d();
         *copy = *this;
         return copy;
@@ -419,14 +420,14 @@ public:
     }
 };
 
-class Move3d : public IMove {
+class Move3d : public MoveBase {
 public:
     Move3d() {
         order = 3;
     }
 
     [[nodiscard]]
-    IMove* CopyMove() const override {
+    MoveBase* CopyMove() const override {
         auto copy = new Move3d();
         *copy = *this;
         return copy;
@@ -527,7 +528,7 @@ public:
         return result;
     }
 
-    Lattice applyMove(const Lattice& lattice, const Module& module, const IMove& move) {
+    Lattice applyMove(const Lattice& lattice, const Module& module, const MoveBase& move) {
 
     }
 };
