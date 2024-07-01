@@ -77,7 +77,7 @@ Cube::Cube(int id, int x, int y, int z) {
     this->id = id;
     this->setPos(x, y, z);
     this->anim = NULL;
-    this->scale = glm::vec3(0.95f);
+    this->scale = glm::vec3(0.85f);
     this->rotation = glm::mat4(1.0f);
     gObjects.insert(std::pair<int, Cube*>(id, this));
 }

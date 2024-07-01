@@ -17,7 +17,7 @@
 #include "ObjectCollection.hpp"
 #include "Scenario.hpp"
 
-#define AUTO_ROTATE 1
+#define AUTO_ROTATE 0
 
 std::unordered_map<int, Cube*> gObjects; // Hashmap of all <ID, object>
 
@@ -30,7 +30,7 @@ const char *fragmentShaderPath = "resources/shaders/fshader.glsl";
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
-float ANIM_SPEED = 0.7f;
+float ANIM_SPEED = 1.5f;
 bool ANIMATE = true;
 
 const float CAMERA_MAX_SPEED = 25.0f;
@@ -203,13 +203,13 @@ int loadTexture(const char *texturePath) {
 }
 
 void resetCamera() {
-    cameraPos = glm::vec3(0.0f, 2.0f, -6.0f);
-    cameraDirection = glm::vec3(0.0f, 0.0f, 1.0f);
+    cameraPos = glm::vec3(0.0f, 2.0f, 6.0f);
+    cameraDirection = glm::vec3(0.0f, 0.0f, -1.0f);
     cameraUp = glm::cross(cameraDirection, glm::normalize(glm::cross(glm::vec3(0.0f, 1.0f, 0.0f), cameraDirection)));
     cameraSpeed = glm::vec3(0.0f, 0.0f, 0.0f);
     lastX = resolution[0]/2.0;
     lastY = resolution[1]/2.0;
-    yaw = 90.0f;
+    yaw = 270.0f;
     pitch = 0.0f;
     cameraZoom = 0.0f;
     resetProjMat();
@@ -250,6 +250,8 @@ int main(int argc, char** argv) {
     glViewport(0, 0, resolution[0], resolution[1]);
     // Enable z-buffer depth testing and transparency
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     Shader shader = Shader(vertexShaderPath, fragmentShaderPath);
     int texture = loadTexture("resources/textures/face_debug.png");
@@ -289,7 +291,7 @@ int main(int argc, char** argv) {
     viewmat = glm::mat4(1.0f);
     projmat = glm::perspective(glm::radians(45.0f), asprat, 0.1f, 100.0f);
 
-    Scenario testScenario = Scenario("Scenarios/Testing/Simple.scen");
+    Scenario testScenario = Scenario("Scenarios/2x2x2_Metamodule.scen");
     ObjectCollection* scenCubes = testScenario.toObjectCollection(&shader, VAO, texture);
     MoveSequence* scenMoveSeq = testScenario.toMoveSequence();
 
