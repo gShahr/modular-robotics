@@ -138,7 +138,7 @@ public:
                 addEdge(mod.id, coordTensor[adjCoords]);
             }
             // Don't want to check both ways if it can be avoided, also don't want to check index beyond max value
-            if (!bothWays || adjCoords[i] + 1 == axisSize) {
+            if (!bothWays || adjCoords[i] + 2 == axisSize) {
                 adjCoords[i]++;
                 continue;
             }
@@ -257,6 +257,7 @@ std::ostream& operator<<(std::ostream& out, /*const*/ Lattice& lattice) {
 
 namespace Move {
     enum State {
+        NOCHECK = ' ',
         EMPTY = 'x',
         INITIAL = '?',
         FINAL = '!',
@@ -268,6 +269,8 @@ class MoveBase {
 protected:
     // each pair represents a coordinate offset to check and whether a module should be there or not
     std::vector<std::pair<std::valarray<int>, bool>> moves;
+    // bounds ex: {(2, 1), (0, 1)} would mean bounds extend from -2 to 1 on x-axis and 0 to 1 on y-axis
+    std::vector<std::pair<int, int>> bounds;
     std::valarray<int> initPos, finalPos;
     int order = -1;
 public:
@@ -282,6 +285,7 @@ public:
     void RotateMove(int index) {
         std::swap(initPos[0], initPos[index]);
         std::swap(finalPos[0], finalPos[index]);
+        std::swap(bounds[0], bounds[index]);
         for (auto& move : moves) {
             std::swap(move.first[0], move.first[index]);
         }
@@ -290,6 +294,7 @@ public:
     void ReflectMove(int index) {
         initPos[index] *= -1;
         finalPos[index] *= -1;
+        std::swap(bounds[index].first, bounds[index].second);
         for (auto& move : moves) {
             move.first[index] *= -1;
         }
@@ -377,6 +382,7 @@ class Move2d : public MoveBase {
 public:
     Move2d() {
         order = 2;
+        bounds.resize(order, {0, 0});
     }
 
     [[nodiscard]]
@@ -388,9 +394,14 @@ public:
 
     void InitMove(std::ifstream& moveFile) override {
         int x = 0, y = 0;
+        std::valarray<int> maxBounds = {0, 0};
         std::string line;
         while (std::getline(moveFile, line)) {
             for (auto c : line) {
+                if (c == Move::NOCHECK) {
+                    x++;
+                    continue;
+                }
                 if (c == Move::EMPTY) {
                     moves.push_back({{x, y}, false});
                 } else if (c == Move::STATIC) {
@@ -400,6 +411,13 @@ public:
                     finalPos = {x, y};
                 } else if (c == Move::INITIAL) {
                     initPos = {x, y};
+                    bounds = {{x, 0}, {y, 0}};
+                }
+                if (x > maxBounds[0]) {
+                    maxBounds[0] = x;
+                }
+                if (y > maxBounds[1]) {
+                    maxBounds[1] = y;
                 }
                 x++;
             }
@@ -412,9 +430,19 @@ public:
         }
         finalPos -= initPos;
         DEBUG("Move Offset: " << finalPos[0] << ", " << finalPos[1] << std::endl);
+        maxBounds -= initPos;
+        bounds[0].second = maxBounds[0];
+        bounds[1].second = maxBounds[1];
     }
 
     bool MoveCheck(CoordTensor<int>& tensor, const Module& mod) override {
+        // Bounds checking
+        for (int i = 0; i < order; i++) {
+            if (mod.coords[i] - bounds[i].first < 0 || mod.coords[i] + bounds[i].second >= tensor.AxisSize()) {
+                return false;
+            }
+        }
+        // Move Check
         for (const auto& move : moves) {
             if ((tensor[mod.coords + move.first] < 0) == move.second) {
                 return false;
@@ -428,6 +456,7 @@ class Move3d : public MoveBase {
 public:
     Move3d() {
         order = 3;
+        bounds.resize(3, {0, 0});
     }
 
     [[nodiscard]]
@@ -439,6 +468,7 @@ public:
 
     void InitMove(std::ifstream& moveFile) override {
         int x = 0, y = 0, z = 0;
+        std::valarray<int> maxBounds = {0, 0, 0};
         std::string line;
         while (std::getline(moveFile, line)) {
             if (line.empty()) {
@@ -447,6 +477,10 @@ public:
                 continue;
             }
             for (auto c : line) {
+                if (c == Move::NOCHECK) {
+                    x++;
+                    continue;
+                }
                 if (c == Move::EMPTY) {
                     moves.push_back({{x, y, z}, false});
                 } else if (c == Move::STATIC) {
@@ -456,6 +490,16 @@ public:
                     finalPos = {x, y, z};
                 } else if (c == Move::INITIAL) {
                     initPos = {x, y, z};
+                    bounds = {{x, 0}, {y, 0}, {z, 0}};
+                }
+                if (x > maxBounds[0]) {
+                    maxBounds[0] = x;
+                }
+                if (y > maxBounds[1]) {
+                    maxBounds[1] = y;
+                }
+                if (z > maxBounds[2]) {
+                    maxBounds[2] = z;
                 }
                 x++;
             }
@@ -468,9 +512,20 @@ public:
         }
         finalPos -= initPos;
         DEBUG("Move Offset: " << finalPos[0] << ", " << finalPos[1] << ", " << finalPos[2] << std::endl);
+        maxBounds -= initPos;
+        bounds[0].second = maxBounds[0];
+        bounds[1].second = maxBounds[1];
+        bounds[2].second = maxBounds[2];
     }
 
     bool MoveCheck(CoordTensor<int>& tensor, const Module& mod) override {
+        // Bounds checking
+        for (int i = 0; i < order; i++) {
+            if (mod.coords[i] - bounds[i].first < 0 || mod.coords[i] + bounds[i].second >= tensor.AxisSize()) {
+                return false;
+            }
+        }
+        // Move Check
         for (const auto& move : moves) {
             if ((tensor[mod.coords + move.first] < 0) == move.second) {
                 return false;
@@ -495,7 +550,7 @@ public:
     return hash value
     */
     static std::size_t hashLattice(const Lattice& lattice) {
-        return boost::hash_range(lattice.grid.begin(), lattice.grid.end());
+        return boost::hash_range(lattice.stateTensor.GetArrayInternal().begin(), lattice.stateTensor.GetArrayInternal().end());
     }
 
     bool compareStates(const State& other) const { return seed == other.getSeed(); }
