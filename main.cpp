@@ -94,23 +94,17 @@ private:
     }
 
 public:
-    std::vector<bool> grid;
+    CoordTensor<bool> stateTensor;
     // CoordTensor, should eventually replace coordmat
     CoordTensor<int> coordTensor;
     // Holds coordinate info for articulation points / cut vertices
     std::vector<std::valarray<int>> articulationPoints;
 
-    Lattice(int order, int axisSize) : coordTensor(order, axisSize), order(order), axisSize(axisSize), time(0), moduleCount(0) {
-        grid.resize(pow(axisSize, order), false);
-    }
+    Lattice(int order, int axisSize) : stateTensor(order, axisSize, false), coordTensor(order, axisSize, -1), order(order), axisSize(axisSize), time(0), moduleCount(0) {}
 
     // Add a new module
     void addModule(const std::valarray<int>& coords) {
-        int index = 0;
-        for (int i = 0; i < coords.size(); i++) {
-             index += i * pow(axisSize, i) * coords[i];
-        }
-        grid[index] = true;
+        stateTensor[{coords}] = true;
         // Create and register new module
         Module mod(coords);
         ModuleIdManager::RegisterModule(mod);
@@ -230,10 +224,12 @@ public:
 
     bool operator==(const Lattice& other) {
         bool result = false;
-        if (grid.size() == other.grid.size()) {
+        if (stateTensor.GetArrayInternal().size() == other.stateTensor.GetArrayInternal().size()) {
             result = true;
-            for (int i = 0; i < grid.size(); i++) {
-                if (grid[i] != other.grid[i]) {
+            // this local vector is ideally a temporary solution
+            auto& otherArrInternal = other.stateTensor.GetArrayInternal();
+            for (int i = 0; i < stateTensor.GetArrayInternal().size(); i++) {
+                if (stateTensor.GetIdDirect(i) != otherArrInternal[i]) {
                     return false;
                 }
             }
