@@ -238,6 +238,11 @@ public:
         return result;
     }
 
+    Lattice& operator=(CoordTensor<bool> coordTensor) {
+        return *this;
+        // TODO
+    }
+
     friend std::ostream& operator<<(std::ostream& out, /*const*/ Lattice& lattice);
 };
 
@@ -536,13 +541,13 @@ public:
     }
 };
 
-class State {
+class hashedNode {
 private:
     size_t seed;
 public:
-    State() : seed(0) {}
+    hashedNode() : seed(0) {}
 
-    State(size_t seed) : seed(seed) {}
+    hashedNode(size_t seed) : seed(seed) {}
 
     size_t getSeed() const { return seed; }
 
@@ -554,7 +559,11 @@ public:
         return boost::hash_range(lattice.stateTensor.GetArrayInternal().begin(), lattice.stateTensor.GetArrayInternal().end());
     }
 
-    bool compareStates(const State& other) const { return seed == other.getSeed(); }
+    static std::size_t hashCoordTensor(const CoordTensor<bool>& coordTensor) {
+        return boost::hash_range(coordTensor.GetArrayInternal().begin(), coordTensor.GetArrayInternal().end());
+    }
+
+    bool compareStates(const hashedNode& other) const { return seed == other.getSeed(); }
     /*
     check how to do this properly (operator overload function in lattice function)
     return true iff lattice have the same structure of modules
@@ -566,12 +575,15 @@ class Configuration {
 private:
     Configuration* parent;
     std::vector<Configuration*> next;
-    Lattice lattice;
-    State state;
+    CoordTensor<bool> state;
 public:
-    std::vector<std::vector<Lattice>> makeAllMoves(Lattice& lattice) {
-        std::vector<std::vector<Lattice>> result;
+    Configuration(CoordTensor<bool> state) { this->state = state; }
+
+    std::vector<CoordTensor<bool>> makeAllMoves() {
+        std::vector<CoordTensor<bool>> result;
+        Lattice lattice = state;
         for (auto module: ModuleIdManager::Modules()) {
+            // make sure cut vertices are updated
             result.emplace_back(makeMoves(lattice, module));
         }
         return result;
@@ -579,9 +591,15 @@ public:
 
     /*
     Returns upto 8 possible lattice configurations from given lattice per movable modules
+    TODO
+        Use coordTensor instead of lattice
     */
-    std::vector<Lattice> makeMoves(Lattice& lattice, Module& module) {
+    CoordTensor<bool> makeMoves(Lattice& lattice, Module& module) {
         std::vector<Lattice> result;
+        /* 
+        TODO
+            Use movemanager instead of reading from file
+        */
         std::ifstream moveFile("Moves/Slide_1.txt");
         if (!moveFile) {
             std::cerr << "Unable to open file Moves/Slide_1.txt";
@@ -598,9 +616,14 @@ public:
         return result;
     }
 
-    Lattice applyMove(Lattice lattice, Module& module, MoveBase& move) {
+    /*
+    TODO
+        Refactor to use coordiante tensor instead of lattice
+        Make different move module for coordTensor or implement entire movement using coordTensor in applyMove
+    */
+    CoordTensor<bool> applyMove(Lattice lattice, Module& module, MoveBase& move) {
         lattice.moveModule(module, move.MoveOffset());
-        return lattice;
+        return lattice.coordTensor;
     }
 
     void addEdge(Configuration* configuration) {
@@ -619,8 +642,12 @@ public:
         return lattice;
     }
 
-    State getState() {
-        return state;
+    void setState(State state) {
+        this->state = state;
+    }
+
+    void setParent(Configuration* configuration) {
+        parent = configuration;
     }
 };
 
@@ -633,7 +660,7 @@ public:
     */
     std::vector<Configuration*> bfs(Configuration* start, Configuration* final) {
         std::queue<Configuration*> q;
-        std::unordered_set<Configuration*> visited;
+        std::unordered_set<hashedNode> visited;
         q.push(start);
         visited.insert(start);
         while (!q.empty()) {
@@ -642,10 +669,14 @@ public:
             if (current == final) {
                 return findPath(start, final);
             }
-            for (Configuration* next: current->getNext()) {
-                if (visited.find(next) == visited.end()) {
-                    q.push(next);
-                    visited.insert(next);
+            auto adjList = current->makeAllMoves();
+            for (auto node: adjList) {
+                // check if hashed node is visited
+                if (visited.find(hashedNode(node)) == visited.end()) {
+                    Configuration nextConfiguration = new Configuration(node);
+                    nextConfiguration.setParent(current);
+                    q.push(nextConfiguration);
+                    visited.insert(node);
                 }
             }
         }
@@ -665,6 +696,23 @@ public:
         path.push_back(start);
         std::reverse(path.begin(), path.end());
         return path;
+    }
+
+    /*
+    TODO
+        Change lattice to coordtensors of bools
+    */
+    void generateNeighbors(Configuration* configuration) {
+        std::vector<std::vector<Lattice>> lattices = configuration->makeAllMoves();
+        for (auto latticeList: lattices) {
+            for (auto lattice: latticeList) {
+                Configuration* newConfiguration = new Configuration();
+                newConfiguration->parent = configuration;
+                newConfiguration->lattice = lattice;
+                newConfiguration.setState(State::hashLattice(lattice));
+                configuration->addEdge(newConfiguration);
+            }
+        }
     }
 };
 
