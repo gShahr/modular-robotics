@@ -107,7 +107,8 @@ void main()
 
 	vec3 color = border * borderColor;
 	FragColor = texture(tex, texCoord) * interiorMask + vec4(color, 1.0);
-	FragColor = mix(FragColor, vec4(interior, 1.0), 0.35) * incidentLight;
+	FragColor = mix(FragColor, vec4(interior, 1.0), 0.35);
+    FragColor.xyz *= incidentLight;
 
 	//FragColor = texture(tex, texCoord);
 }

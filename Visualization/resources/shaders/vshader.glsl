@@ -26,7 +26,7 @@ void main()
 {
 	mat4 toModel = modelmat * transform;
 	worldPos = toModel * vec4(aPos.xyz, 1.0);
-	worldPos.xyz = worldPos.xyz - 0.5;
+	//worldPos.xyz = worldPos.xyz - 0.5;
 	//worldPos.xyz = worldPos.xyz - 20.0;
 	
 	//worldPos.x = worldPos.x * (1.0 + sin(iTime * 3.0 + worldPos.x) / 45.0);

@@ -1,8 +1,8 @@
 #include "MoveSequence.hpp"
 
 MoveSequence::MoveSequence(std::vector<Move*> moves) {
-    this->moves = {};
-    this->undostack = {};
+    this->moves = std::deque<Move*>();
+    this->undostack = std::stack<Move*>();
     for (Move* move : moves) {
         this->moves.push_back(move);
     }
