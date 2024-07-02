@@ -10,7 +10,6 @@
 #include "debug_util.h"
 #include <boost/functional/hash.hpp>
 #include <queue>
-#include <unordered_set>
 
 class Module;
 
@@ -565,7 +564,6 @@ public:
 class Configuration {
 private:
     Configuration* parent;
-    std::vector<Configuration*> next;
     Lattice lattice;
     State state;
 public:
@@ -602,26 +600,6 @@ public:
         lattice.moveModule(module, move.MoveOffset());
         return lattice;
     }
-
-    void addEdge(Configuration* configuration) {
-        next.push_back(configuration);
-    }
-
-    Configuration* getParent() {
-        return parent;
-    }
-
-    std::vector<Configuration*> getNext() {
-        return next;
-    }
-
-    Lattice getLattice() {
-        return lattice;
-    }
-
-    State getState() {
-        return state;
-    }
 };
 
 class ConfigurationSpace {
@@ -631,40 +609,19 @@ public:
     run bfs on configuration space
     return path of bfs via states taken
     */
-    std::vector<Configuration*> bfs(Configuration* start, Configuration* final) {
-        std::queue<Configuration*> q;
-        std::unordered_set<Configuration*> visited;
-        q.push(start);
-        visited.insert(start);
+    void bfs(Lattice& initialLattice, Lattice& finalLattice) {
+        std::vector<Lattice> visited;
+        std::queue<Lattice> q;
+        q.push(initialLattice);
         while (!q.empty()) {
-            Configuration* current = q.front();
+            Lattice current = q.front();
             q.pop();
-            if (current == final) {
-                return findPath(start, final);
-            }
-            for (Configuration* next: current->getNext()) {
-                if (visited.find(next) == visited.end()) {
-                    q.push(next);
-                    visited.insert(next);
-                }
+            Lattice next = current;
+            if (std::find(visited.begin(), visited.end(), next) == visited.end()) {
+                q.push(next);
+                visited.push_back(next);
             }
         }
-    }
-    
-    /*
-    backtrack to find path from start to final
-    return path of configurations
-    */
-    std::vector<Configuration*> findPath(Configuration* start, Configuration* final) {
-        std::vector<Configuration*> path;
-        Configuration* current = final;
-        while (current != start) {
-            path.push_back(current);
-            current = current->getParent();
-        }
-        path.push_back(start);
-        std::reverse(path.begin(), path.end());
-        return path;
     }
 };
 
