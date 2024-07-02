@@ -567,7 +567,7 @@ private:
     Lattice lattice;
     State state;
 public:
-    std::vector<std::vector<Lattice>> makeAllMoves(const Lattice& lattice) {
+    std::vector<std::vector<Lattice>> makeAllMoves(Lattice& lattice) {
         std::vector<std::vector<Lattice>> result;
         for (auto module: ModuleIdManager::Modules()) {
             result.emplace_back(makeMoves(lattice, module));
@@ -578,17 +578,27 @@ public:
     /*
     Returns upto 8 possible lattice configurations from given lattice per movable modules
     */
-    std::vector<Lattice> makeMoves(const Lattice& lattice, const Module& module) {
+    std::vector<Lattice> makeMoves(Lattice& lattice, Module& module) {
         std::vector<Lattice> result;
-        // to be implemented
-        /*for (auto move : moves) {
-            result.emplace_back(applyMove(lattice, module, move));
-        }*/
+        std::ifstream moveFile("Moves/Slide_1.txt");
+        if (!moveFile) {
+            std::cerr << "Unable to open file Moves/Slide_1.txt";
+            return result;
+        }
+        Move2d move;
+        move.InitMove(moveFile);
+        moveFile.close();
+        MoveManager::GenerateMovesFrom(&move);
+        auto legalMoves = MoveManager::CheckAllMoves(lattice.coordTensor, module);
+        for (auto move : legalMoves) {
+            result.emplace_back(applyMove(lattice, module, *move));
+        }
         return result;
     }
 
-    Lattice applyMove(const Lattice& lattice, const Module& module, const MoveBase& move) {
-
+    Lattice applyMove(Lattice lattice, Module& module, MoveBase& move) {
+        lattice.moveModule(module, move.MoveOffset());
+        return lattice;
     }
 };
 
@@ -599,7 +609,7 @@ public:
     run bfs on configuration space
     return path of bfs via states taken
     */
-    void bfs(const Lattice& initialLattice, const Lattice& finalLattice) {
+    void bfs(Lattice& initialLattice, Lattice& finalLattice) {
         std::vector<Lattice> visited;
         std::queue<Lattice> q;
         q.push(initialLattice);
