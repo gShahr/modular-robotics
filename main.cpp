@@ -363,7 +363,10 @@ public:
         std::vector<MoveBase*> LegalMoves = {};
         for (auto move : _moves) {
             if (move->MoveCheck(tensor, mod)) {
+                std::cout << "passed!\n";
                 LegalMoves.push_back(move);
+            } else {
+                std::cout << "failed!\n";
             }
         }
         return LegalMoves;
@@ -722,7 +725,9 @@ int main() {
     }
     Move2d move;
     move.InitMove(moveFile);
-    bool test = move.MoveCheck(lattice.coordTensor, ModuleIdManager::Modules()[0]);
+    MoveManager::GenerateMovesFrom(&move);
+    auto legalMoves = MoveManager::CheckAllMoves(lattice.coordTensor, ModuleIdManager::Modules()[0]);
+    bool test = !legalMoves.empty();
     std::cout << (test ? "MoveCheck Passed!" : "MoveCheck Failed!") << std::endl;
     moveFile.close();
     if (test) {
@@ -730,10 +735,9 @@ int main() {
         lattice.moveModule(ModuleIdManager::Modules()[0], move.MoveOffset());
         std::cout << lattice;
     }
-    MoveManager::GenerateMovesFrom(&move);
     // movegen testing
     // test = move.MoveCheck(lattice.coordTensor, ModuleIdManager::Modules()[2]);
-    auto legalMoves = MoveManager::CheckAllMoves(lattice.coordTensor, ModuleIdManager::Modules()[2]);
+    legalMoves = MoveManager::CheckAllMoves(lattice.coordTensor, ModuleIdManager::Modules()[2]);
     test = !legalMoves.empty();
     std::cout << (test ? "MoveCheck Passed!" : "MoveCheck Failed!") << std::endl;
     moveFile.close();
