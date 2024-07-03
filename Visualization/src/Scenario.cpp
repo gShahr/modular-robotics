@@ -26,6 +26,7 @@ Scenario::Scenario(const char* filepath) {
     int i;
     int buf[5]; // maximum of 5 values per line expected
     while (std::getline(stream, line)) {
+        line = line.substr(0, line.find("//"));
         if (line.empty()) {
             parsedInitials = true;
             continue;
