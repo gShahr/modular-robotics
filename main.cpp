@@ -10,6 +10,7 @@
 #include "debug_util.h"
 #include <boost/functional/hash.hpp>
 #include <queue>
+#include <unordered_set>
 
 class Module;
 
@@ -94,23 +95,17 @@ private:
     }
 
 public:
-    std::vector<bool> grid;
+    CoordTensor<bool> stateTensor;
     // CoordTensor, should eventually replace coordmat
     CoordTensor<int> coordTensor;
     // Holds coordinate info for articulation points / cut vertices
     std::vector<std::valarray<int>> articulationPoints;
 
-    Lattice(int order, int axisSize) : coordTensor(order, axisSize), order(order), axisSize(axisSize), time(0), moduleCount(0) {
-        grid.resize(pow(axisSize, order), false);
-    }
+    Lattice(int order, int axisSize) : stateTensor(order, axisSize, false), coordTensor(order, axisSize, -1), order(order), axisSize(axisSize), time(0), moduleCount(0) {}
 
     // Add a new module
     void addModule(const std::valarray<int>& coords) {
-        int index = 0;
-        for (int i = 0; i < coords.size(); i++) {
-             index += i * pow(axisSize, i) * coords[i];
-        }
-        grid[index] = true;
+        stateTensor[{coords}] = true;
         // Create and register new module
         Module mod(coords);
         ModuleIdManager::RegisterModule(mod);
@@ -144,7 +139,7 @@ public:
                 addEdge(mod.id, coordTensor[adjCoords]);
             }
             // Don't want to check both ways if it can be avoided, also don't want to check index beyond max value
-            if (!bothWays || adjCoords[i] + 1 == axisSize) {
+            if (!bothWays || adjCoords[i] + 2 == axisSize) {
                 adjCoords[i]++;
                 continue;
             }
@@ -230,15 +225,26 @@ public:
 
     bool operator==(const Lattice& other) {
         bool result = false;
-        if (grid.size() == other.grid.size()) {
+        if (stateTensor.GetArrayInternal().size() == other.stateTensor.GetArrayInternal().size()) {
             result = true;
-            for (int i = 0; i < grid.size(); i++) {
-                if (grid[i] != other.grid[i]) {
+            // this local vector is ideally a temporary solution
+            auto& otherArrInternal = other.stateTensor.GetArrayInternal();
+            for (int i = 0; i < stateTensor.GetArrayInternal().size(); i++) {
+                if (stateTensor.GetIdDirect(i) != otherArrInternal[i]) {
                     return false;
                 }
             }
         }
         return result;
+    }
+
+    Lattice& operator=(const CoordTensor<bool> coordTensor) {
+        return *this;
+        // TODO
+    }
+
+    void setState(const CoordTensor<bool>& newState) {
+        Lattice::stateTensor = newState;
     }
 
     friend std::ostream& operator<<(std::ostream& out, /*const*/ Lattice& lattice);
@@ -261,6 +267,7 @@ std::ostream& operator<<(std::ostream& out, /*const*/ Lattice& lattice) {
 
 namespace Move {
     enum State {
+        NOCHECK = ' ',
         EMPTY = 'x',
         INITIAL = '?',
         FINAL = '!',
@@ -272,6 +279,8 @@ class MoveBase {
 protected:
     // each pair represents a coordinate offset to check and whether a module should be there or not
     std::vector<std::pair<std::valarray<int>, bool>> moves;
+    // bounds ex: {(2, 1), (0, 1)} would mean bounds extend from -2 to 1 on x-axis and 0 to 1 on y-axis
+    std::vector<std::pair<int, int>> bounds;
     std::valarray<int> initPos, finalPos;
     int order = -1;
 public:
@@ -286,6 +295,7 @@ public:
     void RotateMove(int index) {
         std::swap(initPos[0], initPos[index]);
         std::swap(finalPos[0], finalPos[index]);
+        std::swap(bounds[0], bounds[index]);
         for (auto& move : moves) {
             std::swap(move.first[0], move.first[index]);
         }
@@ -294,6 +304,7 @@ public:
     void ReflectMove(int index) {
         initPos[index] *= -1;
         finalPos[index] *= -1;
+        std::swap(bounds[index].first, bounds[index].second);
         for (auto& move : moves) {
             move.first[index] *= -1;
         }
@@ -361,7 +372,10 @@ public:
         std::vector<MoveBase*> LegalMoves = {};
         for (auto move : _moves) {
             if (move->MoveCheck(tensor, mod)) {
+                std::cout << "passed!\n";
                 LegalMoves.push_back(move);
+            } else {
+                std::cout << "failed!\n";
             }
         }
         return LegalMoves;
@@ -381,6 +395,7 @@ class Move2d : public MoveBase {
 public:
     Move2d() {
         order = 2;
+        bounds.resize(order, {0, 0});
     }
 
     [[nodiscard]]
@@ -392,9 +407,14 @@ public:
 
     void InitMove(std::ifstream& moveFile) override {
         int x = 0, y = 0;
+        std::valarray<int> maxBounds = {0, 0};
         std::string line;
         while (std::getline(moveFile, line)) {
             for (auto c : line) {
+                if (c == Move::NOCHECK) {
+                    x++;
+                    continue;
+                }
                 if (c == Move::EMPTY) {
                     moves.push_back({{x, y}, false});
                 } else if (c == Move::STATIC) {
@@ -404,6 +424,13 @@ public:
                     finalPos = {x, y};
                 } else if (c == Move::INITIAL) {
                     initPos = {x, y};
+                    bounds = {{x, 0}, {y, 0}};
+                }
+                if (x > maxBounds[0]) {
+                    maxBounds[0] = x;
+                }
+                if (y > maxBounds[1]) {
+                    maxBounds[1] = y;
                 }
                 x++;
             }
@@ -416,9 +443,19 @@ public:
         }
         finalPos -= initPos;
         DEBUG("Move Offset: " << finalPos[0] << ", " << finalPos[1] << std::endl);
+        maxBounds -= initPos;
+        bounds[0].second = maxBounds[0];
+        bounds[1].second = maxBounds[1];
     }
 
     bool MoveCheck(CoordTensor<int>& tensor, const Module& mod) override {
+        // Bounds checking
+        for (int i = 0; i < order; i++) {
+            if (mod.coords[i] - bounds[i].first < 0 || mod.coords[i] + bounds[i].second >= tensor.AxisSize()) {
+                return false;
+            }
+        }
+        // Move Check
         for (const auto& move : moves) {
             if ((tensor[mod.coords + move.first] < 0) == move.second) {
                 return false;
@@ -432,6 +469,7 @@ class Move3d : public MoveBase {
 public:
     Move3d() {
         order = 3;
+        bounds.resize(3, {0, 0});
     }
 
     [[nodiscard]]
@@ -443,6 +481,7 @@ public:
 
     void InitMove(std::ifstream& moveFile) override {
         int x = 0, y = 0, z = 0;
+        std::valarray<int> maxBounds = {0, 0, 0};
         std::string line;
         while (std::getline(moveFile, line)) {
             if (line.empty()) {
@@ -451,6 +490,10 @@ public:
                 continue;
             }
             for (auto c : line) {
+                if (c == Move::NOCHECK) {
+                    x++;
+                    continue;
+                }
                 if (c == Move::EMPTY) {
                     moves.push_back({{x, y, z}, false});
                 } else if (c == Move::STATIC) {
@@ -460,6 +503,16 @@ public:
                     finalPos = {x, y, z};
                 } else if (c == Move::INITIAL) {
                     initPos = {x, y, z};
+                    bounds = {{x, 0}, {y, 0}, {z, 0}};
+                }
+                if (x > maxBounds[0]) {
+                    maxBounds[0] = x;
+                }
+                if (y > maxBounds[1]) {
+                    maxBounds[1] = y;
+                }
+                if (z > maxBounds[2]) {
+                    maxBounds[2] = z;
                 }
                 x++;
             }
@@ -472,9 +525,20 @@ public:
         }
         finalPos -= initPos;
         DEBUG("Move Offset: " << finalPos[0] << ", " << finalPos[1] << ", " << finalPos[2] << std::endl);
+        maxBounds -= initPos;
+        bounds[0].second = maxBounds[0];
+        bounds[1].second = maxBounds[1];
+        bounds[2].second = maxBounds[2];
     }
 
     bool MoveCheck(CoordTensor<int>& tensor, const Module& mod) override {
+        // Bounds checking
+        for (int i = 0; i < order; i++) {
+            if (mod.coords[i] - bounds[i].first < 0 || mod.coords[i] + bounds[i].second >= tensor.AxisSize()) {
+                return false;
+            }
+        }
+        // Move Check
         for (const auto& move : moves) {
             if ((tensor[mod.coords + move.first] < 0) == move.second) {
                 return false;
@@ -484,60 +548,102 @@ public:
     }
 };
 
-class State {
+class HashedState {
 private:
     size_t seed;
 public:
-    State() : seed(0) {}
+    HashedState() : seed(0) {}
 
-    State(size_t seed) : seed(seed) {}
+    HashedState(size_t seed) : seed(seed) {}
+
+    HashedState(CoordTensor<bool> coordTensor) {
+        hashCoordTensor(coordTensor);
+    }
+
+    HashedState(const HashedState& other) : seed(other.getSeed()) {}
 
     size_t getSeed() const { return seed; }
-
     /*
     pass in information about lattice (hash bool of where modules are or bitfield c++)
     return hash value
     */
-    static std::size_t hashLattice(const Lattice& lattice) {
-        return boost::hash_range(lattice.grid.begin(), lattice.grid.end());
+    void hashLattice(const Lattice& lattice) {
+        seed = boost::hash_range(lattice.stateTensor.GetArrayInternal().begin(), lattice.stateTensor.GetArrayInternal().end());
     }
 
-    bool compareStates(const State& other) const { return seed == other.getSeed(); }
+    void hashCoordTensor(const CoordTensor<bool>& coordTensor) {
+        seed = boost::hash_range(coordTensor.GetArrayInternal().begin(), coordTensor.GetArrayInternal().end());
+    }
+
+    bool compareStates(const HashedState& other) const { return seed == other.getSeed(); }
     /*
     check how to do this properly (operator overload function in lattice function)
     return true iff lattice have the same structure of modules
     */
     bool compareLattice(const Lattice& Lattice1, const Lattice& Lattice2) {}
+
+    bool operator==(const HashedState& other) const {
+        return seed == other.getSeed();
+    }
 };
+
+namespace std {
+    template<>
+    struct hash<HashedState> {
+        std::size_t operator()(const HashedState& state) const {
+            return std::hash<int>()(state.getSeed());
+        }
+    };
+}
 
 class Configuration {
 private:
     Configuration* parent;
-    Lattice lattice;
-    State state;
+    std::vector<Configuration*> next;
+    CoordTensor<bool> state;
+    HashedState hash;
 public:
-    std::vector<std::vector<Lattice>> makeAllMoves(const Lattice& lattice) {
-        std::vector<std::vector<Lattice>> result;
+    Configuration(CoordTensor<bool> state) : state(state) {}
+
+    std::vector<CoordTensor<bool>> makeAllMoves(Lattice& lattice) {
+        std::vector<CoordTensor<bool>> result;
+        lattice.setState(state);
         for (auto module: ModuleIdManager::Modules()) {
-            result.emplace_back(makeMoves(lattice, module));
+            auto legalMoves = MoveManager::CheckAllMoves(lattice.coordTensor, module);
+            for (auto move : legalMoves) {
+                lattice.moveModule(module, move->MoveOffset());
+                result.push_back(lattice.stateTensor);
+            }
         }
         return result;
     }
 
-    /*
-    Returns upto 8 possible lattice configurations from given lattice per movable modules
-    */
-    std::vector<Lattice> makeMoves(const Lattice& lattice, const Module& module) {
-        std::vector<Lattice> result;
-        // to be implemented
-        /*for (auto move : moves) {
-            result.emplace_back(applyMove(lattice, module, move));
-        }*/
-        return result;
+    void addEdge(Configuration* configuration) {
+        next.push_back(configuration);
     }
 
-    Lattice applyMove(const Lattice& lattice, const Module& module, const MoveBase& move) {
+    Configuration* getParent() {
+        return parent;
+    }
 
+    std::vector<Configuration*> getNext() {
+        return next;
+    }
+
+    CoordTensor<bool> getState() {
+        return state;
+    }
+
+    HashedState getHash() {
+        return hash;
+    }
+
+    void setState(CoordTensor<bool> state) {
+        this->state = state;
+    }
+
+    void setParent(Configuration* configuration) {
+        parent = configuration;
     }
 };
 
@@ -548,19 +654,43 @@ public:
     run bfs on configuration space
     return path of bfs via states taken
     */
-    void bfs(const Lattice& initialLattice, const Lattice& finalLattice) {
-        std::vector<Lattice> visited;
-        std::queue<Lattice> q;
-        q.push(initialLattice);
+    std::vector<Configuration*> bfs(Configuration* start, Configuration* final, Lattice& lattice) {
+        std::queue<Configuration*> q;
+        std::unordered_set<HashedState> visited;
+        q.push(start);
+        visited.insert(start->getHash());
         while (!q.empty()) {
-            Lattice current = q.front();
+            Configuration* current = q.front();
             q.pop();
-            Lattice next = current;
-            if (std::find(visited.begin(), visited.end(), next) == visited.end()) {
-                q.push(next);
-                visited.push_back(next);
+            if (current == final) {
+                return findPath(start, final);
+            }
+            auto adjList = current->makeAllMoves(lattice);
+            for (auto node: adjList) {
+                if (visited.find(HashedState(node)) == visited.end()) {
+                    Configuration* nextConfiguration = new Configuration(node);
+                    nextConfiguration->setParent(current);
+                    q.push(nextConfiguration);
+                    visited.insert(node);
+                }
             }
         }
+    }
+    
+    /*
+    backtrack to find path from start to final
+    return path of configurations
+    */
+    std::vector<Configuration*> findPath(Configuration* start, Configuration* final) {
+        std::vector<Configuration*> path;
+        Configuration* current = final;
+        while (current != start) {
+            path.push_back(current);
+            current = current->getParent();
+        }
+        path.push_back(start);
+        std::reverse(path.begin(), path.end());
+        return path;
     }
 };
 
@@ -618,7 +748,9 @@ int main() {
     }
     Move2d move;
     move.InitMove(moveFile);
-    bool test = move.MoveCheck(lattice.coordTensor, ModuleIdManager::Modules()[0]);
+    MoveManager::GenerateMovesFrom(&move);
+    auto legalMoves = MoveManager::CheckAllMoves(lattice.coordTensor, ModuleIdManager::Modules()[0]);
+    bool test = !legalMoves.empty();
     std::cout << (test ? "MoveCheck Passed!" : "MoveCheck Failed!") << std::endl;
     moveFile.close();
     if (test) {
@@ -626,10 +758,9 @@ int main() {
         lattice.moveModule(ModuleIdManager::Modules()[0], move.MoveOffset());
         std::cout << lattice;
     }
-    MoveManager::GenerateMovesFrom(&move);
     // movegen testing
     // test = move.MoveCheck(lattice.coordTensor, ModuleIdManager::Modules()[2]);
-    auto legalMoves = MoveManager::CheckAllMoves(lattice.coordTensor, ModuleIdManager::Modules()[2]);
+    legalMoves = MoveManager::CheckAllMoves(lattice.coordTensor, ModuleIdManager::Modules()[2]);
     test = !legalMoves.empty();
     std::cout << (test ? "MoveCheck Passed!" : "MoveCheck Failed!") << std::endl;
     moveFile.close();

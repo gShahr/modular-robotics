@@ -1,4 +1,4 @@
-CFLAGS=-I$(IDIR) 
+CFLAGS=-I$(IDIR) -std=c++11
 _COMMA:=,
 
 ODIR=obj
@@ -32,7 +32,7 @@ else
     _LIBS=libglfw3_arm64.a
     LIBS = $(patsubst %,$(LDIR)/$(LIBSUBFOLDER)/%,$(_LIBS))
 
-    OSCFLAGS += -framework Cocoa -framework OpenGL -framework IOKit
+    OSCFLAGS += -framework Cocoa -framework OpenGL -framework IOKit -Wc++11-extensions
     OSCFLAGS := $(LIBS) $(OSCFLAGS)
 endif
 

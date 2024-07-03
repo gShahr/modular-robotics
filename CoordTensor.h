@@ -16,27 +16,31 @@ public:
     // represent a point in space.
     // Axis size determines the length of each axis, an axis size of 10
     // would mean that only the integers 0-9 would be valid coordinates.
-    CoordTensor(int order, int axisSize);
+    CoordTensor(int order, int axisSize, const typename std::vector<T>::value_type& value);
 
     // Gets a reference to an ID directly from the internal array, this
     // is always faster than calling IdAtInternal but requires a pre-calculated
     // index in order to work.
-    T& GetIdDirect(int index);
+    typename std::vector<T>::reference GetIdDirect(int index);
 
     // IdAt returns a reference to the module ID stored at the given
     // coordinates. An ID of -1 means no module is present.
-    T& IdAt(const std::valarray<int>& coords);
+    typename std::vector<T>::reference IdAt(const std::valarray<int>& coords);
 
     // Identical to IdAt but uses the subscript operator, mostly here to
     // make moving to CoordTensor easier.
-    T& operator[](const std::valarray<int>& coords);
+    typename std::vector<T>::reference operator[](const std::valarray<int>& coords);
 
     // Get a const reference to the internal array
-    const std::vector<T>& GetArrayInternal(void) const;
-    // std::vector<T>::size_type size(void) const;
+    const std::vector<T>& GetArrayInternal() const;
+
+    // Get a copy of axisSize
+    const int AxisSize() const;
 private:
+    // Axis size, useful for bounds checking
+    int _axisSize;
     // Coordinate multiplier cache for tensors of order > 3
-    std::valarray<T> _axisMultipliers;
+    std::valarray<int> _axisMultipliers;
     // Internal array responsible for holding module IDs
     std::vector<T> _arrayInternal;
     // Internal array responsible for holding slices of _arrayInternal
@@ -44,33 +48,39 @@ private:
     // Internal array responsible for holding slices of _arrayInternal2D
     std::vector<T**> _arrayInternal3D;
     // Did you know that calling member function pointers looks really weird?
-    T& (CoordTensor::*IdAtInternal)(const std::valarray<int>& coords);
+    typename std::vector<T>::reference (CoordTensor::*IdAtInternal)(const std::valarray<int>& coords);
     // 2nd and 3rd order tensors benefit from specialized IdAt functions
-    T& IdAt2ndOrder (const std::valarray<int>& coords);
-    T& IdAt3rdOrder (const std::valarray<int>& coords);
+    typename std::vector<T>::reference IdAt2ndOrder (const std::valarray<int>& coords);
+    typename std::vector<T>::reference IdAt3rdOrder (const std::valarray<int>& coords);
     // Generalized IdAtInternal function
-    T& IdAtNthOrder (const std::valarray<int>& coords);
+    typename std::vector<T>::reference IdAtNthOrder (const std::valarray<int>& coords);
 };
 
+template<typename T>
+const int CoordTensor<T>::AxisSize() const {
+    return _axisSize;
+}
+
 template <typename T>
-CoordTensor<T>::CoordTensor(int order, int axisSize) {
+CoordTensor<T>::CoordTensor(int order, int axisSize, const typename std::vector<T>::value_type& value) {
+    _axisSize = axisSize;
     // Calculate number of elements in tensor
-    int internalSize = (int) std::pow(axisSize, order);
+    int internalSize = (int) std::pow(_axisSize, order);
     // Resize internal array to accommodate all elements
-    _arrayInternal.resize(internalSize, -1);
+    _arrayInternal.resize(internalSize, value);
     // Set size of 2nd order array
-    internalSize = axisSize;
+    internalSize = _axisSize;
     switch (order) {
         case 3:
             // 2nd order array will need to be larger if tensor is 3rd order
-            internalSize *= axisSize;
+            internalSize *= _axisSize;
         case 2:
             // Initialize 2nd order array
             _arrayInternal2D.resize(internalSize);
             for (int i = 0; i < internalSize; i++) {
-                _arrayInternal2D[i] = &(_arrayInternal[i * axisSize]);
+                _arrayInternal2D[i] = &(_arrayInternal[i * _axisSize]);
             }
-            if (internalSize == axisSize) {
+            if (internalSize == _axisSize) {
                 // If internalSize wasn't modified by case 3, then tensor is 2nd order
                 IdAtInternal = &CoordTensor::IdAt2ndOrder;
                 DEBUG("2nd order tensor created\n");
@@ -78,9 +88,9 @@ CoordTensor<T>::CoordTensor(int order, int axisSize) {
             }
             // Otherwise tensor is 3rd order
             // Initialize 3rd order array
-            _arrayInternal3D.resize(axisSize);
-            for (int i = 0; i < axisSize; i++) {
-                _arrayInternal3D[i] = &(_arrayInternal2D[i * axisSize]);
+            _arrayInternal3D.resize(_axisSize);
+            for (int i = 0; i < _axisSize; i++) {
+                _arrayInternal3D[i] = &(_arrayInternal2D[i * _axisSize]);
             }
             IdAtInternal = &CoordTensor::IdAt3rdOrder;
             DEBUG("3rd order tensor created\n");
@@ -92,7 +102,7 @@ CoordTensor<T>::CoordTensor(int order, int axisSize) {
             int multiplier = 1;
             for (int i = 0; i < order; i++) {
                 _axisMultipliers[i] = multiplier;
-                multiplier *= axisSize;
+                multiplier *= _axisSize;
             }
             IdAtInternal = &CoordTensor::IdAtNthOrder;
             DEBUG("Tensor of order " << order << " created\n");
@@ -110,13 +120,41 @@ CoordTensor<T>::CoordTensor(int order, int axisSize) {
 #endif
 }
 
+template<>
+CoordTensor<bool>::CoordTensor(int order, int axisSize, const typename std::vector<bool>::value_type& value) {
+    _axisSize = axisSize;
+    // Calculate number of elements in tensor
+    int internalSize = (int) std::pow(_axisSize, order);
+    // Resize internal array to accommodate all elements
+    _arrayInternal.resize(internalSize, value);
+    // If the tensor is not 2nd or 3rd order then the
+    // coordinate multiplier cache needs to be set up
+    _axisMultipliers.resize(order);
+    int multiplier = 1;
+    for (int i = 0; i < order; i++) {
+        _axisMultipliers[i] = multiplier;
+        multiplier *= _axisSize;
+    }
+    IdAtInternal = &CoordTensor::IdAtNthOrder;
+    DEBUG("Tensor of order " << order << " created\n");
+#ifndef NDEBUG
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "ConstantConditionsOC"
+#pragma ide diagnostic ignored "UnreachableCode"
+    std::cout << "IdAtInternal Function: " << (
+            IdAtInternal == &CoordTensor::IdAtNthOrder ? "IdAtNthOrder" :
+            "Invalid Function!") << std::endl;
+#pragma clang diagnostic pop
+#endif
+}
+
 template <typename T>
-T& CoordTensor<T>::GetIdDirect(int index) {
+typename std::vector<T>::reference CoordTensor<T>::GetIdDirect(int index) {
     return _arrayInternal[index];
 }
 
 template <typename T>
-inline T& CoordTensor<T>::IdAt(const std::valarray<int>& coords) {
+inline typename std::vector<T>::reference CoordTensor<T>::IdAt(const std::valarray<int>& coords) {
     // Told you calling member function pointers looks weird
     return (this->*IdAtInternal)(coords);
     // This would look even worse if IdAtInternal were called from outside,
@@ -124,22 +162,22 @@ inline T& CoordTensor<T>::IdAt(const std::valarray<int>& coords) {
 }
 
 template <typename T>
-T& CoordTensor<T>::IdAt2ndOrder (const std::valarray<int>& coords) {
+typename std::vector<T>::reference CoordTensor<T>::IdAt2ndOrder (const std::valarray<int>& coords) {
     return _arrayInternal2D[coords[1]][coords[0]];
 }
 
 template <typename T>
-T& CoordTensor<T>::IdAt3rdOrder (const std::valarray<int>& coords) {
+typename std::vector<T>::reference CoordTensor<T>::IdAt3rdOrder (const std::valarray<int>& coords) {
     return _arrayInternal3D[coords[2]][coords[1]][coords[0]];
 }
 
 template <typename T>
-T& CoordTensor<T>::IdAtNthOrder (const std::valarray<int>& coords) {
+typename std::vector<T>::reference CoordTensor<T>::IdAtNthOrder (const std::valarray<int>& coords) {
     return _arrayInternal[(coords * _axisMultipliers).sum()];
 }
 
 template <typename T>
-T& CoordTensor<T>::operator[](const std::valarray<int> &coords) {
+typename std::vector<T>::reference CoordTensor<T>::operator[](const std::valarray<int> &coords) {
     return (this->*IdAtInternal)(coords);
 }
 
