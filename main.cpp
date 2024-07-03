@@ -548,42 +548,60 @@ public:
     }
 };
 
-class hashedState {
+class HashedState {
 private:
     size_t seed;
 public:
-    hashedState() : seed(0) {}
+    HashedState() : seed(0) {}
 
-    hashedState(size_t seed) : seed(seed) {}
+    HashedState(size_t seed) : seed(seed) {}
+
+    HashedState(CoordTensor<bool> coordTensor) {
+        hashCoordTensor(coordTensor);
+    }
+
+    HashedState(const HashedState& other) : seed(other.getSeed()) {}
 
     size_t getSeed() const { return seed; }
-
     /*
     pass in information about lattice (hash bool of where modules are or bitfield c++)
     return hash value
     */
-    static std::size_t hashLattice(const Lattice& lattice) {
-        return boost::hash_range(lattice.stateTensor.GetArrayInternal().begin(), lattice.stateTensor.GetArrayInternal().end());
+    void hashLattice(const Lattice& lattice) {
+        seed = boost::hash_range(lattice.stateTensor.GetArrayInternal().begin(), lattice.stateTensor.GetArrayInternal().end());
     }
 
-    static std::size_t hashCoordTensor(const CoordTensor<bool>& coordTensor) {
-        return boost::hash_range(coordTensor.GetArrayInternal().begin(), coordTensor.GetArrayInternal().end());
+    void hashCoordTensor(const CoordTensor<bool>& coordTensor) {
+        seed = boost::hash_range(coordTensor.GetArrayInternal().begin(), coordTensor.GetArrayInternal().end());
     }
 
-    bool compareStates(const hashedState& other) const { return seed == other.getSeed(); }
+    bool compareStates(const HashedState& other) const { return seed == other.getSeed(); }
     /*
     check how to do this properly (operator overload function in lattice function)
     return true iff lattice have the same structure of modules
     */
     bool compareLattice(const Lattice& Lattice1, const Lattice& Lattice2) {}
+
+    bool operator==(const HashedState& other) const {
+        return seed == other.getSeed();
+    }
 };
+
+namespace std {
+    template<>
+    struct hash<HashedState> {
+        std::size_t operator()(const HashedState& state) const {
+            return std::hash<int>()(state.getSeed());
+        }
+    };
+}
 
 class Configuration {
 private:
     Configuration* parent;
     std::vector<Configuration*> next;
     CoordTensor<bool> state;
-    hashedState hash;
+    HashedState hash;
 public:
     Configuration(CoordTensor<bool> state) : state(state) {}
 
@@ -612,6 +630,14 @@ public:
         return next;
     }
 
+    CoordTensor<bool> getState() {
+        return state;
+    }
+
+    HashedState getHash() {
+        return hash;
+    }
+
     void setState(CoordTensor<bool> state) {
         this->state = state;
     }
@@ -628,23 +654,22 @@ public:
     run bfs on configuration space
     return path of bfs via states taken
     */
-    std::vector<Configuration*> bfs(Configuration* start, Configuration* final) {
+    std::vector<Configuration*> bfs(Configuration* start, Configuration* final, Lattice& lattice) {
         std::queue<Configuration*> q;
-        std::unordered_set<hashedNode> visited;
+        std::unordered_set<HashedState> visited;
         q.push(start);
-        visited.insert(start);
+        visited.insert(start->getHash());
         while (!q.empty()) {
             Configuration* current = q.front();
             q.pop();
             if (current == final) {
                 return findPath(start, final);
             }
-            auto adjList = current->makeAllMoves();
+            auto adjList = current->makeAllMoves(lattice);
             for (auto node: adjList) {
-                // check if hashed node is visited
-                if (visited.find(hashedNode(node)) == visited.end()) {
-                    Configuration nextConfiguration = new Configuration(node);
-                    nextConfiguration.setParent(current);
+                if (visited.find(HashedState(node)) == visited.end()) {
+                    Configuration* nextConfiguration = new Configuration(node);
+                    nextConfiguration->setParent(current);
                     q.push(nextConfiguration);
                     visited.insert(node);
                 }
