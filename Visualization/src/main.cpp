@@ -3,6 +3,7 @@
 #include <math.h>
 #include <algorithm>            // clamp
 #include <deque>                // Animation sequences
+#include <map>
 #include <unordered_map>        // Hashmap of all <ID, object>
 #include "glad/glad.h"
 #include "glfw3.h"
