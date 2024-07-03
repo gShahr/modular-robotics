@@ -34,9 +34,13 @@ public:
     // Get a const reference to the internal array
     const std::vector<T>& GetArrayInternal() const;
 
+    // Get a copy of order
+    const int OrderSize() const;
+
     // Get a copy of axisSize
     const int AxisSize() const;
 private:
+    int _orderSize;
     // Axis size, useful for bounds checking
     int _axisSize;
     // Coordinate multiplier cache for tensors of order > 3
@@ -57,12 +61,18 @@ private:
 };
 
 template<typename T>
+const int CoordTensor<T>::OrderSize() const {
+    return _orderSize;
+}
+
+template<typename T>
 const int CoordTensor<T>::AxisSize() const {
     return _axisSize;
 }
 
 template <typename T>
 CoordTensor<T>::CoordTensor(int order, int axisSize, const typename std::vector<T>::value_type& value) {
+    _orderSize = order;
     _axisSize = axisSize;
     // Calculate number of elements in tensor
     int internalSize = (int) std::pow(_axisSize, order);
