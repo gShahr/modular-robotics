@@ -31,7 +31,7 @@ float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
 float ANIM_SPEED = 1.5f;
-bool ANIMATE = true;
+bool ANIMATE = false;
 
 const float CAMERA_MAX_SPEED = 25.0f;
 const float CAMERA_ACCEL = 0.10f;
@@ -292,6 +292,8 @@ int main(int argc, char** argv) {
     projmat = glm::perspective(glm::radians(45.0f), asprat, 0.1f, 100.0f);
 
     Scenario testScenario = Scenario("Scenarios/2x2x2_Metamodule.scen");
+    //Scenario testScenario = Scenario("Scenarios/Testing/Simple.scen");
+    //Scenario testScenario = Scenario("Scenarios/Testing/3x3x3_Candidate.scen");
     ObjectCollection* scenCubes = testScenario.toObjectCollection(&shader, VAO, texture);
     MoveSequence* scenMoveSeq = testScenario.toMoveSequence();
 
@@ -311,7 +313,7 @@ int main(int argc, char** argv) {
         cameraPos += (cameraSpeed.y * cameraUp * deltaTime);
         viewmat = glm::lookAt(cameraPos, cameraPos + cameraDirection, cameraUp);
 #else
-        cameraPos = glm::rotate(cameraPos, glm::radians(30.0f * deltaTime), glm::vec3(0.0, 1.0, 0.0));
+        cameraPos = glm::rotate(cameraPos, glm::radians(15.0f * deltaTime), glm::vec3(0.0, 1.0, 0.0));
         viewmat = glm::lookAt(cameraPos, glm::vec3(0.0, 0.0, 0.0), cameraUp);
 #endif
 

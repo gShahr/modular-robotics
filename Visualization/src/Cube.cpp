@@ -73,11 +73,20 @@ void Cube::setPos(int x, int y, int z) {
     this->pos = glm::vec3(x, y, z);
 }
 
+void Cube::setScale(int scale) {
+    this->scale = glm::vec3((float)scale / 100.0f);
+}
+
+void Cube::setColor(int r, int g, int b) {
+    this->color = glm::vec3((float)r/255.0f, (float)g/255.0f, (float)b/255.0f);
+}
+
 Cube::Cube(int id, int x, int y, int z) {
     this->id = id;
     this->setPos(x, y, z);
     this->anim = NULL;
-    this->scale = glm::vec3(0.85f);
+    this->scale = glm::vec3(0.9f);
+    this->color = glm::vec3(1.0f);
     this->rotation = glm::mat4(1.0f);
     gObjects.insert(std::pair<int, Cube*>(id, this));
 }
@@ -144,6 +153,7 @@ void Cube::draw() {
         transform = this->processAnimation() * transform;
     };
 
+    glUniform3fv(colorLoc, 1, glm::value_ptr(this->color));
     glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelmat));
     if (surfaceNormalLoc >= 0) {

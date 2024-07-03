@@ -1,34 +1,48 @@
 #include "Scenario.hpp"
 
+struct VisGroup {
+    int color[3];
+    int scale;
+
+    VisGroup(int r, int g, int b, int scale) {
+        this->color[0] = r;
+        this->color[1] = g;
+        this->color[2] = b;
+        this->scale = scale;
+    }
+};
+
 Scenario::Scenario(const char* filepath) {
     this->cubes = std::vector<Cube*>();
     this->moves = std::vector<Move*>();
+    
+    std::unordered_map<int, VisGroup*> visgroups;
 
     // -- Load file and parse data into Cube and Move objects --
-    std::string raw;
     std::ifstream scenFile;
     std::stringstream stream;
 
     scenFile.exceptions (std::ifstream::failbit | std::ifstream::badbit);
 
-    try
-    {
+    try {
         scenFile.open(filepath);
         stream << scenFile.rdbuf();
-    }
-    catch(std::ifstream::failure e)
-    {
+    } catch(std::ifstream::failure e) {
         std::cout << "ERROR::SCENARIO::FILE_NOT_SUCCESSFULLY_READ" << std::endl;
     }
 
-    bool parsedInitials = false;
-    std::string line, value;
-    int i;
-    int buf[5]; // maximum of 5 values per line expected
+    int currentBlock = 0;       // Which block of the Scenario file we're currently parsing
+    int buf[5];                 // Each line should have a maximum of 5 values. Any further will be ignored
+    int i;                      // Helper iterator variable
+    std::string line, value;    // Each line will be (temp) stored in string. Each component of a line will be (temp) stored in value
+    VisGroup* vg;
+    Cube* cube;
+
     while (std::getline(stream, line)) {
         line = line.substr(0, line.find("//"));
         if (line.empty()) {
-            parsedInitials = true;
+            currentBlock++;
+            std::cout << " -- Parsing new block -- " << currentBlock << std::endl;
             continue;
         }
 
@@ -37,12 +51,29 @@ Scenario::Scenario(const char* filepath) {
             buf[i] = std::stoi(value);
         }
 
-        if (!parsedInitials) {
-            std::cout << "Creating Cube with ID " << buf[0] << " at location " << buf[1] << ", " << buf[2] << ", " << buf[3] << std::endl;
-            this->cubes.push_back(new Cube(buf[0], buf[1], buf[2], buf[3]));
-        } else {
-            std::cout << "Creating Move of Cube ID " << buf[0] << " anchored to Cube " << buf[1] << " with delta position " << buf[2] << ", " << buf[3] << ", " << buf[4] << std::endl;
-            this->moves.push_back(new Move(buf[0], buf[1], glm::vec3(buf[2], buf[3], buf[4])));
+        switch (currentBlock) {
+            case 0: {
+                for (i = 1; i < 4; i++) { buf[i] = glm::clamp(buf[i], 0, 255); }    // Clamp color values to 0-255
+                buf[4] = glm::clamp(buf[4], 10, 100);                               // Clamp size value to 10-100
+                std::cout << "Parsing Group ID " << buf[0] << " with color " << buf[1] << ", " << buf[2] << ", " << buf[3] << ", size " << buf[4] << std::endl;
+                vg = new VisGroup(buf[1], buf[2], buf[3], buf[4]);
+                visgroups.insert(std::pair<int, VisGroup*>(buf[0], vg));
+                break;
+            }
+            case 1: {
+                std::cout << "Creating Cube with ID " << buf[0] << " in group " << buf[1] << " at location " << buf[2] << ", " << buf[3] << ", " << buf[4] << std::endl;
+                cube = new Cube(buf[0], buf[2], buf[3], buf[4]);
+                vg = visgroups.at(buf[1]);
+                cube->setColor(vg->color[0], vg->color[1], vg->color[2]); 
+                cube->setScale(vg->scale);
+                this->cubes.push_back(cube);
+                break;
+            }
+            case 2: {
+                std::cout << "Creating Move of Cube ID " << buf[0] << " anchored to Cube " << buf[1] << " with delta position " << buf[2] << ", " << buf[3] << ", " << buf[4] << std::endl;
+                this->moves.push_back(new Move(buf[0], buf[1], glm::vec3(buf[2], buf[3], buf[4])));
+                break;
+            }
         }
     }
 }

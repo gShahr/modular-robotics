@@ -1,6 +1,6 @@
 #include "Shader.hpp"
 
-unsigned int timeLoc, modelLoc, viewLoc, projLoc, transformLoc, surfaceNormalLoc;
+unsigned int timeLoc, colorLoc, modelLoc, viewLoc, projLoc, transformLoc, surfaceNormalLoc;
 
 Shader::Shader(const char* vertexPath, const char* fragmentPath)
 {
@@ -72,7 +72,8 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
 }
 
 void Shader::use() {
-    timeLoc = glGetUniformLocation(this->ID, "iTime");
+    timeLoc = glGetUniformLocation(this->ID, "uTime");
+    colorLoc = glGetUniformLocation(this->ID, "uColor");
     modelLoc = glGetUniformLocation(this->ID, "modelmat");
     viewLoc = glGetUniformLocation(this->ID, "viewmat");
     projLoc = glGetUniformLocation(this->ID, "projmat");

@@ -6,7 +6,8 @@ in vec3 surfaceNorm;
 out vec4 FragColor;
 uniform sampler2D tex;
 uniform vec2 iResolution;
-uniform float iTime;
+uniform vec3 uColor;
+uniform float uTime;
 uniform vec3 baseSurfaceNorm;
 
 #define WAVEGROWTH 1.5
@@ -66,21 +67,18 @@ float Map(float fromLow, float fromHigh, float toLow, float toHigh, float v) {
 void main()
 {
 
-	vec3 lightSource = vec3(4.0, 4.0, -10.0);
-	float lightAngle = Map(-1.0, 1.0, radians(-120.0), radians(120.0), sin(iTime));
+	vec3 lightSource = vec3(4.0, 4.0, 10.0);
+	float lightAngle = Map(-1.0, 1.0, radians(-120.0), radians(120.0), sin(uTime));
 	lightSource = (rotation3d(vec3(0.0, 1.0, 0.0), lightAngle) * vec4(lightSource, 1.0)).xyz;
 	float incidentLight = max(0.0, dot(normalize(lightSource - worldPos.xyz), surfaceNorm));
 	incidentLight /= length(lightSource - worldPos.xyz);
-	incidentLight *= 4.0;
-	incidentLight += 0.2;
+	incidentLight *= 3.0;
+	incidentLight += 0.3;
 	incidentLight = clamp(incidentLight, 0.0, 1.0);
-
 
 	float borderWidth = 0.005;
 	float borderMask = 1.0 - Rectangle(vec2(borderWidth), vec2(1.0 - 2*borderWidth), texCoord);
 	float interiorMask = 1.0 - borderMask;
-	//vec3 borderColor = vec3(0.2, 0.7, 1.0);
-	//vec3 borderColor = vec3(0.3, 0.8, 0.1);
 	vec3 borderColor = vec3(0.0);
 	vec3 border = borderMask * borderColor;
 
@@ -95,19 +93,15 @@ void main()
     for (int i = 0; i < numwaves; i ++) {
 		thisWaveColor = vec3(random(float(i)), random(float(i)+.1), random(float(i)+.3));
 		thisWaveColor = clamp(thisWaveColor, 0.1, 0.8);
-        thisWaveContribution = noise((texCoord.x + texCoord.y) *(3.0 + float(i)*WAVEGROWTH) + iTime*WAVESPEED, float(i));
+        thisWaveContribution = noise((texCoord.x + texCoord.y) *(3.0 + float(i)*WAVEGROWTH) + uTime*WAVESPEED, float(i));
 		thisWaveContribution = alpha * plot(texCoord, thisWaveContribution, WIDTH);
 		interior += thisWaveContribution * thisWaveColor * 2.;
     }
-	interior *= interiorMask;
-	
-	//FragColor = vec4(border + interior, 1.0);
-	
-	// FragColor = mix(texture(tex, texCoord), vec4(abs(st.xy), step(0.1, dot(st.xy, st.xy)), 1.0), (sin(timeSec) + 1.0) / 2.0);
+    interior = texture(tex, texCoord).xyz * interior;
+	interior = mix(uColor, interior, 0.3);
+    interior *= interiorMask;
 
-	vec3 color = border * borderColor;
-	FragColor = texture(tex, texCoord) * interiorMask + vec4(color, 1.0);
-	FragColor = mix(FragColor, vec4(interior, 1.0), 0.35);
+	FragColor = vec4(interior + border, 1.0);
     FragColor.xyz *= incidentLight;
 
 	//FragColor = texture(tex, texCoord);

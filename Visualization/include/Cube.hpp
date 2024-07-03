@@ -13,7 +13,7 @@
 #include "Animation.hpp"
 
 unsigned int _createCubeVAO();
-extern unsigned int transformLoc, modelLoc, surfaceNormalLoc; // Assigned whenever a shader is loaded
+extern unsigned int colorLoc, transformLoc, modelLoc, surfaceNormalLoc; // Assigned whenever a shader is loaded
 extern float deltaTime, ANIM_SPEED;
 extern bool ANIMATE;
 
@@ -22,6 +22,8 @@ class Cube
 public:
     Cube(int id, int x, int y, int z);
     void setPos(int x, int y, int z);
+    void setScale(int scale);
+    void setColor(int r, int g, int b);
     void draw();
     void startAnimation(bool* markWhenAnimFinished, glm::vec3 AnchorDirection, glm::vec3 DeltaPos);
     void stopAnimation();
@@ -32,6 +34,7 @@ public:
     int id;
 private:
     float animProgress;
+    glm::vec3 color;
     glm::vec3 scale;
     glm::mat4 rotation;
 };

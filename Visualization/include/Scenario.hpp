@@ -8,6 +8,7 @@
 #include <string>
 #include <deque>
 #include <cstdlib>
+#include <map>
 #include "Cube.hpp"
 #include "Move.hpp"
 #include "ObjectCollection.hpp"
