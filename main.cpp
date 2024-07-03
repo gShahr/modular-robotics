@@ -667,23 +667,6 @@ public:
         std::reverse(path.begin(), path.end());
         return path;
     }
-
-    /*
-    TODO
-        Change lattice to coordtensors of bools
-    */
-    void generateNeighbors(Configuration* configuration) {
-        std::vector<std::vector<Lattice>> lattices = configuration->makeAllMoves();
-        for (auto latticeList: lattices) {
-            for (auto lattice: latticeList) {
-                Configuration* newConfiguration = new Configuration();
-                newConfiguration->parent = configuration;
-                newConfiguration->lattice = lattice;
-                newConfiguration.setState(State::hashLattice(lattice));
-                configuration->addEdge(newConfiguration);
-            }
-        }
-    }
 };
 
 int main() {
