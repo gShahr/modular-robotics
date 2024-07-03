@@ -638,14 +638,29 @@ public:
         return hash;
     }
 
-    void setState(CoordTensor<bool> state) {
+    void setStateAndHash(CoordTensor<bool> state) {
         this->state = state;
+        hash = HashedState(state);
     }
 
     void setParent(Configuration* configuration) {
         parent = configuration;
     }
+
+    friend std::ostream& operator<<(std::ostream& os, const Configuration& config) {
+        os << "Configuration: " << config.hash.getSeed() << std::endl;
+        return os;
+    }
 };
+
+std::ostream& operator<<(std::ostream& os, const std::vector<Configuration*>& configs) {
+    for (const auto* config : configs) {
+        if (config) {
+            os << *config << std::endl;
+        }
+    }
+    return os;
+}
 
 class ConfigurationSpace {
 private:
@@ -670,6 +685,7 @@ public:
                 if (visited.find(HashedState(node)) == visited.end()) {
                     Configuration* nextConfiguration = new Configuration(node);
                     nextConfiguration->setParent(current);
+                    nextConfiguration->setStateAndHash(node);
                     q.push(nextConfiguration);
                     visited.insert(node);
                 }
@@ -833,5 +849,11 @@ int main() {
     //
     //  END TESTING
     //
+
+    // BFS TESTING
+    ConfigurationSpace cg = ConfigurationSpace();
+    Configuration* start = new Configuration(lattice.stateTensor);
+    Configuration* end = new Configuration(lattice.stateTensor);
+    auto path = cg.bfs(start, end, lattice);
     return 0;
 }
