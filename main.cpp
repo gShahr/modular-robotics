@@ -238,9 +238,13 @@ public:
         return result;
     }
 
-    Lattice& operator=(CoordTensor<bool> coordTensor) {
+    Lattice& operator=(const CoordTensor<bool> coordTensor) {
         return *this;
         // TODO
+    }
+
+    void setState(const CoordTensor<bool>& newState) {
+        Lattice::stateTensor = newState;
     }
 
     friend std::ostream& operator<<(std::ostream& out, /*const*/ Lattice& lattice);
@@ -544,13 +548,13 @@ public:
     }
 };
 
-class hashedNode {
+class hashedState {
 private:
     size_t seed;
 public:
-    hashedNode() : seed(0) {}
+    hashedState() : seed(0) {}
 
-    hashedNode(size_t seed) : seed(seed) {}
+    hashedState(size_t seed) : seed(seed) {}
 
     size_t getSeed() const { return seed; }
 
@@ -566,7 +570,7 @@ public:
         return boost::hash_range(coordTensor.GetArrayInternal().begin(), coordTensor.GetArrayInternal().end());
     }
 
-    bool compareStates(const hashedNode& other) const { return seed == other.getSeed(); }
+    bool compareStates(const hashedState& other) const { return seed == other.getSeed(); }
     /*
     check how to do this properly (operator overload function in lattice function)
     return true iff lattice have the same structure of modules
@@ -579,54 +583,21 @@ private:
     Configuration* parent;
     std::vector<Configuration*> next;
     CoordTensor<bool> state;
+    hashedState hash;
 public:
-    Configuration(CoordTensor<bool> state) { this->state = state; }
+    Configuration(CoordTensor<bool> state) : state(state) {}
 
-    std::vector<CoordTensor<bool>> makeAllMoves() {
+    std::vector<CoordTensor<bool>> makeAllMoves(Lattice& lattice) {
         std::vector<CoordTensor<bool>> result;
-        Lattice lattice = state;
+        lattice.setState(state);
         for (auto module: ModuleIdManager::Modules()) {
-            // make sure cut vertices are updated
-            result.emplace_back(makeMoves(lattice, module));
+            auto legalMoves = MoveManager::CheckAllMoves(lattice.coordTensor, module);
+            for (auto move : legalMoves) {
+                lattice.moveModule(module, move->MoveOffset());
+                result.push_back(lattice.stateTensor);
+            }
         }
         return result;
-    }
-
-    /*
-    Returns upto 8 possible lattice configurations from given lattice per movable modules
-    TODO
-        Use coordTensor instead of lattice
-    */
-    CoordTensor<bool> makeMoves(Lattice& lattice, Module& module) {
-        std::vector<Lattice> result;
-        /* 
-        TODO
-            Use movemanager instead of reading from file
-        */
-        std::ifstream moveFile("Moves/Slide_1.txt");
-        if (!moveFile) {
-            std::cerr << "Unable to open file Moves/Slide_1.txt";
-            return result;
-        }
-        Move2d move;
-        move.InitMove(moveFile);
-        moveFile.close();
-        MoveManager::GenerateMovesFrom(&move);
-        auto legalMoves = MoveManager::CheckAllMoves(lattice.coordTensor, module);
-        for (auto move : legalMoves) {
-            result.emplace_back(applyMove(lattice, module, *move));
-        }
-        return result;
-    }
-
-    /*
-    TODO
-        Refactor to use coordiante tensor instead of lattice
-        Make different move module for coordTensor or implement entire movement using coordTensor in applyMove
-    */
-    CoordTensor<bool> applyMove(Lattice lattice, Module& module, MoveBase& move) {
-        lattice.moveModule(module, move.MoveOffset());
-        return lattice.coordTensor;
     }
 
     void addEdge(Configuration* configuration) {
@@ -641,11 +612,7 @@ public:
         return next;
     }
 
-    Lattice getLattice() {
-        return lattice;
-    }
-
-    void setState(State state) {
+    void setState(CoordTensor<bool> state) {
         this->state = state;
     }
 
