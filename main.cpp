@@ -779,7 +779,7 @@ int main() {
     moveFile.close();
     if (test) {
         std::cout << "Moving!\n";
-        lattice.moveModule(ModuleIdManager::Modules()[0], move.MoveOffset());
+        lattice.moveModule(ModuleIdManager::Modules()[0], legalMoves[0]->MoveOffset());
         std::cout << lattice;
     }
     // movegen testing
