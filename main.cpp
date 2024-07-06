@@ -372,10 +372,10 @@ public:
         std::vector<MoveBase*> LegalMoves = {};
         for (auto move : _moves) {
             if (move->MoveCheck(tensor, mod)) {
-                std::cout << "passed!\n";
+                DEBUG("passed!\n");
                 LegalMoves.push_back(move);
             } else {
-                std::cout << "failed!\n";
+                DEBUG("failed!\n");
             }
         }
         return LegalMoves;
@@ -411,20 +411,24 @@ public:
         std::string line;
         while (std::getline(moveFile, line)) {
             for (auto c : line) {
-                if (c == Move::NOCHECK) {
-                    x++;
-                    continue;
-                }
-                if (c == Move::EMPTY) {
-                    moves.push_back({{x, y}, false});
-                } else if (c == Move::STATIC) {
-                    moves.push_back({{x, y}, true});
-                } else if (c == Move::FINAL) {
-                    moves.push_back({{x, y}, false});
-                    finalPos = {x, y};
-                } else if (c == Move::INITIAL) {
-                    initPos = {x, y};
-                    bounds = {{x, 0}, {y, 0}};
+                switch (c) {
+                    default:
+                        DEBUG("Unrecognized Move: " << c << std::endl);
+                    case Move::NOCHECK:
+                        x++;
+                        continue;
+                    case Move::FINAL:
+                        finalPos = {x, y};
+                    case Move::EMPTY:
+                        moves.push_back({{x, y}, false});
+                        break;
+                    case Move::STATIC:
+                        moves.push_back({{x, y}, true});
+                        break;
+                    case Move::INITIAL:
+                        initPos = {x, y};
+                        bounds = {{x, 0}, {y, 0}};
+                        break;
                 }
                 if (x > maxBounds[0]) {
                     maxBounds[0] = x;
@@ -490,20 +494,24 @@ public:
                 continue;
             }
             for (auto c : line) {
-                if (c == Move::NOCHECK) {
-                    x++;
-                    continue;
-                }
-                if (c == Move::EMPTY) {
-                    moves.push_back({{x, y, z}, false});
-                } else if (c == Move::STATIC) {
-                    moves.push_back({{x, y, z}, true});
-                } else if (c == Move::FINAL) {
-                    moves.push_back({{x, y, z}, false});
-                    finalPos = {x, y, z};
-                } else if (c == Move::INITIAL) {
-                    initPos = {x, y, z};
-                    bounds = {{x, 0}, {y, 0}, {z, 0}};
+                switch (c) {
+                    default:
+                        DEBUG("Unrecognized Move: " << c << std::endl);
+                    case Move::NOCHECK:
+                        x++;
+                        continue;
+                    case Move::FINAL:
+                        finalPos = {x, y, z};
+                    case Move::EMPTY:
+                        moves.push_back({{x, y, z}, false});
+                        break;
+                    case Move::STATIC:
+                        moves.push_back({{x, y, z}, true});
+                        break;
+                    case Move::INITIAL:
+                        initPos = {x, y, z};
+                        bounds = {{x, 0}, {y, 0}, {z, 0}};
+                        break;
                 }
                 if (x > maxBounds[0]) {
                     maxBounds[0] = x;
