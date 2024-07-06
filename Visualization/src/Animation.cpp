@@ -1,11 +1,19 @@
 #include "Animation.hpp"
 
-Animation::Animation(glm::vec3 AnchorDirection, glm::vec3 DeltaPos) {
+Animation::Animation(glm::vec3 AnchorDirection, glm::vec3 DeltaPos, bool sliding) {
+    this->sliding = sliding;
     this->AnchorDirection = AnchorDirection;
     this->DeltaPos = DeltaPos;
-    this->PreTranslation = glm::clamp((0.5f * AnchorDirection) + (0.5f * DeltaPos), -0.5f, 0.5f) + 0.0f;
-    this->MaxAngle = (abs(DeltaPos[0]) + abs(DeltaPos[1]) + abs(DeltaPos[2])) * 90.0f;
-    this->RotationAxis = glm::normalize(glm::cross(DeltaPos, AnchorDirection)) + 0.0f;
+
+    if (sliding) {
+        this->PreTranslation = glm::vec3(0.0f);
+        this->MaxAngle = 0.0f;
+        this->RotationAxis = glm::vec3(0.0f);
+    } else {
+        this->PreTranslation = glm::clamp((0.5f * AnchorDirection) + (0.5f * DeltaPos), -0.5f, 0.5f) + 0.0f;
+        this->MaxAngle = (abs(DeltaPos[0]) + abs(DeltaPos[1]) + abs(DeltaPos[2])) * 90.0f;
+        this->RotationAxis = glm::normalize(glm::cross(DeltaPos, AnchorDirection)) + 0.0f;
+    }
 
     if (std::isnan(this->RotationAxis[0])) {
         throw std::domain_error("Failed to calculate rotation axis for animation: target path is parallel to anchor direction");
@@ -17,4 +25,3 @@ Animation::Animation(glm::vec3 AnchorDirection, glm::vec3 DeltaPos) {
     // std::cout << "MaxAngle: " << this->MaxAngle << std::endl;
     // std::cout << "RotationAxis: " << glm::to_string(this->RotationAxis) << std::endl;
 }
-

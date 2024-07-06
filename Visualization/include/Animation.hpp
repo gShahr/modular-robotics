@@ -10,13 +10,13 @@
 class Animation
 {
 public:
-    Animation(glm::vec3 AnchorDirection, glm::vec3 DeltaPos);
+    Animation(glm::vec3 AnchorDirection, glm::vec3 DeltaPos, bool sliding);
+    bool sliding;
     glm::vec3 AnchorDirection;
     glm::vec3 DeltaPos;
     float MaxAngle;
     glm::vec3 PreTranslation;
     glm::vec3 RotationAxis;
 };
-
 
 #endif

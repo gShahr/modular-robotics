@@ -260,41 +260,17 @@ int main(int argc, char** argv) {
 
     ObjectCollection* cubes = new ObjectCollection(&shader, VAO, texture);
     
-    // --- Stress testing ---
-    // float _x, _y, _z;
-    // const float _scale = 35.0f;
-    // for (int i = 0; i < 20000; i++) {
-    //     _x = floor(float(std::rand()) / RAND_MAX * _scale);
-    //     _y = floor(float(std::rand()) / RAND_MAX * _scale);
-    //     _z = floor(float(std::rand()) / RAND_MAX * _scale);
-    //     // std::cout << _x << " | ";
-    //     cubes->addObj(new Cube(_x, _y, _z));
-    // }
-
-    //Cube* TEST_CUBE = new Cube(100, 3.0f, 3.0f, 3.0f);
-    //cubes->addObj(TEST_CUBE);
-    //cubes->addObj(new Cube(101, 1.0f, 0.0f, 0.0f));  // Bottom layer
-    //cubes->addObj(new Cube(102, 0.0f, 0.0f, 0.0f));
-    //cubes->addObj(new Cube(103, 0.0f, 0.0f, 1.0f));
-    //cubes->addObj(new Cube(104, 0.0f, 1.0f, 1.0f)));  // Middle layer part 1 (TEST CUBE)
-    //cubes->addObj(new Cube(105, 0.0f, 1.0f, 2.0f));
-    //cubes->addObj(new Cube(106, 1.0f, 1.0f, 2.0f));
-    //cubes->addObj(new Cube(107, 1.0f, 2.0f, 2.0f)); // Top layer
-    //cubes->addObj(new Cube(108, 2.0f, 2.0f, 2.0f));
-    //cubes->addObj(new Cube(109, 2.0f, 2.0f, 1.0f));
-    //cubes->addObj(new Cube(110, 2.0f, 1.0f, 1.0f));  // Middle layer part 2
-    //cubes->addObj(new Cube(111, 2.0f, 1.0f, 0.0f));
-    //cubes->addObj(new Cube(112, 1.0f, 1.0f, 0.0f));
-    //bool dummy;
-    //TEST_CUBE->startAnimation(&dummy, glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 0.0f));
-
     resetCamera();
     viewmat = glm::mat4(1.0f);
     projmat = glm::perspective(glm::radians(45.0f), asprat, 0.1f, 100.0f);
 
-    Scenario testScenario = Scenario("Scenarios/2x2x2_Metamodule.scen");
-    //Scenario testScenario = Scenario("Scenarios/Testing/Simple.scen");
-    //Scenario testScenario = Scenario("Scenarios/Testing/3x3x3_Candidate.scen");
+    // Scenario testScenario = Scenario("Scenarios/LegalSlideMove.scen");
+    // Scenario testScenario = Scenario("Scenarios/IllegalPivotMove.scen");
+    // Scenario testScenario = Scenario("Scenarios/2x2x2_Metamodule.scen");
+
+    // Scenario testScenario = Scenario("Scenarios/Testing/LegalSlide_IllegalPivot.scen");
+    Scenario testScenario = Scenario("Scenarios/Testing/SlidingTests.scen");
+    // Scenario testScenario = Scenario("Scenarios/Testing/3x3x3_Candidate.scen");
     ObjectCollection* scenCubes = testScenario.toObjectCollection(&shader, VAO, texture);
     MoveSequence* scenMoveSeq = testScenario.toMoveSequence();
 
@@ -325,6 +301,7 @@ int main(int argc, char** argv) {
         if (readyForNewAnim) {
             Move* move;
             glm::vec3 deltaPos, anchorDir;
+            bool sliding = false;
             if (forward) {
                 move = scenMoveSeq->pop();
                 deltaPos = move->deltaPos;
@@ -332,16 +309,35 @@ int main(int argc, char** argv) {
                 move = scenMoveSeq->undo();
                 deltaPos = -move->deltaPos;
             }
+            Cube* mover = gObjects.at(move->moverId);
+            if (move->anchorId >= 0) {
+                Cube* anchor = gObjects.at(move->anchorId);
+                anchorDir = anchor->pos - mover->pos;
+            } else {
+                sliding = true;
+                int aid = move->anchorId;
+
+                // If we're reversing, and it's a DIAGONAL sliding move, change the order of subslides
+                if (!forward && glm::dot(glm::abs(move->deltaPos), glm::vec3(1.0f)) > 1.0f) {
+                    switch (move->anchorId) {
+                        case (-1): { aid = glm::round(-glm::dot(glm::vec3(0.0f, 2.0f, 3.0f), glm::abs(move->deltaPos))); break; }
+                        case (-2): { aid = glm::round(-glm::dot(glm::vec3(1.0f, 0.0f, 3.0f), glm::abs(move->deltaPos))); break; }
+                        case (-3): { aid = glm::round(-glm::dot(glm::vec3(1.0f, 2.0f, 0.0f), glm::abs(move->deltaPos))); break; }
+                    }
+                }
+
+                switch (aid) {
+                    case (-1): { anchorDir = glm::vec3(1.0f, 0.0f, 0.0f); break; }
+                    case (-2): { anchorDir = glm::vec3(0.0f, 1.0f, 0.0f); break; }
+                    case (-3): { anchorDir = glm::vec3(0.0f, 0.0f, 1.0f); break; }
+                    default: { anchorDir = glm::vec3(1.0f); break; }
+                }
+            }
+            mover->startAnimation(&readyForNewAnim, anchorDir, deltaPos, sliding);
+            readyForNewAnim = false;
             if ((scenMoveSeq->currentMove == 0) || (scenMoveSeq->remainingMoves == 0)) { 
-                //std::cout << "Reversing..." << std::endl;
                 forward = !forward; 
             }
-            Cube* mover = gObjects.at(move->moverId);
-            Cube* anchor = gObjects.at(move->anchorId);
-            anchorDir = anchor->pos - mover->pos;
-            mover->startAnimation(&readyForNewAnim, anchorDir, deltaPos);
-            // std::cout << "Beginning animation of move with mover " << move->moverId << " and anchor " << move->anchorId << ": anchorDir = " << glm::to_string(anchorDir) << ", deltaPos = " << glm::to_string(deltaPos) << std::endl;
-            readyForNewAnim = false;
         }
 
         // std::cout << glm::to_string(viewmat) << std::endl;

@@ -1,0 +1,21 @@
+0, 255,255,  0, 95      // Group definition: Group ID, r, g, b, size (1-100)
+1, 255,150,100, 85      // Bright orange    west of origin
+2,  20,100, 20, 85      // Sage green       south of origin
+3, 255,175,255, 85      // Pink             east of origin
+4, 100,  0,100, 85      // Purple           in front of origin
+5, 255,  0,  0, 85      // Red              behind origin
+6, 255,175,175, 85      // Cream orange     behind and north of origin
+7,   0,  0,255, 85      // Blue             northwest of origin
+8, 255, 50,  0, 85      // Deep orange      northeast of origin
+
+00,  0,  1,  1,  1
+01,  1,  0,  1,  1
+02,  2,  1,  0,  1
+03,  3,  2,  1,  1
+04,  4,  1,  1,  2
+05,  5,  1,  1,  0
+06,  6,  1,  2,  0
+07,  7,  0,  2,  1
+08,  8,  2,  2,  1
+
+00, -2,  0,  1,  1
