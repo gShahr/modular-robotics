@@ -33,6 +33,7 @@ public:
     }
 
     // Get ID for assignment to newly created module
+    [[nodiscard]]
     static int GetNextId() {
         return _nextId++;
     }
@@ -657,6 +658,12 @@ private:
 public:
     Configuration(CoordTensor<bool> state) : state(state) {}
 
+    ~Configuration() {
+        for (auto i = next.rbegin(); i != next.rend(); i++) {
+            delete(*i);
+        }
+    }
+
     std::vector<CoordTensor<bool>> makeAllMoves(Lattice& lattice) {
         std::vector<CoordTensor<bool>> result;
         lattice.setState(state);
@@ -741,6 +748,7 @@ public:
                     nextConfiguration->setParent(current);
                     nextConfiguration->setStateAndHash(node);
                     q.push(nextConfiguration);
+                    current->addEdge(nextConfiguration);
                     visited.insert(node);
                 }
             }
@@ -931,6 +939,8 @@ int main() {
         lattice = config->getState();
         std::cout << lattice;
     }
+    delete(start);
+    delete(end);
 
     // Cleanup
     MoveManager::CleanMoves();
