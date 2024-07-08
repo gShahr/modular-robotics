@@ -277,7 +277,6 @@ public:
             stateTensor.GetIdDirect(i) = stateArray[i];
         }
         return *this;
-        // TODO
     }
 
     void setState(const CoordTensor<bool>& newState) {
@@ -658,6 +657,7 @@ public:
             for (auto move : legalMoves) {
                 lattice.moveModule(module, move->MoveOffset());
                 result.push_back(lattice.stateTensor);
+                lattice.moveModule(module, -move->MoveOffset());
             }
         }
         return result;
@@ -721,12 +721,13 @@ public:
         visited.insert(start->getHash());
         while (!q.empty()) {
             Configuration* current = q.front();
+            lattice = q.front()->getState();
             q.pop();
-            if (current == final) {
-                return findPath(start, final);
+            if (current->getState() == final->getState()) {
+                return findPath(start, current);
             }
             auto adjList = current->makeAllMoves(lattice);
-            for (auto node: adjList) {
+            for (const auto& node: adjList) {
                 if (visited.find(HashedState(node)) == visited.end()) {
                     Configuration* nextConfiguration = new Configuration(node);
                     nextConfiguration->setParent(current);
@@ -736,6 +737,7 @@ public:
                 }
             }
         }
+        return {};
     }
     
     /*
@@ -745,7 +747,7 @@ public:
     std::vector<Configuration*> findPath(Configuration* start, Configuration* final) {
         std::vector<Configuration*> path;
         Configuration* current = final;
-        while (current != start) {
+        while (current->getState() != start->getState()) {
             path.push_back(current);
             current = current->getParent();
         }
@@ -897,9 +899,9 @@ int main() {
     // STATE TENSOR ASSIGNMENT TESTING
     std::cout << "Attempting to assign to lattice from state tensor.\n";
     CoordTensor<bool> stateTest(order, axisSize, false);
-    stateTest[{0, 0}] = true;
     stateTest[{1, 1}] = true;
-    stateTest[{2, 3}] = true;
+    stateTest[{1, 2}] = true;
+    stateTest[{2, 2}] = true;
     lattice = stateTest;
     std::cout << lattice;
 
@@ -907,8 +909,15 @@ int main() {
     std::cout << "BFS Testing:\n";
     ConfigurationSpace cg = ConfigurationSpace();
     Configuration* start = new Configuration(lattice.stateTensor);
-    Configuration* end = new Configuration(lattice.stateTensor);
+    stateTest[{1, 1}] = false;
+    stateTest[{1, 3}] = true;
+    Configuration* end = new Configuration(stateTest);
     auto path = cg.bfs(start, end, lattice);
+    std::cout << "Path:\n";
+    for (auto config : path) {
+        lattice = config->getState();
+        std::cout << lattice;
+    }
 
     // Cleanup
     MoveManager::CleanMoves();
