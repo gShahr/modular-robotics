@@ -890,7 +890,6 @@ int main() {
         lattice.moveModule(ModuleIdManager::Modules()[0], legalMoves[0]->MoveOffset());
         std::cout << lattice;
     }
-    MoveManager::CleanMoves();
     //
     //  END TESTING
     //
@@ -910,5 +909,8 @@ int main() {
     Configuration* start = new Configuration(lattice.stateTensor);
     Configuration* end = new Configuration(lattice.stateTensor);
     auto path = cg.bfs(start, end, lattice);
+
+    // Cleanup
+    MoveManager::CleanMoves();
     return 0;
 }
