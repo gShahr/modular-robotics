@@ -91,9 +91,9 @@ Cube::Cube(int id, int x, int y, int z) {
     gObjects.insert(std::pair<int, Cube*>(id, this));
 }
 
-void Cube::startAnimation(bool* markWhenAnimFinished, glm::vec3 AnchorDirection, glm::vec3 DeltaPos) {
+void Cube::startAnimation(bool* markWhenAnimFinished, glm::vec3 AnchorDirection, glm::vec3 DeltaPos, bool sliding) {
     this->markWhenAnimFinished = markWhenAnimFinished;
-    this->anim = new Animation(AnchorDirection, DeltaPos);
+    this->anim = new Animation(AnchorDirection, DeltaPos, sliding);
     this->animProgress = 0.0f;
 }
 
@@ -106,37 +106,64 @@ inline float _animInterp(float pct) {
 
 glm::mat4 Cube::processAnimation() {
     glm::mat4 transform = glm::mat4(1.0f);
+    glm::vec3 pt = this->anim->PreTranslation; // If the animation finishes on this frame, the Animation object will be deleted
+    glm::vec3 ra = this->anim->RotationAxis; // before we construct the transformation matrix. So, store the PT and RA now just in case.
+    float _pct; // "Smoothed" progress through animation, as calculated by _animInterp()
 
     // increment animation progress
-    if (ANIMATE) {
-        this->animProgress += (ANIM_SPEED * deltaTime);
-    }
+    if (ANIMATE) { this->animProgress += (ANIM_SPEED * deltaTime); }
+    _pct = _animInterp(this->animProgress);
 
-    if (animProgress > 1.0f) { // Animation finished
-        this->rotation = glm::rotate(glm::mat4(1.0f), glm::radians(this->anim->MaxAngle), this->anim->RotationAxis) * this->rotation;
+    if (this->anim->sliding) { // Sliding move
+        glm::vec3 translate;
+        if (animProgress < 1.0f) {
+            // If it's a diagonal move, map animProgress such that 0-0.5 corresponds to the "first" slide, and 0.5-1.0 corresponds to the "second" slide
+            // The "first" slide is determined by the axis in the animation's AnchorPos
+            if (abs(this->anim->DeltaPos[0]) + abs(this->anim->DeltaPos[1]) + abs(this->anim->DeltaPos[2]) > 1.0f) {
+                float _pct1, _pct2;
+                _pct1 = _animInterp(glm::min(this->animProgress * 2.0f, 1.0f));
+                _pct2 = _animInterp(1.0f - glm::min(2.0f - this->animProgress * 2.0f, 1.0f));
+                translate =  _pct1 * (this->anim->DeltaPos *         this->anim->AnchorDirection);
+                translate += _pct2 * (this->anim->DeltaPos * (1.0f - this->anim->AnchorDirection));
+            } else { // Not a diagonal move
+                translate = _pct * this->anim->DeltaPos;
+            }
+        } else { // Animation finished
+            translate = this->anim->DeltaPos;
 
-        transform = glm::translate(transform, this->anim->PreTranslation);
-        transform = glm::rotate(transform, glm::radians(this->anim->MaxAngle), this->anim->RotationAxis);
-        transform = glm::translate(transform, -(this->anim->PreTranslation));
+            glm::vec3 newPos = this->pos + this->anim->DeltaPos;
+            this->setPos(newPos[0], newPos[1], newPos[2]);
+            this->animProgress = 0.0f;
 
+            delete this->anim;
+            this->anim = NULL;
 
-        glm::vec3 newPos = this->pos + this->anim->DeltaPos;
-        this->setPos(newPos[0], newPos[1], newPos[2]);
-        this->animProgress = 0.0f;
+            *(this->markWhenAnimFinished) = true; 
+            this->markWhenAnimFinished = NULL;
+        }
+        transform = glm::translate(transform, translate);
+    } else { // Pivot move
+        float angle;
+        if (this->animProgress < 1.0f) {
+            angle = _pct * this->anim->MaxAngle;
+        } else { // Animation finished
+            // Update cumulative cube rotation
+            this->rotation = glm::rotate(glm::mat4(1.0f), glm::radians(this->anim->MaxAngle), this->anim->RotationAxis) * this->rotation;
+            angle = this->anim->MaxAngle;
 
-        delete this->anim;
-        this->anim = NULL;
+            glm::vec3 newPos = this->pos + this->anim->DeltaPos;
+            this->setPos(newPos[0], newPos[1], newPos[2]);
+            this->animProgress = 0.0f;
 
-        *(this->markWhenAnimFinished) = true; 
-        this->markWhenAnimFinished = NULL;
-    } else {
-        // calculate rotation angle based on progress
-        float angle = _animInterp(this->animProgress) * this->anim->MaxAngle;
+            delete this->anim;
+            this->anim = NULL;
 
-        // construct transform matrix
-        transform = glm::translate(transform, this->anim->PreTranslation);
-        transform = glm::rotate(transform, glm::radians(angle), this->anim->RotationAxis);
-        transform = glm::translate(transform, -(this->anim->PreTranslation));
+            *(this->markWhenAnimFinished) = true; 
+            this->markWhenAnimFinished = NULL;
+        }
+        transform = glm::translate(transform, pt);
+        transform = glm::rotate(transform, glm::radians(angle), ra);
+        transform = glm::translate(transform, -pt);
     }
 
     return transform;

@@ -27,7 +27,7 @@ public:
     void setScale(int scale);
     void setColor(int r, int g, int b);
     void draw();
-    void startAnimation(bool* markWhenAnimFinished, glm::vec3 AnchorDirection, glm::vec3 DeltaPos);
+    void startAnimation(bool* markWhenAnimFinished, glm::vec3 AnchorDirection, glm::vec3 DeltaPos, bool sliding);
     void stopAnimation();
     glm::mat4 processAnimation();
     glm::vec3 pos;
