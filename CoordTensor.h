@@ -35,16 +35,21 @@ public:
     const std::vector<T>& GetArrayInternal() const;
 
     // Get a copy of order
-    const int OrderSize() const;
+    int Order() const;
 
     // Get a copy of axisSize
-    const int AxisSize() const;
+    int AxisSize() const;
+
+    // Get a coordinate vector from an index
+    std::valarray<int> CoordsFromIndex(int index) const;
 private:
-    int _orderSize;
+    int _order;
     // Axis size, useful for bounds checking
     int _axisSize;
     // Coordinate multiplier cache for tensors of order > 3
     std::valarray<int> _axisMultipliers;
+    // Internal array for rapid conversion from index to coordinate
+    std::vector<std::valarray<int>> _coordsInternal;
     // Internal array responsible for holding module IDs
     std::vector<T> _arrayInternal;
     // Internal array responsible for holding slices of _arrayInternal
@@ -61,23 +66,40 @@ private:
 };
 
 template<typename T>
-const int CoordTensor<T>::OrderSize() const {
-    return _orderSize;
+int CoordTensor<T>::Order() const {
+    return _order;
 }
 
 template<typename T>
-const int CoordTensor<T>::AxisSize() const {
+int CoordTensor<T>::AxisSize() const {
     return _axisSize;
+}
+
+template<typename T>
+std::valarray<int> CoordTensor<T>::CoordsFromIndex(int index) const {
+    return _coordsInternal[index];
 }
 
 template <typename T>
 CoordTensor<T>::CoordTensor(int order, int axisSize, const typename std::vector<T>::value_type& value) {
-    _orderSize = order;
+    _order = order;
     _axisSize = axisSize;
     // Calculate number of elements in tensor
     int internalSize = (int) std::pow(_axisSize, order);
     // Resize internal array to accommodate all elements
     _arrayInternal.resize(internalSize, value);
+    // Setup Index -> Coordinate array
+    _coordsInternal.resize(internalSize);
+    std::valarray<int> coords;
+    coords.resize(order, 0);
+    for (int i = 0; i < internalSize; i++) {
+        _coordsInternal[i] = coords;
+        for (int j = 0; j < order; j++) {
+            if (++coords[j] == axisSize) {
+                coords[j] = 0;
+            } else break;
+        }
+    }
     // Set size of 2nd order array
     internalSize = _axisSize;
     switch (order) {
@@ -132,11 +154,24 @@ CoordTensor<T>::CoordTensor(int order, int axisSize, const typename std::vector<
 
 template<>
 CoordTensor<bool>::CoordTensor(int order, int axisSize, const typename std::vector<bool>::value_type& value) {
+    _order = order;
     _axisSize = axisSize;
     // Calculate number of elements in tensor
     int internalSize = (int) std::pow(_axisSize, order);
     // Resize internal array to accommodate all elements
     _arrayInternal.resize(internalSize, value);
+    // Setup Index -> Coordinate array
+    _coordsInternal.resize(internalSize);
+    std::valarray<int> coords;
+    coords.resize(order, 0);
+    for (int i = 0; i < internalSize; i++) {
+        _coordsInternal[i] = coords;
+        for (int j = 0; j < order; j++) {
+            if (++coords[j] == axisSize) {
+                coords[j] = 0;
+            } else break;
+        }
+    }
     // If the tensor is not 2nd or 3rd order then the
     // coordinate multiplier cache needs to be set up
     _axisMultipliers.resize(order);
