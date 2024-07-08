@@ -929,18 +929,16 @@ int main() {
                  "  -##-         -##-\n" <<
                  "  ----         -#--\n";
     ConfigurationSpace cg = ConfigurationSpace();
-    Configuration* start = new Configuration(lattice.stateTensor);
+    Configuration start(lattice.stateTensor);
     stateTest[{1, 1}] = false;
     stateTest[{1, 3}] = true;
-    Configuration* end = new Configuration(stateTest);
-    auto path = cg.bfs(start, end, lattice);
+    Configuration end(stateTest);
+    auto path = cg.bfs(&start, &end, lattice);
     std::cout << "Path:\n";
     for (auto config : path) {
         lattice = config->getState();
         std::cout << lattice;
     }
-    delete(start);
-    delete(end);
 
     // Cleanup
     MoveManager::CleanMoves();
