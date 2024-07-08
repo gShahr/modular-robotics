@@ -895,7 +895,17 @@ int main() {
     //  END TESTING
     //
 
+    // STATE TENSOR ASSIGNMENT TESTING
+    std::cout << "Attempting to assign to lattice from state tensor.\n";
+    CoordTensor<bool> stateTest(order, axisSize, false);
+    stateTest[{0, 0}] = true;
+    stateTest[{1, 1}] = true;
+    stateTest[{2, 3}] = true;
+    lattice = stateTest;
+    std::cout << lattice;
+
     // BFS TESTING
+    std::cout << "BFS Testing:\n";
     ConfigurationSpace cg = ConfigurationSpace();
     Configuration* start = new Configuration(lattice.stateTensor);
     Configuration* end = new Configuration(lattice.stateTensor);
