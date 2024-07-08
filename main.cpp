@@ -907,6 +907,11 @@ int main() {
 
     // BFS TESTING
     std::cout << "BFS Testing:\n";
+    std::cout << "Original:    Desired:\n" <<
+                 "  ----         ----\n" <<
+                 "  -#--         ----\n" <<
+                 "  -##-         -##-\n" <<
+                 "  ----         -#--\n";
     ConfigurationSpace cg = ConfigurationSpace();
     Configuration* start = new Configuration(lattice.stateTensor);
     stateTest[{1, 1}] = false;
