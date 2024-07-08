@@ -121,8 +121,10 @@ public:
     void moveModule(Module& mod, const std::valarray<int>& offset) {
         ClearAdjacencies(mod.id);
         coordTensor.IdAt(mod.coords) = -1;
+        stateTensor.IdAt(mod.coords) = false;
         mod.coords += offset;
         coordTensor.IdAt(mod.coords) = mod.id;
+        stateTensor.IdAt(mod.coords) = true;
         edgeCheck(mod);
     }
 
