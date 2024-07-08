@@ -651,12 +651,12 @@ namespace std {
 
 class Configuration {
 private:
-    Configuration* parent;
+    Configuration* parent = nullptr;
     std::vector<Configuration*> next;
-    CoordTensor<bool> state;
+    CoordTensor<bool> _state;
     HashedState hash;
 public:
-    Configuration(CoordTensor<bool> state) : state(state) {}
+    explicit Configuration(CoordTensor<bool> state) : _state(std::move(state)) {}
 
     ~Configuration() {
         for (auto i = next.rbegin(); i != next.rend(); i++) {
@@ -666,7 +666,7 @@ public:
 
     std::vector<CoordTensor<bool>> makeAllMoves(Lattice& lattice) {
         std::vector<CoordTensor<bool>> result;
-        lattice.setState(state);
+        lattice.setState(_state);
         for (auto module: ModuleIdManager::Modules()) {
             auto legalMoves = MoveManager::CheckAllMoves(lattice.coordTensor, module);
             for (auto move : legalMoves) {
@@ -691,15 +691,15 @@ public:
     }
 
     CoordTensor<bool> getState() {
-        return state;
+        return _state;
     }
 
     HashedState getHash() {
         return hash;
     }
 
-    void setStateAndHash(CoordTensor<bool> state) {
-        this->state = state;
+    void setStateAndHash(const CoordTensor<bool>& state) {
+        _state = state;
         hash = HashedState(state);
     }
 
@@ -729,7 +729,7 @@ public:
     run bfs on configuration space
     return path of bfs via states taken
     */
-    std::vector<Configuration*> bfs(Configuration* start, Configuration* final, Lattice& lattice) {
+    static std::vector<Configuration*> bfs(Configuration* start, Configuration* final, Lattice& lattice) {
         std::queue<Configuration*> q;
         std::unordered_set<HashedState> visited;
         q.push(start);
@@ -744,7 +744,7 @@ public:
             auto adjList = current->makeAllMoves(lattice);
             for (const auto& node: adjList) {
                 if (visited.find(HashedState(node)) == visited.end()) {
-                    Configuration* nextConfiguration = new Configuration(node);
+                    auto nextConfiguration = new Configuration(node);
                     nextConfiguration->setParent(current);
                     nextConfiguration->setStateAndHash(node);
                     q.push(nextConfiguration);
@@ -760,7 +760,7 @@ public:
     backtrack to find path from start to final
     return path of configurations
     */
-    std::vector<Configuration*> findPath(Configuration* start, Configuration* final) {
+    static std::vector<Configuration*> findPath(Configuration* start, Configuration* final) {
         std::vector<Configuration*> path;
         Configuration* current = final;
         while (current->getState() != start->getState()) {
@@ -928,12 +928,11 @@ int main() {
                  "  -#--         ----\n" <<
                  "  -##-         -##-\n" <<
                  "  ----         -#--\n";
-    ConfigurationSpace cg = ConfigurationSpace();
     Configuration start(lattice.stateTensor);
     stateTest[{1, 1}] = false;
     stateTest[{1, 3}] = true;
     Configuration end(stateTest);
-    auto path = cg.bfs(&start, &end, lattice);
+    auto path = ConfigurationSpace::bfs(&start, &end, lattice);
     std::cout << "Path:\n";
     for (auto config : path) {
         lattice = config->getState();
