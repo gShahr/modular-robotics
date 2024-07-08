@@ -238,7 +238,42 @@ public:
         return result;
     }
 
-    Lattice& operator=(const CoordTensor<bool> coordTensor) {
+    Lattice& operator=(const CoordTensor<bool>& state) {
+        auto& stateArray = state.GetArrayInternal();
+        std::queue<int> modsToMove;
+        std::queue<int> destinations;
+        for (int i = 0; i < stateArray.size(); i++) {
+            // Search for state differences
+            if (stateTensor.GetIdDirect(i) == stateArray[i]) continue;
+            if (stateArray[i]) {
+                // New state has module at this index, current state doesn't have one
+                if (modsToMove.empty()) {
+                    // Remember this location for when a mismatched module is found
+                    destinations.push(i);
+                } else {
+                    // Move a mismatched module to this location
+                    coordTensor.GetIdDirect(i) = modsToMove.front();
+                    // TEST: Update module position variable
+                    ModuleIdManager::Modules()[modsToMove.front()].coords = coordTensor.CoordsFromIndex(i);
+                    modsToMove.pop();
+                }
+            } else {
+                // Current state has module at this index, new state doesn't have one
+                if (destinations.empty()) {
+                    // Remember this mismatched module for when a location is found
+                    modsToMove.push(coordTensor.GetIdDirect(i));
+                } else {
+                    // Move this mismatched module to a location
+                    coordTensor.GetIdDirect(destinations.front()) = coordTensor.GetIdDirect(i);
+                    // TEST: Update module position variable
+                    ModuleIdManager::Modules()[coordTensor.GetIdDirect(i)].coords = coordTensor.CoordsFromIndex(destinations.front());
+                    destinations.pop();
+                }
+                // Set former module location to -1
+                coordTensor.GetIdDirect(i) = -1;
+            }
+            stateTensor.GetIdDirect(i) = stateArray[i];
+        }
         return *this;
         // TODO
     }
