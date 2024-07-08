@@ -32,15 +32,19 @@ public:
     typename std::vector<T>::reference operator[](const std::valarray<int>& coords);
 
     // Get a const reference to the internal array
+    [[nodiscard]]
     const std::vector<T>& GetArrayInternal() const;
 
     // Get a copy of order
+    [[nodiscard]]
     int Order() const;
 
     // Get a copy of axisSize
+    [[nodiscard]]
     int AxisSize() const;
 
     // Get a coordinate vector from an index
+    [[nodiscard]]
     std::valarray<int> CoordsFromIndex(int index) const;
 private:
     int _order;
