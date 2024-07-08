@@ -46,6 +46,10 @@ public:
     // Get a coordinate vector from an index
     [[nodiscard]]
     std::valarray<int> CoordsFromIndex(int index) const;
+
+    // Comparison Operators
+    bool operator==(const CoordTensor<T>& right);
+    bool operator!=(const CoordTensor<T>& right);
 private:
     int _order;
     // Axis size, useful for bounds checking
@@ -68,6 +72,16 @@ private:
     // Generalized IdAtInternal function
     typename std::vector<T>::reference IdAtNthOrder (const std::valarray<int>& coords);
 };
+
+template<typename T>
+bool CoordTensor<T>::operator==(const CoordTensor<T>& right) {
+    return _arrayInternal == right._arrayInternal;
+}
+
+template<typename T>
+bool CoordTensor<T>::operator!=(const CoordTensor<T>& right) {
+    return _arrayInternal != right._arrayInternal;
+}
 
 template<typename T>
 int CoordTensor<T>::Order() const {
