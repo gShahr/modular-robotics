@@ -257,6 +257,10 @@ public:
                     coordTensor.GetIdDirect(i) = modsToMove.front();
                     // TEST: Update module position variable
                     ModuleIdManager::Modules()[modsToMove.front()].coords = coordTensor.CoordsFromIndex(i);
+                    // Update adjacency list
+                    ClearAdjacencies(coordTensor.GetIdDirect(i));
+                    edgeCheck(ModuleIdManager::Modules()[coordTensor.GetIdDirect(i)]);
+                    // Pop ID stack
                     modsToMove.pop();
                 }
             } else {
@@ -269,6 +273,10 @@ public:
                     coordTensor.GetIdDirect(destinations.front()) = coordTensor.GetIdDirect(i);
                     // TEST: Update module position variable
                     ModuleIdManager::Modules()[coordTensor.GetIdDirect(i)].coords = coordTensor.CoordsFromIndex(destinations.front());
+                    // Update adjacency list
+                    ClearAdjacencies(coordTensor.GetIdDirect(i));
+                    edgeCheck(ModuleIdManager::Modules()[coordTensor.GetIdDirect(i)]);
+                    // Pop index stack
                     destinations.pop();
                 }
                 // Set former module location to -1
