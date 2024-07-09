@@ -101,6 +101,7 @@ public:
     CoordTensor<int> coordTensor;
     // Holds coordinate info for articulation points / cut vertices
     std::vector<std::valarray<int>> articulationPoints;
+    std::vector<Module*> nonCutModules;
 
     Lattice(int order, int axisSize) : stateTensor(order, axisSize, false), coordTensor(order, axisSize, -1), order(order), axisSize(axisSize), time(0), moduleCount(0) {}
 
@@ -222,6 +223,8 @@ public:
                 auto& mod = ModuleIdManager::Modules()[id];
                 DEBUG("Module at (" << mod.coords[0] << ", " << mod.coords[1] << ") is an articulation point" << std::endl);
                 articulationPoints.emplace_back(mod.coords);
+            } else {
+                nonCutModules.emplace_back(&ModuleIdManager::Modules()[id]);
             }
         }
     }
@@ -290,6 +293,11 @@ public:
 
     void setState(const CoordTensor<bool>& newState) {
         Lattice::stateTensor = newState;
+    }
+
+    std::vector<Module*> getMovableModules() {
+        AP();
+        return nonCutModules;
     }
 
     friend std::ostream& operator<<(std::ostream& out, /*const*/ Lattice& lattice);
@@ -667,12 +675,13 @@ public:
     std::vector<CoordTensor<bool>> makeAllMoves(Lattice& lattice) {
         std::vector<CoordTensor<bool>> result;
         lattice.setState(_state);
-        for (auto module: ModuleIdManager::Modules()) {
-            auto legalMoves = MoveManager::CheckAllMoves(lattice.coordTensor, module);
+        std::vector<Module*> movableModules = lattice.getMovableModules();
+        for (auto module: movableModules) {
+            auto legalMoves = MoveManager::CheckAllMoves(lattice.coordTensor, *module);
             for (auto move : legalMoves) {
-                lattice.moveModule(module, move->MoveOffset());
+                lattice.moveModule(*module, move->MoveOffset());
                 result.push_back(lattice.stateTensor);
-                lattice.moveModule(module, -move->MoveOffset());
+                lattice.moveModule(*module, -move->MoveOffset());
             }
         }
         return result;
@@ -908,6 +917,15 @@ int main() {
         lattice.moveModule(ModuleIdManager::Modules()[0], legalMoves[0]->MoveOffset());
         std::cout << lattice;
     }
+
+    std::ifstream moveFile2("Moves/Pivot_1.txt");
+    if (!moveFile2) {
+        std::cerr << "Unable to open file Moves/Pivot_1.txt";
+        return 1;
+    }
+    Move2d move2;
+    move2.InitMove(moveFile2);
+    MoveManager::GenerateMovesFrom(&move2);
     //
     //  END TESTING
     //
