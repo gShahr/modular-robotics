@@ -296,6 +296,7 @@ public:
     }
 
     std::vector<Module*> getMovableModules() {
+        nonCutModules.clear();
         AP();
         return nonCutModules;
     }
@@ -664,6 +665,7 @@ private:
     CoordTensor<bool> _state;
     HashedState hash;
 public:
+    int depth = 0;
     explicit Configuration(CoordTensor<bool> state) : _state(std::move(state)) {}
 
     ~Configuration() {
@@ -739,6 +741,7 @@ public:
     return path of bfs via states taken
     */
     static std::vector<Configuration*> bfs(Configuration* start, Configuration* final, Lattice& lattice) {
+        int testI = -1;
         std::queue<Configuration*> q;
         std::unordered_set<HashedState> visited;
         q.push(start);
@@ -746,6 +749,10 @@ public:
         while (!q.empty()) {
             Configuration* current = q.front();
             lattice = q.front()->getState();
+            if (q.front()->depth != testI) {
+                testI++;
+                std::cout << "bfs depth: " << q.front()->depth << std::endl << lattice << std::endl;
+            }
             q.pop();
             if (current->getState() == final->getState()) {
                 return findPath(start, current);
@@ -758,6 +765,7 @@ public:
                     nextConfiguration->setStateAndHash(node);
                     q.push(nextConfiguration);
                     current->addEdge(nextConfiguration);
+                    nextConfiguration->depth = current->depth + 1;
                     visited.insert(node);
                 }
             }
@@ -784,7 +792,7 @@ public:
 
 int main() {
     int order = 2;
-    int axisSize = 4;
+    int axisSize = 9;
     Lattice lattice(order, axisSize);
     const int ORIGIN = 0;
     int x = ORIGIN;
@@ -803,9 +811,9 @@ int main() {
             if (c == '1') {
                 std::valarray<int> coords = {x, y};
                 lattice.addModule(coords);
-                row.push_back('1');
+                row.push_back('#');
             } else if (c == '0') {
-                row.push_back('0');
+                row.push_back(' ');
             }
             x++;
         }
@@ -829,7 +837,7 @@ int main() {
     //  MOVE TESTING BELOW
     //
     std::cout << lattice;
-    std::ifstream moveFile("Moves/Slide_1.txt");
+    std::ifstream moveFile("Moves/Pivot_1.txt");
     if (!moveFile) {
         std::cerr << "Unable to open file Moves/Slide_1.txt";
         return 1;
@@ -837,6 +845,17 @@ int main() {
     Move2d move;
     move.InitMove(moveFile);
     MoveManager::GenerateMovesFrom(&move);
+    std::ifstream moveFile2("Moves/Pivot_2.txt");
+    if (!moveFile2) {
+        std::cerr << "Unable to open file Moves/Slide_2.txt";
+        return 1;
+    }
+    Move2d move2;
+    move2.InitMove(moveFile2);
+    MoveManager::GenerateMovesFrom(&move2);
+    moveFile.close();
+    moveFile2.close();
+    /*
     auto legalMoves = MoveManager::CheckAllMoves(lattice.coordTensor, ModuleIdManager::Modules()[0]);
     bool test = !legalMoves.empty();
     std::cout << (test ? "MoveCheck Passed!" : "MoveCheck Failed!") << std::endl;
@@ -911,7 +930,7 @@ int main() {
     legalMoves = MoveManager::CheckAllMoves(lattice.coordTensor, ModuleIdManager::Modules()[0]);
     test = !legalMoves.empty();
     std::cout << (test ? "MoveCheck Passed!" : "MoveCheck Failed!") << std::endl;
-    moveFile.close();
+
     if (test) {
         std::cout << "Moving!\n";
         lattice.moveModule(ModuleIdManager::Modules()[0], legalMoves[0]->MoveOffset());
@@ -937,19 +956,29 @@ int main() {
     stateTest[{1, 2}] = true;
     stateTest[{2, 2}] = true;
     lattice = stateTest;
-    std::cout << lattice;
+    std::cout << lattice;*/
 
     // BFS TESTING
     std::cout << "BFS Testing:\n";
     std::cout << "Original:    Desired:\n" <<
-                 "  ----         ----\n" <<
-                 "  -#--         ----\n" <<
-                 "  -##-         -##-\n" <<
-                 "  ----         -#--\n";
+                 "  ----         --##\n" <<
+                 "  -#--         ---#\n" <<
+                 "  -##-         ----\n" <<
+                 "  ----         ----\n";
     Configuration start(lattice.stateTensor);
-    stateTest[{1, 1}] = false;
-    stateTest[{1, 3}] = true;
-    Configuration end(stateTest);
+    CoordTensor<bool> desiredState(order, axisSize, false);
+    desiredState = lattice.stateTensor;
+    desiredState[{3,3}] = false;
+    desiredState[{4,3}] = false;
+    desiredState[{4,4}] = false;
+    desiredState[{4,5}] = false;
+    desiredState[{5,5}] = false;
+    desiredState[{8,3}] = true;
+    desiredState[{8,4}] = true;
+    desiredState[{7,4}] = true;
+    desiredState[{6,4}] = true;
+    desiredState[{6,5}] = true;
+    Configuration end(desiredState);
     auto path = ConfigurationSpace::bfs(&start, &end, lattice);
     std::cout << "Path:\n";
     for (auto config : path) {
