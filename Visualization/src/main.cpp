@@ -31,14 +31,14 @@ const char *fragmentShaderPath = "resources/shaders/fshader.glsl";
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
-float ANIM_SPEED = 1.5f;
+float ANIM_SPEED = 1.0f;
 bool ANIMATE = false;
 
 const float CAMERA_MAX_SPEED = 25.0f;
 const float CAMERA_ACCEL = 0.10f;
 const float CAMERA_DECEL_FACTOR = 0.95f;
 const float CAMERA_SENSITIVITY = 0.1f;
-float FOV = 45.0f;
+float FOV = 60.0f;
 float cameraZoom = 0.0f;
 bool perspective = true;
 glm::vec3 cameraPos; // Camera variables initialized in resetCamera()
@@ -204,7 +204,7 @@ int loadTexture(const char *texturePath) {
 }
 
 void resetCamera() {
-    cameraPos = glm::vec3(0.0f, 2.0f, 6.0f);
+    cameraPos = glm::vec3(0.0f, 0.0f, 6.0f);
     cameraDirection = glm::vec3(0.0f, 0.0f, -1.0f);
     cameraUp = glm::cross(cameraDirection, glm::normalize(glm::cross(glm::vec3(0.0f, 1.0f, 0.0f), cameraDirection)));
     cameraSpeed = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -264,15 +264,22 @@ int main(int argc, char** argv) {
     viewmat = glm::mat4(1.0f);
     projmat = glm::perspective(glm::radians(45.0f), asprat, 0.1f, 100.0f);
 
-    // Scenario testScenario = Scenario("Scenarios/LegalSlideMove.scen");
-    // Scenario testScenario = Scenario("Scenarios/IllegalPivotMove.scen");
-    // Scenario testScenario = Scenario("Scenarios/2x2x2_Metamodule.scen");
-
-    // Scenario testScenario = Scenario("Scenarios/Testing/LegalSlide_IllegalPivot.scen");
-    Scenario testScenario = Scenario("Scenarios/Testing/SlidingTests.scen");
-    // Scenario testScenario = Scenario("Scenarios/Testing/3x3x3_Candidate.scen");
-    ObjectCollection* scenCubes = testScenario.toObjectCollection(&shader, VAO, texture);
-    MoveSequence* scenMoveSeq = testScenario.toMoveSequence();
+    // Scenario scenario = Scenario("Scenarios/LegalSlideMove.scen");
+    // Scenario scenario = Scenario("Scenarios/IllegalPivotMove.scen");
+    // Scenario scenario = Scenario("Scenarios/2x2x2_Metamodule.scen");
+    // Scenario scenario = Scenario("Scenarios/Testing/LegalSlide_IllegalPivot.scen");
+    // Scenario scenario = Scenario("Scenarios/Testing/SlidingTests.scen");
+    // Scenario scenario = Scenario("Scenarios/Testing/3x3x3_Candidate.scen");
+    std::string _scenfile;
+    if (!argv[1]) {
+        _scenfile.append("Scenarios/3d2rMeta.scen");
+    } else {
+        _scenfile.append("Scenarios/").append(argv[1]).append(".scen");
+    }
+    Scenario scenario = Scenario(_scenfile.c_str());
+   
+    ObjectCollection* scenCubes = scenario.toObjectCollection(&shader, VAO, texture);
+    MoveSequence* scenMoveSeq = scenario.toMoveSequence();
 
     bool readyForNewAnim = true;
     bool forward = true;

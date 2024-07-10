@@ -27,7 +27,7 @@ void main()
 {
 	mat4 toModel = modelmat * transform;
 	worldPos = toModel * vec4(aPos.xyz, 1.0);
-    worldPos.y = worldPos.y - 1.0;
+    //worldPos.y = worldPos.y - 1.0;
 	//worldPos.xyz = worldPos.xyz - 0.5;
 	//worldPos.xyz = worldPos.xyz - 20.0;
 	
