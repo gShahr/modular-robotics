@@ -51,10 +51,12 @@ class Module {
 public:
     // Coordinate information
     std::valarray<int> coords;
+    // Static module check
+    bool moduleStatic = false;
     // Module ID
     int id;
 
-    explicit Module(const std::valarray<int>& coords) : coords(coords), id(ModuleIdManager::GetNextId()) { }
+    explicit Module(const std::valarray<int>& coords, bool isStatic = false) : coords(coords), moduleStatic(isStatic), id(ModuleIdManager::GetNextId()) { }
 };
 
 // Stream insertion operator overloaded for easy printing of module info
@@ -106,10 +108,10 @@ public:
     Lattice(int order, int axisSize) : stateTensor(order, axisSize, false), coordTensor(order, axisSize, -1), order(order), axisSize(axisSize), time(0), moduleCount(0) {}
 
     // Add a new module
-    void addModule(const std::valarray<int>& coords) {
+    void addModule(const std::valarray<int>& coords, bool isStatic = false) {
         stateTensor[{coords}] = true;
         // Create and register new module
-        Module mod(coords);
+        Module mod(coords, isStatic);
         ModuleIdManager::RegisterModule(mod);
         // Insert module ID at given coordinates
         coordTensor[{coords}] = mod.id;
@@ -219,12 +221,12 @@ public:
         }
 
         for (int id = 0; id < moduleCount; id++) {
+            auto& mod = ModuleIdManager::Modules()[id];
             if (ap[id]) {
-                auto& mod = ModuleIdManager::Modules()[id];
                 DEBUG("Module at (" << mod.coords[0] << ", " << mod.coords[1] << ") is an articulation point" << std::endl);
                 articulationPoints.emplace_back(mod.coords);
-            } else {
-                nonCutModules.emplace_back(&ModuleIdManager::Modules()[id]);
+            } else if (!mod.moduleStatic) {
+                nonCutModules.emplace_back(&mod);
             }
         }
     }
@@ -814,6 +816,10 @@ int main() {
                 row.push_back('#');
             } else if (c == '0') {
                 row.push_back(' ');
+            } else if (c == '@') {
+                std::valarray<int> coords = {x, y};
+                lattice.addModule(coords, true);
+                row.push_back('@');
             }
             x++;
         }
