@@ -71,6 +71,51 @@ std::ostream& operator<<(std::ostream& out, const Module& mod) {
     return out;
 }
 
+class MoveBase {
+protected:
+    // each pair represents a coordinate offset to check and whether a module should be there or not
+    std::vector<std::pair<std::valarray<int>, bool>> moves;
+    // bounds ex: {(2, 1), (0, 1)} would mean bounds extend from -2 to 1 on x-axis and 0 to 1 on y-axis
+    std::vector<std::pair<int, int>> bounds;
+    std::valarray<int> initPos, finalPos;
+    int order = -1;
+public:
+    // Create a copy of a move
+    [[nodiscard]]
+    virtual MoveBase* CopyMove() const = 0;
+    // Load in move info from a given file
+    virtual void InitMove(std::ifstream& moveFile) = 0;
+    // Check to see if move is possible for a given module
+    virtual bool MoveCheck(CoordTensor<int>& tensor, const Module& mod) = 0;
+
+    void RotateMove(int index) {
+        std::swap(initPos[0], initPos[index]);
+        std::swap(finalPos[0], finalPos[index]);
+        std::swap(bounds[0], bounds[index]);
+        for (auto& move : moves) {
+            std::swap(move.first[0], move.first[index]);
+        }
+    }
+
+    void ReflectMove(int index) {
+        initPos[index] *= -1;
+        finalPos[index] *= -1;
+        std::swap(bounds[index].first, bounds[index].second);
+        for (auto& move : moves) {
+            move.first[index] *= -1;
+        }
+    }
+
+    const std::valarray<int>& MoveOffset() {
+        return finalPos;
+    }
+
+    virtual ~MoveBase() = default;
+
+    // MoveManager will need to see moves and offsets
+    friend class MoveManager;
+};
+
 class Lattice {
 private:
     // Vector that holds the IDs of adjacent modules, indexed by ID
@@ -98,6 +143,10 @@ private:
     }
 
 public:
+    // move info
+    std::valarray<int> modOrigin = {-1, -1};
+    MoveBase* lastMove;
+    // state tensor
     CoordTensor<bool> stateTensor;
     // CoordTensor, should eventually replace coordmat
     CoordTensor<int> coordTensor;
@@ -122,7 +171,10 @@ public:
     }
 
     // Move
-    void moveModule(Module& mod, const std::valarray<int>& offset) {
+    void moveModule(Module& mod, const std::valarray<int>& offset, MoveBase* move) {
+        modOrigin = mod.coords;
+        lastMove = move;
+
         ClearAdjacencies(mod.id);
         coordTensor.IdAt(mod.coords) = -1;
         stateTensor.IdAt(mod.coords) = false;
@@ -256,9 +308,11 @@ public:
             if (stateArray[i]) {
                 // New state has module at this index, current state doesn't have one
                 if (modsToMove.empty()) {
+                    modOrigin = coordTensor.CoordsFromIndex(i);
                     // Remember this location for when a mismatched module is found
                     destinations.push(i);
                 } else {
+                    modOrigin = coordTensor.CoordsFromIndex(i);
                     // Move a mismatched module to this location
                     coordTensor.GetIdDirect(i) = modsToMove.front();
                     // TEST: Update module position variable
@@ -309,8 +363,13 @@ public:
 std::ostream& operator<<(std::ostream& out, /*const*/ Lattice& lattice) {
     out << "Lattice State:\n";
     for (int i = 0; i < lattice.coordTensor.GetArrayInternal().size(); i++) {
-        if (lattice.coordTensor.GetIdDirect(i) >= 0) {
-            out << '#';
+        auto id = lattice.coordTensor.GetIdDirect(i);
+        if (id >= 0) {
+            if ((ModuleIdManager::Modules()[id].coords == lattice.modOrigin).min() == 1) {
+                out << '&';
+            } else {
+                out << '#';
+            }
         } else {
             out << '-';
         }
@@ -330,51 +389,6 @@ namespace Move {
         STATIC = '#'
     };
 }
-
-class MoveBase {
-protected:
-    // each pair represents a coordinate offset to check and whether a module should be there or not
-    std::vector<std::pair<std::valarray<int>, bool>> moves;
-    // bounds ex: {(2, 1), (0, 1)} would mean bounds extend from -2 to 1 on x-axis and 0 to 1 on y-axis
-    std::vector<std::pair<int, int>> bounds;
-    std::valarray<int> initPos, finalPos;
-    int order = -1;
-public:
-    // Create a copy of a move
-    [[nodiscard]]
-    virtual MoveBase* CopyMove() const = 0;
-    // Load in move info from a given file
-    virtual void InitMove(std::ifstream& moveFile) = 0;
-    // Check to see if move is possible for a given module
-    virtual bool MoveCheck(CoordTensor<int>& tensor, const Module& mod) = 0;
-
-    void RotateMove(int index) {
-        std::swap(initPos[0], initPos[index]);
-        std::swap(finalPos[0], finalPos[index]);
-        std::swap(bounds[0], bounds[index]);
-        for (auto& move : moves) {
-            std::swap(move.first[0], move.first[index]);
-        }
-    }
-
-    void ReflectMove(int index) {
-        initPos[index] *= -1;
-        finalPos[index] *= -1;
-        std::swap(bounds[index].first, bounds[index].second);
-        for (auto& move : moves) {
-            move.first[index] *= -1;
-        }
-    }
-
-    const std::valarray<int>& MoveOffset() {
-        return finalPos;
-    }
-
-    virtual ~MoveBase() = default;
-
-    // MoveManager will need to see moves and offsets
-    friend class MoveManager;
-};
 
 class MoveManager {
 private:
@@ -683,9 +697,9 @@ public:
         for (auto module: movableModules) {
             auto legalMoves = MoveManager::CheckAllMoves(lattice.coordTensor, *module);
             for (auto move : legalMoves) {
-                lattice.moveModule(*module, move->MoveOffset());
+                lattice.moveModule(*module, move->MoveOffset(), move);
                 result.push_back(lattice.stateTensor);
-                lattice.moveModule(*module, -move->MoveOffset());
+                lattice.moveModule(*module, -move->MoveOffset(), move);
             }
         }
         return result;
@@ -794,7 +808,7 @@ public:
 
 int main() {
     int order = 2;
-    int axisSize = 9;
+    int axisSize = 6;
     Lattice lattice(order, axisSize);
     const int ORIGIN = 0;
     int x = ORIGIN;
@@ -859,8 +873,44 @@ int main() {
     Move2d move2;
     move2.InitMove(moveFile2);
     MoveManager::GenerateMovesFrom(&move2);
+    /*std::ifstream moveFile3("Moves/Leapfrog_1.txt");
+    if (!moveFile3) {
+        std::cerr << "Unable to open file Moves/Leapfrog_1.txt";
+        return 1;
+    }
+    Move2d move3;
+    move3.InitMove(moveFile3);
+    MoveManager::GenerateMovesFrom(&move3);
+    std::ifstream moveFile4("Moves/Leapfrog_2.txt");
+    if (!moveFile4) {
+        std::cerr << "Unable to open file Moves/Leapfrog_2.txt";
+        return 1;
+    }
+    Move2d move4;
+    move4.InitMove(moveFile4);
+    MoveManager::GenerateMovesFrom(&move4);*/
+    std::ifstream moveFile5("Moves/Monkey_1.txt");
+    if (!moveFile5) {
+        std::cerr << "Unable to open file Moves/Monkey_1.txt";
+        return 1;
+    }
+    Move2d move5;
+    move5.InitMove(moveFile5);
+    MoveManager::GenerateMovesFrom(&move5);
+    std::ifstream moveFile6("Moves/Monkey_2.txt");
+    if (!moveFile6) {
+        std::cerr << "Unable to open file Moves/Monkey_2.txt";
+        return 1;
+    }
+    Move2d move6;
+    move6.InitMove(moveFile6);
+    MoveManager::GenerateMovesFrom(&move6);
     moveFile.close();
     moveFile2.close();
+    //moveFile3.close();
+    //moveFile4.close();
+    moveFile5.close();
+    moveFile6.close();
     /*
     auto legalMoves = MoveManager::CheckAllMoves(lattice.coordTensor, ModuleIdManager::Modules()[0]);
     bool test = !legalMoves.empty();
@@ -974,6 +1024,7 @@ int main() {
     Configuration start(lattice.stateTensor);
     CoordTensor<bool> desiredState(order, axisSize, false);
     desiredState = lattice.stateTensor;
+    /*
     desiredState[{3,3}] = false;
     desiredState[{4,3}] = false;
     desiredState[{4,4}] = false;
@@ -984,6 +1035,15 @@ int main() {
     desiredState[{7,4}] = true;
     desiredState[{6,4}] = true;
     desiredState[{6,5}] = true;
+    */
+    desiredState[{0,1}] = false;
+    desiredState[{0,2}] = false;
+    desiredState[{0,3}] = false;
+    desiredState[{0,4}] = false;
+    desiredState[{1,5}] = true;
+    desiredState[{2,5}] = true;
+    desiredState[{3,5}] = true;
+    desiredState[{4,5}] = true;
     Configuration end(desiredState);
     auto path = ConfigurationSpace::bfs(&start, &end, lattice);
     std::cout << "Path:\n";
