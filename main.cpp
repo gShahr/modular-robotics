@@ -806,6 +806,36 @@ public:
     }
 };
 
+class Scenario {
+private:
+public:
+    void exportStateTensorToJson(int id, const CoordTensor<bool>& stateTensor, const std::string& filename) {
+        indentSize = 4
+        nlohmann::json jsonOutput;
+        for (int i = 0; i < stateTensor.GetArrayInternal().size(); i++) {
+            jsonOutput["configurations"][id]["state"].push_back(stateTensor.GetIdDirect(i));
+        }
+        std::ofstream file(filename);
+        if (file.is_open()) {
+            file << jsonOutput.dump(indentSize);
+            file.close();
+        }
+    }
+
+    void exportConfigurationSpaceToJson(const std::vector<Configuration*>& path, const std::string& filename) {
+        indentSize = 4
+        nlohmann::json jsonOutput;
+        for (int i = 0; i < path.size(); i++) {
+            exportStateTensorToJson(i, path[i]->getState(), filename);
+        }
+        std::ofstream file(filename);
+        if (file.is_open()) {
+            file << jsonOutput.dump(indentSize);
+            file.close();
+        }
+    }
+};
+
 int main() {
     int order = 2;
     int axisSize = 6;
