@@ -11,6 +11,7 @@
 #include <boost/functional/hash.hpp>
 #include <queue>
 #include <unordered_set>
+#include <nlohmann/json.hpp>
 
 class Module;
 
@@ -674,6 +675,11 @@ namespace std {
     };
 }
 
+struct MoveWithCoordTensor {
+    CoordTensor<bool> tensor;
+    MoveBase* lastMove;
+};
+
 class Configuration {
 private:
     Configuration* parent = nullptr;
@@ -810,7 +816,7 @@ class Scenario {
 private:
 public:
     void exportStateTensorToJson(int id, const CoordTensor<bool>& stateTensor, const std::string& filename) {
-        indentSize = 4
+        int indentSize = 4;
         nlohmann::json jsonOutput;
         for (int i = 0; i < stateTensor.GetArrayInternal().size(); i++) {
             jsonOutput["configurations"][id]["state"].push_back(stateTensor.GetIdDirect(i));
@@ -823,15 +829,8 @@ public:
     }
 
     void exportConfigurationSpaceToJson(const std::vector<Configuration*>& path, const std::string& filename) {
-        indentSize = 4
-        nlohmann::json jsonOutput;
         for (int i = 0; i < path.size(); i++) {
             exportStateTensorToJson(i, path[i]->getState(), filename);
-        }
-        std::ofstream file(filename);
-        if (file.is_open()) {
-            file << jsonOutput.dump(indentSize);
-            file.close();
         }
     }
 };
