@@ -11,7 +11,7 @@ LDFLAGS =
 BOOST_LIBS =
 
 # Source files
-SOURCES = main.cpp CoordTensor.cpp
+SOURCES = main.cpp
 
 # Object files
 OBJECTS = $(SOURCES:.cpp=.o)
