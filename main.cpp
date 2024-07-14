@@ -480,7 +480,9 @@ public:
 };
 
 std::vector<MoveBase*> MoveManager::_moves;
+CoordTensor<std::vector<MoveBase*>> MoveManager::_movesByOffset(1, 1, {});
 std::vector<MoveBase*> MoveManager::_movesToFree;
+std::vector<std::valarray<int>> MoveManager::_offsets;
 
 class Move2d : public MoveBase {
 public:
