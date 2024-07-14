@@ -6,197 +6,13 @@
 #include <set>
 #include <string>
 #include "MoveManager.h"
+#include "ConfigurationSpace.h"
 #include "debug_util.h"
 #include <boost/functional/hash.hpp>
 #include <boost/format.hpp>
 #include <queue>
 #include <unordered_set>
 #include <nlohmann/json.hpp>
-
-class HashedState {
-private:
-    size_t seed;
-public:
-    HashedState() : seed(0) {}
-
-    HashedState(size_t seed) : seed(seed) {}
-
-    HashedState(CoordTensor<bool> coordTensor) {
-        hashCoordTensor(coordTensor);
-    }
-
-    HashedState(const HashedState& other) : seed(other.getSeed()) {}
-
-    size_t getSeed() const { return seed; }
-    /*
-    pass in information about lattice (hash bool of where modules are or bitfield c++)
-    return hash value
-    */
-    void hashLattice(const Lattice& lattice) {
-        seed = boost::hash_range(lattice.stateTensor.GetArrayInternal().begin(), lattice.stateTensor.GetArrayInternal().end());
-    }
-
-    void hashCoordTensor(const CoordTensor<bool>& coordTensor) {
-        seed = boost::hash_range(coordTensor.GetArrayInternal().begin(), coordTensor.GetArrayInternal().end());
-    }
-
-    bool compareStates(const HashedState& other) const { return seed == other.getSeed(); }
-    /*
-    check how to do this properly (operator overload function in lattice function)
-    return true iff lattice have the same structure of modules
-    */
-    bool compareLattice(const Lattice& Lattice1, const Lattice& Lattice2) {}
-
-    bool operator==(const HashedState& other) const {
-        return seed == other.getSeed();
-    }
-};
-
-namespace std {
-    template<>
-    struct hash<HashedState> {
-        std::size_t operator()(const HashedState& state) const {
-            return std::hash<int>()(state.getSeed());
-        }
-    };
-}
-
-struct MoveWithCoordTensor {
-    CoordTensor<bool> tensor;
-    MoveBase* lastMove;
-};
-
-class Configuration {
-private:
-    Configuration* parent = nullptr;
-    std::vector<Configuration*> next;
-    CoordTensor<bool> _state;
-    HashedState hash;
-public:
-    int depth = 0;
-    explicit Configuration(CoordTensor<bool> state) : _state(std::move(state)) {}
-
-    ~Configuration() {
-        for (auto i = next.rbegin(); i != next.rend(); i++) {
-            delete(*i);
-        }
-    }
-
-    std::vector<CoordTensor<bool>> makeAllMoves(Lattice& lattice) {
-        std::vector<CoordTensor<bool>> result;
-        lattice =_state;
-        std::vector<Module*> movableModules = lattice.MovableModules();
-        for (auto module: movableModules) {
-            auto legalMoves = MoveManager::CheckAllMoves(lattice.coordTensor, *module);
-            for (auto move : legalMoves) {
-                lattice.MoveModule(*module, move->MoveOffset());
-                result.push_back(lattice.stateTensor);
-                lattice.MoveModule(*module, -move->MoveOffset());
-            }
-        }
-        return result;
-    }
-
-    void addEdge(Configuration* configuration) {
-        next.push_back(configuration);
-    }
-
-    Configuration* getParent() {
-        return parent;
-    }
-
-    std::vector<Configuration*> getNext() {
-        return next;
-    }
-
-    CoordTensor<bool> getState() {
-        return _state;
-    }
-
-    HashedState getHash() {
-        return hash;
-    }
-
-    void setStateAndHash(const CoordTensor<bool>& state) {
-        _state = state;
-        hash = HashedState(state);
-    }
-
-    void setParent(Configuration* configuration) {
-        parent = configuration;
-    }
-
-    friend std::ostream& operator<<(std::ostream& os, const Configuration& config) {
-        os << "Configuration: " << config.hash.getSeed() << std::endl;
-        return os;
-    }
-};
-
-std::ostream& operator<<(std::ostream& os, const std::vector<Configuration*>& configs) {
-    for (const auto* config : configs) {
-        if (config) {
-            os << *config << std::endl;
-        }
-    }
-    return os;
-}
-
-class ConfigurationSpace {
-private:
-public:
-    /*
-    run bfs on configuration space
-    return path of bfs via states taken
-    */
-    static std::vector<Configuration*> bfs(Configuration* start, Configuration* final, Lattice& lattice) {
-        int testI = -1;
-        std::queue<Configuration*> q;
-        std::unordered_set<HashedState> visited;
-        q.push(start);
-        visited.insert(start->getHash());
-        while (!q.empty()) {
-            Configuration* current = q.front();
-            lattice = q.front()->getState();
-            if (q.front()->depth != testI) {
-                testI++;
-                std::cout << "bfs depth: " << q.front()->depth << std::endl << lattice << std::endl;
-            }
-            q.pop();
-            if (current->getState() == final->getState()) {
-                return findPath(start, current);
-            }
-            auto adjList = current->makeAllMoves(lattice);
-            for (const auto& node: adjList) {
-                if (visited.find(HashedState(node)) == visited.end()) {
-                    auto nextConfiguration = new Configuration(node);
-                    nextConfiguration->setParent(current);
-                    nextConfiguration->setStateAndHash(node);
-                    q.push(nextConfiguration);
-                    current->addEdge(nextConfiguration);
-                    nextConfiguration->depth = current->depth + 1;
-                    visited.insert(node);
-                }
-            }
-        }
-        return {};
-    }
-    
-    /*
-    backtrack to find path from start to final
-    return path of configurations
-    */
-    static std::vector<Configuration*> findPath(Configuration* start, Configuration* final) {
-        std::vector<Configuration*> path;
-        Configuration* current = final;
-        while (current->getState() != start->getState()) {
-            path.push_back(current);
-            current = current->getParent();
-        }
-        path.push_back(start);
-        std::reverse(path.begin(), path.end());
-        return path;
-    }
-};
 
 // This might be better off as a namespace
 namespace Scenario {
@@ -215,7 +31,7 @@ namespace Scenario {
 
     static void exportConfigurationSpaceToJson(const std::vector<Configuration*>& path, const std::string& filename) {
         for (int i = 0; i < path.size(); i++) {
-            exportStateTensorToJson(i, path[i]->getState(), filename);
+            exportStateTensorToJson(i, path[i]->GetState(), filename);
         }
     }
 
@@ -229,7 +45,7 @@ namespace Scenario {
         auto idLen = std::to_string(ModuleIdManager::Modules().size()).size();
         boost::format padding("%%0%dd, %s");
         boost::format modDef((padding % idLen %  "%d, %d, %d, %d").str());
-        lattice = path[0]->getState();
+        lattice = path[0]->GetState();
         for (int id = 0; id < ModuleIdManager::Modules().size(); id++) {
             auto& mod = ModuleIdManager::Modules()[id];
             modDef % id % (mod.moduleStatic ? 1 : 0) % mod.coords[0] % mod.coords[1] % (mod.coords.size() > 2 ? mod.coords[2] : 0);
@@ -238,7 +54,7 @@ namespace Scenario {
         // Move Definitions
         file << std::endl;
         for (int i = 1; i < path.size(); i++) {
-            auto movePair = MoveManager::FindMoveToState(lattice, path[i]->getState());
+            auto movePair = MoveManager::FindMoveToState(lattice, path[i]->GetState());
             if (movePair.second == nullptr) {
                 std::cout << "Failed to generate scenario file, no move to next state found.\n";
                 file.close();
@@ -495,10 +311,10 @@ int main() {
     desiredState[{3,5}] = true;
     desiredState[{4,5}] = true;*/
     Configuration end(desiredState);
-    auto path = ConfigurationSpace::bfs(&start, &end, lattice);
+    auto path = ConfigurationSpace::BFS(&start, &end, lattice);
     std::cout << "Path:\n";
     for (auto config : path) {
-        lattice = config->getState();
+        lattice = config->GetState();
         std::cout << lattice;
     }
     Scenario::exportToScen(lattice, path, "test.scen");
