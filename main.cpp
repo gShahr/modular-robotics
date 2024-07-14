@@ -382,10 +382,10 @@ int main() {
     desiredState[{3,5}] = true;
     desiredState[{4,5}] = true;*/
     Configuration end(desiredState);
-    auto path = ConfigurationSpace::bfs(&start, &end, lattice);
+    auto path = ConfigurationSpace::BFS(&start, &end, lattice);
     std::cout << "Path:\n";
     for (auto config : path) {
-        lattice = config->getState();
+        lattice = config->GetState();
         std::cout << lattice;
     }
     Scenario::exportToScen(lattice, path, "test.scen");
