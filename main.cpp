@@ -9,6 +9,7 @@
 #include "CoordTensor.h"
 #include "debug_util.h"
 #include <boost/functional/hash.hpp>
+#include <boost/format.hpp>
 #include <queue>
 #include <unordered_set>
 #include <nlohmann/json.hpp>
@@ -886,12 +887,48 @@ namespace Scenario {
             exportStateTensorToJson(i, path[i]->getState(), filename);
         }
     }
+
+    static void exportToScen(Lattice& lattice, const std::vector<Configuration*>& path, const std::string& filename) {
+        // File setup
+        std::ofstream file(filename);
+        // Group Definitions
+        file << "0, 244, 244, 0, 95\n";
+        file << "1, 255, 255, 255, 85\n\n";
+        // Module Definitions
+        auto idLen = std::to_string(ModuleIdManager::Modules().size()).size();
+        boost::format padding("%%0%dd, %s");
+        boost::format modDef((padding % idLen %  "%d, %d, %d, %d").str());
+        lattice = path[0]->getState();
+        for (int id = 0; id < ModuleIdManager::Modules().size(); id++) {
+            auto& mod = ModuleIdManager::Modules()[id];
+            modDef % id % (mod.moduleStatic ? 1 : 0) % mod.coords[0] % mod.coords[1] % (mod.coords.size() > 2 ? mod.coords[2] : 0);
+            file << modDef.str() << std::endl;
+        }
+        // Move Definitions
+        file << std::endl;
+        for (int i = 1; i < path.size(); i++) {
+            auto movePair = MoveManager::FindMoveToState(lattice, path[i]->getState());
+            if (movePair.second == nullptr) {
+                std::cout << "Failed to generate scenario file, no move to next state found.\n";
+                file.close();
+                return;
+            }
+            auto modToMove = movePair.first;
+            auto move = movePair.second;
+            modDef % modToMove->id % lattice.coordTensor[modToMove->coords + move->AnchorOffset()] % move->MoveOffset()[0] % move->MoveOffset()[1] % (move->MoveOffset().size() > 2 ? move->MoveOffset()[2] : 0);
+            file << modDef.str() << std::endl;
+            lattice.moveModule(*modToMove, move->MoveOffset(), move);
+        }
+        // File cleanup
+        file.close();
+    }
 };
 
 int main() {
     int order = 2;
     int axisSize = 6;
     Lattice lattice(order, axisSize);
+    MoveManager::InitMoveManager(order, axisSize);
     const int ORIGIN = 0;
     int x = ORIGIN;
     int y = ORIGIN;
@@ -1133,6 +1170,7 @@ int main() {
         lattice = config->getState();
         std::cout << lattice;
     }
+    Scenario::exportToScen(lattice, path, "test.scen");
 
     // Cleanup
     MoveManager::CleanMoves();
