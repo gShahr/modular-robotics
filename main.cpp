@@ -472,6 +472,32 @@ public:
         return LegalMoves;
     }
 
+    static std::pair<Module*, MoveBase*> FindMoveToState(Lattice& lattice, const CoordTensor<bool>& state) {
+        Module* modToMove = nullptr;
+        // Find module to move
+        for (int i = 0; i < lattice.stateTensor.GetArrayInternal().size(); i++) {
+            if (lattice.stateTensor.GetIdDirect(i) != state.GetIdDirect(i) && !state.GetIdDirect(i)) {
+                modToMove = &ModuleIdManager::Modules()[lattice.coordTensor.GetIdDirect(i)];
+                break;
+            }
+        }
+        if (modToMove == nullptr) {
+            return {nullptr, nullptr};
+        }
+        auto& modCoords = modToMove->coords;
+        for (auto& offset : _offsets) {
+            // Find offset to move to
+            if (!state[modCoords + offset]) continue;
+            // Find move to get there
+            for (auto move : _movesByOffset[offset]) {
+                if (move->MoveCheck(lattice.coordTensor, *modToMove)) {
+                    return {modToMove, move};
+                }
+            }
+        }
+        return {modToMove, nullptr};
+    }
+
     static void CleanMoves() {
         for (auto move : _movesToFree) {
             delete move;
