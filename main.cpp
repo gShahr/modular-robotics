@@ -7,59 +7,13 @@
 #include <string>
 // CoordTensor not used yet, but it's all set up, just need to refactor main.cpp
 #include "CoordTensor.h"
+#include "ModuleManager.h"
 #include "debug_util.h"
 #include <boost/functional/hash.hpp>
 #include <boost/format.hpp>
 #include <queue>
 #include <unordered_set>
 #include <nlohmann/json.hpp>
-
-class Module;
-
-// Class responsible for module ID assignment and providing a central place where modules are stored
-class ModuleIdManager {
-private:
-    // ID to be assigned to next module during construction
-    static int _nextId;
-    // Vector holding all modules, indexed by module ID
-    static std::vector<Module> _modules;
-
-public:
-    // Never instantiate ModuleIdManager
-    ModuleIdManager() = delete;
-    ModuleIdManager(const ModuleIdManager&) = delete;
-
-    // Emplace newly created module into the vector
-    static void RegisterModule(Module& module) {
-        _modules.emplace_back(module);
-    }
-
-    // Get ID for assignment to newly created module
-    [[nodiscard]]
-    static int GetNextId() {
-        return _nextId++;
-    }
-
-    // Get read access to vector of modules, indexed by ID
-    static std::vector<Module>& Modules() {
-        return _modules;
-    }
-};
-
-int ModuleIdManager::_nextId = 0;
-std::vector<Module> ModuleIdManager::_modules;
-
-class Module {
-public:
-    // Coordinate information
-    std::valarray<int> coords;
-    // Static module check
-    bool moduleStatic = false;
-    // Module ID
-    int id;
-
-    explicit Module(const std::valarray<int>& coords, bool isStatic = false) : coords(coords), moduleStatic(isStatic), id(ModuleIdManager::GetNextId()) { }
-};
 
 // Stream insertion operator overloaded for easy printing of module info
 std::ostream& operator<<(std::ostream& out, const Module& mod) {
@@ -166,7 +120,6 @@ public:
         stateTensor[{coords}] = true;
         // Create and register new module
         Module mod(coords, isStatic);
-        ModuleIdManager::RegisterModule(mod);
         // Insert module ID at given coordinates
         coordTensor[{coords}] = mod.id;
         // bothWays bool set to false due to how the lattice should be built
