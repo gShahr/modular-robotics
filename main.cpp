@@ -393,7 +393,8 @@ namespace Move {
         EMPTY = 'x',
         INITIAL = '?',
         FINAL = '!',
-        STATIC = '#'
+        STATIC = '#',
+        ANCHOR = '@'
     };
 }
 
