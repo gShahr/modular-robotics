@@ -153,7 +153,6 @@ private:
 public:
     // move info
     std::valarray<int> modOrigin = {-1, -1};
-    MoveBase* lastMove;
     // state tensor
     CoordTensor<bool> stateTensor;
     // CoordTensor, should eventually replace coordmat
@@ -179,9 +178,8 @@ public:
     }
 
     // Move
-    void moveModule(Module& mod, const std::valarray<int>& offset, MoveBase* move) {
+    void moveModule(Module& mod, const std::valarray<int>& offset) {
         modOrigin = mod.coords;
-        lastMove = move;
 
         ClearAdjacencies(mod.id);
         coordTensor.IdAt(mod.coords) = -1;
@@ -758,9 +756,9 @@ public:
         for (auto module: movableModules) {
             auto legalMoves = MoveManager::CheckAllMoves(lattice.coordTensor, *module);
             for (auto move : legalMoves) {
-                lattice.moveModule(*module, move->MoveOffset(), move);
+                lattice.moveModule(*module, move->MoveOffset());
                 result.push_back(lattice.stateTensor);
-                lattice.moveModule(*module, -move->MoveOffset(), move);
+                lattice.moveModule(*module, -move->MoveOffset());
             }
         }
         return result;
@@ -917,7 +915,7 @@ namespace Scenario {
             auto move = movePair.second;
             modDef % modToMove->id % lattice.coordTensor[modToMove->coords + move->AnchorOffset()] % move->MoveOffset()[0] % move->MoveOffset()[1] % (move->MoveOffset().size() > 2 ? move->MoveOffset()[2] : 0);
             file << modDef.str() << std::endl;
-            lattice.moveModule(*modToMove, move->MoveOffset(), move);
+            lattice.moveModule(*modToMove, move->MoveOffset());
         }
         // File cleanup
         file.close();
