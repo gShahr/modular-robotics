@@ -11,7 +11,7 @@
 #include <boost/format.hpp>
 #include <queue>
 #include <unordered_set>
-#include <nlohmann/json.hpp>
+#include "json.hpp"
 
 class HashedState {
 private:
@@ -60,11 +60,6 @@ namespace std {
         }
     };
 }
-
-struct MoveWithCoordTensor {
-    CoordTensor<bool> tensor;
-    MoveBase* lastMove;
-};
 
 class Configuration {
 private:
@@ -255,20 +250,31 @@ namespace Scenario {
     }
 };
 
-int main() {
-    int order = 2;
-    int axisSize = 9;
-    Lattice lattice(order, axisSize);
-    MoveManager::InitMoveManager(order, axisSize);
-    const int ORIGIN = 0;
+/**
+ * @brief Initializes the lattice and image based on a file input.
+ * 
+ * This function reads a file specified by `filename` and populates the `lattice` and `image`
+ * based on the contents of the file. Each line in the file represents a row in the `image`,
+ * with specific characters ('1', '0', '@') indicating different states or types of modules
+ * to be added to the `lattice`. The function sets the initial position for parsing the file
+ * based on the `ORIGIN` parameter.
+ * 
+ * @param ORIGIN The starting point for the x and y coordinates.
+ * @param lattice A reference to the Lattice object to which modules will be added.
+ * @param image A reference to a 2D vector of chars representing the visual representation of the lattice.
+ * @param filename The name of the file from which to read the lattice and image configuration.
+ * 
+ * @note The function does not return a value but modifies the `lattice` and `image` in place.
+ *       If the file cannot be opened, an error message is printed to `std::cerr`.
+ */
+void setupInitial(int ORIGIN, Lattice& lattice, std::vector<std::vector<char>>& image, const std::string& filename);
+void setupInitial(int ORIGIN, Lattice& lattice, std::vector<std::vector<char>>& image, const std::string& filename) {
     int x = ORIGIN;
     int y = ORIGIN;
-    std::vector<std::vector<char>> image;
-
-    std::ifstream file("test2.txt");
+    std::ifstream file(filename);
     if (!file) {
-        std::cerr << "Unable to open file test2.txt";
-        return 1;
+        std::cerr << "Unable to open file " << filename << std::endl;
+        return;
     }
     std::string line;
     while (std::getline(file, line)) {
@@ -292,6 +298,66 @@ int main() {
         y++;
     }
     file.close();
+}
+
+/**
+ * @brief Reads a configuration from a file and sets up the desired state in a CoordTensor.
+ * 
+ * This function opens a file specified by `filename` and reads its contents line by line
+ * to configure a `CoordTensor<bool>` representing the desired state. Each character in the
+ * file is examined, and if it is '@', the corresponding position in the `CoordTensor` is
+ * set to `true`, indicating a desired active state at that position. The function uses
+ * `ORIGIN` to reset the `x` coordinate at the start of each new line and after the file
+ * is fully processed. The `order` and `axisSize` parameters are used to initialize the
+ * `CoordTensor` dimensions and initial state.
+ * 
+ * @param order The order (dimensionality) of the CoordTensor.
+ * @param axisSize The size of each axis in the CoordTensor.
+ * @param ORIGIN The starting point for the x and y coordinates, used for resetting.
+ * @param lattice A reference to a Lattice object, not used in the current implementation but
+ *                included for potential future use or extension.
+ * @param filename The name of the file from which to read the configuration.
+ * 
+ * @return A CoordTensor<bool> representing the desired state as configured by the file.
+ * 
+ * @note If the file cannot be opened, an error message is printed to `std::cerr` and the
+ *       function returns early with an uninitialized CoordTensor. This behavior might need
+ *       handling by the caller to avoid undefined behavior.
+ */
+CoordTensor<bool> setupFinal(int order, int axisSize, int ORIGIN, Lattice& lattice, const std::string& filename);
+CoordTensor<bool> setupFinal(int order, int axisSize, int ORIGIN, Lattice& lattice, const std::string& filename) {
+    int x = ORIGIN;
+    int y = ORIGIN;
+    CoordTensor<bool> desiredState(order, axisSize, false);
+    std::ifstream file(filename);
+    if (!file) {
+        std::cerr << "Unable to open file " << filename << std::endl;
+        return desiredState;
+    }
+    std::string line;
+    while (std::getline(file, line)) {
+        for (char c: line) {
+            if (c == '@') {
+                std::valarray<int> coords = {x, y};
+                desiredState[coords] = true;
+            }
+            x++;
+        }
+        x = ORIGIN;
+        y++;
+    }
+    file.close();
+    return desiredState;
+}
+
+int main() {
+    const int ORIGIN = 0;
+    int order = 2;
+    int axisSize = 9;
+    Lattice lattice(order, axisSize);
+    MoveManager::InitMoveManager(order, axisSize);
+    std::vector<std::vector<char>> image;
+    setupInitial(ORIGIN, lattice, image, "test2.txt");
     lattice.BuildMovableModules();
     for (auto i: lattice.articulationPoints) {
         image[i[1] - ORIGIN][i[0] - ORIGIN] = '*';
