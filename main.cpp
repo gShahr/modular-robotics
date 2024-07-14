@@ -151,8 +151,6 @@ private:
     }
 
 public:
-    // move info
-    std::valarray<int> modOrigin = {-1, -1};
     // state tensor
     CoordTensor<bool> stateTensor;
     // CoordTensor, should eventually replace coordmat
@@ -179,8 +177,6 @@ public:
 
     // Move
     void moveModule(Module& mod, const std::valarray<int>& offset) {
-        modOrigin = mod.coords;
-
         ClearAdjacencies(mod.id);
         coordTensor.IdAt(mod.coords) = -1;
         stateTensor.IdAt(mod.coords) = false;
@@ -314,11 +310,9 @@ public:
             if (stateArray[i]) {
                 // New state has module at this index, current state doesn't have one
                 if (modsToMove.empty()) {
-                    modOrigin = coordTensor.CoordsFromIndex(i);
                     // Remember this location for when a mismatched module is found
                     destinations.push(i);
                 } else {
-                    modOrigin = coordTensor.CoordsFromIndex(i);
                     // Move a mismatched module to this location
                     coordTensor.GetIdDirect(i) = modsToMove.front();
                     // TEST: Update module position variable
@@ -371,11 +365,7 @@ std::ostream& operator<<(std::ostream& out, /*const*/ Lattice& lattice) {
     for (int i = 0; i < lattice.coordTensor.GetArrayInternal().size(); i++) {
         auto id = lattice.coordTensor.GetIdDirect(i);
         if (id >= 0) {
-            if ((ModuleIdManager::Modules()[id].coords == lattice.modOrigin).min() == 1) {
-                out << '&';
-            } else {
-                out << '#';
-            }
+            out << '#';
         } else {
             out << '-';
         }
