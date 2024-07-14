@@ -15,18 +15,6 @@
 #include <unordered_set>
 #include <nlohmann/json.hpp>
 
-// Stream insertion operator overloaded for easy printing of module info
-std::ostream& operator<<(std::ostream& out, const Module& mod) {
-    out << "Module with ID " << mod.id << " at ";
-    std::string sep = "(";
-    for (auto coord : mod.coords) {
-        out << sep << coord;
-        sep = ", ";
-    }
-    out << ")";
-    return out;
-}
-
 class MoveBase {
 protected:
     // each pair represents a coordinate offset to check and whether a module should be there or not

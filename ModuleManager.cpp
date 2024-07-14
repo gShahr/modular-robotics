@@ -18,3 +18,14 @@ int ModuleIdManager::GetNextId() {
 std::vector<Module>& ModuleIdManager::Modules() {
     return _modules;
 }
+
+std::ostream& operator<<(std::ostream& out, const Module& mod) {
+    out << "Module with ID " << mod.id << " at ";
+    std::string sep = "(";
+    for (auto coord : mod.coords) {
+        out << sep << coord;
+        sep = ", ";
+    }
+    out << ")";
+    return out;
+}

@@ -1,3 +1,4 @@
+#include <iostream>
 #include <vector>
 #include <valarray>
 
@@ -40,5 +41,8 @@ public:
     // Get vector of modules
     static std::vector<Module>& Modules();
 };
+
+// Stream insertion operator overloaded for easy printing of module info
+std::ostream& operator<<(std::ostream& out, const Module& mod);
 
 #endif //MODULAR_ROBOTICS_MODULEMANAGER_H
