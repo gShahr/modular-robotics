@@ -78,7 +78,7 @@ protected:
     std::vector<std::pair<std::valarray<int>, bool>> moves;
     // bounds ex: {(2, 1), (0, 1)} would mean bounds extend from -2 to 1 on x-axis and 0 to 1 on y-axis
     std::vector<std::pair<int, int>> bounds;
-    std::valarray<int> initPos, finalPos;
+    std::valarray<int> initPos, finalPos, anchorPos;
     int order = -1;
 public:
     // Create a copy of a move
@@ -92,6 +92,7 @@ public:
     void RotateMove(int index) {
         std::swap(initPos[0], initPos[index]);
         std::swap(finalPos[0], finalPos[index]);
+        std::swap(anchorPos[0], anchorPos[index]);
         std::swap(bounds[0], bounds[index]);
         for (auto& move : moves) {
             std::swap(move.first[0], move.first[index]);
@@ -101,6 +102,7 @@ public:
     void ReflectMove(int index) {
         initPos[index] *= -1;
         finalPos[index] *= -1;
+        anchorPos[index] *= -1;
         std::swap(bounds[index].first, bounds[index].second);
         for (auto& move : moves) {
             move.first[index] *= -1;
@@ -109,6 +111,10 @@ public:
 
     const std::valarray<int>& MoveOffset() {
         return finalPos;
+    }
+
+    const std::valarray<int>& AnchorOffset() {
+        return anchorPos;
     }
 
     virtual ~MoveBase() = default;
@@ -493,6 +499,8 @@ public:
                     case Move::EMPTY:
                         moves.push_back({{x, y}, false});
                         break;
+                    case Move::ANCHOR:
+                        anchorPos = {x, y};
                     case Move::STATIC:
                         moves.push_back({{x, y}, true});
                         break;
@@ -517,6 +525,7 @@ public:
             DEBUG("Check Offset: " << move.first[0] << ", " << move.first[1] << (move.second ? " Static" : " Empty") << std::endl);
         }
         finalPos -= initPos;
+        anchorPos -= initPos;
         DEBUG("Move Offset: " << finalPos[0] << ", " << finalPos[1] << std::endl);
         maxBounds -= initPos;
         bounds[0].second = maxBounds[0];
@@ -576,6 +585,8 @@ public:
                     case Move::EMPTY:
                         moves.push_back({{x, y, z}, false});
                         break;
+                    case Move::ANCHOR:
+                        anchorPos = {x, y, z};
                     case Move::STATIC:
                         moves.push_back({{x, y, z}, true});
                         break;
@@ -603,6 +614,7 @@ public:
             DEBUG("Check Offset: " << move.first[0] << ", " << move.first[1] << ", " << move.first[2] << (move.second ? " Static" : " Empty") << std::endl);
         }
         finalPos -= initPos;
+        anchorPos -= initPos;
         DEBUG("Move Offset: " << finalPos[0] << ", " << finalPos[1] << ", " << finalPos[2] << std::endl);
         maxBounds -= initPos;
         bounds[0].second = maxBounds[0];
