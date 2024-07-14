@@ -815,7 +815,7 @@ public:
 class Scenario {
 private:
 public:
-    void exportStateTensorToJson(int id, const CoordTensor<bool>& stateTensor, const std::string& filename) {
+    static void exportStateTensorToJson(int id, const CoordTensor<bool>& stateTensor, const std::string& filename) {
         int indentSize = 4;
         nlohmann::json jsonOutput;
         for (int i = 0; i < stateTensor.GetArrayInternal().size(); i++) {
@@ -828,7 +828,7 @@ public:
         }
     }
 
-    void exportConfigurationSpaceToJson(const std::vector<Configuration*>& path, const std::string& filename) {
+    static void exportConfigurationSpaceToJson(const std::vector<Configuration*>& path, const std::string& filename) {
         for (int i = 0; i < path.size(); i++) {
             exportStateTensorToJson(i, path[i]->getState(), filename);
         }
