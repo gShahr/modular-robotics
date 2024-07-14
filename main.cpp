@@ -109,6 +109,7 @@ void setupFromJson(int ORIGIN, Lattice& lattice, const std::string& filename) {
         std::valarray<int> coords(position.data(), position.size());
         lattice.AddModule(coords, module["static"]);
     }
+    lattice.BuildMovableModules();
 }
 
 /**
@@ -235,7 +236,8 @@ int main() {
     int axisSize = 9;
     Lattice lattice(order, axisSize);
     MoveManager::InitMoveManager(order, axisSize);
-    setupInitial(ORIGIN, lattice, "test1.txt");
+    //setupInitial(ORIGIN, lattice, "test1.txt");
+    setupFromJson(ORIGIN, lattice, "test1.json");
 
     //
     //  MOVE TESTING BELOW
