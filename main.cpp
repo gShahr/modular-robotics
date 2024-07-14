@@ -14,15 +14,6 @@
 #include "json.hpp"
 #include "HashedState.h"
 
-namespace std {
-    template<>
-    struct hash<HashedState> {
-        std::size_t operator()(const HashedState& state) const {
-            return std::hash<int>()(state.getSeed());
-        }
-    };
-}
-
 class Configuration {
 private:
     Configuration* parent = nullptr;

@@ -5,6 +5,7 @@
 #include "CoordTensor.h" // Assuming CoordTensor is defined in this header
 #include "Lattice.h" // Assuming Lattice is defined in this header
 #include <boost/functional/hash.hpp> // For boost::hash_range
+#include <functional> // Required for std::hash specialization
 
 class HashedState {
 private:
@@ -22,5 +23,14 @@ public:
     bool compareLattice(const Lattice& Lattice1, const Lattice& Lattice2);
     bool operator==(const HashedState& other) const;
 };
+
+namespace std {
+    template<>
+    struct hash<HashedState> {
+        std::size_t operator()(const HashedState& state) const {
+            return std::hash<size_t>()(state.getSeed());
+        }
+    };
+}
 
 #endif // HASHEDSTATE_H
