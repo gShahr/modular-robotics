@@ -867,7 +867,7 @@ namespace Scenario {
 
 int main() {
     int order = 2;
-    int axisSize = 6;
+    int axisSize = 9;
     Lattice lattice(order, axisSize);
     MoveManager::InitMoveManager(order, axisSize);
     const int ORIGIN = 0;
@@ -875,9 +875,9 @@ int main() {
     int y = ORIGIN;
     std::vector<std::vector<char>> image;
 
-    std::ifstream file("test1.txt");
+    std::ifstream file("test2.txt");
     if (!file) {
-        std::cerr << "Unable to open file test1.txt";
+        std::cerr << "Unable to open file test2.txt";
         return 1;
     }
     std::string line;
@@ -949,7 +949,7 @@ int main() {
     Move2d move4;
     move4.InitMove(moveFile4);
     MoveManager::GenerateMovesFrom(&move4);*/
-    std::ifstream moveFile5("Moves/Monkey_1.txt");
+    /*std::ifstream moveFile5("Moves/Monkey_1.txt");
     if (!moveFile5) {
         std::cerr << "Unable to open file Moves/Monkey_1.txt";
         return 1;
@@ -964,13 +964,13 @@ int main() {
     }
     Move2d move6;
     move6.InitMove(moveFile6);
-    MoveManager::GenerateMovesFrom(&move6);
+    MoveManager::GenerateMovesFrom(&move6);*/
     moveFile.close();
     moveFile2.close();
     //moveFile3.close();
     //moveFile4.close();
-    moveFile5.close();
-    moveFile6.close();
+    //moveFile5.close();
+    //moveFile6.close();
     /*
     auto legalMoves = MoveManager::CheckAllMoves(lattice.coordTensor, ModuleIdManager::Modules()[0]);
     bool test = !legalMoves.empty();
@@ -1084,7 +1084,7 @@ int main() {
     Configuration start(lattice.stateTensor);
     CoordTensor<bool> desiredState(order, axisSize, false);
     desiredState = lattice.stateTensor;
-    /*
+
     desiredState[{3,3}] = false;
     desiredState[{4,3}] = false;
     desiredState[{4,4}] = false;
@@ -1095,15 +1095,15 @@ int main() {
     desiredState[{7,4}] = true;
     desiredState[{6,4}] = true;
     desiredState[{6,5}] = true;
-    */
-    desiredState[{0,1}] = false;
+
+    /*desiredState[{0,1}] = false;
     desiredState[{0,2}] = false;
     desiredState[{0,3}] = false;
     desiredState[{0,4}] = false;
     desiredState[{1,5}] = true;
     desiredState[{2,5}] = true;
     desiredState[{3,5}] = true;
-    desiredState[{4,5}] = true;
+    desiredState[{4,5}] = true;*/
     Configuration end(desiredState);
     auto path = ConfigurationSpace::bfs(&start, &end, lattice);
     std::cout << "Path:\n";
