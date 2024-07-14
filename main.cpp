@@ -119,7 +119,7 @@ void setupFromJson(int ORIGIN, Lattice& lattice, const std::string& filename) {
  * vector `image`. The file's content dictates the placement and type of modules
  * within the lattice, where each character ('1', '0', '@') in a line corresponds
  * to a module's state or type: '1' for a standard module, '0' for an empty space,
- * and '@' for a special module. The `ORIGIN` parameter determines the starting
+ * and '@' for a static module. The `ORIGIN` parameter determines the starting
  * coordinates for module placement, aligning the file's content with the lattice's
  * coordinate system.
  * 
@@ -184,7 +184,7 @@ void setupInitial(int ORIGIN, Lattice& lattice, const std::string& filename) {
  * 
  * This function opens a file specified by `filename` and reads its contents line by line
  * to configure a `CoordTensor<bool>` representing the desired state. Each character in the
- * file is examined, and if it is '@', the corresponding position in the `CoordTensor` is
+ * file is examined, and if it is '1', the corresponding position in the `CoordTensor` is
  * set to `true`, indicating a desired active state at that position. The function uses
  * `ORIGIN` to reset the `x` coordinate at the start of each new line and after the file
  * is fully processed. The `order` and `axisSize` parameters are used to initialize the
@@ -216,7 +216,7 @@ CoordTensor<bool> setupFinal(int order, int axisSize, int ORIGIN, Lattice& latti
     std::string line;
     while (std::getline(file, line)) {
         for (char c: line) {
-            if (c == '@') {
+            if (c == '1') {
                 std::valarray<int> coords = {x, y};
                 desiredState[coords] = true;
             }
@@ -235,7 +235,7 @@ int main() {
     int axisSize = 9;
     Lattice lattice(order, axisSize);
     MoveManager::InitMoveManager(order, axisSize);
-    setupInitial(ORIGIN, lattice, "test2.txt");
+    setupInitial(ORIGIN, lattice, "test1.txt");
 
     //
     //  MOVE TESTING BELOW
@@ -406,19 +406,18 @@ int main() {
                  "  -##-         ----\n" <<
                  "  ----         ----\n";
     Configuration start(lattice.stateTensor);
-    CoordTensor<bool> desiredState(order, axisSize, false);
-    desiredState = lattice.stateTensor;
+    CoordTensor<bool> desiredState = setupFinal(order, axisSize, ORIGIN, lattice, "test1DesiredState.txt");
 
-    desiredState[{3,3}] = false;
-    desiredState[{4,3}] = false;
-    desiredState[{4,4}] = false;
-    desiredState[{4,5}] = false;
-    desiredState[{5,5}] = false;
-    desiredState[{8,3}] = true;
-    desiredState[{8,4}] = true;
-    desiredState[{7,4}] = true;
-    desiredState[{6,4}] = true;
-    desiredState[{6,5}] = true;
+    // desiredState[{3,3}] = false;
+    // desiredState[{4,3}] = false;
+    // desiredState[{4,4}] = false;
+    // desiredState[{4,5}] = false;
+    // desiredState[{5,5}] = false;
+    // desiredState[{8,3}] = true;
+    // desiredState[{8,4}] = true;
+    // desiredState[{7,4}] = true;
+    // desiredState[{6,4}] = true;
+    // desiredState[{6,5}] = true;
 
     /*desiredState[{0,1}] = false;
     desiredState[{0,2}] = false;
