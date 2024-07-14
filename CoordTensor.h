@@ -199,7 +199,7 @@ CoordTensor<T>::CoordTensor(int order, int axisSize, const typename std::vector<
 }
 
 template<>
-CoordTensor<bool>::CoordTensor(int order, int axisSize, const typename std::vector<bool>::value_type& value, std::valarray<int> originOffset) {
+inline CoordTensor<bool>::CoordTensor(int order, int axisSize, const typename std::vector<bool>::value_type& value, std::valarray<int> originOffset) {
     _order = order;
     _axisSize = axisSize;
     // Calculate number of elements in tensor
