@@ -16,7 +16,7 @@ public:
     // represent a point in space.
     // Axis size determines the length of each axis, an axis size of 10
     // would mean that only the integers 0-9 would be valid coordinates.
-    CoordTensor(int order, int axisSize, const typename std::vector<T>::value_type& value);
+    CoordTensor(int order, int axisSize, const typename std::vector<T>::value_type& value, std::valarray<int> originOffset = {});
 
     // Gets a reference to an ID directly from the internal array, this
     // is always faster than calling IdAtInternal but requires a pre-calculated
@@ -60,6 +60,8 @@ private:
     int _order;
     // Axis size, useful for bounds checking
     int _axisSize;
+    // Origin offset
+    std::valarray<int> _offset;
     // Coordinate multiplier cache for tensors of order > 3
     std::valarray<int> _axisMultipliers;
     // Internal array for rapid conversion from index to coordinate
@@ -114,7 +116,7 @@ std::valarray<int> CoordTensor<T>::CoordsFromIndex(int index) const {
 }
 
 template <typename T>
-CoordTensor<T>::CoordTensor(int order, int axisSize, const typename std::vector<T>::value_type& value) {
+CoordTensor<T>::CoordTensor(int order, int axisSize, const typename std::vector<T>::value_type& value, std::valarray<int> originOffset) {
     _order = order;
     _axisSize = axisSize;
     // Calculate number of elements in tensor
@@ -175,6 +177,14 @@ CoordTensor<T>::CoordTensor(int order, int axisSize, const typename std::vector<
             IdAtInternalConst = &CoordTensor::IdAtNthOrderConst;
             DEBUG("Tensor of order " << order << " created\n");
     }
+    // Offset setup
+    if (originOffset.size() != 0) {
+        _offset = originOffset;
+        IdAtInternalOffset = IdAtInternal;
+        IdAtInternalOffsetConst = IdAtInternalConst;
+        IdAtInternal = &CoordTensor::IdAtNthOrderOffset;
+        IdAtInternalConst = &CoordTensor::IdAtNthOrderOffsetConst;
+    }
 #ifndef NDEBUG
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "ConstantConditionsOC"
@@ -189,7 +199,7 @@ CoordTensor<T>::CoordTensor(int order, int axisSize, const typename std::vector<
 }
 
 template<>
-CoordTensor<bool>::CoordTensor(int order, int axisSize, const typename std::vector<bool>::value_type& value) {
+CoordTensor<bool>::CoordTensor(int order, int axisSize, const typename std::vector<bool>::value_type& value, std::valarray<int> originOffset) {
     _order = order;
     _axisSize = axisSize;
     // Calculate number of elements in tensor
@@ -219,6 +229,14 @@ CoordTensor<bool>::CoordTensor(int order, int axisSize, const typename std::vect
     IdAtInternal = &CoordTensor::IdAtNthOrder;
     IdAtInternalConst = &CoordTensor::IdAtNthOrderConst;
     DEBUG("Tensor of order " << order << " created\n");
+    // Offset setup
+    if (originOffset.size() != 0) {
+        _offset = originOffset;
+        IdAtInternalOffset = IdAtInternal;
+        IdAtInternalOffsetConst = IdAtInternalConst;
+        IdAtInternal = &CoordTensor::IdAtNthOrderOffset;
+        IdAtInternalConst = &CoordTensor::IdAtNthOrderOffsetConst;
+    }
 #ifndef NDEBUG
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "ConstantConditionsOC"
@@ -296,6 +314,16 @@ typename std::vector<T>::const_reference CoordTensor<T>::operator[](const std::v
 template <typename T>
 const std::vector<T>& CoordTensor<T>::GetArrayInternal() const {
     return _arrayInternal;
+}
+
+template <typename T>
+inline typename std::vector<T>::reference CoordTensor<T>::IdAtNthOrderOffset (const std::valarray<int>& coords) {
+    return (this->*IdAtInternalOffset)(coords + _offset);
+}
+
+template <typename T>
+inline typename std::vector<T>::const_reference CoordTensor<T>::IdAtNthOrderOffsetConst (const std::valarray<int>& coords) const {
+    return (this->*IdAtInternalOffsetConst)(coords + _offset);
 }
 
 // Would only work with C++20
