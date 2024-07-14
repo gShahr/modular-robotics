@@ -402,12 +402,21 @@ class MoveManager {
 private:
     // Vector containing every move
     static std::vector<MoveBase*> _moves;
+    // Map from offset to move
+    static CoordTensor<std::vector<MoveBase*>> _movesByOffset;
     // Vector containing only generated moves
     static std::vector<MoveBase*> _movesToFree;
+    // Vector containing all move offsets
+    static std::vector<std::valarray<int>> _offsets;
 public:
     // Never instantiate MoveManager
     MoveManager() = delete;
     MoveManager(const MoveManager&) = delete;
+
+    // Need to set up order of offset tensor
+    static void InitMoveManager(int order, int maxDistance) {
+        _movesByOffset = std::move(CoordTensor<std::vector<MoveBase*>>(order, 2 * maxDistance, {}, std::valarray<int>(maxDistance, order)));
+    }
 
     // To be used to generate multiple moves from a single move
     static void GenerateMovesFrom(MoveBase* origMove) {
@@ -434,6 +443,10 @@ public:
         // Add everything to _moves
         for (auto move : movesGen) {
             _moves.push_back(move);
+            if (_movesByOffset[move->finalPos].empty()) {
+                _offsets.push_back(move->finalPos);
+            }
+            _movesByOffset[move->finalPos].push_back(move);
         }
     }
 
