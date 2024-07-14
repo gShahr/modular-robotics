@@ -23,6 +23,8 @@ public:
     // index in order to work.
     typename std::vector<T>::reference GetIdDirect(int index);
 
+    const typename std::vector<T>::const_reference GetIdDirect(int index) const;
+
     // IdAt returns a reference to the module ID stored at the given
     // coordinates. An ID of -1 means no module is present.
     typename std::vector<T>::reference IdAt(const std::valarray<int>& coords);
@@ -213,6 +215,11 @@ CoordTensor<bool>::CoordTensor(int order, int axisSize, const typename std::vect
 
 template <typename T>
 typename std::vector<T>::reference CoordTensor<T>::GetIdDirect(int index) {
+    return _arrayInternal[index];
+}
+
+template <typename T>
+const typename std::vector<T>::const_reference CoordTensor<T>::GetIdDirect(int index) const {
     return _arrayInternal[index];
 }
 
