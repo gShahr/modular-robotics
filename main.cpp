@@ -71,25 +71,50 @@ namespace Scenario {
     }
 };
 
+void setupFromJson(int ORIGIN, Lattice& lattice, const std::string& filename) {
+    std::ifstream file(filename);
+    if (!file) {
+        std::cerr << "Unable to open file " << filename << std::endl;
+        return;
+    }
+    nlohmann::json j;
+    file >> j;
+    for (const auto& module : j["modules"]) {
+        std::vector<int> position = module["position"];
+        std::transform(position.begin(), position.end(), position.begin(),
+                    [ORIGIN](int coord) { return coord + ORIGIN; });
+        std::valarray<int> coords(position.data(), position.size());
+        lattice.AddModule(coords, module["static"]);
+    }
+}
+
 /**
- * @brief Initializes the lattice and image based on a file input.
+ * @brief Reads module configuration from a file and initializes the lattice.
  * 
- * This function reads a file specified by `filename` and populates the `lattice` and `image`
- * based on the contents of the file. Each line in the file represents a row in the `image`,
- * with specific characters ('1', '0', '@') indicating different states or types of modules
- * to be added to the `lattice`. The function sets the initial position for parsing the file
- * based on the `ORIGIN` parameter.
+ * This function opens a file specified by `filename` to configure a `lattice`
+ * object and generate a visual representation of the lattice in a 2D character
+ * vector `image`. The file's content dictates the placement and type of modules
+ * within the lattice, where each character ('1', '0', '@') in a line corresponds
+ * to a module's state or type: '1' for a standard module, '0' for an empty space,
+ * and '@' for a special module. The `ORIGIN` parameter determines the starting
+ * coordinates for module placement, aligning the file's content with the lattice's
+ * coordinate system.
  * 
- * @param ORIGIN The starting point for the x and y coordinates.
- * @param lattice A reference to the Lattice object to which modules will be added.
- * @param image A reference to a 2D vector of chars representing the visual representation of the lattice.
- * @param filename The name of the file from which to read the lattice and image configuration.
+ * @param ORIGIN The base coordinate offset for x and y axes, setting the initial
+ * position for parsing.
+ * @param lattice A reference to the Lattice object that will be populated with
+ * modules based on the file.
+ * @param filename The path to the input file containing the configuration for the
+ * lattice and its visual representation.
  * 
- * @note The function does not return a value but modifies the `lattice` and `image` in place.
- *       If the file cannot be opened, an error message is printed to `std::cerr`.
+ * @note The function modifies the `lattice` in place and prints the visual
+ * representation to standard output. If the file cannot be opened, an error message
+ * is output to `std::cerr`. The function also identifies and marks articulation
+ * points within the lattice after all modules have been added.
  */
-void setupInitial(int ORIGIN, Lattice& lattice, std::vector<std::vector<char>>& image, const std::string& filename);
-void setupInitial(int ORIGIN, Lattice& lattice, std::vector<std::vector<char>>& image, const std::string& filename) {
+void setupInitial(int ORIGIN, Lattice& lattice, const std::string& filename);
+void setupInitial(int ORIGIN, Lattice& lattice, const std::string& filename) {
+    std::vector<std::vector<char>> image;
     int x = ORIGIN;
     int y = ORIGIN;
     std::ifstream file(filename);
@@ -119,6 +144,16 @@ void setupInitial(int ORIGIN, Lattice& lattice, std::vector<std::vector<char>>& 
         y++;
     }
     file.close();
+    lattice.BuildMovableModules();
+    for (auto i: lattice.articulationPoints) {
+        image[i[1] - ORIGIN][i[0] - ORIGIN] = '*';
+    }
+    for (const auto& imageRow: image) {
+        for (auto c: imageRow) {
+            std::cout << c;
+        }
+        std::cout << std::endl;
+    }
 }
 
 /**
@@ -177,18 +212,7 @@ int main() {
     int axisSize = 9;
     Lattice lattice(order, axisSize);
     MoveManager::InitMoveManager(order, axisSize);
-    std::vector<std::vector<char>> image;
-    setupInitial(ORIGIN, lattice, image, "test2.txt");
-    lattice.BuildMovableModules();
-    for (auto i: lattice.articulationPoints) {
-        image[i[1] - ORIGIN][i[0] - ORIGIN] = '*';
-    }
-    for (const auto& imageRow: image) {
-        for (auto c: imageRow) {
-            std::cout << c;
-        }
-        std::cout << std::endl;
-    }
+    setupInitial(ORIGIN, lattice, "test2.txt");
 
     //
     //  MOVE TESTING BELOW
