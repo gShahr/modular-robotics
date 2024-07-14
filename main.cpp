@@ -71,6 +71,29 @@ namespace Scenario {
     }
 };
 
+/**
+ * @brief Sets up a lattice structure from a JSON file.
+ * 
+ * This function reads a JSON file specified by `filename` and uses its contents
+ * to configure a `Lattice` object. The JSON file is expected to contain a list
+ * of modules, each with a position and a static flag. The position is adjusted
+ * by adding the `ORIGIN` offset to each coordinate, allowing for repositioning
+ * of the entire structure within the lattice's coordinate system.
+ * 
+ * @param ORIGIN An integer offset added to each coordinate of the module's position
+ * to translate the module within the lattice.
+ * @param lattice A reference to the Lattice object that will be populated with
+ * modules based on the JSON file.
+ * @param filename The path to the JSON file containing the configuration for the
+ * lattice. The file should be structured to include a "modules" array, with each
+ * object in the array having a "position" array of integers and a "static" boolean.
+ * 
+ * @note If the file cannot be opened, an error message is printed to `std::cerr`.
+ * The function modifies the `lattice` in place by adding modules according to the
+ * JSON file's specifications. The "static" flag for each module is directly passed
+ * to the `AddModule` method of the `Lattice` object.
+ */
+void setupFromJson(int ORIGIN, Lattice& lattice, const std::string& filename);
 void setupFromJson(int ORIGIN, Lattice& lattice, const std::string& filename) {
     std::ifstream file(filename);
     if (!file) {
