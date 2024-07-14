@@ -11,7 +11,7 @@ LDFLAGS =
 BOOST_LIBS =
 
 # Source files
-SOURCES = main.cpp
+SOURCES = main.cpp ConfigurationSpace.cpp Lattice.cpp ModuleManager.cpp MoveManager.cpp
 
 # Object files
 OBJECTS = $(SOURCES:.cpp=.o)
