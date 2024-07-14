@@ -7,3 +7,4 @@
 .idea
 cmake-build*
 CMakeLists.txt
+clion-include
