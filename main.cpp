@@ -866,9 +866,8 @@ public:
     }
 };
 
-class Scenario {
-private:
-public:
+// This might be better off as a namespace
+namespace Scenario {
     static void exportStateTensorToJson(int id, const CoordTensor<bool>& stateTensor, const std::string& filename) {
         int indentSize = 4;
         nlohmann::json jsonOutput;
