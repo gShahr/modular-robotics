@@ -12,45 +12,7 @@
 #include <queue>
 #include <unordered_set>
 #include "json.hpp"
-
-class HashedState {
-private:
-    size_t seed;
-public:
-    HashedState() : seed(0) {}
-
-    HashedState(size_t seed) : seed(seed) {}
-
-    HashedState(CoordTensor<bool> coordTensor) {
-        hashCoordTensor(coordTensor);
-    }
-
-    HashedState(const HashedState& other) : seed(other.getSeed()) {}
-
-    size_t getSeed() const { return seed; }
-    /*
-    pass in information about lattice (hash bool of where modules are or bitfield c++)
-    return hash value
-    */
-    void hashLattice(const Lattice& lattice) {
-        seed = boost::hash_range(lattice.stateTensor.GetArrayInternal().begin(), lattice.stateTensor.GetArrayInternal().end());
-    }
-
-    void hashCoordTensor(const CoordTensor<bool>& coordTensor) {
-        seed = boost::hash_range(coordTensor.GetArrayInternal().begin(), coordTensor.GetArrayInternal().end());
-    }
-
-    bool compareStates(const HashedState& other) const { return seed == other.getSeed(); }
-    /*
-    check how to do this properly (operator overload function in lattice function)
-    return true iff lattice have the same structure of modules
-    */
-    bool compareLattice(const Lattice& Lattice1, const Lattice& Lattice2) {}
-
-    bool operator==(const HashedState& other) const {
-        return seed == other.getSeed();
-    }
-};
+#include "HashedState.h"
 
 namespace std {
     template<>
