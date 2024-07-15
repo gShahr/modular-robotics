@@ -14,9 +14,8 @@
 #include <unordered_set>
 #include "json.hpp"
 
-// This might be better off as a namespace
 namespace Scenario {
-    static void exportStateTensorToJson(int id, const CoordTensor<bool>& stateTensor, const std::string& filename) {
+    void exportStateTensorToJson(int id, const CoordTensor<bool>& stateTensor, const std::string& filename) {
         int indentSize = 4;
         nlohmann::json jsonOutput;
         for (int i = 0; i < stateTensor.GetArrayInternal().size(); i++) {
@@ -29,13 +28,13 @@ namespace Scenario {
         }
     }
 
-    static void exportConfigurationSpaceToJson(const std::vector<Configuration*>& path, const std::string& filename) {
+    void exportConfigurationSpaceToJson(const std::vector<Configuration*>& path, const std::string& filename) {
         for (int i = 0; i < path.size(); i++) {
             exportStateTensorToJson(i, path[i]->GetState(), filename);
         }
     }
 
-    static void exportToScen(Lattice& lattice, const std::vector<Configuration*>& path, const std::string& filename) {
+    void exportToScen(Lattice& lattice, const std::vector<Configuration*>& path, const std::string& filename) {
         // File setup
         std::ofstream file(filename);
         // Group Definitions
