@@ -23,18 +23,21 @@ public:
     // index in order to work.
     typename std::vector<T>::reference GetIdDirect(int index);
 
+    [[nodiscard]]
     typename std::vector<T>::const_reference GetIdDirect(int index) const;
 
     // IdAt returns a reference to the module ID stored at the given
     // coordinates. An ID of -1 means no module is present.
     typename std::vector<T>::reference IdAt(const std::valarray<int>& coords);
 
+    [[nodiscard]]
     typename std::vector<T>::const_reference IdAt(const std::valarray<int>& coords) const;
 
     // Identical to IdAt but uses the subscript operator, mostly here to
     // make moving to CoordTensor easier.
     typename std::vector<T>::reference operator[](const std::valarray<int>& coords);
 
+    [[nodiscard]]
     typename std::vector<T>::const_reference operator[](const std::valarray<int>& coords) const;
 
     // Get a const reference to the internal array

@@ -49,6 +49,7 @@ public:
 class Move2d : public MoveBase {
 public:
     Move2d();
+    [[nodiscard]]
     MoveBase* CopyMove() const override;
     void InitMove(std::ifstream& moveFile) override;
     bool MoveCheck(CoordTensor<int>& tensor, const Module& mod) override;
@@ -57,6 +58,7 @@ public:
 class Move3d : public MoveBase {
 public:
     Move3d();
+    [[nodiscard]]
     MoveBase* CopyMove() const override;
     void InitMove(std::ifstream& moveFile) override;
     bool MoveCheck(CoordTensor<int>& tensor, const Module& mod) override;
