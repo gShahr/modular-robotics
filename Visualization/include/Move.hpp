@@ -6,10 +6,18 @@
 class Move
 {
 public:
-    Move(int moverId, int anchorId, glm::vec3(deltaPos));
+    Move(int moverId, glm::vec3 anchorDir, glm::vec3 deltaPos, bool sliding);
+    Move* copy();           // Creates a deep copy of a Move
+    Move* reverse();        // Creates a new move which is the "reverse" of this Move
 
-    int anchorId, moverId;
-    glm::vec3 deltaPos;
+    int moverId;            // Which module is moving
+    glm::vec3 anchorDir;    // Vector which determines the "anchor" face of a move (or, for diagonal sliding moves, which direction to move FIRST)
+    glm::vec3 deltaPos;     // Final position offset
+    bool sliding;           // Whether or not this is a sliding move
+
+    float maxAngle;         // Total angle offset (for pivot moves)
+    glm::vec3 preTrans;     // Required amount of pre-translation (for pivot moves)
+    glm::vec3 rotAxis;      // Axis of rotation (for pivot moves)
 };
 
 #endif

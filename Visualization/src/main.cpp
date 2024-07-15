@@ -31,7 +31,7 @@ const char *fragmentShaderPath = "resources/shaders/fshader.glsl";
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
-float ANIM_SPEED = 1.0f;
+float ANIM_SPEED = 2.0f;
 bool ANIMATE = false;
 
 const float CAMERA_MAX_SPEED = 25.0f;
@@ -307,53 +307,23 @@ int main(int argc, char** argv) {
 
         if (readyForNewAnim) {
             Move* move;
-            glm::vec3 deltaPos, anchorDir;
-            bool sliding = false;
-            if (forward) {
-                move = scenMoveSeq->pop();
-                deltaPos = move->deltaPos;
-            } else {
-                move = scenMoveSeq->undo();
-                deltaPos = -move->deltaPos;
-            }
+            if (forward) { move = scenMoveSeq->pop(); }
+            else { move = scenMoveSeq->undo(); }
+
             Cube* mover = gObjects.at(move->moverId);
-            if (move->anchorId >= 0) {
-                Cube* anchor = gObjects.at(move->anchorId);
-                anchorDir = anchor->pos - mover->pos;
-            } else {
-                sliding = true;
-                int aid = move->anchorId;
 
-                // If we're reversing, and it's a DIAGONAL sliding move, change the order of subslides
-                if (!forward && glm::dot(glm::abs(move->deltaPos), glm::vec3(1.0f)) > 1.0f) {
-                    switch (move->anchorId) {
-                        case (-1): { aid = glm::round(-glm::dot(glm::vec3(0.0f, 2.0f, 3.0f), glm::abs(move->deltaPos))); break; }
-                        case (-2): { aid = glm::round(-glm::dot(glm::vec3(1.0f, 0.0f, 3.0f), glm::abs(move->deltaPos))); break; }
-                        case (-3): { aid = glm::round(-glm::dot(glm::vec3(1.0f, 2.0f, 0.0f), glm::abs(move->deltaPos))); break; }
-                    }
-                }
-
-                switch (aid) {
-                    case (-1): { anchorDir = glm::vec3(1.0f, 0.0f, 0.0f); break; }
-                    case (-2): { anchorDir = glm::vec3(0.0f, 1.0f, 0.0f); break; }
-                    case (-3): { anchorDir = glm::vec3(0.0f, 0.0f, 1.0f); break; }
-                    default: { anchorDir = glm::vec3(1.0f); break; }
-                }
-            }
-            mover->startAnimation(&readyForNewAnim, anchorDir, deltaPos, sliding);
+            mover->startAnimation(&readyForNewAnim, move);
             readyForNewAnim = false;
             if ((scenMoveSeq->currentMove == 0) || (scenMoveSeq->remainingMoves == 0)) { 
                 forward = !forward; 
             }
         }
 
-        // std::cout << glm::to_string(viewmat) << std::endl;
         cubes->drawAll();
         scenCubes->drawAll();
 
         glfwSwapBuffers(window);
         glfwPollEvents();
-        // std::cout << "yaw: " << yaw << " | pitch: " << pitch << std::endl;
     }
 
     glDeleteVertexArrays(1, &VAO);

@@ -12,7 +12,7 @@
 #include "glm/ext.hpp"
 #include "glad/glad.h"
 #include "glfw3.h"
-#include "Animation.hpp"
+#include "Move.hpp"
 
 unsigned int _createCubeVAO();
 extern unsigned int colorLoc, transformLoc, modelLoc, surfaceNormalLoc; // Assigned whenever a shader is loaded
@@ -27,11 +27,11 @@ public:
     void setScale(int scale);
     void setColor(int r, int g, int b);
     void draw();
-    void startAnimation(bool* markWhenAnimFinished, glm::vec3 AnchorDirection, glm::vec3 DeltaPos, bool sliding);
+    void startAnimation(bool* markWhenAnimFinished, Move* move);
     void stopAnimation();
     glm::mat4 processAnimation();
     glm::vec3 pos;
-    Animation *anim;
+    Move* move;
     bool* markWhenAnimFinished;
     int id;
 private:

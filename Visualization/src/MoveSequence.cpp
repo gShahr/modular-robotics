@@ -19,9 +19,11 @@ Move* MoveSequence::pop() {
     this->moves.pop_front();
     this->undostack.push(move);
 
+    move = move->copy();
+
     this->remainingMoves--;
     this->currentMove++;
-    
+
     return move;
 }
 
@@ -31,6 +33,8 @@ Move* MoveSequence::undo() {
     Move* move = this->undostack.top();
     this->moves.push_front(move);
     this->undostack.pop();
+
+    move = move->reverse();
 
     this->remainingMoves++;
     this->currentMove--;

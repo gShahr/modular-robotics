@@ -75,6 +75,7 @@ void main()
 	incidentLight *= 3.0;
 	incidentLight += 0.3;
 	incidentLight = clamp(incidentLight, 0.0, 1.0);
+	incidentLight = 0.6;
 
 	float borderWidth = 0.005;
 	float borderMask = 1.0 - Rectangle(vec2(borderWidth), vec2(1.0 - 2*borderWidth), texCoord);

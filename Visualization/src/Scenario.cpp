@@ -35,6 +35,8 @@ Scenario::Scenario(const char* filepath) {
     int buf[5];                 // Each line should have a maximum of 5 values. Any further will be ignored
     int i;                      // Helper iterator variable
     std::string line, value;    // Each line will be (temp) stored in string. Each component of a line will be (temp) stored in value
+    glm::vec3 anchorDir;        // anchorDirs are encoded using ints; we will decode them when constructing each Move
+    bool sliding;               // As above: sliding moves are encoded by sign of int. Extract to this helper variable
     VisGroup* vg;
     Cube* cube;
 
@@ -58,7 +60,7 @@ Scenario::Scenario(const char* filepath) {
                 std::cout << "Parsing Group ID " << buf[0] << " with color " << buf[1] << ", " << buf[2] << ", " << buf[3] << ", size " << buf[4] << std::endl;
                 vg = new VisGroup(buf[1], buf[2], buf[3], buf[4]);
                 visgroups.insert(std::pair<int, VisGroup*>(buf[0], vg));
-                break;
+                break; // Switch break
             }
             case 1: {
                 std::cout << "Creating Cube with ID " << buf[0] << " in group " << buf[1] << " at location " << buf[2] << ", " << buf[3] << ", " << buf[4] << std::endl;
@@ -70,9 +72,22 @@ Scenario::Scenario(const char* filepath) {
                 break;
             }
             case 2: {
-                std::cout << "Creating Move of Cube ID " << buf[0] << " anchored to Cube " << buf[1] << " with delta position " << buf[2] << ", " << buf[3] << ", " << buf[4] << std::endl;
-                this->moves.push_back(new Move(buf[0], buf[1], glm::vec3(buf[2], buf[3], buf[4])));
-                break;
+                switch (abs(buf[1])) {
+                    case (0): { anchorDir = glm::vec3(1.0f, 0.0f, 0.0f); break; }
+                    case (1): { anchorDir = glm::vec3(1.0f, 0.0f, 0.0f); break; }
+                    case (2): { anchorDir = glm::vec3(0.0f, 1.0f, 0.0f); break; }
+                    case (3): { anchorDir = glm::vec3(0.0f, 0.0f, 1.0f); break; }
+                    case (4): { anchorDir = glm::vec3(-1.0f, 0.0f, 0.0f); break; }
+                    case (5): { anchorDir = glm::vec3(0.0f, -1.0f, 0.0f); break; }
+                    case (6): { anchorDir = glm::vec3(0.0f, 0.0f, -1.0f); break; }
+                    default:  { throw std::invalid_argument("Invalid anchor-direction specified in Scenario file (must be between -3 and 6)"); }
+                }
+                sliding = buf[1] >= 0 ? false : true;
+
+                this->moves.push_back(new Move(buf[0], anchorDir, glm::vec3(buf[2], buf[3], buf[4]), buf[1] >= 0 ? false : true));
+                if (sliding) { std::cout << "Creating Pivot Move of Cube ID " << buf[0] << " with anchorDir " << glm::to_string(anchorDir) << " with delta position " << buf[2] << ", " << buf[3] << ", " << buf[4] << std::endl; }
+                else { std::cout << "Creating Sliding Move of Cube ID " << buf[0] << " with anchorDir " << glm::to_string(anchorDir) << " with delta position " << buf[2] << ", " << buf[3] << ", " << buf[4] << std::endl; }
+                break; // Switch break
             }
         }
     }

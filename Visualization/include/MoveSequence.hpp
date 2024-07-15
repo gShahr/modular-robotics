@@ -4,7 +4,6 @@
 #include <deque>
 #include <vector>
 #include <stack>
-#include "Animation.hpp"
 #include "Move.hpp"
 
 class MoveSequence
