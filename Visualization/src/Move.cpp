@@ -25,10 +25,12 @@ Move* Move::reverse() {
     glm::vec3 deltaPos = -this->deltaPos;
     glm::vec3 anchorDir = this->anchorDir;
 
-    // If it's a diagonal sliding move or a corner pivot move, we need to do some math
-    if (glm::dot(glm::abs(deltaPos), glm::vec3(1.0f)) > 1.0f) {
-        anchorDir = (glm::vec3(1.0f) - glm::abs(anchorDir)) * deltaPos;
-        if (this->sliding) { anchorDir = glm::abs(anchorDir); }
+    if (abs(anchorDir[0]) + abs(anchorDir[1]) + abs(anchorDir[2]) > 0.1f) { // If anchorDir is uniform 0.0f, indicates a generic sliding move; bypass the anchorDir changeups
+        // If it's a diagonal sliding move or a corner pivot move, we need to do some math
+        if (glm::dot(glm::abs(deltaPos), glm::vec3(1.0f)) > 1.0f) {
+            anchorDir = (glm::vec3(1.0f) - glm::abs(anchorDir)) * deltaPos;
+            if (this->sliding) { anchorDir = glm::abs(anchorDir); }
+        }
     }
 
     return new Move(moverId, anchorDir, deltaPos, this->sliding);

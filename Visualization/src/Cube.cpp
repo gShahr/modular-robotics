@@ -119,7 +119,8 @@ glm::mat4 Cube::processAnimation() {
         if (animProgress < 1.0f) {
             // If it's a diagonal move, map animProgress such that 0-0.5 corresponds to the "first" slide, and 0.5-1.0 corresponds to the "second" slide
             // The "first" slide is determined by the axis in the animation's AnchorPos
-            if (abs(this->move->deltaPos[0]) + abs(this->move->deltaPos[1]) + abs(this->move->deltaPos[2]) > 1.0f) {
+            if (    abs(this->move->deltaPos[0]) + abs(this->move->deltaPos[1]) + abs(this->move->deltaPos[2]) > 1.0f
+                 && abs(this->move->anchorDir[0]) + abs(this->move->anchorDir[1]) + abs(this->move->anchorDir[2]) > 0.1f) { // If anchorDir is uniform 0.0f, indicates a generic sliding move; bypass the 2-part slide
                 float _pct1, _pct2;
                 _pct1 = _animInterp(glm::min(this->animProgress * 2.0f, 1.0f));
                 _pct2 = _animInterp(1.0f - glm::min(2.0f - this->animProgress * 2.0f, 1.0f));

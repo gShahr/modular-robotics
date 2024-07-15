@@ -73,7 +73,7 @@ Scenario::Scenario(const char* filepath) {
             }
             case 2: {
                 switch (abs(buf[1])) {
-                    case (0): { anchorDir = glm::vec3(1.0f, 0.0f, 0.0f); break; }
+                    case (0): { anchorDir = glm::vec3(0.0f); break; }
                     case (1): { anchorDir = glm::vec3(1.0f, 0.0f, 0.0f); break; }
                     case (2): { anchorDir = glm::vec3(0.0f, 1.0f, 0.0f); break; }
                     case (3): { anchorDir = glm::vec3(0.0f, 0.0f, 1.0f); break; }
@@ -82,11 +82,11 @@ Scenario::Scenario(const char* filepath) {
                     case (6): { anchorDir = glm::vec3(0.0f, 0.0f, -1.0f); break; }
                     default:  { throw std::invalid_argument("Invalid anchor-direction specified in Scenario file (must be between -3 and 6)"); }
                 }
-                sliding = buf[1] >= 0 ? false : true;
+                sliding = buf[1] > 0 ? false : true;
 
-                this->moves.push_back(new Move(buf[0], anchorDir, glm::vec3(buf[2], buf[3], buf[4]), buf[1] >= 0 ? false : true));
-                if (sliding) { std::cout << "Creating Pivot Move of Cube ID " << buf[0] << " with anchorDir " << glm::to_string(anchorDir) << " with delta position " << buf[2] << ", " << buf[3] << ", " << buf[4] << std::endl; }
-                else { std::cout << "Creating Sliding Move of Cube ID " << buf[0] << " with anchorDir " << glm::to_string(anchorDir) << " with delta position " << buf[2] << ", " << buf[3] << ", " << buf[4] << std::endl; }
+                this->moves.push_back(new Move(buf[0], anchorDir, glm::vec3(buf[2], buf[3], buf[4]), sliding));
+                if (sliding) { std::cout << "Creating Sliding Move of Cube ID " << buf[0] << " with anchorDir " << glm::to_string(anchorDir) << " with delta position " << buf[2] << ", " << buf[3] << ", " << buf[4] << std::endl; }
+                else { std::cout << "Creating Pivot Move of Cube ID " << buf[0] << " with anchorDir " << glm::to_string(anchorDir) << " with delta position " << buf[2] << ", " << buf[3] << ", " << buf[4] << std::endl; }
                 break; // Switch break
             }
         }
