@@ -1,9 +1,10 @@
 .vscode
-.exe
-.o
-.out
-.swp
-.~
+*.exe
+*.o
+*.out
+*.swp
+*.~
 .idea
 cmake-build*
 CMakeLists.txt
+clion-include
