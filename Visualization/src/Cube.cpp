@@ -1,3 +1,6 @@
+#include "glad/glad.h"
+#include "glfw3.h"
+
 #include "Cube.hpp"
 
 float _cubeVertices[] = { 
