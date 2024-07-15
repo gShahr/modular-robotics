@@ -117,7 +117,7 @@ std::vector<Configuration*> ConfigurationSpace::BFS(Configuration* start, Config
                 q.push(nextConfiguration);
                 current->AddEdge(nextConfiguration);
                 nextConfiguration->depth = current->depth + 1;
-                visited.insert(node);
+                visited.insert(HashedState(node));
             }
         }
     }

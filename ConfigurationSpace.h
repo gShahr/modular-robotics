@@ -10,9 +10,9 @@ private:
 public:
     HashedState();
 
-    HashedState(size_t seed);
+    explicit HashedState(size_t seed);
 
-    HashedState(CoordTensor<bool> state);
+    explicit HashedState(CoordTensor<bool> state);
 
     HashedState(const HashedState& other);
 
