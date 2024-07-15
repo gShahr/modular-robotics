@@ -7,9 +7,11 @@
 #include "glm/gtc/type_ptr.hpp"
 #include "Shader.hpp"
 #include "Cube.hpp"
+#include "Camera.hpp"
 
 extern unsigned int glob_timeLoc, glob_transformLoc, glob_viewLoc, glob_projLoc; // Assigned whenever a shader is loaded
-extern glm::mat4 glob_viewmat, glob_projmat, glob_transform; // main()
+extern glm::mat4 glob_transform;
+extern Camera camera;
 extern float glob_lastFrame;
 
 class ObjectCollection

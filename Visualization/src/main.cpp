@@ -16,6 +16,7 @@
 #include "Cube.hpp"
 #include "ObjectCollection.hpp"
 #include "Scenario.hpp"
+#include "Camera.hpp"
 
 #define AUTO_ROTATE 0
 
@@ -23,7 +24,7 @@ std::unordered_map<int, Cube*> glob_objects;        // Hashmap of all <ID, objec
 glm::mat4 glob_viewmat, glob_projmat;           // View and Projection matrices
 
 float resolution[2] = {1280.0f, 720.0f};        // Screen attributes
-float asprat = resolution[0] / resolution[1];
+float glob_aspectRatio = resolution[0] / resolution[1];
 
 const char *vertexShaderPath = "resources/shaders/vshader.glsl";    // Resource paths
 const char *fragmentShaderPath = "resources/shaders/fshader.glsl";
@@ -35,15 +36,8 @@ float glob_lastFrame = 0.0f;
 float glob_animSpeed = 2.0f;                        // Animation attributes
 bool glob_animate = false;
 
-glm::vec3 cameraPos, cameraDirection, cameraUp, cameraSpeed; // Camera variables initialized in resetCamera()
+Camera camera = Camera();
 float lastX, lastY, yaw, pitch;
-const float CAMERA_MAX_SPEED = 25.0f;           // Camera attributes
-const float CAMERA_ACCEL = 0.10f;
-const float CAMERA_DECEL_FACTOR = 0.95f;
-const float CAMERA_SENSITIVITY = 0.1f;
-float FOV = 60.0f;
-float cameraZoom = 0.0f;
-bool perspective = true;
 
 bool pkeyPressed = false;                       // Helper variables for user interaction
 bool spacebarPressed = false;
@@ -57,15 +51,13 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 void mouse_scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow *window);
 int loadTexture(const char *texturePath);
-void resetCamera();
-void resetProjMat();
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
     resolution[0] = width;
     resolution[1] = height;
-    asprat = resolution[0] / resolution[1];
-    resetProjMat();
+    glob_aspectRatio = resolution[0] / resolution[1];
+    camera.resetProjMat();
 }
 
 void cursormove_callback(GLFWwindow* window, double xpos, double ypos) {
@@ -81,20 +73,17 @@ void cursormove_callback(GLFWwindow* window, double xpos, double ypos) {
         lastX = xpos;
         lastY = ypos;
 
-        xoffset *= CAMERA_SENSITIVITY;
-        yoffset *= CAMERA_SENSITIVITY;
+        xoffset *= camera.getSensitivity();
+        yoffset *= camera.getSensitivity();
 
-        yaw += xoffset;
-        pitch += yoffset;
-
-        yaw = std::fmod(yaw, 360.0f);
-        pitch = glm::clamp(pitch, -89.0f, 89.0f);
+        camera.setYaw(camera.getYaw() + xoffset);
+        camera.setPitch(camera.getPitch() + yoffset);
 
         glm::vec3 direction;
-        direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-        direction.y = sin(glm::radians(pitch));
-        direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-        cameraDirection = glm::normalize(direction);
+        direction.x = cos(glm::radians(camera.getYaw())) * cos(glm::radians(camera.getPitch()));
+        direction.y = sin(glm::radians(camera.getPitch()));
+        direction.z = sin(glm::radians(camera.getYaw())) * cos(glm::radians(camera.getPitch()));
+        camera.setDir(glm::normalize(direction));
     }
 }
 
@@ -110,9 +99,8 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 }
 
 void mouse_scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
-    cameraZoom += yoffset;
-    cameraZoom = glm::clamp(cameraZoom, -25.0f, 25.0f);
-    resetProjMat();
+    camera.setZoom(camera.getZoom() + yoffset);
+    camera.resetProjMat();
 }
 
 void processInput(GLFWwindow *window) {
@@ -122,33 +110,32 @@ void processInput(GLFWwindow *window) {
 
     if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) {
         firstMouse = true;
-        resetCamera();
+        camera.reset();
     }
 
+    glm::vec3 newSpeed = camera.getSpeed();
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-        if (cameraSpeed[2] < 0) { cameraSpeed[2] *= CAMERA_DECEL_FACTOR; }
-        cameraSpeed[2] = cameraSpeed[2] + CAMERA_ACCEL;
+        if (newSpeed[2] < 0) { newSpeed[2] *= camera.getDecelFactor(); }
+        newSpeed[2] = newSpeed[2] + camera.getAccelFactor();
     } else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-        if (cameraSpeed[2] > 0) { cameraSpeed[2] *= CAMERA_DECEL_FACTOR; }
-        cameraSpeed[2] = cameraSpeed[2] - CAMERA_ACCEL;
-    } else { cameraSpeed[2] *= CAMERA_DECEL_FACTOR; }
+        if (newSpeed[2] > 0) { newSpeed[2] *= camera.getDecelFactor(); }
+        newSpeed[2] = newSpeed[2] - camera.getAccelFactor();
+    } else { newSpeed[2] *= camera.getDecelFactor(); }
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-        if (cameraSpeed[0] > 0) { cameraSpeed[0] *= CAMERA_DECEL_FACTOR; }
-        cameraSpeed[0] = cameraSpeed[0] - CAMERA_ACCEL;
+        if (newSpeed[0] > 0) { newSpeed[0] *= camera.getDecelFactor(); }
+        newSpeed[0] = newSpeed[0] - camera.getAccelFactor();
     } else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-        if (cameraSpeed[0] < 0) { cameraSpeed[0] *= CAMERA_DECEL_FACTOR; }
-        cameraSpeed[0] = cameraSpeed[0] + CAMERA_ACCEL;
-    } else { cameraSpeed[0] *= CAMERA_DECEL_FACTOR; }
+        if (newSpeed[0] < 0) { newSpeed[0] *= camera.getDecelFactor(); }
+        newSpeed[0] = newSpeed[0] + camera.getAccelFactor();
+    } else { newSpeed[0] *= camera.getDecelFactor(); }
     if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
-        if (cameraSpeed[1] < 0) { cameraSpeed[1] *= CAMERA_DECEL_FACTOR; }
-        cameraSpeed[1] = cameraSpeed[1] + CAMERA_ACCEL;
+        if (newSpeed[1] < 0) { newSpeed[1] *= camera.getDecelFactor(); }
+        newSpeed[1] = newSpeed[1] + camera.getAccelFactor();
     } else if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
-        if (cameraSpeed[1] > 0) { cameraSpeed[1] *= CAMERA_DECEL_FACTOR; }
-        cameraSpeed[1] = cameraSpeed[1] - CAMERA_ACCEL;
-    } else { cameraSpeed[1] *= CAMERA_DECEL_FACTOR; }
-
-    cameraSpeed = glm::step(0.00001f, glm::abs(cameraSpeed)) * cameraSpeed;
-    cameraSpeed = glm::clamp(cameraSpeed, -CAMERA_MAX_SPEED, CAMERA_MAX_SPEED);
+        if (newSpeed[1] > 0) { newSpeed[1] *= camera.getDecelFactor(); }
+        newSpeed[1] = newSpeed[1] - camera.getAccelFactor();
+    } else { newSpeed[1] *= camera.getDecelFactor(); }
+    camera.setSpeed(newSpeed);
 
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && !spacebarPressed) {
         spacebarPressed = true;
@@ -159,22 +146,10 @@ void processInput(GLFWwindow *window) {
 
     if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS && !pkeyPressed) {
         pkeyPressed = true;
-        perspective = !perspective;
-        resetProjMat();
+        camera.setPerspective(!camera.getPerspective());
+        camera.resetProjMat();
     } else if (glfwGetKey(window, GLFW_KEY_P) == GLFW_RELEASE && pkeyPressed) {
         pkeyPressed = false;
-    }
-}
-
-void resetProjMat() {
-    float scalar;
-    if (perspective) {
-        scalar = 2.0 / (1.0 + std::exp(cameraZoom / 4.0));
-        glob_projmat = glm::perspective(glm::radians(FOV * scalar), asprat, 0.1f, 100.0f); 
-    } else {
-        scalar = 2.0 / (1.0 + std::exp(cameraZoom / 10.0));
-        scalar *= scalar;
-        glob_projmat = glm::ortho(-2.0f * asprat * scalar, 2.0f * asprat * scalar, -2.0f * scalar, 2.0f * scalar, 0.1f, 100.0f); 
     }
 }
 
@@ -195,22 +170,9 @@ int loadTexture(const char *texturePath) {
     return texture;
 }
 
-void resetCamera() {
-    cameraPos = glm::vec3(0.0f, 0.0f, 6.0f);
-    cameraDirection = glm::vec3(0.0f, 0.0f, -1.0f);
-    cameraUp = glm::cross(cameraDirection, glm::normalize(glm::cross(glm::vec3(0.0f, 1.0f, 0.0f), cameraDirection)));
-    cameraSpeed = glm::vec3(0.0f, 0.0f, 0.0f);
-    lastX = resolution[0]/2.0;
-    lastY = resolution[1]/2.0;
-    yaw = 270.0f;
-    pitch = 0.0f;
-    cameraZoom = 0.0f;
-    resetProjMat();
-}
-
 int main(int argc, char** argv) {
     std::cout << "Hello, world" << std::endl;
-    
+
     // Initialize GLFW and configure it to use version 3.3 with OGL Core Profile
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -250,10 +212,6 @@ int main(int argc, char** argv) {
     int texture = loadTexture(texturePath);
     unsigned int VAO = _createCubeVAO();
     
-    resetCamera();
-    glob_viewmat = glm::mat4(1.0f);
-    glob_projmat = glm::perspective(glm::radians(45.0f), asprat, 0.1f, 100.0f);
-
     std::string _scenfile;
     if (!argv[1]) {
         _scenfile.append("Scenarios/3d2rMeta.scen");
@@ -276,13 +234,13 @@ int main(int argc, char** argv) {
         processInput(window);
 
 #if AUTO_ROTATE < 1
-        cameraPos += (cameraSpeed.z * cameraDirection * glob_deltaTime);
-        cameraPos += (cameraSpeed.x * glm::cross(cameraDirection, cameraUp) * glob_deltaTime);
-        cameraPos += (cameraSpeed.y * cameraUp * glob_deltaTime);
-        glob_viewmat = glm::lookAt(cameraPos, cameraPos + cameraDirection, cameraUp);
+        camera.setPos(camera.getPos() + camera.getSpeed()[2] * camera.getDir() * glob_deltaTime);
+        camera.setPos(camera.getPos() + camera.getSpeed()[0] * glm::cross(camera.getDir(), camera.getUp()) * glob_deltaTime);
+        camera.setPos(camera.getPos() + camera.getSpeed()[1] * camera.getUp() * glob_deltaTime);
+        camera.calcViewMat();
 #else
-        cameraPos = glm::rotate(cameraPos, glm::radians(15.0f * glob_deltaTime), glm::vec3(0.0, 1.0, 0.0));
-        glob_viewmat = glm::lookAt(cameraPos, glm::vec3(0.0, 0.0, 0.0), cameraUp);
+        camera.setPos(glm::rotate(camera.getPos(), glm::radians(15.0f * glob_deltaTime), glm::vec3(0.0, 1.0, 0.0)));
+        camera.calcViewMat(glm::vec3(0.0f));
 #endif
 
         // -- Rendering --
