@@ -16,6 +16,7 @@ public:
 
     HashedState(const HashedState& other);
 
+    [[nodiscard]]
     size_t GetSeed() const;
 
     void HashLattice(const Lattice& lattice);
