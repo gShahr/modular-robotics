@@ -14,10 +14,10 @@ void ObjectCollection::drawAll() {
 
     //std::cout << glm::to_string(viewmat) << std::endl;
     
-    glUniform1f(timeLoc, lastFrame);
+    glUniform1f(glob_timeLoc, glob_lastFrame);
 
-    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(viewmat));
-    glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projmat));
+    glUniformMatrix4fv(glob_viewLoc, 1, GL_FALSE, glm::value_ptr(glob_viewmat));
+    glUniformMatrix4fv(glob_projLoc, 1, GL_FALSE, glm::value_ptr(glob_projmat));
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, this->textureID);

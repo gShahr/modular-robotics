@@ -88,7 +88,7 @@ Cube::Cube(int id, int x, int y, int z) {
     this->scale = glm::vec3(0.9f);
     this->color = glm::vec3(1.0f);
     this->rotation = glm::mat4(1.0f);
-    gObjects.insert(std::pair<int, Cube*>(id, this));
+    glob_objects.insert(std::pair<int, Cube*>(id, this));
 }
 
 void Cube::startAnimation(bool* markWhenAnimFinished, Move* move) {
@@ -111,7 +111,7 @@ glm::mat4 Cube::processAnimation() {
     float _pct; // "Smoothed" progress through animation, as calculated by _animInterp()
 
     // increment animation progress
-    if (ANIMATE) { this->animProgress += (ANIM_SPEED * deltaTime); }
+    if (glob_animate) { this->animProgress += (glob_animSpeed * glob_deltaTime); }
     _pct = _animInterp(this->animProgress);
 
     if (this->move->sliding) { // Sliding move
@@ -181,12 +181,12 @@ void Cube::draw() {
         transform = this->processAnimation() * transform;
     };
 
-    glUniform3fv(colorLoc, 1, glm::value_ptr(this->color));
-    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelmat));
-    if (surfaceNormalLoc >= 0) {
+    glUniform3fv(glob_colorLoc, 1, glm::value_ptr(this->color));
+    glUniformMatrix4fv(glob_transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
+    glUniformMatrix4fv(glob_modelLoc, 1, GL_FALSE, glm::value_ptr(modelmat));
+    if (glob_surfaceNormalLoc >= 0) {
         for (int i = 0; i < 6; i++) {
-            glUniform3fv(surfaceNormalLoc, 1, glm::value_ptr(_cubeSurfaceNorms[i]));
+            glUniform3fv(glob_surfaceNormalLoc, 1, glm::value_ptr(_cubeSurfaceNorms[i]));
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)((6 * i * sizeof(GLuint))));
         }
     } else { 

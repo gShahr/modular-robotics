@@ -15,9 +15,9 @@
 #include "Move.hpp"
 
 unsigned int _createCubeVAO();
-extern unsigned int colorLoc, transformLoc, modelLoc, surfaceNormalLoc; // Assigned whenever a shader is loaded
-extern float deltaTime, ANIM_SPEED;
-extern bool ANIMATE;
+extern unsigned int glob_colorLoc, glob_transformLoc, glob_modelLoc, glob_surfaceNormalLoc; // Assigned whenever a shader is loaded
+extern float glob_deltaTime, glob_animSpeed;
+extern bool glob_animate;
 
 class Cube
 {
@@ -41,6 +41,6 @@ private:
     glm::mat4 rotation;
 };
 
-extern std::unordered_map<int, Cube*> gObjects; // This is ugly, sorry
+extern std::unordered_map<int, Cube*> glob_objects; // This is ugly, sorry
 
 #endif

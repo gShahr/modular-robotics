@@ -2,9 +2,8 @@
 #include <stdio.h>
 #include <math.h>
 #include <algorithm>            // clamp
-#include <deque>                // Animation sequences
 #include <map>
-#include <unordered_map>        // Hashmap of all <ID, object>
+#include <unordered_map>
 #include "glad/glad.h"
 #include "glfw3.h"
 #include "stb_image.h"
@@ -20,43 +19,38 @@
 
 #define AUTO_ROTATE 0
 
-std::unordered_map<int, Cube*> gObjects; // Hashmap of all <ID, object>
+std::unordered_map<int, Cube*> glob_objects;        // Hashmap of all <ID, object>. Global variable
+glm::mat4 glob_viewmat, glob_projmat;           // View and Projection matrices
 
-float resolution[2] = {800.0f, 600.0f};
+float resolution[2] = {1280.0f, 720.0f};        // Screen attributes
 float asprat = resolution[0] / resolution[1];
 
-const char *vertexShaderPath = "resources/shaders/vshader.glsl";
+const char *vertexShaderPath = "resources/shaders/vshader.glsl";    // Resource paths
 const char *fragmentShaderPath = "resources/shaders/fshader.glsl";
+const char *texturePath = "resources/textures/face_debug.png";
 
-float deltaTime = 0.0f;
-float lastFrame = 0.0f;
+float glob_deltaTime = 0.0f;                    // Frame-time info
+float glob_lastFrame = 0.0f;
 
-float ANIM_SPEED = 2.0f;
-bool ANIMATE = false;
+float glob_animSpeed = 2.0f;                        // Animation attributes
+bool glob_animate = false;
 
-const float CAMERA_MAX_SPEED = 25.0f;
+glm::vec3 cameraPos, cameraDirection, cameraUp, cameraSpeed; // Camera variables initialized in resetCamera()
+float lastX, lastY, yaw, pitch;
+const float CAMERA_MAX_SPEED = 25.0f;           // Camera attributes
 const float CAMERA_ACCEL = 0.10f;
 const float CAMERA_DECEL_FACTOR = 0.95f;
 const float CAMERA_SENSITIVITY = 0.1f;
 float FOV = 60.0f;
 float cameraZoom = 0.0f;
 bool perspective = true;
-glm::vec3 cameraPos; // Camera variables initialized in resetCamera()
-glm::vec3 cameraDirection;
-glm::vec3 cameraUp;
-glm::vec3 cameraSpeed;
-float lastX;
-float lastY;
-float yaw;
-float pitch;
-bool pkeyPressed = false;
+
+bool pkeyPressed = false;                       // Helper variables for user interaction
 bool spacebarPressed = false;
 bool rmbClicked = false;
 bool firstMouse = true;
-bool animating = true;
 
-glm::mat4 viewmat, projmat;
-
+// Forward declerations
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void cursormove_callback(GLFWwindow* window, double xpos, double ypos);
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
@@ -101,7 +95,6 @@ void cursormove_callback(GLFWwindow* window, double xpos, double ypos) {
         direction.y = sin(glm::radians(pitch));
         direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
         cameraDirection = glm::normalize(direction);
-        //std::cout << "POS: " << glm::to_string(cameraPos) << " PITCH/YAW: " << pitch << " | " << yaw << " | DIR: " << glm::to_string(cameraDirection) << std::endl;
     }
 }
 
@@ -159,7 +152,7 @@ void processInput(GLFWwindow *window) {
 
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && !spacebarPressed) {
         spacebarPressed = true;
-        ANIMATE = !ANIMATE;
+        glob_animate = !glob_animate;
     } else if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_RELEASE && spacebarPressed) {
         spacebarPressed = false;
     }
@@ -177,13 +170,12 @@ void resetProjMat() {
     float scalar;
     if (perspective) {
         scalar = 2.0 / (1.0 + std::exp(cameraZoom / 4.0));
-        projmat = glm::perspective(glm::radians(FOV * scalar), asprat, 0.1f, 100.0f); 
+        glob_projmat = glm::perspective(glm::radians(FOV * scalar), asprat, 0.1f, 100.0f); 
     } else {
         scalar = 2.0 / (1.0 + std::exp(cameraZoom / 10.0));
         scalar *= scalar;
-        projmat = glm::ortho(-2.0f * asprat * scalar, 2.0f * asprat * scalar, -2.0f * scalar, 2.0f * scalar, 0.1f, 100.0f); 
+        glob_projmat = glm::ortho(-2.0f * asprat * scalar, 2.0f * asprat * scalar, -2.0f * scalar, 2.0f * scalar, 0.1f, 100.0f); 
     }
-    // std::cout << "cameraZoom: " << cameraZoom << " | scalar: " << scalar << std::endl;
 }
 
 int loadTexture(const char *texturePath) {
@@ -255,21 +247,13 @@ int main(int argc, char** argv) {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     Shader shader = Shader(vertexShaderPath, fragmentShaderPath);
-    int texture = loadTexture("resources/textures/face_debug.png");
+    int texture = loadTexture(texturePath);
     unsigned int VAO = _createCubeVAO();
-
-    ObjectCollection* cubes = new ObjectCollection(&shader, VAO, texture);
     
     resetCamera();
-    viewmat = glm::mat4(1.0f);
-    projmat = glm::perspective(glm::radians(45.0f), asprat, 0.1f, 100.0f);
+    glob_viewmat = glm::mat4(1.0f);
+    glob_projmat = glm::perspective(glm::radians(45.0f), asprat, 0.1f, 100.0f);
 
-    // Scenario scenario = Scenario("Scenarios/LegalSlideMove.scen");
-    // Scenario scenario = Scenario("Scenarios/IllegalPivotMove.scen");
-    // Scenario scenario = Scenario("Scenarios/2x2x2_Metamodule.scen");
-    // Scenario scenario = Scenario("Scenarios/Testing/LegalSlide_IllegalPivot.scen");
-    // Scenario scenario = Scenario("Scenarios/Testing/SlidingTests.scen");
-    // Scenario scenario = Scenario("Scenarios/Testing/3x3x3_Candidate.scen");
     std::string _scenfile;
     if (!argv[1]) {
         _scenfile.append("Scenarios/3d2rMeta.scen");
@@ -286,19 +270,19 @@ int main(int argc, char** argv) {
 
     while(!glfwWindowShouldClose(window)) {
         float currentFrame = glfwGetTime();
-        deltaTime = currentFrame - lastFrame;
-        lastFrame = currentFrame;
+        glob_deltaTime = currentFrame - glob_lastFrame;
+        glob_lastFrame = currentFrame;
 
         processInput(window);
 
 #if AUTO_ROTATE < 1
-        cameraPos += (cameraSpeed.z * cameraDirection * deltaTime);
-        cameraPos += (cameraSpeed.x * glm::cross(cameraDirection, cameraUp) * deltaTime);
-        cameraPos += (cameraSpeed.y * cameraUp * deltaTime);
-        viewmat = glm::lookAt(cameraPos, cameraPos + cameraDirection, cameraUp);
+        cameraPos += (cameraSpeed.z * cameraDirection * glob_deltaTime);
+        cameraPos += (cameraSpeed.x * glm::cross(cameraDirection, cameraUp) * glob_deltaTime);
+        cameraPos += (cameraSpeed.y * cameraUp * glob_deltaTime);
+        glob_viewmat = glm::lookAt(cameraPos, cameraPos + cameraDirection, cameraUp);
 #else
-        cameraPos = glm::rotate(cameraPos, glm::radians(15.0f * deltaTime), glm::vec3(0.0, 1.0, 0.0));
-        viewmat = glm::lookAt(cameraPos, glm::vec3(0.0, 0.0, 0.0), cameraUp);
+        cameraPos = glm::rotate(cameraPos, glm::radians(15.0f * glob_deltaTime), glm::vec3(0.0, 1.0, 0.0));
+        glob_viewmat = glm::lookAt(cameraPos, glm::vec3(0.0, 0.0, 0.0), cameraUp);
 #endif
 
         // -- Rendering --
@@ -310,7 +294,7 @@ int main(int argc, char** argv) {
             if (forward) { move = scenMoveSeq->pop(); }
             else { move = scenMoveSeq->undo(); }
 
-            Cube* mover = gObjects.at(move->moverId);
+            Cube* mover = glob_objects.at(move->moverId);
 
             mover->startAnimation(&readyForNewAnim, move);
             readyForNewAnim = false;
@@ -319,7 +303,6 @@ int main(int argc, char** argv) {
             }
         }
 
-        cubes->drawAll();
         scenCubes->drawAll();
 
         glfwSwapBuffers(window);

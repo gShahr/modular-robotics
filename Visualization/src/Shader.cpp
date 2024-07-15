@@ -1,6 +1,6 @@
 #include "Shader.hpp"
 
-unsigned int timeLoc, colorLoc, modelLoc, viewLoc, projLoc, transformLoc, surfaceNormalLoc;
+unsigned int glob_timeLoc, glob_colorLoc, glob_modelLoc, glob_viewLoc, glob_projLoc, glob_transformLoc, glob_surfaceNormalLoc;
 
 Shader::Shader(const char* vertexPath, const char* fragmentPath)
 {
@@ -72,13 +72,13 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
 }
 
 void Shader::use() {
-    timeLoc = glGetUniformLocation(this->ID, "uTime");
-    colorLoc = glGetUniformLocation(this->ID, "uColor");
-    modelLoc = glGetUniformLocation(this->ID, "modelmat");
-    viewLoc = glGetUniformLocation(this->ID, "viewmat");
-    projLoc = glGetUniformLocation(this->ID, "projmat");
-    transformLoc = glGetUniformLocation(this->ID, "transform");
-    surfaceNormalLoc = glGetUniformLocation(this->ID, "baseSurfaceNorm");
+    glob_timeLoc = glGetUniformLocation(this->ID, "uTime");
+    glob_colorLoc = glGetUniformLocation(this->ID, "uColor");
+    glob_modelLoc = glGetUniformLocation(this->ID, "modelmat");
+    glob_viewLoc = glGetUniformLocation(this->ID, "viewmat");
+    glob_projLoc = glGetUniformLocation(this->ID, "projmat");
+    glob_transformLoc = glGetUniformLocation(this->ID, "transform");
+    glob_surfaceNormalLoc = glGetUniformLocation(this->ID, "baseSurfaceNorm");
     // std::cout << modelLoc << " | " << transformLoc << " | " << viewLoc << " | " << projLoc << std::endl;
     glUseProgram(ID);
 }
