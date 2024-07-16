@@ -69,11 +69,11 @@ std::vector<Configuration*> Configuration::GetNext() {
     return next;
 }
 
-CoordTensor<bool> Configuration::GetState() {
+const CoordTensor<bool>& Configuration::GetState() const {
     return _state;
 }
 
-HashedState Configuration::GetHash() {
+const HashedState& Configuration::GetHash() const {
     return hash;
 }
 

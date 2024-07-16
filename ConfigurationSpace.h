@@ -64,9 +64,11 @@ public:
 
     std::vector<Configuration*> GetNext();
 
-    CoordTensor<bool> GetState();
+    [[nodiscard]]
+    const CoordTensor<bool>& GetState() const;
 
-    HashedState GetHash();
+    [[nodiscard]]
+    const HashedState& GetHash() const;
 
     void SetStateAndHash(const CoordTensor<bool>& state);
 
