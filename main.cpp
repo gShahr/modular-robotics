@@ -14,6 +14,54 @@
 #include <unordered_set>
 #include "json.hpp"
 
+class MetaModule {
+private:
+    int order;
+    int axisSize;
+    std::vector<std::pair<int, int>> coords;
+public:
+    MetaModule(int ORIGIN, const std::string& filename) {
+        int x = 0;
+        int y = 0;
+        std::ifstream file(filename);
+        if (!file.is_open()) {
+            std::cerr << "Unable to open file: " << filename << std::endl;
+            return;
+        }
+        std::string line;
+        while (std::getline(file, line)) {
+            for (char c : line) {
+                if (c == '1') {
+                    coords.push_back({x, y});
+                }
+                x++;
+            }
+            x = ORIGIN;
+            y++;
+        }
+        file.close();
+    }
+
+    void generateRotations() {
+        for (int i = 1; i < order; i++) {
+            std::vector<std::pair<int, int>> rotation = coords;
+            for (int j = 0; j < coords.size(); j++) {
+                std::swap(rotation[0].first, rotation[i].second);
+            }
+        }
+    }
+
+    void generateReflections() {
+        for (int i = 1; i < order; i++) {
+            std::vector<std::pair<int, int>> rotation = coords;
+            for (int j = 0; j < coords.size(); j++) {
+                rotation[index].first *= -1;
+                rotation[index].second *= -1;
+            }
+        }
+    }
+};
+
 namespace Scenario {
     void exportStateTensorToJson(int id, const CoordTensor<bool>& stateTensor, const std::string& filename) {
         int indentSize = 4;
