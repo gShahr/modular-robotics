@@ -92,7 +92,9 @@ std::ostream& operator<<(std::ostream& out, const Configuration& config) {
 }
 
 std::vector<Configuration*> ConfigurationSpace::BFS(Configuration* start, Configuration* final, Lattice &lattice) {
-    int testI = -1;
+#if CONFIG_VERBOSE
+    int depth = -1;
+#endif
     std::queue<Configuration*> q;
     std::unordered_set<HashedState> visited;
     q.push(start);
@@ -100,10 +102,12 @@ std::vector<Configuration*> ConfigurationSpace::BFS(Configuration* start, Config
     while (!q.empty()) {
         Configuration* current = q.front();
         lattice = q.front()->GetState();
-        if (q.front()->depth != testI) {
-            testI++;
+#if CONFIG_VERBOSE
+        if (q.front()->depth != depth) {
+            depth++;
             std::cout << "bfs depth: " << q.front()->depth << std::endl << lattice << std::endl;
         }
+#endif
         q.pop();
         if (current->GetState() == final->GetState()) {
             return FindPath(start, current);

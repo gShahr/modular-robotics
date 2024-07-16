@@ -4,6 +4,9 @@
 #ifndef MODULAR_ROBOTICS_CONFIGURATIONSPACE_H
 #define MODULAR_ROBOTICS_CONFIGURATIONSPACE_H
 
+// Verbosity Configuration
+#define CONFIG_VERBOSE false
+
 class HashedState {
 private:
     size_t seed;
