@@ -57,8 +57,8 @@ public:
     std::valarray<int> CoordsFromIndex(int index) const;
 
     // Comparison Operators
-    bool operator==(const CoordTensor<T>& right);
-    bool operator!=(const CoordTensor<T>& right);
+    bool operator==(const CoordTensor<T>& right) const;
+    bool operator!=(const CoordTensor<T>& right) const;
 private:
     int _order;
     // Axis size, useful for bounds checking
@@ -94,12 +94,12 @@ private:
 };
 
 template<typename T>
-bool CoordTensor<T>::operator==(const CoordTensor<T>& right) {
+bool CoordTensor<T>::operator==(const CoordTensor<T>& right) const {
     return _arrayInternal == right._arrayInternal;
 }
 
 template<typename T>
-bool CoordTensor<T>::operator!=(const CoordTensor<T>& right) {
+bool CoordTensor<T>::operator!=(const CoordTensor<T>& right) const {
     return _arrayInternal != right._arrayInternal;
 }
 
