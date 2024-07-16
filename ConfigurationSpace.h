@@ -4,8 +4,16 @@
 #ifndef MODULAR_ROBOTICS_CONFIGURATIONSPACE_H
 #define MODULAR_ROBOTICS_CONFIGURATIONSPACE_H
 
-// Verbosity Configuration
-#define CONFIG_VERBOSE false
+// Verbosity Constants (Don't change these)
+#define NONE 0
+#define FINAL_DEPTH 1
+#define EVERY_DEPTH 2
+/* Verbosity Configuration
+ * NONE: No output from BFS
+ * FINAL_DEPTH: Output final depth and configuration upon BFS completion
+ * EVERY_DEPTH: Output current depth and configuration every time BFS depth increases
+ */
+#define CONFIG_VERBOSE FINAL_DEPTH
 
 class HashedState {
 private:
