@@ -195,9 +195,9 @@ CoordTensor<T>::CoordTensor(int order, int axisSize, const typename std::vector<
 #pragma ide diagnostic ignored "ConstantConditionsOC"
 #pragma ide diagnostic ignored "UnreachableCode"
     std::cout << "IdAtInternal Function: " << (
-            IdAtInternal == &CoordTensor::IdAt3rdOrder ? "IdAt3rdOrder" :
-            IdAtInternal == &CoordTensor::IdAt2ndOrder ? "IdAt2ndOrder" :
-            IdAtInternal == &CoordTensor::IdAtNthOrder ? "IdAtNthOrder" :
+            IdAtInternal == &CoordTensor::ElemAt3rdOrder ? "IdAt3rdOrder" :
+            IdAtInternal == &CoordTensor::ElemAt2ndOrder ? "IdAt2ndOrder" :
+            IdAtInternal == &CoordTensor::ElemAtNthOrder ? "IdAtNthOrder" :
             "Invalid Function!") << std::endl;
 #pragma clang diagnostic pop
 #endif
@@ -247,7 +247,7 @@ inline CoordTensor<bool>::CoordTensor(int order, int axisSize, const typename st
 #pragma ide diagnostic ignored "ConstantConditionsOC"
 #pragma ide diagnostic ignored "UnreachableCode"
     std::cout << "IdAtInternal Function: " << (
-            IdAtInternal == &CoordTensor::IdAtNthOrder ? "IdAtNthOrder" :
+            IdAtInternal == &CoordTensor::ElemAtNthOrder ? "IdAtNthOrder" :
             "Invalid Function!") << std::endl;
 #pragma clang diagnostic pop
 #endif
