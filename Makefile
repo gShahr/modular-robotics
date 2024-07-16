@@ -2,7 +2,7 @@
 CXX = g++
 
 # Compiler flags
-CXXFLAGS = -Wall -std=c++11 -I D:/boost_1_85_0
+CXXFLAGS = -Wall -std=c++17 -I D:/boost_1_85_0
 
 # Linker flags
 LDFLAGS = 
