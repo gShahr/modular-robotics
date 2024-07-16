@@ -11,8 +11,8 @@ void MoveBase::RotateMove(int index) {
         std::swap(move.first[0], move.first[index]);
     }
     for (auto& anim : animSequence) {
+        anim.first = Move::AnimRotationMap.at(anim.first)[index];
         std::swap(anim.second[0], anim.second[index]);
-        // TODO: Need to rotate animType also
     }
 }
 
@@ -24,8 +24,8 @@ void MoveBase::ReflectMove(int index) {
         move.first[index] *= -1;
     }
     for (auto& anim : animSequence) {
+        anim.first = Move::AnimReflectionMap.at(anim.first)[index];
         anim.second[index] *= -1;
-        // TODO: Need to reflect animType also
     }
 }
 
