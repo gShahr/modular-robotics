@@ -23,7 +23,7 @@ public:
 
     explicit HashedState(size_t seed);
 
-    explicit HashedState(CoordTensor<bool> state);
+    explicit HashedState(const CoordTensor<bool>& state);
 
     HashedState(const HashedState& other);
 

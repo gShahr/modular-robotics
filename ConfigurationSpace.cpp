@@ -8,7 +8,7 @@ HashedState::HashedState() : seed(0) {}
 
 HashedState::HashedState(size_t seed) : seed(seed) {}
 
-HashedState::HashedState(CoordTensor<bool> state) {
+HashedState::HashedState(const CoordTensor<bool>& state) {
     HashCoordTensor(state);
 }
 
