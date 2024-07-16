@@ -1,33 +1,40 @@
 #include <string>
 #include <fstream>
+#include <filesystem>
 #include "MoveManager.h"
 
 void MoveBase::RotateMove(int index) {
     std::swap(initPos[0], initPos[index]);
     std::swap(finalPos[0], finalPos[index]);
-    std::swap(anchorPos[0], anchorPos[index]);
     std::swap(bounds[0], bounds[index]);
     for (auto& move : moves) {
         std::swap(move.first[0], move.first[index]);
+    }
+    for (auto& anim : animSequence) {
+        std::swap(anim.second[0], anim.second[index]);
+        // TODO: Need to rotate animType also
     }
 }
 
 void MoveBase::ReflectMove(int index) {
     initPos[index] *= -1;
     finalPos[index] *= -1;
-    anchorPos[index] *= -1;
     std::swap(bounds[index].first, bounds[index].second);
     for (auto& move : moves) {
         move.first[index] *= -1;
     }
+    for (auto& anim : animSequence) {
+        anim.second[index] *= -1;
+        // TODO: Need to reflect animType also
+    }
 }
 
-const std::valarray<int>& MoveBase::MoveOffset() {
+const std::valarray<int>& MoveBase::MoveOffset() const {
     return finalPos;
 }
 
-const std::valarray<int>& MoveBase::AnchorOffset() {
-    return anchorPos;
+const std::vector<std::pair<Move::AnimType, std::valarray<int>>>& MoveBase::AnimSequence() const {
+    return animSequence;
 }
 
 Move2d::Move2d() {
@@ -41,12 +48,11 @@ MoveBase* Move2d::CopyMove() const {
     return copy;
 }
 
-void Move2d::InitMove(std::ifstream &moveFile) {
+void Move2d::InitMove(const nlohmann::basic_json<>& moveDef) {
     int x = 0, y = 0;
     std::valarray<int> maxBounds = {0, 0};
-    std::string line;
-    while (std::getline(moveFile, line)) {
-        for (auto c : line) {
+    for (const std::string line : moveDef["def"][0]) {
+        for (char c : line) {
             switch (c) {
                 default:
                     DEBUG("Unrecognized Move: " << c << std::endl);
@@ -58,8 +64,6 @@ void Move2d::InitMove(std::ifstream &moveFile) {
                 case Move::EMPTY:
                     moves.push_back({{x, y}, false});
                     break;
-                case Move::ANCHOR:
-                    anchorPos = {x, y};
                 case Move::STATIC:
                     moves.push_back({{x, y}, true});
                     break;
@@ -84,11 +88,22 @@ void Move2d::InitMove(std::ifstream &moveFile) {
         DEBUG("Check Offset: " << move.first[0] << ", " << move.first[1] << (move.second ? " Static" : " Empty") << std::endl);
     }
     finalPos -= initPos;
-    anchorPos -= initPos;
     DEBUG("Move Offset: " << finalPos[0] << ", " << finalPos[1] << std::endl);
     maxBounds -= initPos;
     bounds[0].second = maxBounds[0];
     bounds[1].second = maxBounds[1];
+    // Set up animation data
+    for (const auto& animDef : moveDef["animSeq"]) {
+        Move::AnimType animType = Move::StrAnimMap.at(animDef[0]);
+        std::valarray<int> animOffset = animDef[1];
+        animSequence.emplace_back(animType, animOffset);
+    }
+    // Generate move permutations if necessary (it pretty much always is)
+    if (moveDef["permGen"] == true) {
+        MoveManager::GenerateMovesFrom(this);
+    } else {
+        MoveManager::RegisterSingleMove(this);
+    }
 }
 
 bool Move2d::MoveCheck(CoordTensor<int> &tensor, const Module &mod) {
@@ -118,63 +133,72 @@ MoveBase* Move3d::CopyMove() const {
     return copy;
 }
 
-void Move3d::InitMove(std::ifstream &moveFile) {
+void Move3d::InitMove(const nlohmann::basic_json<>& moveDef) {
     int x = 0, y = 0, z = 0;
     std::valarray<int> maxBounds = {0, 0, 0};
-    std::string line;
-    while (std::getline(moveFile, line)) {
-        if (line.empty()) {
-            z++;
-            y = 0;
-            continue;
+    for (const std::vector<std::string> slice : moveDef["def"]) {
+        for (const auto& line : slice) {
+            for (auto c: line) {
+                switch (c) {
+                    default:
+                        DEBUG("Unrecognized Move: " << c << std::endl);
+                    case Move::NOCHECK:
+                        x++;
+                        continue;
+                    case Move::FINAL:
+                        finalPos = {x, y, z};
+                    case Move::EMPTY:
+                        moves.push_back({{x, y, z}, false});
+                        break;
+                    case Move::STATIC:
+                        moves.push_back({{x, y, z}, true});
+                        break;
+                    case Move::INITIAL:
+                        initPos = {x, y, z};
+                        bounds = {{x, 0},
+                                  {y, 0},
+                                  {z, 0}};
+                        break;
+                }
+                if (x > maxBounds[0]) {
+                    maxBounds[0] = x;
+                }
+                if (y > maxBounds[1]) {
+                    maxBounds[1] = y;
+                }
+                if (z > maxBounds[2]) {
+                    maxBounds[2] = z;
+                }
+                x++;
+            }
+            x = 0;
+            y++;
         }
-        for (auto c : line) {
-            switch (c) {
-                default:
-                    DEBUG("Unrecognized Move: " << c << std::endl);
-                case Move::NOCHECK:
-                    x++;
-                    continue;
-                case Move::FINAL:
-                    finalPos = {x, y, z};
-                case Move::EMPTY:
-                    moves.push_back({{x, y, z}, false});
-                    break;
-                case Move::ANCHOR:
-                    anchorPos = {x, y, z};
-                case Move::STATIC:
-                    moves.push_back({{x, y, z}, true});
-                    break;
-                case Move::INITIAL:
-                    initPos = {x, y, z};
-                    bounds = {{x, 0}, {y, 0}, {z, 0}};
-                    break;
-            }
-            if (x > maxBounds[0]) {
-                maxBounds[0] = x;
-            }
-            if (y > maxBounds[1]) {
-                maxBounds[1] = y;
-            }
-            if (z > maxBounds[2]) {
-                maxBounds[2] = z;
-            }
-            x++;
-        }
-        x = 0;
-        y++;
+        y = 0;
+        z++;
     }
     for (auto& move : moves) {
         move.first -= initPos;
         DEBUG("Check Offset: " << move.first[0] << ", " << move.first[1] << ", " << move.first[2] << (move.second ? " Static" : " Empty") << std::endl);
     }
     finalPos -= initPos;
-    anchorPos -= initPos;
     DEBUG("Move Offset: " << finalPos[0] << ", " << finalPos[1] << ", " << finalPos[2] << std::endl);
     maxBounds -= initPos;
     bounds[0].second = maxBounds[0];
     bounds[1].second = maxBounds[1];
     bounds[2].second = maxBounds[2];
+    // Set up animation data
+    for (const auto& animDef : moveDef["animSeq"]) {
+        Move::AnimType animType = Move::StrAnimMap.at(animDef[0]);
+        std::valarray<int> animOffset = animDef[1];
+        animSequence.emplace_back(animType, animOffset);
+    }
+    // Generate move permutations if necessary (it pretty much always is)
+    if (moveDef["permGen"] == true) {
+        MoveManager::GenerateMovesFrom(this);
+    } else {
+        MoveManager::RegisterSingleMove(this);
+    }
 }
 
 bool Move3d::MoveCheck(CoordTensor<int> &tensor, const Module &mod) {
@@ -236,6 +260,28 @@ void MoveManager::GenerateMovesFrom(MoveBase *origMove) {
 
 void MoveManager::RegisterSingleMove(MoveBase *move) {
     _moves.push_back(move);
+}
+
+void MoveManager::RegisterAllMoves(const std::string& movePath) {
+    nlohmann::json moveJson;
+    for (const auto& moveFile : std::filesystem::recursive_directory_iterator(movePath)) {
+        std::ifstream(moveFile.path()) >> moveJson;
+        for (const auto& moveDef : moveJson["moves"]) {
+            if (moveDef["order"] == 2) {
+                auto move = new Move2d();
+                move->InitMove(moveDef);
+                _movesToFree.push_back(move);
+            } else if (moveDef["order"] == 3) {
+                auto move = new Move3d();
+                move->InitMove(moveDef);
+                _movesToFree.push_back(move);
+            } else {
+                // Not currently supported
+                std::cout << "Attempted to create move of order != 2 or 3, moveDef at: " << moveFile.path() << std::endl;
+            }
+        }
+        // might need to close the ifstream idk yet
+    }
 }
 
 std::vector<MoveBase*> MoveManager::CheckAllMoves(CoordTensor<int> &tensor, Module &mod) {

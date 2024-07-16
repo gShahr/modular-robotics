@@ -108,10 +108,13 @@ namespace Scenario {
                 return;
             }
             auto modToMove = movePair.first;
-            auto move = movePair.second;
-            modDef % modToMove->id % lattice.coordTensor[modToMove->coords + move->AnchorOffset()] % move->MoveOffset()[0] % move->MoveOffset()[1] % (move->MoveOffset().size() > 2 ? move->MoveOffset()[2] : 0);
-            file << modDef.str() << std::endl;
-            lattice.MoveModule(*modToMove, move->MoveOffset());
+            for (const auto& anim : movePair.second->AnimSequence()) {
+                modDef % modToMove->id % anim.first % anim.second[0] % anim.second[1] % anim.second[2];
+                file << modDef.str() << std::endl;
+            }
+            //modDef % modToMove->id % lattice.coordTensor[modToMove->coords + move->AnchorOffset()] % move->MoveOffset()[0] % move->MoveOffset()[1] % (move->MoveOffset().size() > 2 ? move->MoveOffset()[2] : 0);
+            //file << modDef.str() << std::endl;
+            lattice.MoveModule(*modToMove, movePair.second->MoveOffset());
         }
         // File cleanup
         file.close();
@@ -290,7 +293,8 @@ int main() {
     //  MOVE TESTING BELOW
     //
     std::cout << lattice;
-    std::ifstream moveFile("Moves/Pivot_1.txt");
+    MoveManager::RegisterAllMoves();
+    /*std::ifstream moveFile("Moves/Pivot_1.txt");
     if (!moveFile) {
         std::cerr << "Unable to open file Moves/Slide_1.txt";
         return 1;
@@ -305,7 +309,7 @@ int main() {
     }
     Move2d move2;
     move2.InitMove(moveFile2);
-    MoveManager::GenerateMovesFrom(&move2);
+    MoveManager::GenerateMovesFrom(&move2);*/
     /*std::ifstream moveFile3("Moves/Leapfrog_1.txt");
     if (!moveFile3) {
         std::cerr << "Unable to open file Moves/Leapfrog_1.txt";
@@ -338,8 +342,8 @@ int main() {
     Move2d move6;
     move6.InitMove(moveFile6);
     MoveManager::GenerateMovesFrom(&move6);*/
-    moveFile.close();
-    moveFile2.close();
+    //moveFile.close();
+    //moveFile2.close();
     //moveFile3.close();
     //moveFile4.close();
     //moveFile5.close();
