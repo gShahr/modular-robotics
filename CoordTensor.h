@@ -16,7 +16,7 @@ public:
     // represent a point in space.
     // Axis size determines the length of each axis, an axis size of 10
     // would mean that only the integers 0-9 would be valid coordinates.
-    CoordTensor(int order, int axisSize, const typename std::vector<T>::value_type& value, std::valarray<int> originOffset = {});
+    CoordTensor(int order, int axisSize, const typename std::vector<T>::value_type& value, const std::valarray<int>& originOffset = {});
 
     // Gets a reference to an ID directly from the internal array, this
     // is always faster than calling IdAtInternal but requires a pre-calculated
@@ -119,7 +119,7 @@ std::valarray<int> CoordTensor<T>::CoordsFromIndex(int index) const {
 }
 
 template <typename T>
-CoordTensor<T>::CoordTensor(int order, int axisSize, const typename std::vector<T>::value_type& value, std::valarray<int> originOffset) {
+CoordTensor<T>::CoordTensor(int order, int axisSize, const typename std::vector<T>::value_type& value, const std::valarray<int>& originOffset) {
     _order = order;
     _axisSize = axisSize;
     // Calculate number of elements in tensor
@@ -202,7 +202,7 @@ CoordTensor<T>::CoordTensor(int order, int axisSize, const typename std::vector<
 }
 
 template<>
-inline CoordTensor<bool>::CoordTensor(int order, int axisSize, const typename std::vector<bool>::value_type& value, std::valarray<int> originOffset) {
+inline CoordTensor<bool>::CoordTensor(int order, int axisSize, const typename std::vector<bool>::value_type& value, const std::valarray<int>& originOffset) {
     _order = order;
     _axisSize = axisSize;
     // Calculate number of elements in tensor
