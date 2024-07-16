@@ -21,17 +21,17 @@ public:
     // Gets a reference to an ID directly from the internal array, this
     // is always faster than calling IdAtInternal but requires a pre-calculated
     // index in order to work.
-    typename std::vector<T>::reference GetIdDirect(int index);
+    typename std::vector<T>::reference GetElementDirect(int index);
 
     [[nodiscard]]
-    typename std::vector<T>::const_reference GetIdDirect(int index) const;
+    typename std::vector<T>::const_reference GetElementDirect(int index) const;
 
     // IdAt returns a reference to the module ID stored at the given
     // coordinates. An ID of -1 means no module is present.
-    typename std::vector<T>::reference IdAt(const std::valarray<int>& coords);
+    typename std::vector<T>::reference ElementAt(const std::valarray<int>& coords);
 
     [[nodiscard]]
-    typename std::vector<T>::const_reference IdAt(const std::valarray<int>& coords) const;
+    typename std::vector<T>::const_reference ElementAt(const std::valarray<int>& coords) const;
 
     // Identical to IdAt but uses the subscript operator, mostly here to
     // make moving to CoordTensor easier.
@@ -81,16 +81,18 @@ private:
     typename std::vector<T>::reference (CoordTensor::*IdAtInternalOffset)(const std::valarray<int>& coords);
     typename std::vector<T>::const_reference (CoordTensor::*IdAtInternalOffsetConst)(const std::valarray<int>& coords) const;
     // 2nd and 3rd order tensors benefit from specialized IdAt functions
-    typename std::vector<T>::reference IdAt2ndOrder (const std::valarray<int>& coords);
-    typename std::vector<T>::const_reference IdAt2ndOrderConst (const std::valarray<int>& coords) const;
-    typename std::vector<T>::reference IdAt3rdOrder (const std::valarray<int>& coords);
-    typename std::vector<T>::const_reference IdAt3rdOrderConst (const std::valarray<int>& coords) const;
+    typename std::vector<T>::reference ElemAt2ndOrder (const std::valarray<int>& coords);
+    [[nodiscard]]
+    typename std::vector<T>::const_reference ElemAt2ndOrderConst (const std::valarray<int>& coords) const;
+    typename std::vector<T>::reference ElemAt3rdOrder (const std::valarray<int>& coords);
+    [[nodiscard]]
+    typename std::vector<T>::const_reference ElemAt3rdOrderConst (const std::valarray<int>& coords) const;
     // Generalized IdAtInternal function
-    typename std::vector<T>::reference IdAtNthOrder (const std::valarray<int>& coords);
-    typename std::vector<T>::const_reference IdAtNthOrderConst (const std::valarray<int>& coords) const;
+    typename std::vector<T>::reference ElemAtNthOrder (const std::valarray<int>& coords);
+    typename std::vector<T>::const_reference ElemAtNthOrderConst (const std::valarray<int>& coords) const;
     // Offset IdAt
-    typename std::vector<T>::reference IdAtNthOrderOffset (const std::valarray<int>& coords);
-    typename std::vector<T>::const_reference IdAtNthOrderOffsetConst (const std::valarray<int>& coords) const;
+    typename std::vector<T>::reference ElemAtNthOrderOffset (const std::valarray<int>& coords);
+    typename std::vector<T>::const_reference ElemAtNthOrderOffsetConst (const std::valarray<int>& coords) const;
 };
 
 template<typename T>
@@ -152,8 +154,8 @@ CoordTensor<T>::CoordTensor(int order, int axisSize, const typename std::vector<
             }
             if (internalSize == _axisSize) {
                 // If internalSize wasn't modified by case 3, then tensor is 2nd order
-                IdAtInternal = &CoordTensor::IdAt2ndOrder;
-                IdAtInternalConst = &CoordTensor::IdAt2ndOrderConst;
+                IdAtInternal = &CoordTensor::ElemAt2ndOrder;
+                IdAtInternalConst = &CoordTensor::ElemAt2ndOrderConst;
                 DEBUG("2nd order tensor created\n");
                 break;
             }
@@ -163,8 +165,8 @@ CoordTensor<T>::CoordTensor(int order, int axisSize, const typename std::vector<
             for (int i = 0; i < _axisSize; i++) {
                 _arrayInternal3D[i] = &(_arrayInternal2D[i * _axisSize]);
             }
-            IdAtInternal = &CoordTensor::IdAt3rdOrder;
-            IdAtInternalConst = &CoordTensor::IdAt3rdOrderConst;
+            IdAtInternal = &CoordTensor::ElemAt3rdOrder;
+            IdAtInternalConst = &CoordTensor::ElemAt3rdOrderConst;
             DEBUG("3rd order tensor created\n");
             break;
         default:
@@ -176,8 +178,8 @@ CoordTensor<T>::CoordTensor(int order, int axisSize, const typename std::vector<
                 _axisMultipliers[i] = multiplier;
                 multiplier *= _axisSize;
             }
-            IdAtInternal = &CoordTensor::IdAtNthOrder;
-            IdAtInternalConst = &CoordTensor::IdAtNthOrderConst;
+            IdAtInternal = &CoordTensor::ElemAtNthOrder;
+            IdAtInternalConst = &CoordTensor::ElemAtNthOrderConst;
             DEBUG("Tensor of order " << order << " created\n");
     }
     // Offset setup
@@ -185,8 +187,8 @@ CoordTensor<T>::CoordTensor(int order, int axisSize, const typename std::vector<
         _offset = originOffset;
         IdAtInternalOffset = IdAtInternal;
         IdAtInternalOffsetConst = IdAtInternalConst;
-        IdAtInternal = &CoordTensor::IdAtNthOrderOffset;
-        IdAtInternalConst = &CoordTensor::IdAtNthOrderOffsetConst;
+        IdAtInternal = &CoordTensor::ElemAtNthOrderOffset;
+        IdAtInternalConst = &CoordTensor::ElemAtNthOrderOffsetConst;
     }
 #ifndef NDEBUG
 #pragma clang diagnostic push
@@ -229,16 +231,16 @@ inline CoordTensor<bool>::CoordTensor(int order, int axisSize, const typename st
         _axisMultipliers[i] = multiplier;
         multiplier *= _axisSize;
     }
-    IdAtInternal = &CoordTensor::IdAtNthOrder;
-    IdAtInternalConst = &CoordTensor::IdAtNthOrderConst;
+    IdAtInternal = &CoordTensor::ElemAtNthOrder;
+    IdAtInternalConst = &CoordTensor::ElemAtNthOrderConst;
     DEBUG("Tensor of order " << order << " created\n");
     // Offset setup
     if (originOffset.size() != 0) {
         _offset = originOffset;
         IdAtInternalOffset = IdAtInternal;
         IdAtInternalOffsetConst = IdAtInternalConst;
-        IdAtInternal = &CoordTensor::IdAtNthOrderOffset;
-        IdAtInternalConst = &CoordTensor::IdAtNthOrderOffsetConst;
+        IdAtInternal = &CoordTensor::ElemAtNthOrderOffset;
+        IdAtInternalConst = &CoordTensor::ElemAtNthOrderOffsetConst;
     }
 #ifndef NDEBUG
 #pragma clang diagnostic push
@@ -252,17 +254,17 @@ inline CoordTensor<bool>::CoordTensor(int order, int axisSize, const typename st
 }
 
 template <typename T>
-typename std::vector<T>::reference CoordTensor<T>::GetIdDirect(int index) {
+typename std::vector<T>::reference CoordTensor<T>::GetElementDirect(int index) {
     return _arrayInternal[index];
 }
 
 template <typename T>
-typename std::vector<T>::const_reference CoordTensor<T>::GetIdDirect(int index) const {
+typename std::vector<T>::const_reference CoordTensor<T>::GetElementDirect(int index) const {
     return _arrayInternal[index];
 }
 
 template <typename T>
-inline typename std::vector<T>::reference CoordTensor<T>::IdAt(const std::valarray<int>& coords) {
+inline typename std::vector<T>::reference CoordTensor<T>::ElementAt(const std::valarray<int>& coords) {
     // Told you calling member function pointers looks weird
     return (this->*IdAtInternal)(coords);
     // This would look even worse if IdAtInternal were called from outside,
@@ -270,37 +272,37 @@ inline typename std::vector<T>::reference CoordTensor<T>::IdAt(const std::valarr
 }
 
 template <typename T>
-inline typename std::vector<T>::const_reference CoordTensor<T>::IdAt(const std::valarray<int>& coords) const {
+inline typename std::vector<T>::const_reference CoordTensor<T>::ElementAt(const std::valarray<int>& coords) const {
     return (this->*IdAtInternalConst)(coords);
 }
 
 template <typename T>
-typename std::vector<T>::reference CoordTensor<T>::IdAt2ndOrder (const std::valarray<int>& coords) {
+typename std::vector<T>::reference CoordTensor<T>::ElemAt2ndOrder (const std::valarray<int>& coords) {
     return _arrayInternal2D[coords[1]][coords[0]];
 }
 
 template <typename T>
-typename std::vector<T>::const_reference CoordTensor<T>::IdAt2ndOrderConst (const std::valarray<int>& coords) const {
+typename std::vector<T>::const_reference CoordTensor<T>::ElemAt2ndOrderConst (const std::valarray<int>& coords) const {
     return _arrayInternal2D[coords[1]][coords[0]];
 }
 
 template <typename T>
-typename std::vector<T>::reference CoordTensor<T>::IdAt3rdOrder (const std::valarray<int>& coords) {
+typename std::vector<T>::reference CoordTensor<T>::ElemAt3rdOrder (const std::valarray<int>& coords) {
     return _arrayInternal3D[coords[2]][coords[1]][coords[0]];
 }
 
 template <typename T>
-typename std::vector<T>::const_reference CoordTensor<T>::IdAt3rdOrderConst (const std::valarray<int>& coords) const {
+typename std::vector<T>::const_reference CoordTensor<T>::ElemAt3rdOrderConst (const std::valarray<int>& coords) const {
     return _arrayInternal3D[coords[2]][coords[1]][coords[0]];
 }
 
 template <typename T>
-typename std::vector<T>::reference CoordTensor<T>::IdAtNthOrder (const std::valarray<int>& coords) {
+typename std::vector<T>::reference CoordTensor<T>::ElemAtNthOrder (const std::valarray<int>& coords) {
     return _arrayInternal[(coords * _axisMultipliers).sum()];
 }
 
 template <typename T>
-typename std::vector<T>::const_reference CoordTensor<T>::IdAtNthOrderConst (const std::valarray<int>& coords) const {
+typename std::vector<T>::const_reference CoordTensor<T>::ElemAtNthOrderConst (const std::valarray<int>& coords) const {
     return _arrayInternal[(coords * _axisMultipliers).sum()];
 }
 
@@ -320,12 +322,12 @@ const std::vector<T>& CoordTensor<T>::GetArrayInternal() const {
 }
 
 template <typename T>
-inline typename std::vector<T>::reference CoordTensor<T>::IdAtNthOrderOffset (const std::valarray<int>& coords) {
+inline typename std::vector<T>::reference CoordTensor<T>::ElemAtNthOrderOffset (const std::valarray<int>& coords) {
     return (this->*IdAtInternalOffset)(coords + _offset);
 }
 
 template <typename T>
-inline typename std::vector<T>::const_reference CoordTensor<T>::IdAtNthOrderOffsetConst (const std::valarray<int>& coords) const {
+inline typename std::vector<T>::const_reference CoordTensor<T>::ElemAtNthOrderOffsetConst (const std::valarray<int>& coords) const {
     return (this->*IdAtInternalOffsetConst)(coords + _offset);
 }
 

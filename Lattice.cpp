@@ -134,7 +134,7 @@ bool Lattice::operator==(const Lattice &other) {
     if (stateTensor.GetArrayInternal().size() == other.stateTensor.GetArrayInternal().size()) {
         result = true;
         for (int i = 0; i < stateTensor.GetArrayInternal().size(); i++) {
-            if (stateTensor.GetIdDirect(i) != other.stateTensor.GetIdDirect(i)) {
+            if (stateTensor.GetElementDirect(i) != other.stateTensor.GetElementDirect(i)) {
                 return false;
             }
         }
@@ -147,20 +147,20 @@ Lattice& Lattice::operator=(const CoordTensor<bool> &state) {
     std::queue<int> destinations;
     for (int i = 0; i < state.GetArrayInternal().size(); i++) {
         // Search for state differences
-        if (stateTensor.GetIdDirect(i) == state.GetIdDirect(i)) continue;
-        if (state.GetIdDirect(i)) {
+        if (stateTensor.GetElementDirect(i) == state.GetElementDirect(i)) continue;
+        if (state.GetElementDirect(i)) {
             // New state has module at this index, current state doesn't have one
             if (modsToMove.empty()) {
                 // Remember this location for when a mismatched module is found
                 destinations.push(i);
             } else {
                 // Move a mismatched module to this location
-                coordTensor.GetIdDirect(i) = modsToMove.front();
+                coordTensor.GetElementDirect(i) = modsToMove.front();
                 // TEST: Update module position variable
                 ModuleIdManager::Modules()[modsToMove.front()].coords = coordTensor.CoordsFromIndex(i);
                 // Update adjacency list
-                ClearAdjacencies(coordTensor.GetIdDirect(i));
-                EdgeCheck(ModuleIdManager::Modules()[coordTensor.GetIdDirect(i)]);
+                ClearAdjacencies(coordTensor.GetElementDirect(i));
+                EdgeCheck(ModuleIdManager::Modules()[coordTensor.GetElementDirect(i)]);
                 // Pop ID stack
                 modsToMove.pop();
             }
@@ -168,22 +168,22 @@ Lattice& Lattice::operator=(const CoordTensor<bool> &state) {
             // Current state has module at this index, new state doesn't have one
             if (destinations.empty()) {
                 // Remember this mismatched module for when a location is found
-                modsToMove.push(coordTensor.GetIdDirect(i));
+                modsToMove.push(coordTensor.GetElementDirect(i));
             } else {
                 // Move this mismatched module to a location
-                coordTensor.GetIdDirect(destinations.front()) = coordTensor.GetIdDirect(i);
+                coordTensor.GetElementDirect(destinations.front()) = coordTensor.GetElementDirect(i);
                 // TEST: Update module position variable
-                ModuleIdManager::Modules()[coordTensor.GetIdDirect(i)].coords = coordTensor.CoordsFromIndex(destinations.front());
+                ModuleIdManager::Modules()[coordTensor.GetElementDirect(i)].coords = coordTensor.CoordsFromIndex(destinations.front());
                 // Update adjacency list
-                ClearAdjacencies(coordTensor.GetIdDirect(i));
-                EdgeCheck(ModuleIdManager::Modules()[coordTensor.GetIdDirect(i)]);
+                ClearAdjacencies(coordTensor.GetElementDirect(i));
+                EdgeCheck(ModuleIdManager::Modules()[coordTensor.GetElementDirect(i)]);
                 // Pop index stack
                 destinations.pop();
             }
             // Set former module location to -1
-            coordTensor.GetIdDirect(i) = -1;
+            coordTensor.GetElementDirect(i) = -1;
         }
-        stateTensor.GetIdDirect(i) = state.GetIdDirect(i);
+        stateTensor.GetElementDirect(i) = state.GetElementDirect(i);
     }
     return *this;
 }
@@ -191,7 +191,7 @@ Lattice& Lattice::operator=(const CoordTensor<bool> &state) {
 std::ostream& operator<<(std::ostream& out, Lattice& lattice) {
     out << "Lattice State:\n";
     for (int i = 0; i < lattice.coordTensor.GetArrayInternal().size(); i++) {
-        auto id = lattice.coordTensor.GetIdDirect(i);
+        auto id = lattice.coordTensor.GetElementDirect(i);
         if (id >= 0) {
             out << '#';
         } else {

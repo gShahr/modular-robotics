@@ -19,7 +19,7 @@ namespace Scenario {
         int indentSize = 4;
         nlohmann::json jsonOutput;
         for (int i = 0; i < stateTensor.GetArrayInternal().size(); i++) {
-            jsonOutput["configurations"][id]["state"].push_back(stateTensor.GetIdDirect(i));
+            jsonOutput["configurations"][id]["state"].push_back(stateTensor.GetElementDirect(i));
         }
         std::ofstream file(filename);
         if (file.is_open()) {

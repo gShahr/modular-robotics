@@ -254,8 +254,8 @@ std::pair<Module*, MoveBase*> MoveManager::FindMoveToState(Lattice &lattice, con
     Module* modToMove = nullptr;
     // Find module to move
     for (int i = 0; i < lattice.stateTensor.GetArrayInternal().size(); i++) {
-        if (lattice.stateTensor.GetIdDirect(i) != state.GetIdDirect(i) && !state.GetIdDirect(i)) {
-            modToMove = &ModuleIdManager::Modules()[lattice.coordTensor.GetIdDirect(i)];
+        if (lattice.stateTensor.GetElementDirect(i) != state.GetElementDirect(i) && !state.GetElementDirect(i)) {
+            modToMove = &ModuleIdManager::Modules()[lattice.coordTensor.GetElementDirect(i)];
             break;
         }
     }
