@@ -59,7 +59,7 @@ public:
     virtual MoveBase* CopyMove() const = 0;
     // Load in move info from a given file
     // virtual void InitMove(std::ifstream& moveFile) = 0;
-    virtual void InitMove(const nlohmann::json& moveDef) = 0;
+    virtual void InitMove(const nlohmann::basic_json<>& moveDef) = 0;
     // Check to see if move is possible for a given module
     virtual bool MoveCheck(CoordTensor<int>& tensor, const Module& mod) = 0;
 
