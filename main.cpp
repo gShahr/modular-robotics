@@ -16,10 +16,12 @@
 
 class MetaModule {
 private:
+public:
     int order;
     int axisSize;
     std::vector<std::pair<int, int>> coords;
-public:
+    std::vector<std::vector<std::pair<int, int>>> metaModules;
+
     MetaModule(int ORIGIN, const std::string& filename) {
         int x = 0;
         int y = 0;
@@ -30,8 +32,8 @@ public:
         }
         std::string line;
         while (std::getline(file, line)) {
-            for (char c : line) {
-                if (c == '1') {
+            for (char c: line) {
+                if (c == '#') {
                     coords.push_back({x, y});
                 }
                 x++;
@@ -39,25 +41,70 @@ public:
             x = ORIGIN;
             y++;
         }
+        metaModules.push_back(coords);
         file.close();
     }
 
     void generateRotations() {
-        for (int i = 1; i < order; i++) {
-            std::vector<std::pair<int, int>> rotation = coords;
-            for (int j = 0; j < coords.size(); j++) {
-                std::swap(rotation[0].first, rotation[i].second);
-            }
+        DEBUG("Generating rotations for metamodules\n");
+        std::vector<std::pair<int, int>> rotation = coords;
+        for (int j = 0; j < coords.size(); j++) {
+            std::swap(rotation[j].first, rotation[j].second);
         }
+        metaModules.push_back(rotation);
     }
 
     void generateReflections() {
-        for (int i = 1; i < order; i++) {
-            std::vector<std::pair<int, int>> rotation = coords;
-            for (int j = 0; j < coords.size(); j++) {
-                rotation[index].first *= -1;
-                rotation[index].second *= -1;
+        DEBUG("Generating reflections for metamodules\n");
+        std::vector<std::vector<std::pair<int, int>>> newMetaModules;
+        std::vector<std::pair<int, int>> reflection;
+        for (int j = 0; j < metaModules.size(); j++) {
+            reflection = metaModules[j];
+            for (int k = 0; k < reflection.size(); k++) {
+                reflection[k].first *= -1;
             }
+            newMetaModules.push_back(reflection);
+        }
+        for (auto metaModule : newMetaModules) {
+            metaModules.push_back(metaModule);
+        }
+    }
+
+    void printCoordsOnly() const {
+        DEBUG("Printing coordinates of metamodules\n");
+        for (int i = 0; i < metaModules.size(); ++i) {
+            std::cout << "Configuration " << i << " coordinates:\n";
+            for (const auto& coord : metaModules[i]) {
+                std::cout << "(" << coord.first << ", " << coord.second << ")\n";
+            }
+            std::cout << "\n";
+        }
+    }
+
+    void printConfigurations() const {
+        DEBUG("Printing metamodules\n");
+        const int width = 10;
+        const int height = 10;
+        const int offset = 5;
+        for (int i = 0; i < metaModules.size(); ++i) {
+            std::cout << "Configuration " << i << ":\n";
+            char grid[width][height];
+            for (int m = 0; m < width; ++m) {
+                for (int n = 0; n < height; ++n) {
+                    grid[m][n] = '.';
+                }
+            }
+            for (const auto& coord : metaModules[i]) {
+                std::cout << coord.first << ' ' << coord.second << std::endl;
+                grid[coord.second + offset][coord.first + offset] = '#';
+            }
+            for (int y = 0; y < width; ++y) {
+                for (int x = 0; x < height; ++x) {
+                    std::cout << grid[y][x] << " ";
+                }
+                std::cout << "\n";
+            }
+            std::cout << "\n";
         }
     }
 };
@@ -281,6 +328,12 @@ CoordTensor<bool> setupFinal(int order, int axisSize, int ORIGIN, Lattice& latti
 }
 
 int main() {
+    // Metamodule testing
+    MetaModule metamodule(0, "metamodule_1.txt");
+    metamodule.generateRotations();
+    metamodule.generateReflections();
+    metamodule.printConfigurations();
+    //
     const int ORIGIN = 0;
     int order = 2;
     int axisSize = 9;
@@ -493,3 +546,4 @@ int main() {
     MoveManager::CleanMoves();
     return 0;
 }
+
