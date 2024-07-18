@@ -92,7 +92,7 @@ std::ostream& operator<<(std::ostream& out, const Configuration& config) {
 }
 
 std::vector<Configuration*> ConfigurationSpace::BFS(Configuration* start, Configuration* final, Lattice &lattice) {
-#if CONFIG_VERBOSE > NONE
+#if CONFIG_VERBOSE > CS_LOG_NONE
     int depth = -1;
 #endif
     std::queue<Configuration*> q;
@@ -102,17 +102,17 @@ std::vector<Configuration*> ConfigurationSpace::BFS(Configuration* start, Config
     while (!q.empty()) {
         Configuration* current = q.front();
         lattice = q.front()->GetState();
-#if CONFIG_VERBOSE > NONE
+#if CONFIG_VERBOSE > CS_LOG_NONE
         if (q.front()->depth != depth) {
             depth++;
-#if CONFIG_VERBOSE > FINAL_DEPTH
+#if CONFIG_VERBOSE > CS_LOG_FINAL_DEPTH
             std::cout << "bfs depth: " << q.front()->depth << std::endl << lattice << std::endl;
 #endif
         }
 #endif
         q.pop();
         if (current->GetState() == final->GetState()) {
-#if CONFIG_VERBOSE == FINAL_DEPTH
+#if CONFIG_VERBOSE == CS_LOG_FINAL_DEPTH
             std::cout << "bfs depth: " << depth << std::endl << lattice << std::endl;
 #endif
             return FindPath(start, current);
