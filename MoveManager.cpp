@@ -85,10 +85,14 @@ void Move2d::InitMove(const nlohmann::basic_json<>& moveDef) {
     }
     for (auto& move : moves) {
         move.first -= initPos;
+#if MOVEMANAGER_VERBOSE > MM_LOG_NONE
         DEBUG("Check Offset: " << move.first[0] << ", " << move.first[1] << (move.second ? " Static" : " Empty") << std::endl);
+#endif
     }
     finalPos -= initPos;
+#if MOVEMANAGER_VERBOSE > MM_LOG_NONE
     DEBUG("Move Offset: " << finalPos[0] << ", " << finalPos[1] << std::endl);
+#endif
     maxBounds -= initPos;
     bounds[0].second = maxBounds[0];
     bounds[1].second = maxBounds[1];
@@ -179,10 +183,14 @@ void Move3d::InitMove(const nlohmann::basic_json<>& moveDef) {
     }
     for (auto& move : moves) {
         move.first -= initPos;
+#if MOVEMANAGER_VERBOSE > MM_LOG_NONE
         DEBUG("Check Offset: " << move.first[0] << ", " << move.first[1] << ", " << move.first[2] << (move.second ? " Static" : " Empty") << std::endl);
+#endif
     }
     finalPos -= initPos;
+#if MOVEMANAGER_VERBOSE > MM_LOG_NONE
     DEBUG("Move Offset: " << finalPos[0] << ", " << finalPos[1] << ", " << finalPos[2] << std::endl);
+#endif
     maxBounds -= initPos;
     bounds[0].second = maxBounds[0];
     bounds[1].second = maxBounds[1];
@@ -268,12 +276,16 @@ void MoveManager::RegisterAllMoves(const std::string& movePath) {
         std::ifstream(moveFile.path()) >> moveJson;
         for (const auto& moveDef : moveJson["moves"]) {
             if (moveDef["order"] == 2) {
+#if MOVEMANAGER_VERBOSE > MM_LOG_NONE
                 DEBUG("Registering 2d move " << moveDef["name"] << std::endl);
+#endif
                 auto move = new Move2d();
                 move->InitMove(moveDef);
                 _movesToFree.push_back(move);
             } else if (moveDef["order"] == 3) {
+#if MOVEMANAGER_VERBOSE > MM_LOG_NONE
                 DEBUG("Registering 3d move " << moveDef["name"] << std::endl);
+#endif
                 auto move = new Move3d();
                 move->InitMove(moveDef);
                 _movesToFree.push_back(move);
@@ -290,10 +302,14 @@ std::vector<MoveBase*> MoveManager::CheckAllMoves(CoordTensor<int> &tensor, Modu
     std::vector<MoveBase*> legalMoves = {};
     for (auto move : _moves) {
         if (move->MoveCheck(tensor, mod)) {
+#if MOVEMANAGER_VERBOSE == MM_LOG_MOVE_CHECKS
             DEBUG("passed!\n");
+#endif
             legalMoves.push_back(move);
+#if MOVEMANAGER_VERBOSE == MM_LOG_MOVE_CHECKS
         } else {
             DEBUG("failed!\n");
+#endif
         }
     }
     return legalMoves;

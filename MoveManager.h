@@ -7,6 +7,17 @@
 #ifndef MODULAR_ROBOTICS_MOVEMANAGER_H
 #define MODULAR_ROBOTICS_MOVEMANAGER_H
 
+// Verbosity Constants (Don't change these)
+#define MM_LOG_NONE 0
+#define MM_LOG_MOVE_DEFS 1
+#define MM_LOG_MOVE_CHECKS 2
+/* Verbosity Configuration
+ * NONE: No output from MoveManager
+ * MOVE_DEFS: Output move def information
+ * MOVE_CHECK: Output move def information and move check results
+ */
+#define MOVEMANAGER_VERBOSE MM_LOG_MOVE_DEFS
+
 namespace Move {
     enum State {
         NOCHECK = ' ',
