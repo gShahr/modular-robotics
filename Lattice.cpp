@@ -189,6 +189,10 @@ Lattice& Lattice::operator=(const CoordTensor<bool> &state) {
 }
 
 std::ostream& operator<<(std::ostream& out, Lattice& lattice) {
+    if (lattice.order != 2) {
+        DEBUG("Lattice insertion operator not permitted for non-2d lattices");
+        return out;
+    }
     out << "Lattice State:\n";
     for (int i = 0; i < lattice.coordTensor.GetArrayInternal().size(); i++) {
         auto id = lattice.coordTensor.GetElementDirect(i);
