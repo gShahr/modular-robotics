@@ -47,7 +47,9 @@ void Lattice::EdgeCheck(const Module &mod, bool bothWays) {
         if (adjCoords[i] == 0) continue;
         adjCoords[i]--;
         if (coordTensor[adjCoords] >= 0) {
+#if (LATTICE_VERBOSE & LAT_LOG_ADJ) == LAT_LOG_ADJ
             DEBUG(mod << " Adjacent to " << ModuleIdManager::Modules()[coordTensor[adjCoords]] << std::endl);
+#endif
             AddEdge(mod.id, coordTensor[adjCoords]);
         }
         // Don't want to check both ways if it can be avoided, also don't want to check index beyond max value
@@ -57,7 +59,9 @@ void Lattice::EdgeCheck(const Module &mod, bool bothWays) {
         }
         adjCoords[i] += 2;
         if (coordTensor[adjCoords] >= 0) {
+#if (LATTICE_VERBOSE & LAT_LOG_ADJ) == LAT_LOG_ADJ
             DEBUG(mod << " Adjacent to " << ModuleIdManager::Modules()[coordTensor[adjCoords]] << std::endl);
+#endif
             AddEdge(mod.id, coordTensor[adjCoords]);
         }
         adjCoords[i]--;
@@ -115,7 +119,9 @@ void Lattice::BuildMovableModules() {
     for (int id = 0; id < moduleCount; id++) {
         auto& mod = ModuleIdManager::Modules()[id];
         if (ap[id]) {
-            DEBUG("Module at (" << mod.coords[0] << ", " << mod.coords[1] << ") is an articulation point" << std::endl);
+#if (LATTICE_VERBOSE & LAT_LOG_CUT) == LAT_LOG_CUT
+            DEBUG(mod << " is an articulation point" << std::endl);
+#endif
         } else if (!mod.moduleStatic) {
             // Non-cut, non-static modules
             movableModules.emplace_back(&mod);

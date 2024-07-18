@@ -4,6 +4,20 @@
 #ifndef MODULAR_ROBOTICS_LATTICE_H
 #define MODULAR_ROBOTICS_LATTICE_H
 
+// Verbosity Constants (Don't change these)
+#define LAT_LOG_NONE 0
+#define LAT_LOG_ADJ 1
+#define LAT_LOG_CUT 2
+#define LAT_LOG_ALL 3
+/* Verbosity Configuration
+ * NONE: No output from Lattice
+ * ADJ: Output adjacency information
+ * CUT: Output cut vertex information
+ * ALL: Output both adjacency and cut vertex information
+ */
+#define LATTICE_VERBOSE LAT_LOG_NONE
+
+
 class Lattice {
 private:
     // Vector that holds the IDs of adjacent modules, indexed by ID
