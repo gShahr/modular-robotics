@@ -342,13 +342,13 @@ int main() {
 
     std::cout << lattice;
     MoveManager::RegisterAllMoves();
-    std::cout << "Attempting to assign to lattice from state tensor.\n";
+    /*std::cout << "Attempting to assign to lattice from state tensor.\n";
     CoordTensor<bool> stateTest(order, axisSize, false);
     stateTest[{1, 1}] = true;
     stateTest[{1, 2}] = true;
     stateTest[{2, 2}] = true;
     lattice = stateTest;
-    std::cout << lattice;
+    std::cout << lattice;*/
 
     // BFS TESTING
     std::cout << "BFS Testing:\n";
