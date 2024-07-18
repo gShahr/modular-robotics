@@ -22,7 +22,7 @@ public:
     std::vector<std::pair<int, int>> coords;
     std::vector<std::vector<std::pair<int, int>>> metaModules;
 
-    MetaModule(int ORIGIN, const std::string& filename) {
+    MetaModule(const std::string& filename) {
         int x = 0;
         int y = 0;
         std::ifstream file(filename);
@@ -38,7 +38,7 @@ public:
                 }
                 x++;
             }
-            x = ORIGIN;
+            x = 0;
             y++;
         }
         metaModules.push_back(coords);
@@ -190,8 +190,8 @@ namespace Scenario {
  * JSON file's specifications. The "static" flag for each module is directly passed
  * to the `AddModule` method of the `Lattice` object.
  */
-void setupFromJson(int ORIGIN, Lattice& lattice, const std::string& filename);
-void setupFromJson(int ORIGIN, Lattice& lattice, const std::string& filename) {
+void setupFromJson(Lattice& lattice, const std::string& filename);
+void setupFromJson(Lattice& lattice, const std::string& filename) {
     std::ifstream file(filename);
     if (!file) {
         std::cerr << "Unable to open file " << filename << std::endl;
@@ -202,7 +202,7 @@ void setupFromJson(int ORIGIN, Lattice& lattice, const std::string& filename) {
     for (const auto& module : j["modules"]) {
         std::vector<int> position = module["position"];
         std::transform(position.begin(), position.end(), position.begin(),
-                    [ORIGIN](int coord) { return coord + ORIGIN; });
+                    [](int coord) { return coord; });
         std::valarray<int> coords(position.data(), position.size());
         lattice.AddModule(coords, module["static"]);
     }
@@ -233,11 +233,11 @@ void setupFromJson(int ORIGIN, Lattice& lattice, const std::string& filename) {
  * is output to `std::cerr`. The function also identifies and marks articulation
  * points within the lattice after all modules have been added.
  */
-void setupInitial(int ORIGIN, Lattice& lattice, const std::string& filename);
-void setupInitial(int ORIGIN, Lattice& lattice, const std::string& filename) {
+void setupInitial(Lattice& lattice, const std::string& filename);
+void setupInitial(Lattice& lattice, const std::string& filename) {
     std::vector<std::vector<char>> image;
-    int x = ORIGIN;
-    int y = ORIGIN;
+    int x = 0;
+    int y = 0;
     std::ifstream file(filename);
     if (!file) {
         std::cerr << "Unable to open file " << filename << std::endl;
@@ -261,13 +261,13 @@ void setupInitial(int ORIGIN, Lattice& lattice, const std::string& filename) {
             x++;
         }
         image.push_back(row);
-        x = ORIGIN;
+        x = 0;
         y++;
     }
     file.close();
     lattice.BuildMovableModules();
     for (auto i: lattice.articulationPoints) {
-        image[i[1] - ORIGIN][i[0] - ORIGIN] = '*';
+        image[i[1]][i[0]] = '*';
     }
     for (const auto& imageRow: image) {
         for (auto c: imageRow) {
@@ -301,10 +301,10 @@ void setupInitial(int ORIGIN, Lattice& lattice, const std::string& filename) {
  *       function returns early with an uninitialized CoordTensor. This behavior might need
  *       handling by the caller to avoid undefined behavior.
  */
-CoordTensor<bool> setupFinal(int order, int axisSize, int ORIGIN, Lattice& lattice, const std::string& filename);
-CoordTensor<bool> setupFinal(int order, int axisSize, int ORIGIN, Lattice& lattice, const std::string& filename) {
-    int x = ORIGIN;
-    int y = ORIGIN;
+CoordTensor<bool> setupFinal(int order, int axisSize, Lattice& lattice, const std::string& filename);
+CoordTensor<bool> setupFinal(int order, int axisSize, Lattice& lattice, const std::string& filename) {
+    int x = 0;
+    int y = 0;
     CoordTensor<bool> desiredState(order, axisSize, false);
     std::ifstream file(filename);
     if (!file) {
@@ -320,7 +320,7 @@ CoordTensor<bool> setupFinal(int order, int axisSize, int ORIGIN, Lattice& latti
             }
             x++;
         }
-        x = ORIGIN;
+        x = 0;
         y++;
     }
     file.close();
@@ -329,180 +329,26 @@ CoordTensor<bool> setupFinal(int order, int axisSize, int ORIGIN, Lattice& latti
 
 int main() {
     // Metamodule testing
-    MetaModule metamodule(0, "metamodule_1.txt");
+    MetaModule metamodule("metamodule_1.txt");
     metamodule.generateRotations();
     metamodule.generateReflections();
     metamodule.printConfigurations();
-    //
-    const int ORIGIN = 0;
     int order = 2;
     int axisSize = 9;
     Lattice lattice(order, axisSize);
     MoveManager::InitMoveManager(order, axisSize);
     //setupInitial(ORIGIN, lattice, "test1.txt");
-    setupFromJson(ORIGIN, lattice, "test1.json");
+    setupFromJson(lattice, "test1.json");
 
-    //
-    //  MOVE TESTING BELOW
-    //
     std::cout << lattice;
     MoveManager::RegisterAllMoves();
-    /*std::ifstream moveFile("Moves/Pivot_1.txt");
-    if (!moveFile) {
-        std::cerr << "Unable to open file Moves/Slide_1.txt";
-        return 1;
-    }
-    Move2d move;
-    move.InitMove(moveFile);
-    MoveManager::GenerateMovesFrom(&move);
-    std::ifstream moveFile2("Moves/Pivot_2.txt");
-    if (!moveFile2) {
-        std::cerr << "Unable to open file Moves/Slide_2.txt";
-        return 1;
-    }
-    Move2d move2;
-    move2.InitMove(moveFile2);
-    MoveManager::GenerateMovesFrom(&move2);*/
-    /*std::ifstream moveFile3("Moves/Leapfrog_1.txt");
-    if (!moveFile3) {
-        std::cerr << "Unable to open file Moves/Leapfrog_1.txt";
-        return 1;
-    }
-    Move2d move3;
-    move3.InitMove(moveFile3);
-    MoveManager::GenerateMovesFrom(&move3);
-    std::ifstream moveFile4("Moves/Leapfrog_2.txt");
-    if (!moveFile4) {
-        std::cerr << "Unable to open file Moves/Leapfrog_2.txt";
-        return 1;
-    }
-    Move2d move4;
-    move4.InitMove(moveFile4);
-    MoveManager::GenerateMovesFrom(&move4);*/
-    /*std::ifstream moveFile5("Moves/Monkey_1.txt");
-    if (!moveFile5) {
-        std::cerr << "Unable to open file Moves/Monkey_1.txt";
-        return 1;
-    }
-    Move2d move5;
-    move5.InitMove(moveFile5);
-    MoveManager::GenerateMovesFrom(&move5);
-    std::ifstream moveFile6("Moves/Monkey_2.txt");
-    if (!moveFile6) {
-        std::cerr << "Unable to open file Moves/Monkey_2.txt";
-        return 1;
-    }
-    Move2d move6;
-    move6.InitMove(moveFile6);
-    MoveManager::GenerateMovesFrom(&move6);*/
-    //moveFile.close();
-    //moveFile2.close();
-    //moveFile3.close();
-    //moveFile4.close();
-    //moveFile5.close();
-    //moveFile6.close();
-    /*
-    auto legalMoves = MoveManager::CheckAllMoves(lattice.coordTensor, ModuleIdManager::Modules()[0]);
-    bool test = !legalMoves.empty();
-    std::cout << (test ? "MoveCheck Passed!" : "MoveCheck Failed!") << std::endl;
-    moveFile.close();
-    if (test) {
-        std::cout << "Moving!\n";
-        lattice.moveModule(ModuleIdManager::Modules()[0], legalMoves[0]->MoveOffset());
-        std::cout << lattice;
-    }
-    // movegen testing
-    // test = move.MoveCheck(lattice.coordTensor, ModuleIdManager::Modules()[2]);
-    legalMoves = MoveManager::CheckAllMoves(lattice.coordTensor, ModuleIdManager::Modules()[2]);
-    test = !legalMoves.empty();
-    std::cout << (test ? "MoveCheck Passed!" : "MoveCheck Failed!") << std::endl;
-    moveFile.close();
-    if (test) {
-        std::cout << "Moving!\n";
-        lattice.moveModule(ModuleIdManager::Modules()[2], legalMoves[0]->MoveOffset());
-        std::cout << lattice;
-    }
-    // test2
-    legalMoves = MoveManager::CheckAllMoves(lattice.coordTensor, ModuleIdManager::Modules()[1]);
-    test = !legalMoves.empty();
-    std::cout << (test ? "MoveCheck Passed!" : "MoveCheck Failed!") << std::endl;
-    moveFile.close();
-    if (test) {
-        std::cout << "Moving!\n";
-        lattice.moveModule(ModuleIdManager::Modules()[1], legalMoves[0]->MoveOffset());
-        std::cout << lattice;
-    }
-    // test3
-    legalMoves = MoveManager::CheckAllMoves(lattice.coordTensor, ModuleIdManager::Modules()[0]);
-    test = !legalMoves.empty();
-    std::cout << (test ? "MoveCheck Passed!" : "MoveCheck Failed!") << std::endl;
-    moveFile.close();
-    if (test) {
-        std::cout << "Moving!\n";
-        lattice.moveModule(ModuleIdManager::Modules()[0], legalMoves[0]->MoveOffset());
-        std::cout << lattice;
-    }
-    // test4
-    legalMoves = MoveManager::CheckAllMoves(lattice.coordTensor, ModuleIdManager::Modules()[0]);
-    test = !legalMoves.empty();
-    std::cout << (test ? "MoveCheck Passed!" : "MoveCheck Failed!") << std::endl;
-    moveFile.close();
-    if (test) {
-        std::cout << "Moving!\n";
-        lattice.moveModule(ModuleIdManager::Modules()[0], legalMoves[0]->MoveOffset());
-        std::cout << lattice;
-    }
-    // test5
-    legalMoves = MoveManager::CheckAllMoves(lattice.coordTensor, ModuleIdManager::Modules()[1]);
-    test = !legalMoves.empty();
-    std::cout << (test ? "MoveCheck Passed!" : "MoveCheck Failed!") << std::endl;
-    moveFile.close();
-    if (test) {
-        std::cout << "Moving!\n";
-        lattice.moveModule(ModuleIdManager::Modules()[1], legalMoves[0]->MoveOffset());
-        std::cout << lattice;
-    }
-    // test6
-    legalMoves = MoveManager::CheckAllMoves(lattice.coordTensor, ModuleIdManager::Modules()[2]);
-    test = !legalMoves.empty();
-    std::cout << (test ? "MoveCheck Passed!" : "MoveCheck Failed!") << std::endl;
-    moveFile.close();
-    if (test) {
-        std::cout << "Moving!\n";
-        lattice.moveModule(ModuleIdManager::Modules()[2], legalMoves[0]->MoveOffset());
-        std::cout << lattice;
-    }
-    // test7
-    legalMoves = MoveManager::CheckAllMoves(lattice.coordTensor, ModuleIdManager::Modules()[0]);
-    test = !legalMoves.empty();
-    std::cout << (test ? "MoveCheck Passed!" : "MoveCheck Failed!") << std::endl;
-
-    if (test) {
-        std::cout << "Moving!\n";
-        lattice.moveModule(ModuleIdManager::Modules()[0], legalMoves[0]->MoveOffset());
-        std::cout << lattice;
-    }
-
-    std::ifstream moveFile2("Moves/Pivot_1.txt");
-    if (!moveFile2) {
-        std::cerr << "Unable to open file Moves/Pivot_1.txt";
-        return 1;
-    }
-    Move2d move2;
-    move2.InitMove(moveFile2);
-    MoveManager::GenerateMovesFrom(&move2);
-    //
-    //  END TESTING
-    //
-
-    // STATE TENSOR ASSIGNMENT TESTING
     std::cout << "Attempting to assign to lattice from state tensor.\n";
     CoordTensor<bool> stateTest(order, axisSize, false);
     stateTest[{1, 1}] = true;
     stateTest[{1, 2}] = true;
     stateTest[{2, 2}] = true;
     lattice = stateTest;
-    std::cout << lattice;*/
+    std::cout << lattice;
 
     // BFS TESTING
     std::cout << "BFS Testing:\n";
@@ -512,7 +358,7 @@ int main() {
                  "  -##-         ----\n" <<
                  "  ----         ----\n";
     Configuration start(lattice.stateTensor);
-    CoordTensor<bool> desiredState = setupFinal(order, axisSize, ORIGIN, lattice, "test1DesiredState.txt");
+    CoordTensor<bool> desiredState = setupFinal(order, axisSize, lattice, "test1DesiredState.txt");
 
     // desiredState[{3,3}] = false;
     // desiredState[{4,3}] = false;
