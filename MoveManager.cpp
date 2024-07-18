@@ -268,10 +268,12 @@ void MoveManager::RegisterAllMoves(const std::string& movePath) {
         std::ifstream(moveFile.path()) >> moveJson;
         for (const auto& moveDef : moveJson["moves"]) {
             if (moveDef["order"] == 2) {
+                DEBUG("Registering 2d move " << moveDef["name"] << std::endl);
                 auto move = new Move2d();
                 move->InitMove(moveDef);
                 _movesToFree.push_back(move);
             } else if (moveDef["order"] == 3) {
+                DEBUG("Registering 3d move " << moveDef["name"] << std::endl);
                 auto move = new Move3d();
                 move->InitMove(moveDef);
                 _movesToFree.push_back(move);
