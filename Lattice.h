@@ -28,7 +28,6 @@ public:
     // Module tensor
     CoordTensor<int> coordTensor;
     // Coordinate info for articulation points / cut vertices
-    std::vector<std::valarray<int>> articulationPoints;
 
     Lattice(int order, int axisSize);
 

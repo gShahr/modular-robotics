@@ -116,7 +116,6 @@ void Lattice::BuildMovableModules() {
         auto& mod = ModuleIdManager::Modules()[id];
         if (ap[id]) {
             DEBUG("Module at (" << mod.coords[0] << ", " << mod.coords[1] << ") is an articulation point" << std::endl);
-            articulationPoints.emplace_back(mod.coords);
         } else if (!mod.moduleStatic) {
             // Non-cut, non-static modules
             movableModules.emplace_back(&mod);

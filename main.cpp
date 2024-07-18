@@ -245,36 +245,23 @@ void setupInitial(Lattice& lattice, const std::string& filename) {
     }
     std::string line;
     while (std::getline(file, line)) {
-        std::vector<char> row;
         for (char c: line) {
             if (c == '1') {
                 std::valarray<int> coords = {x, y};
                 lattice.AddModule(coords);
-                row.push_back('#');
             } else if (c == '0') {
-                row.push_back(' ');
+                // Do nothing
             } else if (c == '@') {
                 std::valarray<int> coords = {x, y};
                 lattice.AddModule(coords, true);
-                row.push_back('@');
             }
             x++;
         }
-        image.push_back(row);
         x = 0;
         y++;
     }
     file.close();
     lattice.BuildMovableModules();
-    for (auto i: lattice.articulationPoints) {
-        image[i[1]][i[0]] = '*';
-    }
-    for (const auto& imageRow: image) {
-        for (auto c: imageRow) {
-            std::cout << c;
-        }
-        std::cout << std::endl;
-    }
 }
 
 /**
