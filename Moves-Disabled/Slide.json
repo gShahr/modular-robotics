@@ -1,6 +1,7 @@
 {
   "moves": [
     {
+      "name": "Corner Slide",
       "order": 2,
       "def": [[
         "?x",
@@ -12,6 +13,7 @@
       ]
     },
     {
+      "name": "Slide",
       "order": 2,
       "def": [[
         "?!",

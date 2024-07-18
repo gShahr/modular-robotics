@@ -1,6 +1,7 @@
 {
   "moves": [
     {
+      "name": "Monkey",
       "order": 2,
       "def": [[
         "xxx",
@@ -14,6 +15,7 @@
       ]
     },
     {
+      "name": "Diagonal Monkey",
       "order": 2,
       "def": [[
         "x!#",
