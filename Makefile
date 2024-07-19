@@ -8,7 +8,7 @@ CXXFLAGS = -Wall -std=c++17 -I D:/vcpkg/installed/x64-windows/include
 LDFLAGS = -L D:/vcpkg/installed/x64-windows/lib -lgmock -lgtest -lbenchmark -lpthread 
 
 # Source files
-SOURCES = main.cpp ConfigurationSpace.cpp Lattice.cpp ModuleManager.cpp MoveManager.cpp Metamodule.cpp
+SOURCES = main.cpp ConfigurationSpace.cpp Lattice.cpp ModuleManager.cpp MoveManager.cpp MetaModule.cpp
 
 # Object files
 OBJECTS = $(SOURCES:.cpp=.o)
@@ -23,6 +23,9 @@ $(EXECUTABLE): $(OBJECTS)
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+test: tests/metamodule/test_1.cpp Metamodule.cpp
+	$(CXX) $(CXXFLAGS) -I. -o test_executable tests/metamodule/test_1.cpp Metamodule.cpp
 
 clean:
 	rm -f $(OBJECTS) $(EXECUTABLE)
