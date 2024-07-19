@@ -8,7 +8,7 @@ CXXFLAGS = -Wall -std=c++17 -I $(VCPKG_ROOT)/installed/x64-windows/include
 LDFLAGS = -L $(VCPKG_ROOT)/installed/x64-windows/lib -lgmock -lgtest -lbenchmark -lpthread 
 
 # Source files
-SOURCES = main.cpp ConfigurationSpace.cpp Lattice.cpp ModuleManager.cpp MoveManager.cpp MetaModule.cpp LatticeSetup.cpp
+SOURCES = main.cpp ConfigurationSpace.cpp Lattice.cpp ModuleManager.cpp MoveManager.cpp MetaModule.cpp LatticeSetup.cpp Scenario.cpp
 
 # Object files
 OBJECTS = $(SOURCES:.cpp=.o)
@@ -24,8 +24,8 @@ $(EXECUTABLE): $(OBJECTS)
 .cpp.o:
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-example: docs/examples/move_line.cpp ConfigurationSpace.cpp Lattice.cpp ModuleManager.cpp MoveManager.cpp MetaModule.cpp LatticeSetup.cpp
-	$(CXX) $(CXXFLAGS) -I. -o move_line docs/examples/move_line.cpp ConfigurationSpace.cpp Lattice.cpp ModuleManager.cpp MoveManager.cpp MetaModule.cpp LatticeSetup.cpp
+example: docs/examples/move_line.cpp ConfigurationSpace.cpp Lattice.cpp ModuleManager.cpp MoveManager.cpp MetaModule.cpp LatticeSetup.cpp Scenario.cpp
+	$(CXX) $(CXXFLAGS) -I. -o move_line docs/examples/move_line.cpp ConfigurationSpace.cpp Lattice.cpp ModuleManager.cpp MoveManager.cpp MetaModule.cpp LatticeSetup.cpp Scenario.cpp
 
 test: tests/metamodule/test_1.cpp Metamodule.cpp
 	$(CXX) $(CXXFLAGS) -I. -o test tests/metamodule/test_1.cpp Metamodule.cpp
