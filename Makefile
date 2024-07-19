@@ -2,7 +2,7 @@
 CXX = g++
 
 # Compiler flags
-CXXFLAGS = -Wall -std=c++17 -I D:/vcpkg/installed/x64-windows/include
+CXXFLAGS = -Wall -std=c++17 -I $(VCPKG_ROOT)/installed/x64-windows/include
 
 # Linker flags
 LDFLAGS = -L D:/vcpkg/installed/x64-windows/lib -lgmock -lgtest -lbenchmark -lpthread 
