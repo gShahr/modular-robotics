@@ -221,11 +221,6 @@ CoordTensor<bool> setupFinal(int order, int axisSize, Lattice& lattice, const st
 }
 
 int main() {
-    // Metamodule testing
-    MetaModule metamodule("metamodule_1.txt");
-    metamodule.generateRotations();
-    metamodule.generateReflections();
-    metamodule.printConfigurations();
     int order = 2;
     int axisSize = 9;
     Lattice lattice(order, axisSize);
