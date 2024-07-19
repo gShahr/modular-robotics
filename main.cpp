@@ -12,7 +12,7 @@
 #include <boost/format.hpp>
 #include <queue>
 #include <unordered_set>
-#include "json.hpp"
+#include <nlohmann/json.hpp>
 #include "MetaModule.h"
 
 namespace Scenario {
