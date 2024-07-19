@@ -9,10 +9,9 @@
 
 class MetaModule {
 private:
+public:
     std::vector<std::pair<int, int>> coords;
     std::vector<std::vector<std::pair<int, int>>> metaModules;
-
-public:
     int order;
     int axisSize;
 
