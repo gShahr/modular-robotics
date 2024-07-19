@@ -24,8 +24,8 @@ $(EXECUTABLE): $(OBJECTS)
 .cpp.o:
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-example: docs/examples/move_line.cpp ConfigurationSpace.cpp Lattice.cpp ModuleManager.cpp MoveManager.cpp MetaModule.cpp LatticeSetup.cpp Scenario.cpp
-	$(CXX) $(CXXFLAGS) -I. -o move_line docs/examples/move_line.cpp ConfigurationSpace.cpp Lattice.cpp ModuleManager.cpp MoveManager.cpp MetaModule.cpp LatticeSetup.cpp Scenario.cpp
+example: docs/examples/move_zigzag.cpp ConfigurationSpace.cpp Lattice.cpp ModuleManager.cpp MoveManager.cpp MetaModule.cpp LatticeSetup.cpp Scenario.cpp
+	$(CXX) $(CXXFLAGS) -I. -o move_zigzag docs/examples/move_zigzag.cpp ConfigurationSpace.cpp Lattice.cpp ModuleManager.cpp MoveManager.cpp MetaModule.cpp LatticeSetup.cpp Scenario.cpp
 
 test: tests/metamodule/test_1.cpp Metamodule.cpp
 	$(CXX) $(CXXFLAGS) -I. -o test tests/metamodule/test_1.cpp Metamodule.cpp

@@ -20,30 +20,14 @@
 int main() {
     int order = 2;
     int axisSize = 9;
+    std::string folder = "docs/examples/";
     Lattice lattice(order, axisSize);
     MoveManager::InitMoveManager(order, axisSize);
-    //setupInitial(ORIGIN, lattice, "test1.txt");
-    LatticeSetup::setupFromJson(lattice, "test1.json");
-
+    LatticeSetup::setupInitial(lattice, folder + "move_zigzag_initial.txt");
     std::cout << lattice;
     MoveManager::RegisterAllMoves();
-    /*std::cout << "Attempting to assign to lattice from state tensor.\n";
-    CoordTensor<bool> stateTest(order, axisSize, false);
-    stateTest[{1, 1}] = true;
-    stateTest[{1, 2}] = true;
-    stateTest[{2, 2}] = true;
-    lattice = stateTest;
-    std::cout << lattice;*/
-
-    // BFS TESTING
-    std::cout << "BFS Testing:\n";
-    std::cout << "Original:    Desired:\n" <<
-                 "  ----         --##\n" <<
-                 "  -#--         ---#\n" <<
-                 "  -##-         ----\n" <<
-                 "  ----         ----\n";
     Configuration start(lattice.stateTensor);
-    CoordTensor<bool> desiredState = LatticeSetup::setupFinal(order, axisSize, lattice, "test1DesiredState.txt");
+    CoordTensor<bool> desiredState = LatticeSetup::setupFinal(order, axisSize, lattice, folder + "move_zigzag_final.txt");
     Configuration end(desiredState);
     auto path = ConfigurationSpace::BFS(&start, &end, lattice);
     std::cout << "Path:\n";
@@ -51,10 +35,7 @@ int main() {
         lattice = config->GetState();
         std::cout << lattice;
     }
-    Scenario::exportToScen(lattice, path, "test.scen");
-
-    // Cleanup
+    Scenario::exportToScen(lattice, path, folder + "move_zgizag_scen.scen");
     MoveManager::CleanMoves();
     return 0;
 }
-
