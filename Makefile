@@ -5,7 +5,7 @@ CXX = g++
 CXXFLAGS = -Wall -std=c++17 -I $(VCPKG_ROOT)/installed/x64-windows/include
 
 # Linker flags
-LDFLAGS = -L D:/vcpkg/installed/x64-windows/lib -lgmock -lgtest -lbenchmark -lpthread 
+LDFLAGS = -L $(VCPKG_ROOT)/installed/x64-windows/lib -lgmock -lgtest -lbenchmark -lpthread 
 
 # Source files
 SOURCES = main.cpp ConfigurationSpace.cpp Lattice.cpp ModuleManager.cpp MoveManager.cpp MetaModule.cpp
@@ -18,14 +18,17 @@ EXECUTABLE = main
 
 all: $(SOURCES) $(EXECUTABLE)
 
-$(EXECUTABLE): $(OBJECTS) 
+$(EXECUTABLE): $(OBJECTS)
 	$(CXX) $(LDFLAGS) $(OBJECTS) -o $@ $(BOOST_LIBS)
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
+example: docs/examples/move_line.cpp ConfigurationSpace.cpp Lattice.cpp ModuleManager.cpp MoveManager.cpp MetaModule.cpp
+	$(CXX) $(CXXFLAGS) -I. -o move_line docs/examples/move_line.cpp ConfigurationSpace.cpp Lattice.cpp ModuleManager.cpp MoveManager.cpp MetaModule.cpp
+
 test: tests/metamodule/test_1.cpp Metamodule.cpp
-	$(CXX) $(CXXFLAGS) -I. -o test_executable tests/metamodule/test_1.cpp Metamodule.cpp
+	$(CXX) $(CXXFLAGS) -I. -o test tests/metamodule/test_1.cpp Metamodule.cpp
 
 clean:
 	rm -f $(OBJECTS) $(EXECUTABLE)
