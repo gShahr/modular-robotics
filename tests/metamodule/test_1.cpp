@@ -22,7 +22,7 @@ struct MetaModuleFixture {
 BOOST_FIXTURE_TEST_SUITE(MetaModuleTestSuite, MetaModuleFixture)
 
 BOOST_AUTO_TEST_CASE(ConstructorTest) {
-    BOOST_CHECK_EQUAL(metaModule->coords.size(), 4);
+    BOOST_CHECK_EQUAL(metaModule->coords.size(), 5);
 }
 
 BOOST_AUTO_TEST_CASE(RotationTest) {
