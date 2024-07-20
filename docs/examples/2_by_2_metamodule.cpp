@@ -18,10 +18,8 @@
 #include "Scenario.h"
 
 int main() {
-    int order = 2;
-    int axisSize = 9;
-    std::string folder = "docs/examples/";
-    MetaModule metaModule(folder + "\2_by_2_metamodule.txt");
+    std::string folder = "examples/";
+    MetaModule metaModule(folder + "2_by_2_metamodule.txt");
     metaModule.generateRotations();
     metaModule.generateReflections();
     metaModule.printConfigurations();
