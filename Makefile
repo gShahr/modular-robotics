@@ -24,8 +24,8 @@ $(EXECUTABLE): $(OBJECTS)
 .cpp.o:
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-test: tests/metamodule/test_1.cpp Metamodule.cpp
-	$(CXX) $(CXXFLAGS) -I. -o test tests/metamodule/test_1.cpp Metamodule.cpp
+test: tests/metamodule/test_1.cpp MetaModule.cpp
+	$(CXX) $(CXXFLAGS) -I. -o test tests/metamodule/test_1.cpp MetaModule.cpp
 
 clean:
 	rm -f $(OBJECTS) $(EXECUTABLE)
