@@ -43,7 +43,7 @@ extern void processInput(GLFWwindow *window);
 extern int loadTexture(const char *texturePath);
 extern GLFWwindow* createWindowAndContext();
 extern void registerWindowCallbacks(GLFWwindow* window);
-extern void setupGl();
+extern void setupGl(GLFWwindow* window);
 
 int main(int argc, char** argv) {
     // Establishes a Window, creates an OpenGL context, and invokes GLAD
@@ -53,7 +53,7 @@ int main(int argc, char** argv) {
     registerWindowCallbacks(window); // setuputils.cpp
 
     // Establish the Viewport and set GL settings (depth test/z-buffer, transparency, etc)
-    setupGl(); // setuputils.cpp
+    setupGl(window); // setuputils.cpp
 
     // Load shaders and textures
     Shader shader = Shader(vertexShaderPath, fragmentShaderPath);

@@ -54,8 +54,10 @@ void registerWindowCallbacks(GLFWwindow* window) {
     glfwSetScrollCallback(window, mouse_scroll_callback);
 }
 
-void setupGl() {
-    glViewport(0, 0, glob_resolution[0], glob_resolution[1]);
+void setupGl(GLFWwindow* window) {
+    int width, height;
+    glfwGetFramebufferSize(window, &width, &height);
+    glViewport(0, 0, width, height);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
