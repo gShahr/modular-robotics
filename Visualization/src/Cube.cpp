@@ -114,7 +114,7 @@ glm::mat4 Cube::processAnimation() {
     float _pct; // "Smoothed" progress through animation, as calculated by _animInterp()
 
     // increment animation progress
-    if (glob_animate) { this->animProgress += (glob_animSpeed * glob_deltaTime); }
+    this->animProgress += (glob_animSpeed * glob_deltaTime);
     _pct = _animInterp(this->animProgress);
 
     if (this->move->sliding) { // Sliding move

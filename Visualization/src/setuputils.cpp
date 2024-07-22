@@ -9,6 +9,7 @@ extern void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 extern void cursormove_callback(GLFWwindow* window, double xpos, double ypos);              // userinput.cpp
 extern void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);    // userinput.cpp
 extern void mouse_scroll_callback(GLFWwindow* window, double xoffset, double yoffset);      // userinput.cpp
+extern void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);  // userinput.cpp
 extern float glob_resolution[2];                                                            // main.cpp
 
 int loadTexture(const char *texturePath) {
@@ -51,6 +52,7 @@ void registerWindowCallbacks(GLFWwindow* window) {
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetCursorPosCallback(window, cursormove_callback);
     glfwSetMouseButtonCallback(window, mouse_button_callback);
+    glfwSetKeyCallback(window, key_callback);
     glfwSetScrollCallback(window, mouse_scroll_callback);
 }
 

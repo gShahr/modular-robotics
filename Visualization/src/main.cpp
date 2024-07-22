@@ -32,7 +32,9 @@ const char *texturePath = "resources/textures/face_debug.png";
 float glob_deltaTime = 0.0f;                    // Frame-time info
 float glob_lastFrame = 0.0f;
 float glob_animSpeed = 2.0f;                    // Animation attributes
-bool glob_animate = false;
+bool glob_animateRequest = false;               //  When the current animation finishes (if any), should another be fetched?
+bool glob_animateAuto = false;                  //  Is the scene in auto-animate mode? (will automa
+bool glob_animateForward = true;                //  Direction to fetch animations
 
 Camera camera = Camera();
 
@@ -72,9 +74,8 @@ int main(int argc, char** argv) {
     ObjectCollection* scenCubes = scenario.toObjectCollection(&shader, VAO, texture);
     MoveSequence* scenMoveSeq = scenario.toMoveSequence();
 
-    // Initialize for our main loop: we are ready for the next animation, and we want to move forward through the Scenario
+    // Initialize for our main loop: we are ready for the next animation
     bool readyForNewAnim = true;
-    bool forward = true;
 
     // Main loop -- process input, update camera, handle animations, and render
     while(!glfwWindowShouldClose(window)) {
@@ -94,18 +95,19 @@ int main(int argc, char** argv) {
         camera.calcViewMat(glm::vec3(0.0f));
 #endif
 
-        if (readyForNewAnim) {
+        if (readyForNewAnim && glob_animateRequest) {
             Move* move;
-            if (forward) { move = scenMoveSeq->pop(); }
+            glob_animateRequest = glob_animateAuto;  // Set global variable: reset the request-anim flag, unless auto-animating
+
+            if (glob_animateForward) { move = scenMoveSeq->pop(); }
             else { move = scenMoveSeq->undo(); }
 
-            Cube* mover = glob_objects.at(move->moverId);
+            if (move) {
+                Cube* mover = glob_objects.at(move->moverId);
 
-            mover->startAnimation(&readyForNewAnim, move);
-            readyForNewAnim = false;
-            if ((scenMoveSeq->currentMove == 0) || (scenMoveSeq->remainingMoves == 0)) { 
-                forward = !forward; 
-            }
+                mover->startAnimation(&readyForNewAnim, move);
+                readyForNewAnim = false;
+            } else { glob_animateRequest = false; }
         }
 
         // -- Rendering --

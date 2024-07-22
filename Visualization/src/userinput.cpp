@@ -2,13 +2,12 @@
 #include "Camera.hpp"
 
 extern Camera camera;
-extern bool glob_animate;
 extern float glob_resolution[2];
 extern float glob_aspectRatio;
+extern float glob_animSpeed, glob_deltaTime;
+extern bool glob_animateAuto, glob_animateForward, glob_animateRequest;
 
 float lastX, lastY, yaw, pitch;         // Helper variables for user interaction
-bool pkeyPressed = false;
-bool spacebarPressed = false;
 bool rmbClicked = false;
 bool firstMouse = true;
 
@@ -63,15 +62,35 @@ void mouse_scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
     camera.resetProjMat();
 }
 
-void processInput(GLFWwindow *window) {
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+    if ((key == GLFW_KEY_ESCAPE) && (action == GLFW_PRESS)) {        // Escape -- close
         glfwSetWindowShouldClose(window, true);
-    }
-
-    if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) {
+    } else if ((key == GLFW_KEY_R) && (action == GLFW_PRESS)) {     // R -- reset camera
         firstMouse = true;
         camera.reset();
+    } else if ((key == GLFW_KEY_SPACE) && (action == GLFW_PRESS)) { // Spacebar -- toggle auto-animation
+        glob_animateAuto = !glob_animateAuto;
+        glob_animateRequest = glob_animateAuto;
+        std::cout << "Auto Animation " << (glob_animateAuto ? "ENABLED" : "DISABLED") << std::endl;
+    } else if ((key == GLFW_KEY_P) && (action == GLFW_PRESS)) {      // P -- toggle perspective
+        camera.setPerspective(!camera.getPerspective());
+        camera.resetProjMat();
+    } else if ((key == GLFW_KEY_RIGHT) && (action == GLFW_PRESS)) { // Right arrow -- 
+        glob_animateForward = true;
+        glob_animateRequest = true;
+    } else if ((key == GLFW_KEY_LEFT) && (action == GLFW_PRESS)) {  // Left arrow --
+        glob_animateForward = false;
+        glob_animateRequest = true;
+    } else if ((key == GLFW_KEY_UP) && (action == GLFW_PRESS)) {
+        glob_animSpeed = std::min(12.0f, glob_animSpeed * 1.2f);
+        std::cout << "Animation speed RAISED to " << glob_animSpeed << std::endl;
+    } else if ((key == GLFW_KEY_DOWN) && (action == GLFW_PRESS)) {
+        glob_animSpeed = std::max(0.5f, glob_animSpeed * 0.833f);
+        std::cout << "Animation speed LOWERED to " << glob_animSpeed << std::endl;
     }
+}
+
+void processInput(GLFWwindow *window) {
 
     glm::vec3 newSpeed = camera.getSpeed();
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
@@ -97,18 +116,4 @@ void processInput(GLFWwindow *window) {
     } else { newSpeed[1] *= camera.getDecelFactor(); }
     camera.setSpeed(newSpeed);
 
-    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && !spacebarPressed) {
-        spacebarPressed = true;
-        glob_animate = !glob_animate;
-    } else if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_RELEASE && spacebarPressed) {
-        spacebarPressed = false;
-    }
-
-    if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS && !pkeyPressed) {
-        pkeyPressed = true;
-        camera.setPerspective(!camera.getPerspective());
-        camera.resetProjMat();
-    } else if (glfwGetKey(window, GLFW_KEY_P) == GLFW_RELEASE && pkeyPressed) {
-        pkeyPressed = false;
-    }
 }
