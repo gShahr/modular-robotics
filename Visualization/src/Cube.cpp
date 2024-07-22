@@ -184,12 +184,12 @@ void Cube::draw() {
         transform = this->processAnimation() * transform;
     };
 
-    glUniform3fv(glob_colorLoc, 1, glm::value_ptr(this->color));
-    glUniformMatrix4fv(glob_transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
-    glUniformMatrix4fv(glob_modelLoc, 1, GL_FALSE, glm::value_ptr(modelmat));
-    if (glob_surfaceNormalLoc >= 0) {
+    glUniform3fv(glob_shader->colorLoc, 1, glm::value_ptr(this->color));
+    glUniformMatrix4fv(glob_shader->transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
+    glUniformMatrix4fv(glob_shader->modelLoc, 1, GL_FALSE, glm::value_ptr(modelmat));
+    if (glob_shader->surfaceNormalLoc >= 0) {
         for (int i = 0; i < 6; i++) {
-            glUniform3fv(glob_surfaceNormalLoc, 1, glm::value_ptr(_cubeSurfaceNorms[i]));
+            glUniform3fv(glob_shader->surfaceNormalLoc, 1, glm::value_ptr(_cubeSurfaceNorms[i]));
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)((6 * i * sizeof(GLuint))));
         }
     } else { 

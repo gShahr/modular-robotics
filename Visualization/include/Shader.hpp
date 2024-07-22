@@ -19,6 +19,10 @@ public:
     // Call to glUseProgram() and update global modelLoc, transformLoc, etc.
     void use();
 
+    int colorLoc, modelLoc, transformLoc, surfaceNormalLoc; // Object attribute locations
+    int viewLoc, projLoc; // Camera attribute locations
+    int timeLoc; // Additional attribute locations
+
     // Set uniform values in the shader.
     void setBool(const std::string &name, bool value) const;
     void setInt(const std::string &name, int value) const;

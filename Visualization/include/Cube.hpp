@@ -13,9 +13,10 @@
 #include "glad/glad.h"
 #include "glfw3.h"
 #include "Move.hpp"
+#include "Shader.hpp"
 
 unsigned int _createCubeVAO();
-extern unsigned int glob_colorLoc, glob_transformLoc, glob_modelLoc, glob_surfaceNormalLoc; // Assigned whenever a shader is loaded
+extern Shader* glob_shader;
 extern float glob_deltaTime, glob_animSpeed;
 extern bool glob_animate;
 

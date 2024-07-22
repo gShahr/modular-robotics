@@ -9,8 +9,7 @@
 #include "Cube.hpp"
 #include "Camera.hpp"
 
-extern unsigned int glob_timeLoc, glob_transformLoc, glob_viewLoc, glob_projLoc; // Assigned whenever a shader is loaded
-extern glm::mat4 glob_transform;
+extern Shader* glob_shader;
 extern Camera camera;
 extern float glob_lastFrame;
 

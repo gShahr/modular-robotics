@@ -12,10 +12,10 @@ void ObjectCollection::drawAll() {
     int i; 
     this->shader->use();
 
-    glUniform1f(glob_timeLoc, glob_lastFrame);
+    glUniform1f(glob_shader->timeLoc, glob_lastFrame);
 
-    glUniformMatrix4fv(glob_viewLoc, 1, GL_FALSE, glm::value_ptr(camera.getViewMat()));
-    glUniformMatrix4fv(glob_projLoc, 1, GL_FALSE, glm::value_ptr(camera.getProjMat()));
+    glUniformMatrix4fv(glob_shader->viewLoc, 1, GL_FALSE, glm::value_ptr(camera.getViewMat()));
+    glUniformMatrix4fv(glob_shader->projLoc, 1, GL_FALSE, glm::value_ptr(camera.getProjMat()));
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, this->textureID);
