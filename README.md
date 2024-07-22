@@ -25,4 +25,7 @@
 
 ## Notes
 
+[A Universal In-Place Reconfiguration Algorithm for Sliding Cube-Shaped Robots in a Quadratic Number of Moves
+](https://arxiv.org/html/0802.3414v4)
+
 ## Execute unit tests
