@@ -23,7 +23,7 @@ int main() {
     Lattice lattice(order, axisSize);
     MoveManager::InitMoveManager(order, axisSize);
     //setupInitial(ORIGIN, lattice, "test1.txt");
-    LatticeSetup::setupFromJson(lattice, "test1.json");
+    LatticeSetup::setupFromJson(lattice, "docs/examples/move_line_initial.json");
 
     std::cout << lattice;
     MoveManager::RegisterAllMoves();
@@ -43,7 +43,7 @@ int main() {
                  "  -##-         ----\n" <<
                  "  ----         ----\n";
     Configuration start(lattice.stateTensor);
-    CoordTensor<bool> desiredState = LatticeSetup::setupFinal(order, axisSize, lattice, "test1DesiredState.txt");
+    CoordTensor<bool> desiredState = LatticeSetup::setupFinal(order, axisSize, lattice, "docs/examples/move_line_final.txt");
     Configuration end(desiredState);
     auto path = ConfigurationSpace::BFS(&start, &end, lattice);
     std::cout << "Path:\n";
@@ -51,7 +51,8 @@ int main() {
         lattice = config->GetState();
         std::cout << lattice;
     }
-    Scenario::exportToScen(lattice, path, "test.scen");
+    std::string exportFolder = "Visualization/Scenarios/";
+    Scenario::exportToScen(lattice, path, exportFolder + "test.scen");
 
     // Cleanup
     MoveManager::CleanMoves();
