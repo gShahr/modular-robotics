@@ -9,6 +9,6 @@ cmake-build*
 CMakeLists.txt
 clion-include
 Moves_LEGACY
-*.scen
+/*.scen
 *.d
 *.opp
