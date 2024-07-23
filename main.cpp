@@ -18,14 +18,13 @@
 #include "Scenario.h"
 
 int main() {
-    int order = 2;
-    int axisSize = 9;
-    Lattice lattice(order, axisSize);
-    MoveManager::InitMoveManager(order, axisSize);
-    //setupInitial(ORIGIN, lattice, "test1.txt");
-    LatticeSetup::setupFromJson(lattice, "docs/examples/move_line_initial.json");
+    // Set up Lattice
+    LatticeSetup::setupFromJson("docs/examples/move_line_initial.json");
 
-    std::cout << lattice;
+    // Set up moves
+    MoveManager::InitMoveManager(Lattice::Order(), Lattice::AxisSize());
+
+    std::cout << Lattice::ToString();
     MoveManager::RegisterAllMoves();
     /*std::cout << "Attempting to assign to lattice from state tensor.\n";
     CoordTensor<bool> stateTest(order, axisSize, false);
@@ -37,22 +36,17 @@ int main() {
 
     // BFS TESTING
     std::cout << "BFS Testing:\n";
-    std::cout << "Original:    Desired:\n" <<
-                 "  ----         --##\n" <<
-                 "  -#--         ---#\n" <<
-                 "  -##-         ----\n" <<
-                 "  ----         ----\n";
-    Configuration start(lattice.stateTensor);
-    CoordTensor<bool> desiredState = LatticeSetup::setupFinal(order, axisSize, lattice, "docs/examples/move_line_final.txt");
+    Configuration start(Lattice::stateTensor);
+    CoordTensor<bool> desiredState = LatticeSetup::setupFinal("docs/examples/move_line_final.txt");
     Configuration end(desiredState);
-    auto path = ConfigurationSpace::BFS(&start, &end, lattice);
+    auto path = ConfigurationSpace::BFS(&start, &end);
     std::cout << "Path:\n";
     for (auto config : path) {
-        lattice = config->GetState();
-        std::cout << lattice;
+        Lattice::UpdateFromState(config->GetState());
+        std::cout << Lattice::ToString();
     }
     std::string exportFolder = "Visualization/Scenarios/";
-    Scenario::exportToScen(lattice, path, exportFolder + "test.scen");
+    Scenario::exportToScen(path, exportFolder + "test.scen");
 
     // Cleanup
     MoveManager::CleanMoves();
