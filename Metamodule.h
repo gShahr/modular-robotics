@@ -34,7 +34,9 @@ public:
 
 class MetaModuleManager
 {
-    static std::vector<MetaModule> metamodules;
+    static std::vector<MetaModule*> metamodules;
+
+    static void GenerateFrom(MetaModule* metamodule);
 };
 
 #endif

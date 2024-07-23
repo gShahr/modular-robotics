@@ -71,4 +71,11 @@ void MetaModule::printConfigurations() const {
     }
 }
 
-std::vector<MetaModule> MetaModuleManager::metamodules = {};
+std::vector<MetaModule*> MetaModuleManager::metamodules = {};
+
+void MetaModuleManager::GenerateFrom(MetaModule* metamodule) {
+    auto list = Isometry::GenerateTransforms(metamodule);
+    for (auto metamodule: list) {
+        metamodules.push_back(dynamic_cast<MetaModule*>(metamodule));
+    }
+}

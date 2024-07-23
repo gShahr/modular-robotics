@@ -39,7 +39,7 @@ int main() {
     }
     std::string exportFolder = "Visualization/Scenarios/";
     Scenario::exportToScen(path, exportFolder + "test.scen");
-
+    MetaModuleManager metaModuleManager;
     // Cleanup
     MoveManager::CleanMoves();
     return 0;
