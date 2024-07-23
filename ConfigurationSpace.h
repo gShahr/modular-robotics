@@ -50,10 +50,13 @@ private:
     Configuration* parent = nullptr;
     std::vector<Configuration*> next;
     CoordTensor<bool> _state;
+    CoordTensor<std::string> _colors;
     HashedState hash;
 public:
     int depth = 0;
     explicit Configuration(CoordTensor<bool> state);
+
+    explicit Configuration(CoordTensor<bool> state, CoordTensor<std::string> colors);
 
     ~Configuration();
 
