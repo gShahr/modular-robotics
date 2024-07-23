@@ -81,11 +81,11 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     } else if ((key == GLFW_KEY_LEFT) && (action == GLFW_PRESS)) {  // Left arrow --
         glob_animateForward = false;
         glob_animateRequest = true;
-    } else if ((key == GLFW_KEY_UP) && (action == GLFW_PRESS)) {
-        glob_animSpeed = std::min(12.0f, glob_animSpeed * 1.2f);
+    } else if ((key == GLFW_KEY_UP) && (action != GLFW_RELEASE)) {
+        glob_animSpeed = std::min(25.0f, glob_animSpeed * (action == GLFW_PRESS ? 1.2f : 1.05f));
         std::cout << "Animation speed RAISED to " << glob_animSpeed << std::endl;
-    } else if ((key == GLFW_KEY_DOWN) && (action == GLFW_PRESS)) {
-        glob_animSpeed = std::max(0.5f, glob_animSpeed * 0.833f);
+    } else if ((key == GLFW_KEY_DOWN) && (action != GLFW_RELEASE)) {
+        glob_animSpeed = std::max(0.5f, glob_animSpeed * (action == GLFW_PRESS ? 0.8333f : 0.96f));
         std::cout << "Animation speed LOWERED to " << glob_animSpeed << std::endl;
     }
 }
