@@ -1,5 +1,6 @@
 #include <queue>
 #include <sstream>
+#include <string>
 #include "debug_util.h"
 #include "Lattice.h"
 
@@ -11,6 +12,7 @@ int Lattice::moduleCount = 0;
 std::vector<Module*> Lattice::movableModules;
 CoordTensor<bool> Lattice::stateTensor(1, 1, false);
 CoordTensor<int> Lattice::coordTensor(1, 1, -1);
+CoordTensor<std::string> Lattice::colorTensor(1, 1, "");
 
 void Lattice::ClearAdjacencies(int moduleId) {
     for (int id : adjList[moduleId]) {
@@ -47,9 +49,11 @@ void Lattice::MoveModule(Module &mod, const std::valarray<int> &offset) {
     ClearAdjacencies(mod.id);
     coordTensor[mod.coords] = -1;
     stateTensor[mod.coords] = false;
+    colorTensor[mod.coords] = "";
     mod.coords += offset;
     coordTensor[mod.coords] = mod.id;
     stateTensor[mod.coords] = true;
+    colorTensor[mod.coords] = mod.color;
     EdgeCheck(mod);
 }
 

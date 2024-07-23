@@ -8,8 +8,8 @@ HashedState::HashedState() : seed(0) {}
 
 HashedState::HashedState(size_t seed) : seed(seed) {}
 
-HashedState::HashedState(const CoordTensor<bool>& state) {
-    HashCoordTensor(state);
+HashedState::HashedState(const CoordTensor<bool>& state, const CoordTensor<std::string>& colors) {
+    HashCoordTensor(state, colors);
 }
 
 HashedState::HashedState(const HashedState& other) : seed(other.GetSeed()) {}
@@ -22,8 +22,11 @@ size_t HashedState::GetSeed() const {
     seed = boost::hash_range(lattice.stateTensor.GetArrayInternal().begin(), lattice.stateTensor.GetArrayInternal().end());
 }*/
 
-void HashedState::HashCoordTensor(const CoordTensor<bool>& state) {
+void HashedState::HashCoordTensor(const CoordTensor<bool>& state, const CoordTensor<std::string>& colors) {
     seed = boost::hash_range(state.GetArrayInternal().begin(), state.GetArrayInternal().end());
+    for (const auto& color : colors.GetArrayInternal()) {
+        boost::hash_combine(seed, boost::hash_value(color));
+    }
 }
 
 bool HashedState::operator==(const HashedState& other) const {
@@ -44,8 +47,8 @@ Configuration::~Configuration() {
     }
 }
 
-std::vector<CoordTensor<bool>> Configuration::MakeAllMoves() {
-    std::vector<CoordTensor<bool>> result;
+std::vector<std::pair<CoordTensor<bool>, CoordTensor<std::string>>> Configuration::MakeAllMoves() {
+    std::vector<std::pair<CoordTensor<bool>, CoordTensor<std::string>>> result;
     //lattice =_state;
     Lattice::UpdateFromState(_state);
     std::vector<Module*> movableModules = Lattice::MovableModules();
@@ -53,7 +56,7 @@ std::vector<CoordTensor<bool>> Configuration::MakeAllMoves() {
         auto legalMoves = MoveManager::CheckAllMoves(Lattice::coordTensor, *module);
         for (auto move : legalMoves) {
             Lattice::MoveModule(*module, move->MoveOffset());
-            result.push_back(Lattice::stateTensor);
+            result.emplace_back(Lattice::stateTensor, Lattice::colorTensor);
             Lattice::MoveModule(*module, -move->MoveOffset());
         }
     }
@@ -76,13 +79,17 @@ const CoordTensor<bool>& Configuration::GetState() const {
     return _state;
 }
 
+const CoordTensor<std::string>& Configuration::GetColors() const {
+    return _colors;
+}
+
 const HashedState& Configuration::GetHash() const {
     return hash;
 }
 
-void Configuration::SetStateAndHash(const CoordTensor<bool>& state) {
+void Configuration::SetStateAndHash(const CoordTensor<bool>& state, const CoordTensor<std::string>& colors) {
     _state = state;
-    hash = HashedState(state);
+    hash = HashedState(state, colors);
 }
 
 void Configuration::SetParent(Configuration* configuration) {
@@ -114,22 +121,22 @@ std::vector<Configuration*> ConfigurationSpace::BFS(Configuration* start, Config
         }
 #endif
         q.pop();
-        if (current->GetState() == final->GetState()) {
+        if (current->GetState() == final->GetState() && current->GetColors() == final->GetColors()) {
 #if CONFIG_VERBOSE == CS_LOG_FINAL_DEPTH
             std::cout << "bfs depth: " << depth << std::endl << Lattice::ToString() << std::endl;
 #endif
             return FindPath(start, current);
         }
         auto adjList = current->MakeAllMoves();
-        for (const auto& node: adjList) {
-            if (visited.find(HashedState(node)) == visited.end()) {
-                auto nextConfiguration = new Configuration(node);
+        for (const auto& [state, colors]: adjList) {
+            if (visited.find(HashedState(state, colors)) == visited.end()) {
+                auto nextConfiguration = new Configuration(state, colors);
                 nextConfiguration->SetParent(current);
-                nextConfiguration->SetStateAndHash(node);
+                nextConfiguration->SetStateAndHash(state, colors);
                 q.push(nextConfiguration);
                 current->AddEdge(nextConfiguration);
                 nextConfiguration->depth = current->depth + 1;
-                visited.insert(HashedState(node));
+                visited.insert(HashedState(state, colors));
             }
         }
     }

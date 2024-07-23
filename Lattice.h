@@ -41,7 +41,8 @@ public:
     static CoordTensor<bool> stateTensor;
     // Module tensor
     static CoordTensor<int> coordTensor;
-    // Coordinate info for articulation points / cut vertices
+    // Color tensor
+    static CoordTensor<std::string> colorTensor;
 
     Lattice() = delete;
     Lattice(Lattice&) = delete;
