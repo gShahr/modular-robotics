@@ -30,7 +30,8 @@ public:
     [[nodiscard]]
     size_t GetSeed() const;
 
-    void HashLattice(const Lattice& lattice);
+    // Doesn't make sense to do this
+    //void HashLattice(const Lattice& lattice);
 
     void HashCoordTensor(const CoordTensor<bool>& state);
 
@@ -56,7 +57,7 @@ public:
 
     ~Configuration();
 
-    std::vector<CoordTensor<bool>> MakeAllMoves(Lattice& lattice);
+    std::vector<CoordTensor<bool>> MakeAllMoves();
 
     void AddEdge(Configuration* configuration);
 
@@ -78,7 +79,7 @@ public:
 };
 
 namespace ConfigurationSpace {
-    std::vector<Configuration*> BFS(Configuration* start, Configuration* final, Lattice& lattice);
+    std::vector<Configuration*> BFS(Configuration* start, Configuration* final);
 
     std::vector<Configuration*> FindPath(Configuration* start, Configuration* final);
 }

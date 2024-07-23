@@ -18,9 +18,9 @@ size_t HashedState::GetSeed() const {
     return seed;
 }
 
-void HashedState::HashLattice(const Lattice& lattice) {
+/*void HashedState::HashLattice(const Lattice& lattice) {
     seed = boost::hash_range(lattice.stateTensor.GetArrayInternal().begin(), lattice.stateTensor.GetArrayInternal().end());
-}
+}*/
 
 void HashedState::HashCoordTensor(const CoordTensor<bool>& state) {
     seed = boost::hash_range(state.GetArrayInternal().begin(), state.GetArrayInternal().end());
@@ -42,16 +42,17 @@ Configuration::~Configuration() {
     }
 }
 
-std::vector<CoordTensor<bool>> Configuration::MakeAllMoves(Lattice& lattice) {
+std::vector<CoordTensor<bool>> Configuration::MakeAllMoves() {
     std::vector<CoordTensor<bool>> result;
-    lattice =_state;
-    std::vector<Module*> movableModules = lattice.MovableModules();
+    //lattice =_state;
+    Lattice::UpdateFromState(_state);
+    std::vector<Module*> movableModules = Lattice::MovableModules();
     for (auto module: movableModules) {
-        auto legalMoves = MoveManager::CheckAllMoves(lattice.coordTensor, *module);
+        auto legalMoves = MoveManager::CheckAllMoves(Lattice::coordTensor, *module);
         for (auto move : legalMoves) {
-            lattice.MoveModule(*module, move->MoveOffset());
-            result.push_back(lattice.stateTensor);
-            lattice.MoveModule(*module, -move->MoveOffset());
+            Lattice::MoveModule(*module, move->MoveOffset());
+            result.push_back(Lattice::stateTensor);
+            Lattice::MoveModule(*module, -move->MoveOffset());
         }
     }
     return result;
@@ -91,7 +92,7 @@ std::ostream& operator<<(std::ostream& out, const Configuration& config) {
     return out;
 }
 
-std::vector<Configuration*> ConfigurationSpace::BFS(Configuration* start, Configuration* final, Lattice &lattice) {
+std::vector<Configuration*> ConfigurationSpace::BFS(Configuration* start, Configuration* final) {
 #if CONFIG_VERBOSE > CS_LOG_NONE
     int depth = -1;
 #endif
@@ -101,7 +102,8 @@ std::vector<Configuration*> ConfigurationSpace::BFS(Configuration* start, Config
     visited.insert(start->GetHash());
     while (!q.empty()) {
         Configuration* current = q.front();
-        lattice = q.front()->GetState();
+        //lattice = q.front()->GetState();
+        Lattice::UpdateFromState(q.front()->GetState());
 #if CONFIG_VERBOSE > CS_LOG_NONE
         if (q.front()->depth != depth) {
             depth++;
@@ -113,11 +115,11 @@ std::vector<Configuration*> ConfigurationSpace::BFS(Configuration* start, Config
         q.pop();
         if (current->GetState() == final->GetState()) {
 #if CONFIG_VERBOSE == CS_LOG_FINAL_DEPTH
-            std::cout << "bfs depth: " << depth << std::endl << lattice << std::endl;
+            std::cout << "bfs depth: " << depth << std::endl << Lattice::ToString() << std::endl;
 #endif
             return FindPath(start, current);
         }
-        auto adjList = current->MakeAllMoves(lattice);
+        auto adjList = current->MakeAllMoves();
         for (const auto& node: adjList) {
             if (visited.find(HashedState(node)) == visited.end()) {
                 auto nextConfiguration = new Configuration(node);
