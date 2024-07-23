@@ -70,4 +70,10 @@ namespace LatticeSetup {
         }
         return desiredState;
     }
+
+    void setUpMetamodule(MetaModule* metamodule) {
+        for (const auto &coord: metamodule->coords) {
+            Lattice::AddModule(coord);
+        }
+    }
 };

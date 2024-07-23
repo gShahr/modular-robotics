@@ -8,6 +8,7 @@
 #include <valarray>
 #include "Lattice.h"
 #include "CoordTensor.h"
+#include "Metamodule.cpp"
 #include <nlohmann/json.hpp>
 
 namespace LatticeSetup {
@@ -16,6 +17,8 @@ namespace LatticeSetup {
     void setupInitial(const std::string& filename);
 
     CoordTensor<bool> setupFinal(const std::string& filename);
+
+    void setUpMetamodule(MetaModule* metamodule);
 };
 
 #endif
