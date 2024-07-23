@@ -95,6 +95,13 @@ void MetaModule::printConfigurations() const {
 }
 
 std::vector<MetaModule*> MetaModuleManager::metamodules = {};
+int MetaModuleManager::order = 0;
+int MetaModuleManager::axisSize = 0;
+
+MetaModuleManager::MetaModuleManager(int order, int axisSize) {
+    this->order = order;
+    this->axisSize = axisSize;
+}
 
 void MetaModuleManager::GenerateFrom(MetaModule* metamodule) {
     auto list = Isometry::GenerateTransforms(metamodule);

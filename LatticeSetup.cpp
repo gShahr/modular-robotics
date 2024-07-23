@@ -101,18 +101,18 @@ namespace LatticeSetup {
     }
 
     void setUpTiling() {
-        Lattice::InitLattice(2, 10);
-        for (int i = 0; i < 10/3; i++) {
-            for (int j = 0; j < 10/3; j++) {
+        Lattice::InitLattice(MetaModuleManager::order, MetaModuleManager::axisSize);
+        for (int i = 0; i < MetaModuleManager::axisSize / MetaModuleManager::metamodules[0]->axisSize; i++) {
+            for (int j = 0; j < MetaModuleManager::axisSize / MetaModuleManager::metamodules[0]->axisSize; j++) {
                 int flag = 0;
                 if ((i%2==0 && j&1) || (i&1 && j%2 == 0)) {
                     for (const auto &coord: MetaModuleManager::metamodules[5]->coords) {
-                        std::valarray<int> newCoord = {3 * i, 3 * j};
+                        std::valarray<int> newCoord = {MetaModuleManager::metamodules[5]->axisSize * i, MetaModuleManager::metamodules[5]->axisSize * j};
                         Lattice::AddModule(coord + newCoord);
                     }
                 } else {
                     for (const auto &coord: MetaModuleManager::metamodules[0]->coords) {
-                        std::valarray<int> newCoord = {3 * i, 3 * j};
+                        std::valarray<int> newCoord = {MetaModuleManager::metamodules[0]->axisSize * i, MetaModuleManager::metamodules[0]->axisSize * j};
                         Lattice::AddModule(coord + newCoord);
                     }
                 }

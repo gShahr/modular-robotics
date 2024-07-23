@@ -41,6 +41,10 @@ public:
 class MetaModuleManager {
 public:
     static std::vector<MetaModule*> metamodules;
+    static int order;
+    static int axisSize;
+
+    MetaModuleManager(int order, int axisSize);
 
     static void GenerateFrom(MetaModule* metamodule);
 };
