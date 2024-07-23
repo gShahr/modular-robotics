@@ -315,12 +315,12 @@ std::vector<MoveBase*> MoveManager::CheckAllMoves(CoordTensor<int> &tensor, Modu
     return legalMoves;
 }
 
-std::pair<Module*, MoveBase*> MoveManager::FindMoveToState(Lattice &lattice, const CoordTensor<bool> &state) {
+std::pair<Module*, MoveBase*> MoveManager::FindMoveToState(const CoordTensor<bool> &state) {
     Module* modToMove = nullptr;
     // Find module to move
-    for (int i = 0; i < lattice.stateTensor.GetArrayInternal().size(); i++) {
-        if (lattice.stateTensor.GetElementDirect(i) != state.GetElementDirect(i) && !state.GetElementDirect(i)) {
-            modToMove = &ModuleIdManager::Modules()[lattice.coordTensor.GetElementDirect(i)];
+    for (int i = 0; i < Lattice::stateTensor.GetArrayInternal().size(); i++) {
+        if (Lattice::stateTensor.GetElementDirect(i) != state.GetElementDirect(i) && !state.GetElementDirect(i)) {
+            modToMove = &ModuleIdManager::Modules()[Lattice::coordTensor.GetElementDirect(i)];
             break;
         }
     }
@@ -333,7 +333,7 @@ std::pair<Module*, MoveBase*> MoveManager::FindMoveToState(Lattice &lattice, con
         if (!state[modCoords + offset]) continue;
         // Find move to get there
         for (auto move : _movesByOffset[offset]) {
-            if (move->MoveCheck(lattice.coordTensor, *modToMove)) {
+            if (move->MoveCheck(Lattice::coordTensor, *modToMove)) {
                 return {modToMove, move};
             }
         }
