@@ -12,10 +12,12 @@ public:
     std::valarray<int> coords;
     // Static module check
     bool moduleStatic = false;
+    // Module color
+    std::string color;
     // Module ID
     int id;
 
-    explicit Module(const std::valarray<int>& coords, bool isStatic = false);
+    explicit Module(const std::valarray<int>& coords, bool isStatic = false, const std::string color = "");
 };
 
 // Class responsible for module ID assignment and providing a central place where modules are stored

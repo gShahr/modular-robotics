@@ -31,9 +31,9 @@ void Lattice::InitLattice(int _order, int _axisSize) {
     coordTensor = CoordTensor<int>(order, axisSize, -1);
 }
 
-void Lattice::AddModule(const std::valarray<int> &coords, bool isStatic) {
+void Lattice::AddModule(const std::valarray<int> &coords, bool isStatic, const std::string& color) {
     // Create new module
-    Module mod(coords, isStatic);
+    Module mod(coords, isStatic, color);
     // Update state and coord tensor
     stateTensor[coords] = true;
     coordTensor[coords] = mod.id;

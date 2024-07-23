@@ -1,6 +1,6 @@
 #include "ModuleManager.h"
 
-Module::Module(const std::valarray<int>& coords, bool isStatic) : id(ModuleIdManager::GetNextId()), coords(coords), moduleStatic(isStatic) {
+Module::Module(const std::valarray<int>& coords, bool isStatic, const std::string color) : id(ModuleIdManager::GetNextId()), coords(coords), moduleStatic(isStatic), color(color) {
     ModuleIdManager::RegisterModule(*this);
 }
 

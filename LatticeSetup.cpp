@@ -16,7 +16,11 @@ namespace LatticeSetup {
             std::transform(position.begin(), position.end(), position.begin(),
                         [](int coord) { return coord; });
             std::valarray<int> coords(position.data(), position.size());
-            Lattice::AddModule(coords, module["static"]);
+            if (module.contains("color")) {
+                Lattice::AddModule(coords, module["static"], module["color"]);
+            } else {
+                Lattice::AddModule(coords, module["static"]);
+            }
         }
         Lattice::BuildMovableModules();
     }
