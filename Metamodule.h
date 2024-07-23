@@ -6,19 +6,33 @@
 #include <utility>
 #include <fstream>
 #include <iostream>
+#include <valarray>
+#include "Isometry.h"
 
-class MetaModule {
+namespace MetaModuleManager {
+    std::vector<MetaModule>;
+}
+
+class MetaModule : public ITransformable {
 private:
 public:
-    std::vector<std::pair<int, int>> coords;
-    std::vector<std::vector<std::pair<int, int>>> metaModules;
-    int order;
+    std::vector<std::valarray<int>> coords;
     int axisSize;
 
     MetaModule(const std::string& filename);
+
+    MetaModule* MakeCopy() const override;
+
+    void Rotate(int index) override;
+
+    void Reflect(int index) override;
+
     void generateRotations();
+
     void generateReflections();
+
     void printCoordsOnly() const;
+
     void printConfigurations() const;
 };
 
