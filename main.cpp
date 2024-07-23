@@ -45,6 +45,7 @@ int main() {
     MetaModuleManager metaModuleManager;
     MetaModule metamodule("tests/metamodule/metamodule_1.txt");
     MetaModuleManager::GenerateFrom(&metamodule);
+    std::cout << "MetaModules Generated: " << MetaModuleManager::metamodules.size() << std::endl;
     LatticeSetup::setUpMetamodule(MetaModuleManager::metamodules[2]);
     std::string exportFolder = "Visualization/Scenarios/";
     Scenario::exportToScen(Lattice::stateTensor, exportFolder + "metamodule.scen");
