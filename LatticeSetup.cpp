@@ -72,6 +72,7 @@ namespace LatticeSetup {
     }
 
     void setUpMetamodule(MetaModule* metamodule) {
+        Lattice::InitLattice(2, 10);
         for (const auto &coord: metamodule->coords) {
             Lattice::AddModule(coord);
         }
