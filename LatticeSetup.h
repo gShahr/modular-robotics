@@ -11,11 +11,11 @@
 #include <nlohmann/json.hpp>
 
 namespace LatticeSetup {
-    void setupFromJson(Lattice& lattice, const std::string& filename);
+    void setupFromJson(const std::string& filename);
 
-    void setupInitial(Lattice& lattice, const std::string& filename);
+    void setupInitial(const std::string& filename);
 
-    CoordTensor<bool> setupFinal(int order, int axisSize, Lattice& lattice, const std::string& filename);
+    CoordTensor<bool> setupFinal(const std::string& filename);
 };
 
 #endif
