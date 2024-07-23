@@ -24,14 +24,15 @@ namespace Scenario {
         }
     }
 
-    void exportToScen(Lattice& lattice, const std::vector<Configuration*>& path, const std::string& filename) {
+    void exportToScen(const std::vector<Configuration*>& path, const std::string& filename) {
         std::ofstream file(filename);
         file << "0, 244, 244, 0, 95\n";
         file << "1, 255, 255, 255, 85\n\n";
         auto idLen = std::to_string(ModuleIdManager::Modules().size()).size();
         boost::format padding("%%0%dd, %s");
         boost::format modDef((padding % idLen %  "%d, %d, %d, %d").str());
-        lattice = path[0]->GetState();
+        //lattice = path[0]->GetState();
+        Lattice::UpdateFromState(path[0]->GetState());
         for (int id = 0; id < ModuleIdManager::Modules().size(); id++) {
             auto& mod = ModuleIdManager::Modules()[id];
             modDef % id % (mod.moduleStatic ? 1 : 0) % mod.coords[0] % mod.coords[1] % (mod.coords.size() > 2 ? mod.coords[2] : 0);
@@ -39,7 +40,7 @@ namespace Scenario {
         }
         file << std::endl;
         for (int i = 1; i < path.size(); i++) {
-            auto movePair = MoveManager::FindMoveToState(lattice, path[i]->GetState());
+            auto movePair = MoveManager::FindMoveToState(path[i]->GetState());
             if (movePair.second == nullptr) {
                 std::cout << "Failed to generate scenario file, no move to next state found.\n";
                 file.close();
@@ -50,7 +51,7 @@ namespace Scenario {
                 modDef % modToMove->id % anim.first % anim.second[0] % anim.second[1] % anim.second[2];
                 file << modDef.str() << std::endl;
             }
-            lattice.MoveModule(*modToMove, movePair.second->MoveOffset());
+            Lattice::MoveModule(*modToMove, movePair.second->MoveOffset());
         }
         file.close();
     }
