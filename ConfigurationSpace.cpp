@@ -108,7 +108,7 @@ std::vector<Configuration*> ConfigurationSpace::BFS(Configuration* start, Config
         if (q.front()->depth != depth) {
             depth++;
 #if CONFIG_VERBOSE > CS_LOG_FINAL_DEPTH
-            std::cout << "bfs depth: " << q.front()->depth << std::endl << lattice << std::endl;
+            std::cout << "bfs depth: " << q.front()->depth << std::endl << Lattice::ToString() << std::endl;
 #endif
         }
 #endif
