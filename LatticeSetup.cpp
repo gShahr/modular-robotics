@@ -25,7 +25,7 @@ namespace LatticeSetup {
         std::ifstream file(filename);
         if (!file) {
             std::cerr << "Unable to open file " << filename << std::endl;
-            return;
+            return CoordTensor<bool>(1, 1, false);
         }
         nlohmann::json j;
         file >> j;
