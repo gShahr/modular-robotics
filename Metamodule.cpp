@@ -70,3 +70,7 @@ void MetaModule::printConfigurations() const {
         std::cout << "\n";
     }
 }
+
+namespace MetaModuleManager {
+    std::vector<MetaModule> metamodules;
+}

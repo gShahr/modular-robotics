@@ -9,10 +9,6 @@
 #include <valarray>
 #include "Isometry.h"
 
-namespace MetaModuleManager {
-    std::vector<MetaModule>;
-}
-
 class MetaModule : public ITransformable {
 private:
 public:
@@ -35,5 +31,7 @@ public:
 
     void printConfigurations() const;
 };
+
+namespace MetaModuleManager {}
 
 #endif
