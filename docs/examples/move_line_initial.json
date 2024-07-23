@@ -1,24 +1,26 @@
 {
-    "modules": [
-      {
-        "position": [0, 1],
-        "static": false
-      },
-      {
-        "position": [0, 2],
-        "static": false
-      },
-      {
-        "position": [0, 3],
-        "static": false
-      },
-      {
-        "position": [0, 4],
-        "static": false
-      },
-      {
-        "position": [0, 5],
-        "static": true
-      }
-    ]
-  }
+  "order": 2,
+  "axisSize": 6,
+  "modules": [
+    {
+      "position": [0, 1],
+      "static": false
+    },
+    {
+      "position": [0, 2],
+      "static": false
+    },
+    {
+      "position": [0, 3],
+      "static": false
+    },
+    {
+      "position": [0, 4],
+      "static": false
+    },
+    {
+      "position": [0, 5],
+      "static": true
+    }
+  ]
+}
