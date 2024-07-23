@@ -39,7 +39,7 @@ void MetaModule::Reflect(int index) {
 }
 
 void MetaModule::printCoordsOnly() const {
-    for (int i = 0; i < coords.size(); ++i) {
+    for (size_t i = 0; i < coords.size(); ++i) {
         std::cout << "Configuration " << i << " coordinates:\n";
         for (const auto& coord : coords[i]) {
             std::cout << coord << ' ';
@@ -52,7 +52,7 @@ void MetaModule::printConfigurations() const {
     const int width = 10;
     const int height = 10;
     const int offset = 5;
-    for (int i = 0; i < coords.size(); i++) {
+    for (size_t i = 0; i < coords.size(); i++) {
         std::cout << "Configuration " << i << ":\n";
         char grid[width][height];
         for (int m = 0; m < width; ++m) {
@@ -71,6 +71,4 @@ void MetaModule::printConfigurations() const {
     }
 }
 
-namespace MetaModuleManager {
-    std::vector<MetaModule> metamodules;
-}
+std::vector<MetaModule> MetaModuleManager::metamodules = {};

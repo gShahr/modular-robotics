@@ -32,6 +32,9 @@ public:
     void printConfigurations() const;
 };
 
-namespace MetaModuleManager {}
+class MetaModuleManager
+{
+    static std::vector<MetaModule> metamodules;
+};
 
 #endif
