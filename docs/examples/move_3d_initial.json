@@ -1,0 +1,54 @@
+{
+  "order": 3,
+  "axisSize": 6,
+  "modules": [
+    {
+      "position": [2, 1, 1],
+      "static": true
+    },
+    {
+      "position": [1, 1, 1],
+      "static": true
+    },
+    {
+      "position": [1, 1, 2],
+      "static": true
+    },
+    {
+      "position": [1, 2, 2],
+      "static": true
+    },
+    {
+      "position": [1, 2, 3],
+      "static": true
+    },
+    {
+      "position": [2, 2, 3],
+      "static": true
+    },
+    {
+      "position": [2, 3, 3],
+      "static": true
+    },
+    {
+      "position": [3, 3, 3],
+      "static": false
+    },
+    {
+      "position": [3, 3, 2],
+      "static": true
+    },
+    {
+      "position": [3, 2, 2],
+      "static": true
+    },
+    {
+      "position": [3, 2, 1],
+      "static": true
+    },
+    {
+      "position": [2, 2, 1],
+      "static": true
+    }
+  ]
+}

@@ -18,37 +18,42 @@
 #include "Scenario.h"
 
 int main() {
-    // // Set up Lattice
-    // LatticeSetup::setupFromJson("docs/examples/move_line_initial.json");
-    // std::cout << Lattice::ToString();
+    // Set up Lattice
+    LatticeSetup::setupFromJson("docs/examples/move_line_initial.json");
+    std::cout << Lattice::ToString();
 
-    // // Set up moves
-    // MoveManager::InitMoveManager(Lattice::Order(), Lattice::AxisSize());
-    // MoveManager::RegisterAllMoves();
+    // Set up moves
+    MoveManager::InitMoveManager(Lattice::Order(), Lattice::AxisSize());
+    MoveManager::RegisterAllMoves();
 
-    // // BFS
-    // std::cout << "BFS Testing:\n";
-    // Configuration start(Lattice::stateTensor);
-    // CoordTensor<bool> desiredState = LatticeSetup::setupFinal("docs/examples/move_line_final.txt");
-    // Configuration end(desiredState);
-    // auto path = ConfigurationSpace::BFS(&start, &end);
-    // std::cout << "Path:\n";
-    // for (auto config : path) {
-    //     Lattice::UpdateFromState(config->GetState());
-    //     std::cout << Lattice::ToString();
-    // }
-    // std::string exportFolder = "Visualization/Scenarios/";
-    // Scenario::exportToScen(path, exportFolder + "test.scen");
+    // BFS
+    std::cout << "BFS Testing:\n";
+    Configuration start(Lattice::stateTensor);
+    auto final = Lattice::stateTensor;
+    final[{3, 3, 3}] = false;
+    final[{1, 2, 1}] = true;
+    //CoordTensor<bool> desiredState = LatticeSetup::setupFinal("docs/examples/move_line_final.txt");
+    Configuration end(final);
+    auto path = ConfigurationSpace::BFS(&start, &end);
+    std::cout << "Path:\n";
+    for (auto config : path) {
+        Lattice::UpdateFromState(config->GetState());
+        std::cout << Lattice::ToString();
+    }
+    std::string exportFolder = "Visualization/Scenarios/";
+    Scenario::exportToScen(path, "test.scen");
 
-    // // Cleanup
-    // MoveManager::CleanMoves();
+    // Cleanup
+    MoveManager::CleanMoves();
+    /*MoveManager::InitMoveManager(2, 10);
+    MoveManager::RegisterAllMoves();
     MetaModuleManager metaModuleManager;
     MetaModule metamodule("tests/metamodule/metamodule_1.txt");
     MetaModuleManager::GenerateFrom(&metamodule);
     std::cout << "MetaModules Generated: " << MetaModuleManager::metamodules.size() << std::endl;
     LatticeSetup::setUpTiling();
     std::string exportFolder = "Visualization/Scenarios/";
-    Scenario::exportToScen(Lattice::stateTensor, exportFolder + "metamodule.scen");
+    Scenario::exportToScen(Lattice::stateTensor, exportFolder + "metamodule.scen");*/
     return 0;
 }
 
