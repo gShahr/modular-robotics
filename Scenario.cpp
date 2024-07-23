@@ -55,4 +55,21 @@ namespace Scenario {
         }
         file.close();
     }
+
+    void exportToScen(const CoordTensor<bool>& state, const std::string& filename) {
+        std::ofstream file(filename);
+        file << "0, 244, 244, 0, 95\n";
+        file << "1, 255, 255, 255, 85\n\n";
+        auto idLen = std::to_string(ModuleIdManager::Modules().size()).size();
+        boost::format padding("%%0%dd, %s");
+        boost::format modDef((padding % idLen %  "%d, %d, %d, %d").str());
+        Lattice::UpdateFromState(state);
+        for (int id = 0; id < ModuleIdManager::Modules().size(); id++) {
+            auto& mod = ModuleIdManager::Modules()[id];
+            modDef % id % (mod.moduleStatic ? 1 : 0) % mod.coords[0] % mod.coords[1] % (mod.coords.size() > 2 ? mod.coords[2] : 0);
+            file << modDef.str() << std::endl;
+        }
+        file << std::endl;
+        file.close();
+    }
 };
