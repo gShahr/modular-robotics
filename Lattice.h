@@ -21,60 +21,70 @@
 class Lattice {
 private:
     // Vector that holds the IDs of adjacent modules, indexed by ID
-    std::vector<std::vector<int>> adjList;
+    static std::vector<std::vector<int>> adjList;
     // Order of coordinate tensor / # of dimensions
-    int order;
+    static int order;
     // Length of every axis
-    int axisSize;
+    static int axisSize;
     // Time variable for DFS
-    int time = 0;
+    static int time;
     // # of modules
-    int moduleCount = 0;
+    static int moduleCount;
     // Vector of movable modules
-    std::vector<Module*> movableModules;
+    static std::vector<Module*> movableModules;
 
     // Clear adjacency list for module ID, and remove module ID from other lists
-    void ClearAdjacencies(int moduleId);
+    static void ClearAdjacencies(int moduleId);
 
 public:
     // State tensor
-    CoordTensor<bool> stateTensor;
+    static CoordTensor<bool> stateTensor;
     // Module tensor
-    CoordTensor<int> coordTensor;
+    static CoordTensor<int> coordTensor;
     // Coordinate info for articulation points / cut vertices
 
-    Lattice(int order, int axisSize);
+    Lattice() = delete;
+    Lattice(Lattice&) = delete;
+
+    //Lattice(int order, int axisSize);
+    static void InitLattice(int _order, int _axisSize);
 
     // Add a new module
-    void AddModule(const std::valarray<int>& coords, bool isStatic = false);
+    static void AddModule(const std::valarray<int>& coords, bool isStatic = false);
 
     // Move a module
-    void MoveModule(Module& mod, const std::valarray<int>& offset);
+    static void MoveModule(Module& mod, const std::valarray<int>& offset);
 
     // Adjacency Check
-    void EdgeCheck(const Module& mod, bool bothWays = true);
+    static void EdgeCheck(const Module& mod, bool bothWays = true);
 
     // Update adjacency lists for two adjacent modules
-    void AddEdge(int modA, int modB);
+    static void AddEdge(int modA, int modB);
 
     // Find articulation points / cut vertices using DFS
-    void APUtil(int u, std::vector<bool>& visited, std::vector<bool>& ap, std::vector<int>& parent, std::vector<int>& low, std::vector<int>& disc);
+    static void APUtil(int u, std::vector<bool>& visited, std::vector<bool>& ap, std::vector<int>& parent, std::vector<int>& low, std::vector<int>& disc);
 
     // Build / Rebuild movableModules vector
-    void BuildMovableModules();
+    static void BuildMovableModules();
 
     // Get movable modules
-    const std::vector<Module*>& MovableModules();
+    static const std::vector<Module*>& MovableModules();
 
     // Comparison operator
-    bool operator==(const Lattice& other);
+    // bool operator==(const Lattice& other);
 
     // Assign from state tensor
-    Lattice& operator=(const CoordTensor<bool>& state);
+    // Lattice& operator=(const CoordTensor<bool>& state);
+    static void UpdateFromState(const CoordTensor<bool>& state);
 
-    friend std::ostream& operator<<(std::ostream& out, Lattice& lattice);
+    static int Order();
+
+    static int AxisSize();
+
+    static std::string ToString();
+    //friend std::ostream& operator<<(std::ostream& out, Lattice& lattice);
 };
 
-std::ostream& operator<<(std::ostream& out, /*const*/ Lattice& lattice);
+//std::ostream& operator<<(std::ostream& out, /*const*/ Lattice& lattice);
 
 #endif //MODULAR_ROBOTICS_LATTICE_H

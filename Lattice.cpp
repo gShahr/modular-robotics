@@ -1,6 +1,16 @@
 #include <queue>
+#include <sstream>
 #include "debug_util.h"
 #include "Lattice.h"
+
+std::vector<std::vector<int>> Lattice::adjList;
+int Lattice::order;
+int Lattice::axisSize;
+int Lattice::time = 0;
+int Lattice::moduleCount = 0;
+std::vector<Module*> Lattice::movableModules;
+CoordTensor<bool> Lattice::stateTensor(1, 1, false);
+CoordTensor<int> Lattice::coordTensor(1, 1, -1);
 
 void Lattice::ClearAdjacencies(int moduleId) {
     for (int id : adjList[moduleId]) {
@@ -14,8 +24,14 @@ void Lattice::ClearAdjacencies(int moduleId) {
     adjList[moduleId].clear();
 }
 
-Lattice::Lattice(int order, int axisSize) : stateTensor(order, axisSize, false),
-                                            coordTensor(order, axisSize, -1), order(order), axisSize(axisSize) {}
+//Lattice::Lattice(int order, int axisSize) : stateTensor(order, axisSize, false),
+//                                            coordTensor(order, axisSize, -1), order(order), axisSize(axisSize) {}
+void Lattice::InitLattice(int _order, int _axisSize) {
+    order = _order;
+    axisSize = _axisSize;
+    stateTensor = CoordTensor<bool>(order, axisSize, false);
+    coordTensor = CoordTensor<int>(order, axisSize, -1);
+}
 
 void Lattice::AddModule(const std::valarray<int> &coords, bool isStatic) {
     // Create new module
@@ -134,7 +150,7 @@ const std::vector<Module*>& Lattice::MovableModules() {
     return movableModules;
 }
 
-bool Lattice::operator==(const Lattice &other) {
+/*bool Lattice::operator==(const Lattice &other) {
     bool result = false;
     if (stateTensor.GetArrayInternal().size() == other.stateTensor.GetArrayInternal().size()) {
         result = true;
@@ -145,9 +161,10 @@ bool Lattice::operator==(const Lattice &other) {
         }
     }
     return result;
-}
+}*/
 
-Lattice& Lattice::operator=(const CoordTensor<bool> &state) {
+//Lattice& Lattice::operator=(const CoordTensor<bool> &state) {
+void Lattice::UpdateFromState(const CoordTensor<bool> &state) {
     std::queue<int> modsToMove;
     std::queue<int> destinations;
     for (int i = 0; i < state.GetArrayInternal().size(); i++) {
@@ -190,10 +207,38 @@ Lattice& Lattice::operator=(const CoordTensor<bool> &state) {
         }
         stateTensor.GetElementDirect(i) = state.GetElementDirect(i);
     }
-    return *this;
 }
 
-std::ostream& operator<<(std::ostream& out, Lattice& lattice) {
+int Lattice::Order() {
+    return order;
+}
+
+int Lattice::AxisSize() {
+    return axisSize;
+}
+
+std::string Lattice::ToString() {
+    std::stringstream out;
+    if (order != 2) {
+        DEBUG("Lattice string conversion not permitted for non-2d lattice");
+        return "";
+    }
+    out << "Lattice State:\n";
+    for (int i = 0; i < coordTensor.GetArrayInternal().size(); i++) {
+        auto id = coordTensor.GetElementDirect(i);
+        if (id >= 0) {
+            out << '#';
+        } else {
+            out << '-';
+        }
+        if ((i + 1) % axisSize == 0) {
+            out << '\n';
+        }
+    }
+    return out.str();
+}
+
+/*std::ostream& operator<<(std::ostream& out, Lattice& lattice) {
     if (lattice.order != 2) {
         DEBUG("Lattice insertion operator not permitted for non-2d lattices");
         return out;
@@ -211,4 +256,4 @@ std::ostream& operator<<(std::ostream& out, Lattice& lattice) {
         }
     }
     return out;
-}
+}*/
