@@ -70,11 +70,7 @@ public:
     // Get movable modules
     static const std::vector<Module*>& MovableModules();
 
-    // Comparison operator
-    // bool operator==(const Lattice& other);
-
     // Assign from state tensor
-    // Lattice& operator=(const CoordTensor<bool>& state);
     static void UpdateFromState(const CoordTensor<bool>& state);
 
     static int Order();
@@ -82,9 +78,6 @@ public:
     static int AxisSize();
 
     static std::string ToString();
-    //friend std::ostream& operator<<(std::ostream& out, Lattice& lattice);
 };
-
-//std::ostream& operator<<(std::ostream& out, /*const*/ Lattice& lattice);
 
 #endif //MODULAR_ROBOTICS_LATTICE_H

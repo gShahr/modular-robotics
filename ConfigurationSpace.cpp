@@ -102,7 +102,6 @@ std::vector<Configuration*> ConfigurationSpace::BFS(Configuration* start, Config
     visited.insert(start->GetHash());
     while (!q.empty()) {
         Configuration* current = q.front();
-        //lattice = q.front()->GetState();
         Lattice::UpdateFromState(q.front()->GetState());
 #if CONFIG_VERBOSE > CS_LOG_NONE
         if (q.front()->depth != depth) {

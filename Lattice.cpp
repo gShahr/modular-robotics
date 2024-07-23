@@ -24,8 +24,6 @@ void Lattice::ClearAdjacencies(int moduleId) {
     adjList[moduleId].clear();
 }
 
-//Lattice::Lattice(int order, int axisSize) : stateTensor(order, axisSize, false),
-//                                            coordTensor(order, axisSize, -1), order(order), axisSize(axisSize) {}
 void Lattice::InitLattice(int _order, int _axisSize) {
     order = _order;
     axisSize = _axisSize;
@@ -150,20 +148,6 @@ const std::vector<Module*>& Lattice::MovableModules() {
     return movableModules;
 }
 
-/*bool Lattice::operator==(const Lattice &other) {
-    bool result = false;
-    if (stateTensor.GetArrayInternal().size() == other.stateTensor.GetArrayInternal().size()) {
-        result = true;
-        for (int i = 0; i < stateTensor.GetArrayInternal().size(); i++) {
-            if (stateTensor.GetElementDirect(i) != other.stateTensor.GetElementDirect(i)) {
-                return false;
-            }
-        }
-    }
-    return result;
-}*/
-
-//Lattice& Lattice::operator=(const CoordTensor<bool> &state) {
 void Lattice::UpdateFromState(const CoordTensor<bool> &state) {
     std::queue<int> modsToMove;
     std::queue<int> destinations;
@@ -237,23 +221,3 @@ std::string Lattice::ToString() {
     }
     return out.str();
 }
-
-/*std::ostream& operator<<(std::ostream& out, Lattice& lattice) {
-    if (lattice.order != 2) {
-        DEBUG("Lattice insertion operator not permitted for non-2d lattices");
-        return out;
-    }
-    out << "Lattice State:\n";
-    for (int i = 0; i < lattice.coordTensor.GetArrayInternal().size(); i++) {
-        auto id = lattice.coordTensor.GetElementDirect(i);
-        if (id >= 0) {
-            out << '#';
-        } else {
-            out << '-';
-        }
-        if ((i + 1) % lattice.axisSize == 0) {
-            out << '\n';
-        }
-    }
-    return out;
-}*/
