@@ -94,7 +94,7 @@ namespace LatticeSetup {
     }
 
     void setUpMetamodule(MetaModule* metamodule) {
-        Lattice::InitLattice(2, 10);
+        Lattice::InitLattice(metamodule->order, metamodule->size);
         for (const auto &coord: metamodule->coords) {
             Lattice::AddModule(coord);
         }
@@ -104,7 +104,6 @@ namespace LatticeSetup {
         Lattice::InitLattice(MetaModuleManager::order, MetaModuleManager::axisSize);
         for (int i = 0; i < MetaModuleManager::axisSize / MetaModuleManager::metamodules[0]->size; i++) {
             for (int j = 0; j < MetaModuleManager::axisSize / MetaModuleManager::metamodules[0]->size; j++) {
-                int flag = 0;
                 if ((i%2==0 && j&1) || (i&1 && j%2 == 0)) {
                     for (const auto &coord: MetaModuleManager::metamodules[5]->coords) {
                         std::valarray<int> newCoord = {MetaModuleManager::metamodules[5]->size * i, MetaModuleManager::metamodules[5]->size * j};
