@@ -3,7 +3,7 @@
 #include <filesystem>
 #include "MoveManager.h"
 
-void MoveBase::RotateMove(int index) {
+void MoveBase::Rotate(int index) {
     std::swap(initPos[0], initPos[index]);
     std::swap(finalPos[0], finalPos[index]);
     std::swap(bounds[0], bounds[index]);
@@ -16,7 +16,7 @@ void MoveBase::RotateMove(int index) {
     }
 }
 
-void MoveBase::ReflectMove(int index) {
+void MoveBase::Reflect(int index) {
     initPos[index] *= -1;
     finalPos[index] *= -1;
     std::swap(bounds[index].first, bounds[index].second);
@@ -42,7 +42,7 @@ Move2d::Move2d() {
     bounds.resize(order, {0, 0});
 }
 
-MoveBase* Move2d::CopyMove() const {
+MoveBase* Move2d::MakeCopy() const {
     auto copy = new Move2d();
     *copy = *this;
     return copy;
@@ -131,7 +131,7 @@ Move3d::Move3d() {
     bounds.resize(3, {0, 0});
 }
 
-MoveBase* Move3d::CopyMove() const {
+MoveBase* Move3d::MakeCopy() const {
     auto copy = new Move3d();
     *copy = *this;
     return copy;
@@ -235,14 +235,14 @@ void MoveManager::InitMoveManager(int order, int maxDistance) {
             {}, std::valarray<int>(maxDistance, order)));
 }
 
-void MoveManager::GenerateMovesFrom(MoveBase *origMove) {
+void MoveManager::GenerateMovesFrom(MoveBase* origMove) {
     std::vector<MoveBase*> movesGen;
     // Add initial move to working vector
     movesGen.push_back(origMove);
     // Add rotations to working vector
     for (int i = 1; i < origMove->order; i++) {
-        auto moveRotated = origMove->CopyMove();
-        moveRotated->RotateMove(i);
+        auto moveRotated = origMove->MakeCopy();
+        moveRotated->Rotate(i);
         movesGen.push_back(moveRotated);
         _movesToFree.push_back(moveRotated);
     }
@@ -250,8 +250,8 @@ void MoveManager::GenerateMovesFrom(MoveBase *origMove) {
     for (int i = 0; i < origMove->order; i++) {
         auto movesToReflect = movesGen;
         for (auto move : movesToReflect) {
-            auto moveReflected = move->CopyMove();
-            moveReflected->ReflectMove(i);
+            auto moveReflected = move->MakeCopy();
+            moveReflected->Reflect(i);
             movesGen.push_back(moveReflected);
             _movesToFree.push_back(moveReflected);
         }

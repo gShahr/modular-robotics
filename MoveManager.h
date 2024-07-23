@@ -3,6 +3,7 @@
 #include <valarray>
 #include <nlohmann/json.hpp>
 #include "Lattice.h"
+#include "Isometry.h"
 
 #ifndef MODULAR_ROBOTICS_MOVEMANAGER_H
 #define MODULAR_ROBOTICS_MOVEMANAGER_H
@@ -83,7 +84,7 @@ namespace Move {
     };
 }
 
-class MoveBase {
+class MoveBase : public ITransformable {
 protected:
     // each pair represents a coordinate offset to check and whether a module should be there or not
     std::vector<std::pair<std::valarray<int>, bool>> moves;
@@ -91,20 +92,18 @@ protected:
     std::vector<std::pair<int, int>> bounds;
     std::valarray<int> initPos, finalPos;
     std::vector<std::pair<Move::AnimType, std::valarray<int>>> animSequence;
-    int order = -1;
 public:
-    // Create a copy of a move
-    [[nodiscard]]
-    virtual MoveBase* CopyMove() const = 0;
     // Load in move info from a given file
     // virtual void InitMove(std::ifstream& moveFile) = 0;
     virtual void InitMove(const nlohmann::basic_json<>& moveDef) = 0;
     // Check to see if move is possible for a given module
     virtual bool MoveCheck(CoordTensor<int>& tensor, const Module& mod) = 0;
 
-    void RotateMove(int index);
+    MoveBase* MakeCopy() const override = 0;
 
-    void ReflectMove(int index);
+    void Rotate(int index) override;
+
+    void Reflect(int index) override;
 
     [[nodiscard]]
     const std::valarray<int>& MoveOffset() const;
@@ -121,7 +120,7 @@ class Move2d : public MoveBase {
 public:
     Move2d();
     [[nodiscard]]
-    MoveBase* CopyMove() const override;
+    MoveBase* MakeCopy() const override;
     //void InitMove(std::ifstream& moveFile) override;
     void InitMove(const nlohmann::basic_json<>& moveDef) override;
     bool MoveCheck(CoordTensor<int>& tensor, const Module& mod) override;
@@ -131,7 +130,7 @@ class Move3d : public MoveBase {
 public:
     Move3d();
     [[nodiscard]]
-    MoveBase* CopyMove() const override;
+    MoveBase* MakeCopy() const override;
     //void InitMove(std::ifstream& moveFile) override;
     void InitMove(const nlohmann::basic_json<>& moveDef) override;
     bool MoveCheck(CoordTensor<int>& tensor, const Module& mod) override;
