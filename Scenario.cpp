@@ -31,7 +31,6 @@ namespace Scenario {
         auto idLen = std::to_string(ModuleIdManager::Modules().size()).size();
         boost::format padding("%%0%dd, %s");
         boost::format modDef((padding % idLen %  "%d, %d, %d, %d").str());
-        //lattice = path[0]->GetState();
         Lattice::UpdateFromState(path[0]->GetState());
         for (int id = 0; id < ModuleIdManager::Modules().size(); id++) {
             auto& mod = ModuleIdManager::Modules()[id];
