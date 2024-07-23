@@ -32,8 +32,8 @@ public:
     void printConfigurations() const;
 };
 
-class MetaModuleManager
-{
+class MetaModuleManager {
+public:
     static std::vector<MetaModule*> metamodules;
 
     static void GenerateFrom(MetaModule* metamodule);

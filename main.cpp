@@ -42,9 +42,10 @@ int main() {
 
     // // Cleanup
     // MoveManager::CleanMoves();
-    //MetaModuleManager metaModuleManager;
+    MetaModuleManager metaModuleManager;
     MetaModule metamodule("tests/metamodule/metamodule_1.txt");
-    LatticeSetup::setUpMetamodule(&metamodule);
+    MetaModuleManager::GenerateFrom(&metamodule);
+    LatticeSetup::setUpMetamodule(MetaModuleManager::metamodules[2]);
     std::string exportFolder = "Visualization/Scenarios/";
     Scenario::exportToScen(Lattice::stateTensor, exportFolder + "metamodule.scen");
     return 0;
