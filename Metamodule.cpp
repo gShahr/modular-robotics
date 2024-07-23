@@ -1,6 +1,8 @@
 #include "MetaModule.h"
 
 MetaModule::MetaModule(const std::string& filename) {
+    order = 2;
+    axisSize = 3;
     int x = 0, y = 0;
     std::ifstream file(filename);
     if (!file.is_open()) {
