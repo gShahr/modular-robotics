@@ -84,8 +84,16 @@ namespace LatticeSetup {
         for (const auto &coord: MetaModuleManager::metamodules[0]->coords) {
             Lattice::AddModule(coord);
         }
-        for (const auto &coord: MetaModuleManager::metamodules[2]->coords) {
+        for (const auto &coord: MetaModuleManager::metamodules[5]->coords) {
             std::valarray<int> newCoord = {3, 0};
+            Lattice::AddModule(coord + newCoord);
+        }
+        for (const auto &coord: MetaModuleManager::metamodules[0]->coords) {
+            std::valarray<int> newCoord = {3, 3};
+            Lattice::AddModule(coord + newCoord);
+        }
+        for (const auto &coord: MetaModuleManager::metamodules[5]->coords) {
+            std::valarray<int> newCoord = {0, 3};
             Lattice::AddModule(coord + newCoord);
         }
     }
