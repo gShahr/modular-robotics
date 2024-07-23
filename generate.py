@@ -4,7 +4,7 @@ import os
 root_dir = os.getcwd()
 executable = "main"
 command = "make"
-scenario = "test"
+scenario = "metamodule"
 
 # Run make in the root directory
 make_result = subprocess.run([command], capture_output=True, text=True)

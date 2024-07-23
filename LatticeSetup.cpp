@@ -1,4 +1,5 @@
 #include "LatticeSetup.h"
+#include "MetaModule.h"
 
 namespace LatticeSetup {
     void setupFromJson(const std::string& filename) {
@@ -75,6 +76,17 @@ namespace LatticeSetup {
         Lattice::InitLattice(2, 10);
         for (const auto &coord: metamodule->coords) {
             Lattice::AddModule(coord);
+        }
+    }
+
+    void setUpTiling() {
+        Lattice::InitLattice(2, 10);
+        for (const auto &coord: MetaModuleManager::metamodules[0]->coords) {
+            Lattice::AddModule(coord);
+        }
+        for (const auto &coord: MetaModuleManager::metamodules[2]->coords) {
+            std::valarray<int> newCoord = {3, 0};
+            Lattice::AddModule(coord + newCoord);
         }
     }
 };

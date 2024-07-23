@@ -37,7 +37,7 @@ void MetaModule::Rotate(int index) {
 void MetaModule::Reflect(int index) {
     for (auto& coord : coords) {
         coord[index] *= -1;
-        coord[index] += axisSize;
+        coord[index] += axisSize - 1;
     }
 }
 

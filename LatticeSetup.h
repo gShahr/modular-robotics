@@ -19,6 +19,8 @@ namespace LatticeSetup {
     CoordTensor<bool> setupFinal(const std::string& filename);
 
     void setUpMetamodule(MetaModule* metamodule);
+    
+    void setUpTiling();
 };
 
 #endif
