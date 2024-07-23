@@ -195,9 +195,10 @@ CoordTensor<T>::CoordTensor(int order, int axisSize, const typename std::vector<
 #pragma ide diagnostic ignored "ConstantConditionsOC"
 #pragma ide diagnostic ignored "UnreachableCode"
     std::cout << "IdAtInternal Function: " << (
-            IdAtInternal == &CoordTensor::ElemAt3rdOrder ? "IdAt3rdOrder" :
-            IdAtInternal == &CoordTensor::ElemAt2ndOrder ? "IdAt2ndOrder" :
-            IdAtInternal == &CoordTensor::ElemAtNthOrder ? "IdAtNthOrder" :
+            IdAtInternal == &CoordTensor::ElemAt3rdOrder ? "ElemAt3rdOrder" :
+            IdAtInternal == &CoordTensor::ElemAt2ndOrder ? "ElemAt2ndOrder" :
+            IdAtInternal == &CoordTensor::ElemAtNthOrder ? "ElemAtNthOrder" :
+            IdAtInternal == &CoordTensor::ElemAtNthOrderOffset ? "ElemAtNthOrderOffset" :
             "Invalid Function!") << std::endl;
 #pragma clang diagnostic pop
 #endif
@@ -247,7 +248,8 @@ inline CoordTensor<bool>::CoordTensor(int order, int axisSize, const typename st
 #pragma ide diagnostic ignored "ConstantConditionsOC"
 #pragma ide diagnostic ignored "UnreachableCode"
     std::cout << "IdAtInternal Function: " << (
-            IdAtInternal == &CoordTensor::ElemAtNthOrder ? "IdAtNthOrder" :
+            IdAtInternal == &CoordTensor::ElemAtNthOrder ? "ElemAtNthOrder" :
+            IdAtInternal == &CoordTensor::ElemAtNthOrderOffset ? "ElemAtNthOrderOffset" :
             "Invalid Function!") << std::endl;
 #pragma clang diagnostic pop
 #endif
