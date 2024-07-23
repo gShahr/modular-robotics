@@ -7,6 +7,7 @@
 #include <fstream>
 #include <iostream>
 #include <valarray>
+#include <nlohmann/json.hpp>
 #include "Isometry.h"
 
 class MetaModule : public ITransformable {
@@ -19,6 +20,10 @@ public:
     MetaModule(const std::string& filename, int order, int axisSize);
 
     MetaModule* MakeCopy() const override;
+
+    void readFromTxt2d(const std::string& filename);
+
+    void readFromJson(const std::string& filename);
 
     void Rotate(int index) override;
 
