@@ -13,9 +13,10 @@ class MetaModule : public ITransformable {
 private:
 public:
     std::vector<std::valarray<int>> coords;
+    int order;
     int axisSize;
 
-    MetaModule(const std::string& filename);
+    MetaModule(const std::string& filename, int order, int axisSize);
 
     MetaModule* MakeCopy() const override;
 
