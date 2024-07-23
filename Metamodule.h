@@ -15,9 +15,9 @@ private:
 public:
     std::vector<std::valarray<int>> coords;
     int order;
-    int axisSize;
+    int size;
 
-    MetaModule(const std::string& filename, int order, int axisSize);
+    MetaModule(const std::string& filename, int order, int size);
 
     MetaModule* MakeCopy() const override;
 

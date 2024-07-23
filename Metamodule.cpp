@@ -1,6 +1,6 @@
 #include "MetaModule.h"
 
-MetaModule::MetaModule(const std::string& filename, int order, int axisSize) : order(order), axisSize(axisSize) {
+MetaModule::MetaModule(const std::string& filename, int order, int size) : order(order), size(size) {
     readFromJson(filename);
 }
 
@@ -57,7 +57,7 @@ void MetaModule::Rotate(int index) {
 void MetaModule::Reflect(int index) {
     for (auto& coord : coords) {
         coord[index] *= -1;
-        coord[index] += axisSize - 1;
+        coord[index] += size - 1;
     }
 }
 

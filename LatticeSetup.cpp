@@ -102,17 +102,17 @@ namespace LatticeSetup {
 
     void setUpTiling() {
         Lattice::InitLattice(MetaModuleManager::order, MetaModuleManager::axisSize);
-        for (int i = 0; i < MetaModuleManager::axisSize / MetaModuleManager::metamodules[0]->axisSize; i++) {
-            for (int j = 0; j < MetaModuleManager::axisSize / MetaModuleManager::metamodules[0]->axisSize; j++) {
+        for (int i = 0; i < MetaModuleManager::axisSize / MetaModuleManager::metamodules[0]->size; i++) {
+            for (int j = 0; j < MetaModuleManager::axisSize / MetaModuleManager::metamodules[0]->size; j++) {
                 int flag = 0;
                 if ((i%2==0 && j&1) || (i&1 && j%2 == 0)) {
                     for (const auto &coord: MetaModuleManager::metamodules[5]->coords) {
-                        std::valarray<int> newCoord = {MetaModuleManager::metamodules[5]->axisSize * i, MetaModuleManager::metamodules[5]->axisSize * j};
+                        std::valarray<int> newCoord = {MetaModuleManager::metamodules[5]->size * i, MetaModuleManager::metamodules[5]->size * j};
                         Lattice::AddModule(coord + newCoord);
                     }
                 } else {
                     for (const auto &coord: MetaModuleManager::metamodules[0]->coords) {
-                        std::valarray<int> newCoord = {MetaModuleManager::metamodules[0]->axisSize * i, MetaModuleManager::metamodules[0]->axisSize * j};
+                        std::valarray<int> newCoord = {MetaModuleManager::metamodules[0]->size * i, MetaModuleManager::metamodules[0]->size * j};
                         Lattice::AddModule(coord + newCoord);
                     }
                 }
