@@ -167,9 +167,6 @@ public:
 
     // Get a pair containing which module has to make what move in order to reach an adjacent state
     static std::pair<Module*, MoveBase*> FindMoveToState(const CoordTensor<bool>& state);
-
-    // Clean up generated moves
-    static void CleanMoves();
 };
 
 #endif //MODULAR_ROBOTICS_MOVEMANAGER_H
