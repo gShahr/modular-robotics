@@ -77,15 +77,16 @@ namespace LatticeSetup {
         Lattice::BuildMovableModules();
     }
 
-    CoordTensor<bool> setupFinal(const std::string& filename) {
+    Configuration* setupFinal(const std::string& filename) {
         int x = 0;
         int y = 0;
-        CoordTensor<bool> desiredState(Lattice::Order(), Lattice::AxisSize(), false);
         std::ifstream file(filename);
         if (!file) {
             std::cerr << "Unable to open file " << filename << std::endl;
-            return desiredState;
+            return nullptr;
         }
+        CoordTensor<bool> desiredState(Lattice::Order(), Lattice::AxisSize(), false);
+        CoordTensor<std::string> colors(Lattice::Order(), Lattice::AxisSize(), "");
         std::string line;
         while (std::getline(file, line)) {
             for (char c : line) {
@@ -98,7 +99,7 @@ namespace LatticeSetup {
             x = 0;
             y++;
         }
-        return desiredState;
+        return new Configuration(desiredState, colors);
     }
 
     void setUpMetamodule(MetaModule* metamodule) {
