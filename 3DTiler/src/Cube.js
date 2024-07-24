@@ -1,39 +1,28 @@
-class Cube{
-
-    constructor(x, y, z){
+class Cube {
+    constructor(x, y, z) {
         this.x = x;
         this.y = y;
         this.z = z;
     }
 
-    draw2D(){
-
-    }
-
-    draw3D(){
-
-    }
-
-    set x(val){
+    set x(val) {
         this._x = val;
     }
-    get x(){
+    get x() {
         return this._x;
     }
 
-    set y(val){
+    set y(val) {
         this._y = val;
     }
-    get y(){
+    get y() {
         return this._y;
     }
 
-    set z(val){
+    set z(val) {
         this._z = val;
     }
-    get z(){
+    get z() {
         return this._z;
     }
-
-
 }
