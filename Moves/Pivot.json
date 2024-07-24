@@ -2,7 +2,7 @@
   "moves": [
     {
       "name": "Corner Pivot",
-      "order": 3,
+      "order": 2,
       "def": [[
         "xx",
         "?xx",
@@ -15,7 +15,7 @@
     },
     {
       "name": "Pivot",
-      "order": 3,
+      "order": 2,
       "def": [[
         "xx",
         "?!",

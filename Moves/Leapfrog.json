@@ -2,7 +2,7 @@
   "moves": [
     {
       "name": "Leapfrog",
-      "order": 3,
+      "order": 2,
       "def": [[
         "xx",
         "?!#",
@@ -15,7 +15,7 @@
     },
     {
       "name": "Reversed Leapfrog",
-      "order": 3,
+      "order": 2,
       "def": [[
         " xx",
         "#?!",

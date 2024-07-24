@@ -29,12 +29,8 @@ int main() {
     // BFS
     std::cout << "BFS Testing:\n";
     Configuration start(Lattice::stateTensor);
-    auto final = Lattice::stateTensor;
-    final[{3, 3, 3}] = false;
-    final[{1, 2, 1}] = true;
-    //CoordTensor<bool> desiredState = LatticeSetup::setupFinal("docs/examples/move_line_final.txt");
-    Configuration end(final);
-    auto path = ConfigurationSpace::BFS(&start, &end);
+    Configuration* end = LatticeSetup::setupFinalFromJson("docs/examples/move_line_final.json");
+    auto path = ConfigurationSpace::BFS(&start, end);
     std::cout << "Path:\n";
     for (auto config : path) {
         Lattice::UpdateFromState(config->GetState());
@@ -42,9 +38,6 @@ int main() {
     }
     std::string exportFolder = "Visualization/Scenarios/";
     Scenario::exportToScen(path, "test.scen");
-
-    // Cleanup
-    MoveManager::CleanMoves();
     /*MoveManager::InitMoveManager(2, 10);
     MoveManager::RegisterAllMoves();
     MetaModuleManager metaModuleManager;

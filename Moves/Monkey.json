@@ -2,7 +2,7 @@
   "moves": [
     {
       "name": "Monkey",
-      "order": 3,
+      "order": 2,
       "def": [[
         "xxx",
         "?x!",
@@ -16,7 +16,7 @@
     },
     {
       "name": "Diagonal Monkey",
-      "order": 3,
+      "order": 2,
       "def": [[
         "x!#",
         "?xx",
