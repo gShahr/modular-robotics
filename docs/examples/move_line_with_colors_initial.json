@@ -1,0 +1,16 @@
+{
+  "order": 2,
+  "axisSize": 6,
+  "modules": [
+    {
+      "position": [1, 1],
+      "static": false,
+      "color": "red"
+    },
+    {
+      "position": [2, 1],
+      "static": false,
+      "color": "blue"
+    }
+  ]
+}
