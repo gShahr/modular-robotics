@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CubeTiler</title>
+  <style>
+    body {
+      padding: 0;
+      margin: 0;
+    }
+    header{
+      font-size:40px;
+      margin:auto;
+      width:60%; /* should just be pixels based on canvas size */
+    }
+    </style>
+  <!-- <header id="CH">Inital State</header> -->
+  <script src="p5.js"></script>
+  <script src="p5.easycam.js"></script>
+  <!-- <script src="../addons/p5.sound.js"></script> -->
+  <script src="src/sketch.js"></script>
+  
+  <script src=https://cdnjs.cloudflare.com/ajax/libs/mathjs/3.3.0/math.min.js></script>
+  <script src="src/2dScreen.js"></script>
+  <script src="src/3dScreen.js"></script>
+  <script src="src/Cube.js"></script>
+
+
+  <!-- <input id="blockInput"></input>
+  <button type="button" onclick="loadFromTxt()">Load</button>
+  <button type="button" onclick="saveAsTxt()">Save Current</button>
+  <button type="button" onclick="saveStackAsTxt()">Save all Steps</button>
+  <button type="button" onclick="saveAsPNG()">Save a PNG</button> -->
+  <!-- <button type="button" onclick="clearGrid()">Clear</button> -->
+</head>
+<div style="padding-top:4px;">
+<!-- <button id="save" onclick="saveConfig()">Save</button>
+<button id="load" onclick="loadConfig()">Load</button> -->
+<button id="zUp" onclick="upLayer()">+1 Layer</button>
+<button id="zDown" onclick="downLayer()">-1 Layer</button>
+
+<button id="highlight" onclick="highlightLayer()">Highlight Layer</button>
+<p id="curLayer" style="width:10em;display:inline">Current Layer = 0</p>
+</div>
+<body>
+  <main>
+  </main>
+</body>
+
+</html>
