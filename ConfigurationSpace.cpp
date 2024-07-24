@@ -18,10 +18,6 @@ size_t HashedState::GetSeed() const {
     return seed;
 }
 
-/*void HashedState::HashLattice(const Lattice& lattice) {
-    seed = boost::hash_range(lattice.stateTensor.GetArrayInternal().begin(), lattice.stateTensor.GetArrayInternal().end());
-}*/
-
 void HashedState::HashCoordTensor(const CoordTensor<bool>& state, const CoordTensor<std::string>& colors) {
     seed = boost::hash_range(state.GetArrayInternal().begin(), state.GetArrayInternal().end());
     for (const auto& color : colors.GetArrayInternal()) {
@@ -89,6 +85,7 @@ const HashedState& Configuration::GetHash() const {
 
 void Configuration::SetStateAndHash(const CoordTensor<bool>& state, const CoordTensor<std::string>& colors) {
     _state = state;
+    _colors = colors;
     hash = HashedState(state, colors);
 }
 

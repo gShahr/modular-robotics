@@ -31,6 +31,7 @@ void Lattice::InitLattice(int _order, int _axisSize) {
     axisSize = _axisSize;
     stateTensor = CoordTensor<bool>(order, axisSize, false);
     coordTensor = CoordTensor<int>(order, axisSize, -1);
+    colorTensor = CoordTensor<std::string>(order, axisSize, "");
 }
 
 void Lattice::AddModule(const std::valarray<int> &coords, bool isStatic, const std::string& color) {

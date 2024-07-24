@@ -30,9 +30,6 @@ public:
     [[nodiscard]]
     size_t GetSeed() const;
 
-    // Doesn't make sense to do this
-    //void HashLattice(const Lattice& lattice);
-
     void HashCoordTensor(const CoordTensor<bool>& state, const CoordTensor<std::string>& colors);
 
     bool operator==(const HashedState& other) const;
