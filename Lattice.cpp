@@ -40,6 +40,7 @@ void Lattice::AddModule(const std::valarray<int> &coords, bool isStatic, const s
     // Update state and coord tensor
     stateTensor[coords] = true;
     coordTensor[coords] = mod.id;
+    colorTensor[coords] = color;
     // Adjacency check
     EdgeCheck(mod, false);
     moduleCount++;
@@ -153,7 +154,7 @@ const std::vector<Module*>& Lattice::MovableModules() {
     return movableModules;
 }
 
-void Lattice::UpdateFromState(const CoordTensor<bool> &state) {
+void Lattice::UpdateFromState(const CoordTensor<bool> &state, const CoordTensor<std::string>& colors) {
     std::queue<int> modsToMove;
     std::queue<int> destinations;
     for (int i = 0; i < state.GetArrayInternal().size(); i++) {
@@ -183,6 +184,7 @@ void Lattice::UpdateFromState(const CoordTensor<bool> &state) {
             } else {
                 // Move this mismatched module to a location
                 coordTensor.GetElementDirect(destinations.front()) = coordTensor.GetElementDirect(i);
+                colorTensor.GetElementDirect(destinations.front()) = colorTensor.GetElementDirect(i);
                 // TEST: Update module position variable
                 ModuleIdManager::Modules()[coordTensor.GetElementDirect(i)].coords = coordTensor.CoordsFromIndex(destinations.front());
                 // Update adjacency list
@@ -193,8 +195,10 @@ void Lattice::UpdateFromState(const CoordTensor<bool> &state) {
             }
             // Set former module location to -1
             coordTensor.GetElementDirect(i) = -1;
+            colorTensor.GetElementDirect(i) = "";
         }
         stateTensor.GetElementDirect(i) = state.GetElementDirect(i);
+        colorTensor.GetElementDirect(i) = colors.GetElementDirect(i);
     }
 }
 

@@ -72,7 +72,7 @@ public:
     static const std::vector<Module*>& MovableModules();
 
     // Assign from state tensor
-    static void UpdateFromState(const CoordTensor<bool>& state);
+    static void UpdateFromState(const CoordTensor<bool>& state, const CoordTensor<std::string>& colors);
 
     static int Order();
 

@@ -33,6 +33,8 @@ public:
     void HashCoordTensor(const CoordTensor<bool>& state, const CoordTensor<std::string>& colors);
 
     bool operator==(const HashedState& other) const;
+
+    bool operator!=(const HashedState& other) const;
 };
 
 namespace std {
