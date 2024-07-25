@@ -1,9 +1,16 @@
 #include "MetaModule.h"
 
-MetaModule::MetaModule(const std::string& filename) {
-    order = 2;
-    axisSize = 3;
-    int x = 0, y = 0;
+MetaModule::MetaModule(const std::string& filename, int order, int size) : order(order), size(size) {
+    readFromJson(filename);
+}
+
+MetaModule* MetaModule::MakeCopy() const {
+    auto copy = new MetaModule(*this);
+    return copy;
+}
+
+void MetaModule::readFromTxt2d(const std::string& filename) {
+    int x = 0, y = 0;   
     std::ifstream file(filename);
     if (!file.is_open()) {
         std::cerr << "Unable to open file: " << filename << std::endl;
@@ -21,11 +28,24 @@ MetaModule::MetaModule(const std::string& filename) {
         y++;
     }
     file.close();
+
 }
 
-MetaModule* MetaModule::MakeCopy() const {
-    auto copy = new MetaModule(*this);
-    return copy;
+void MetaModule::readFromJson(const std::string& filename) {
+    std::ifstream file(filename);
+    if (!file) {
+        std::cerr << "Unable to open file " << filename << std::endl;
+        return;
+    }
+    nlohmann::json j;
+    file >> j;
+    for (const auto& module : j["modules"]) {
+        std::vector<int> position = module["position"];
+        std::transform(position.begin(), position.end(), position.begin(),
+                    [](int coord) { return coord; });
+        std::valarray<int> coords(position.data(), position.size());
+        this->coords.push_back(coords);
+    }
 }
 
 void MetaModule::Rotate(int index) {
@@ -37,7 +57,7 @@ void MetaModule::Rotate(int index) {
 void MetaModule::Reflect(int index) {
     for (auto& coord : coords) {
         coord[index] *= -1;
-        coord[index] += axisSize - 1;
+        coord[index] += size - 1;
     }
 }
 
@@ -75,6 +95,13 @@ void MetaModule::printConfigurations() const {
 }
 
 std::vector<MetaModule*> MetaModuleManager::metamodules = {};
+int MetaModuleManager::order = 0;
+int MetaModuleManager::axisSize = 0;
+
+MetaModuleManager::MetaModuleManager(int order, int axisSize) {
+    this->order = order;
+    this->axisSize = axisSize;
+}
 
 void MetaModuleManager::GenerateFrom(MetaModule* metamodule) {
     auto list = Isometry::GenerateTransforms(metamodule);

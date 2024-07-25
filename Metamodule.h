@@ -7,17 +7,23 @@
 #include <fstream>
 #include <iostream>
 #include <valarray>
+#include <nlohmann/json.hpp>
 #include "Isometry.h"
 
 class MetaModule : public ITransformable {
 private:
 public:
     std::vector<std::valarray<int>> coords;
-    int axisSize;
+    int order;
+    int size;
 
-    MetaModule(const std::string& filename);
+    MetaModule(const std::string& filename, int order, int size);
 
     MetaModule* MakeCopy() const override;
+
+    void readFromTxt2d(const std::string& filename);
+
+    void readFromJson(const std::string& filename);
 
     void Rotate(int index) override;
 
@@ -35,6 +41,10 @@ public:
 class MetaModuleManager {
 public:
     static std::vector<MetaModule*> metamodules;
+    static int order;
+    static int axisSize;
+
+    MetaModuleManager(int order, int axisSize);
 
     static void GenerateFrom(MetaModule* metamodule);
 };

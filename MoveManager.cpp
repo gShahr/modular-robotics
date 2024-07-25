@@ -227,7 +227,6 @@ bool Move3d::MoveCheck(CoordTensor<int> &tensor, const Module &mod) {
 
 std::vector<MoveBase*> MoveManager::_moves;
 CoordTensor<std::vector<MoveBase*>> MoveManager::_movesByOffset(1, 1, {});
-std::vector<MoveBase*> MoveManager::_movesToFree;
 std::vector<std::valarray<int>> MoveManager::_offsets;
 
 void MoveManager::InitMoveManager(int order, int maxDistance) {
@@ -236,29 +235,12 @@ void MoveManager::InitMoveManager(int order, int maxDistance) {
 }
 
 void MoveManager::GenerateMovesFrom(MoveBase* origMove) {
-    std::vector<MoveBase*> movesGen;
-    // Add initial move to working vector
-    movesGen.push_back(origMove);
-    // Add rotations to working vector
-    for (int i = 1; i < origMove->order; i++) {
-        auto moveRotated = origMove->MakeCopy();
-        moveRotated->Rotate(i);
-        movesGen.push_back(moveRotated);
-        _movesToFree.push_back(moveRotated);
+    auto list = Isometry::GenerateTransforms(origMove);
+    for (auto move: list) {
+        _moves.push_back(dynamic_cast<MoveBase*>(move));
     }
-    // Reflections
-    for (int i = 0; i < origMove->order; i++) {
-        auto movesToReflect = movesGen;
-        for (auto move : movesToReflect) {
-            auto moveReflected = move->MakeCopy();
-            moveReflected->Reflect(i);
-            movesGen.push_back(moveReflected);
-            _movesToFree.push_back(moveReflected);
-        }
-    }
-    // Add everything to _moves
-    for (auto move : movesGen) {
-        _moves.push_back(move);
+    // Add move to offset map
+    for (auto move : _moves) {
         if (_movesByOffset[move->finalPos].empty()) {
             _offsets.push_back(move->finalPos);
         }
@@ -281,14 +263,12 @@ void MoveManager::RegisterAllMoves(const std::string& movePath) {
 #endif
                 auto move = new Move2d();
                 move->InitMove(moveDef);
-                _movesToFree.push_back(move);
             } else if (moveDef["order"] == 3) {
 #if MOVEMANAGER_VERBOSE > MM_LOG_NONE
                 DEBUG("Registering 3d move " << moveDef["name"] << std::endl);
 #endif
                 auto move = new Move3d();
                 move->InitMove(moveDef);
-                _movesToFree.push_back(move);
             } else {
                 // Not currently supported
                 std::cout << "Attempted to create move of order != 2 or 3, moveDef at: " << moveFile.path() << std::endl;
@@ -339,10 +319,4 @@ std::pair<Module*, MoveBase*> MoveManager::FindMoveToState(const CoordTensor<boo
         }
     }
     return {modToMove, nullptr};
-}
-
-void MoveManager::CleanMoves() {
-    for (auto move : _movesToFree) {
-        delete move;
-    }
 }

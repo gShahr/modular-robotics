@@ -41,7 +41,8 @@ public:
     static CoordTensor<bool> stateTensor;
     // Module tensor
     static CoordTensor<int> coordTensor;
-    // Coordinate info for articulation points / cut vertices
+    // Color tensor
+    static CoordTensor<std::string> colorTensor;
 
     Lattice() = delete;
     Lattice(Lattice&) = delete;
@@ -50,7 +51,7 @@ public:
     static void InitLattice(int _order, int _axisSize);
 
     // Add a new module
-    static void AddModule(const std::valarray<int>& coords, bool isStatic = false);
+    static void AddModule(const std::valarray<int>& coords, bool isStatic = false, const std::string& color = "");
 
     // Move a module
     static void MoveModule(Module& mod, const std::valarray<int>& offset);
@@ -71,7 +72,7 @@ public:
     static const std::vector<Module*>& MovableModules();
 
     // Assign from state tensor
-    static void UpdateFromState(const CoordTensor<bool>& state);
+    static void UpdateFromState(const CoordTensor<bool>& state, const CoordTensor<std::string>& colors);
 
     static int Order();
 

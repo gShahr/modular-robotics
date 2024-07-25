@@ -18,37 +18,25 @@
 #include "Scenario.h"
 
 int main() {
-    // // Set up Lattice
-    // LatticeSetup::setupFromJson("docs/examples/move_line_initial.json");
-    // std::cout << Lattice::ToString();
+    // Set up Lattice
+    LatticeSetup::setupFromJson("docs/examples/move_line_with_colors_initial.json");
+    std::cout << Lattice::ToString();
 
-    // // Set up moves
-    // MoveManager::InitMoveManager(Lattice::Order(), Lattice::AxisSize());
-    // MoveManager::RegisterAllMoves();
+    // Set up moves
+    MoveManager::InitMoveManager(Lattice::Order(), Lattice::AxisSize());
+    MoveManager::RegisterAllMoves();
 
-    // // BFS
-    // std::cout << "BFS Testing:\n";
-    // Configuration start(Lattice::stateTensor);
-    // CoordTensor<bool> desiredState = LatticeSetup::setupFinal("docs/examples/move_line_final.txt");
-    // Configuration end(desiredState);
-    // auto path = ConfigurationSpace::BFS(&start, &end);
-    // std::cout << "Path:\n";
-    // for (auto config : path) {
-    //     Lattice::UpdateFromState(config->GetState());
-    //     std::cout << Lattice::ToString();
-    // }
-    // std::string exportFolder = "Visualization/Scenarios/";
-    // Scenario::exportToScen(path, exportFolder + "test.scen");
-
-    // // Cleanup
-    // MoveManager::CleanMoves();
-    MetaModuleManager metaModuleManager;
-    MetaModule metamodule("tests/metamodule/metamodule_1.txt");
-    MetaModuleManager::GenerateFrom(&metamodule);
-    std::cout << "MetaModules Generated: " << MetaModuleManager::metamodules.size() << std::endl;
-    LatticeSetup::setUpTiling();
+    // BFS
+    std::cout << "BFS Testing:\n";
+    Configuration start(Lattice::stateTensor, Lattice::colorTensor);
+    Configuration* end = LatticeSetup::setupFinalFromJson("docs/examples/move_line_with_colors_final.json");
+    auto path = ConfigurationSpace::BFS(&start, end);
+    std::cout << "Path:\n";
+    for (auto config : path) {
+        Lattice::UpdateFromState(config->GetState(), config->GetColors());
+        std::cout << Lattice::ToString();
+    }
     std::string exportFolder = "Visualization/Scenarios/";
-    Scenario::exportToScen(Lattice::stateTensor, exportFolder + "metamodule.scen");
+    Scenario::exportToScen(path, exportFolder + "move_line_with_colors.scen");
     return 0;
 }
-

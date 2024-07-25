@@ -8,8 +8,8 @@ HashedState::HashedState() : seed(0) {}
 
 HashedState::HashedState(size_t seed) : seed(seed) {}
 
-HashedState::HashedState(const CoordTensor<bool>& state) {
-    HashCoordTensor(state);
+HashedState::HashedState(const CoordTensor<bool>& state, const CoordTensor<std::string>& colors) {
+    HashCoordTensor(state, colors);
 }
 
 HashedState::HashedState(const HashedState& other) : seed(other.GetSeed()) {}
@@ -18,23 +18,27 @@ size_t HashedState::GetSeed() const {
     return seed;
 }
 
-/*void HashedState::HashLattice(const Lattice& lattice) {
-    seed = boost::hash_range(lattice.stateTensor.GetArrayInternal().begin(), lattice.stateTensor.GetArrayInternal().end());
-}*/
-
-void HashedState::HashCoordTensor(const CoordTensor<bool>& state) {
+void HashedState::HashCoordTensor(const CoordTensor<bool>& state, const CoordTensor<std::string>& colors) {
     seed = boost::hash_range(state.GetArrayInternal().begin(), state.GetArrayInternal().end());
+    size_t seed2 = boost::hash_range(colors.GetArrayInternal().begin(), colors.GetArrayInternal().end());
+    boost::hash_combine(seed, seed2);
 }
 
 bool HashedState::operator==(const HashedState& other) const {
     return seed == other.GetSeed();
 }
 
+bool HashedState::operator!=(const HashedState& other) const {
+    return seed != other.GetSeed();
+}
+
 size_t std::hash<HashedState>::operator()(const HashedState& state) const {
     return std::hash<size_t>()(state.GetSeed());
 }
 
-Configuration::Configuration(CoordTensor<bool> state) : _state(std::move(state)) {}
+Configuration::Configuration(CoordTensor<bool> state) : _state(std::move(state)), _colors(CoordTensor<std::string>(state.Order(), state.AxisSize(), "")){}
+
+Configuration::Configuration(CoordTensor<bool> state, CoordTensor<std::string> colors) : _state(std::move(state)), _colors(std::move(colors)) {}
 
 Configuration::~Configuration() {
     for (auto i = next.rbegin(); i != next.rend(); i++) {
@@ -42,16 +46,15 @@ Configuration::~Configuration() {
     }
 }
 
-std::vector<CoordTensor<bool>> Configuration::MakeAllMoves() {
-    std::vector<CoordTensor<bool>> result;
-    //lattice =_state;
-    Lattice::UpdateFromState(_state);
+std::vector<std::pair<CoordTensor<bool>, CoordTensor<std::string>>> Configuration::MakeAllMoves() {
+    std::vector<std::pair<CoordTensor<bool>, CoordTensor<std::string>>> result;
+    Lattice::UpdateFromState(_state, _colors);
     std::vector<Module*> movableModules = Lattice::MovableModules();
     for (auto module: movableModules) {
         auto legalMoves = MoveManager::CheckAllMoves(Lattice::coordTensor, *module);
         for (auto move : legalMoves) {
             Lattice::MoveModule(*module, move->MoveOffset());
-            result.push_back(Lattice::stateTensor);
+            result.emplace_back(Lattice::stateTensor, Lattice::colorTensor);
             Lattice::MoveModule(*module, -move->MoveOffset());
         }
     }
@@ -74,13 +77,18 @@ const CoordTensor<bool>& Configuration::GetState() const {
     return _state;
 }
 
+const CoordTensor<std::string>& Configuration::GetColors() const {
+    return _colors;
+}
+
 const HashedState& Configuration::GetHash() const {
     return hash;
 }
 
-void Configuration::SetStateAndHash(const CoordTensor<bool>& state) {
+void Configuration::SetStateAndHash(const CoordTensor<bool>& state, const CoordTensor<std::string>& colors) {
     _state = state;
-    hash = HashedState(state);
+    _colors = colors;
+    hash = HashedState(state, colors);
 }
 
 void Configuration::SetParent(Configuration* configuration) {
@@ -98,11 +106,13 @@ std::vector<Configuration*> ConfigurationSpace::BFS(Configuration* start, Config
 #endif
     std::queue<Configuration*> q;
     std::unordered_set<HashedState> visited;
+    start->SetStateAndHash(start->GetState(), start->GetColors());
+    final->SetStateAndHash(final->GetState(), final->GetColors());
     q.push(start);
     visited.insert(start->GetHash());
     while (!q.empty()) {
         Configuration* current = q.front();
-        Lattice::UpdateFromState(q.front()->GetState());
+        Lattice::UpdateFromState(q.front()->GetState(), q.front()->GetColors());
 #if CONFIG_VERBOSE > CS_LOG_NONE
         if (q.front()->depth != depth) {
             depth++;
@@ -112,22 +122,22 @@ std::vector<Configuration*> ConfigurationSpace::BFS(Configuration* start, Config
         }
 #endif
         q.pop();
-        if (current->GetState() == final->GetState()) {
+        if (current->GetHash() == final->GetHash()) {
 #if CONFIG_VERBOSE == CS_LOG_FINAL_DEPTH
             std::cout << "bfs depth: " << depth << std::endl << Lattice::ToString() << std::endl;
 #endif
             return FindPath(start, current);
         }
         auto adjList = current->MakeAllMoves();
-        for (const auto& node: adjList) {
-            if (visited.find(HashedState(node)) == visited.end()) {
-                auto nextConfiguration = new Configuration(node);
+        for (const auto& [state, colors]: adjList) {
+            if (visited.find(HashedState(state, colors)) == visited.end()) {
+                auto nextConfiguration = new Configuration(state, colors);
                 nextConfiguration->SetParent(current);
-                nextConfiguration->SetStateAndHash(node);
+                nextConfiguration->SetStateAndHash(state, colors);
                 q.push(nextConfiguration);
                 current->AddEdge(nextConfiguration);
                 nextConfiguration->depth = current->depth + 1;
-                visited.insert(HashedState(node));
+                visited.insert(HashedState(state, colors));
             }
         }
     }
@@ -137,7 +147,7 @@ std::vector<Configuration*> ConfigurationSpace::BFS(Configuration* start, Config
 std::vector<Configuration*> ConfigurationSpace::FindPath(Configuration* start, Configuration* final) {
     std::vector<Configuration*> path;
     Configuration* current = final;
-    while (current->GetState() != start->GetState()) {
+    while (current->GetHash() != start->GetHash()) {
         path.push_back(current);
         current = current->GetParent();
     }

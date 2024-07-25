@@ -23,19 +23,18 @@ public:
 
     explicit HashedState(size_t seed);
 
-    explicit HashedState(const CoordTensor<bool>& state);
+    explicit HashedState(const CoordTensor<bool>& state, const CoordTensor<std::string>& colors);
 
     HashedState(const HashedState& other);
 
     [[nodiscard]]
     size_t GetSeed() const;
 
-    // Doesn't make sense to do this
-    //void HashLattice(const Lattice& lattice);
-
-    void HashCoordTensor(const CoordTensor<bool>& state);
+    void HashCoordTensor(const CoordTensor<bool>& state, const CoordTensor<std::string>& colors);
 
     bool operator==(const HashedState& other) const;
+
+    bool operator!=(const HashedState& other) const;
 };
 
 namespace std {
@@ -50,14 +49,17 @@ private:
     Configuration* parent = nullptr;
     std::vector<Configuration*> next;
     CoordTensor<bool> _state;
+    CoordTensor<std::string> _colors;
     HashedState hash;
 public:
     int depth = 0;
     explicit Configuration(CoordTensor<bool> state);
 
+    explicit Configuration(CoordTensor<bool> state, CoordTensor<std::string> colors);
+
     ~Configuration();
 
-    std::vector<CoordTensor<bool>> MakeAllMoves();
+    std::vector<std::pair<CoordTensor<bool>, CoordTensor<std::string>>> MakeAllMoves();
 
     void AddEdge(Configuration* configuration);
 
@@ -69,9 +71,12 @@ public:
     const CoordTensor<bool>& GetState() const;
 
     [[nodiscard]]
+    const CoordTensor<std::string>& GetColors() const;
+
+    [[nodiscard]]
     const HashedState& GetHash() const;
 
-    void SetStateAndHash(const CoordTensor<bool>& state);
+    void SetStateAndHash(const CoordTensor<bool>& state, const CoordTensor<std::string>& colors);
 
     void SetParent(Configuration* configuration);
 

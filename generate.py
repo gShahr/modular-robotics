@@ -1,10 +1,13 @@
 import subprocess
 import os
+import sys
 
 root_dir = os.getcwd()
 executable = "main"
 command = "make"
-scenario = "metamodule"
+if len(sys.argv) < 2:
+    raise ValueError("No scenario provided. Please pass a scenario as the first argument.")
+scenario = sys.argv[1]
 
 # Run make in the root directory
 make_result = subprocess.run([command], capture_output=True, text=True)

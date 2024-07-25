@@ -8,15 +8,18 @@
 #include <valarray>
 #include "Lattice.h"
 #include "CoordTensor.h"
+#include "ConfigurationSpace.h"
 #include "Metamodule.h"
 #include <nlohmann/json.hpp>
 
 namespace LatticeSetup {
     void setupFromJson(const std::string& filename);
 
+    Configuration* setupFinalFromJson(const std::string& filename);
+
     void setupInitial(const std::string& filename);
 
-    CoordTensor<bool> setupFinal(const std::string& filename);
+    Configuration* setupFinal(const std::string& filename);
 
     void setUpMetamodule(MetaModule* metamodule);
     
