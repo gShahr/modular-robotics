@@ -60,7 +60,15 @@ Cube* raymarch(glm::vec3 pos, glm::vec3 dir) {
             cube = pair.second;
             dist = cube->distanceTo(pos);
             mindist = glm::min(dist, mindist);
-            if (mindist == 0.0f) { std::cout << "Clicked on cube ID " << cube->id << std::endl; return cube; }
+            if (mindist == 0.0f) {
+                std::cout << "Clicked on cube ID " << cube->id << std::endl;
+                for (std::pair<int, Cube*> _ : glob_objects) {
+                    _.second->setBorder();
+                }
+                cube->setBorderWidth(0.02f);
+                cube->setBorderColor(255, 255, 255);
+                return cube;
+            }
         }
 
         pos += glm::max(0.1f, mindist * 0.99f) * dir;

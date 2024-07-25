@@ -66,7 +66,7 @@ Scenario::Scenario(const char* filepath) {
                 std::cout << "Creating Cube with ID " << buf[0] << " in group " << buf[1] << " at location " << buf[2] << ", " << buf[3] << ", " << buf[4] << std::endl;
                 cube = new Cube(buf[0], buf[2], buf[3], buf[4]);
                 vg = visgroups.at(buf[1]);
-                cube->setColor(vg->color[0], vg->color[1], vg->color[2]); 
+                cube->setColor((float)vg->color[0]/255.0f, (float)vg->color[1]/255.0f, (float)vg->color[2]/255.0f); 
                 cube->setScale(vg->scale);
                 this->cubes.push_back(cube);
                 break;
