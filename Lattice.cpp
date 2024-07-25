@@ -198,7 +198,7 @@ void Lattice::UpdateFromState(const CoordTensor<bool> &state, const CoordTensor<
             }
             stateTensor.GetElementDirect(i) = state.GetElementDirect(i);
         }
-        if (colorTensor.GetElementDirect(i) == colors.GetElementDirect(i)) {
+        if (colorTensor.GetElementDirect(i) != colors.GetElementDirect(i)) {
             colorTensor.GetElementDirect(i) = colors.GetElementDirect(i);
         }
     }
