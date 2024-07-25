@@ -29,8 +29,8 @@ int main() {
     // BFS
     std::cout << "BFS Testing:\n";
     Configuration start(Lattice::stateTensor, Lattice::colorTensor);
-    Configuration* end = LatticeSetup::setupFinalFromJson("docs/examples/move_line_with_colors_final.json");
-    auto path = ConfigurationSpace::BFS(&start, end);
+    Configuration end = LatticeSetup::setupFinalFromJson("docs/examples/move_line_with_colors_final.json");
+    auto path = ConfigurationSpace::BFS(&start, &end);
     std::cout << "Path:\n";
     for (auto config : path) {
         Lattice::UpdateFromState(config->GetState(), config->GetColors());
