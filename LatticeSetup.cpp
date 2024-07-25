@@ -30,7 +30,7 @@ namespace LatticeSetup {
         std::ifstream file(filename);
         if (!file) {
             std::cerr << "Unable to open file " << filename << std::endl;
-            return nullptr;
+            throw std::ios_base::failure("Unable to open file " + filename + "\n");
         }
         nlohmann::json j;
         file >> j;
@@ -83,7 +83,7 @@ namespace LatticeSetup {
         std::ifstream file(filename);
         if (!file) {
             std::cerr << "Unable to open file " << filename << std::endl;
-            return nullptr;
+            throw std::ios_base::failure("Unable to open file " + filename + "\n");
         }
         CoordTensor<bool> desiredState(Lattice::Order(), Lattice::AxisSize(), false);
         CoordTensor<std::string> colors(Lattice::Order(), Lattice::AxisSize(), "");
