@@ -159,45 +159,48 @@ void Lattice::UpdateFromState(const CoordTensor<bool> &state, const CoordTensor<
     std::queue<int> destinations;
     for (int i = 0; i < state.GetArrayInternal().size(); i++) {
         // Search for state differences
-        if ((stateTensor.GetElementDirect(i) == state.GetElementDirect(i)) && 
-        colorTensor.GetElementDirect(i) == colors.GetElementDirect(i)) continue;
-        if (state.GetElementDirect(i)) {
-            // New state has module at this index, current state doesn't have one
-            if (modsToMove.empty()) {
-                // Remember this location for when a mismatched module is found
-                destinations.push(i);
+        if (stateTensor.GetElementDirect(i) != state.GetElementDirect(i)) {
+            if (state.GetElementDirect(i)) {
+                // New state has module at this index, current state doesn't have one
+                if (modsToMove.empty()) {
+                    // Remember this location for when a mismatched module is found
+                    destinations.push(i);
+                } else {
+                    // Move a mismatched module to this location
+                    coordTensor.GetElementDirect(i) = modsToMove.front();
+                    // TEST: Update module position variable
+                    ModuleIdManager::Modules()[modsToMove.front()].coords = coordTensor.CoordsFromIndex(i);
+                    // Update adjacency list
+                    ClearAdjacencies(coordTensor.GetElementDirect(i));
+                    EdgeCheck(ModuleIdManager::Modules()[coordTensor.GetElementDirect(i)]);
+                    // Pop ID stack
+                    modsToMove.pop();
+                }
             } else {
-                // Move a mismatched module to this location
-                coordTensor.GetElementDirect(i) = modsToMove.front();
-                // TEST: Update module position variable
-                ModuleIdManager::Modules()[modsToMove.front()].coords = coordTensor.CoordsFromIndex(i);
-                // Update adjacency list
-                ClearAdjacencies(coordTensor.GetElementDirect(i));
-                EdgeCheck(ModuleIdManager::Modules()[coordTensor.GetElementDirect(i)]);
-                // Pop ID stack
-                modsToMove.pop();
+                // Current state has module at this index, new state doesn't have one
+                if (destinations.empty()) {
+                    // Remember this mismatched module for when a location is found
+                    modsToMove.push(coordTensor.GetElementDirect(i));
+                } else {
+                    // Move this mismatched module to a location
+                    coordTensor.GetElementDirect(destinations.front()) = coordTensor.GetElementDirect(i);
+                    // TEST: Update module position variable
+                    ModuleIdManager::Modules()[coordTensor.GetElementDirect(i)].coords = coordTensor.CoordsFromIndex(
+                            destinations.front());
+                    // Update adjacency list
+                    ClearAdjacencies(coordTensor.GetElementDirect(i));
+                    EdgeCheck(ModuleIdManager::Modules()[coordTensor.GetElementDirect(i)]);
+                    // Pop index stack
+                    destinations.pop();
+                }
+                // Set former module location to -1
+                coordTensor.GetElementDirect(i) = -1;
             }
-        } else {
-            // Current state has module at this index, new state doesn't have one
-            if (destinations.empty()) {
-                // Remember this mismatched module for when a location is found
-                modsToMove.push(coordTensor.GetElementDirect(i));
-            } else {
-                // Move this mismatched module to a location
-                coordTensor.GetElementDirect(destinations.front()) = coordTensor.GetElementDirect(i);
-                // TEST: Update module position variable
-                ModuleIdManager::Modules()[coordTensor.GetElementDirect(i)].coords = coordTensor.CoordsFromIndex(destinations.front());
-                // Update adjacency list
-                ClearAdjacencies(coordTensor.GetElementDirect(i));
-                EdgeCheck(ModuleIdManager::Modules()[coordTensor.GetElementDirect(i)]);
-                // Pop index stack
-                destinations.pop();
-            }
-            // Set former module location to -1
-            coordTensor.GetElementDirect(i) = -1;
+            stateTensor.GetElementDirect(i) = state.GetElementDirect(i);
         }
-        stateTensor.GetElementDirect(i) = state.GetElementDirect(i);
-        colorTensor.GetElementDirect(i) = colors.GetElementDirect(i);
+        if (colorTensor.GetElementDirect(i) == colors.GetElementDirect(i)) {
+            colorTensor.GetElementDirect(i) = colors.GetElementDirect(i);
+        }
     }
 }
 
