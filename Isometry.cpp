@@ -1,5 +1,7 @@
 #include "Isometry.h"
 
+std::vector<ITransformable*> Isometry::transformsToFree;
+
 std::vector<ITransformable*> Isometry::GenerateTransforms(ITransformable* initial) {
     // Set up working vector
     std::vector<ITransformable*> transforms = {initial};
@@ -8,6 +10,7 @@ std::vector<ITransformable*> Isometry::GenerateTransforms(ITransformable* initia
         auto rotated = initial->MakeCopy();
         rotated->Rotate(i);
         transforms.push_back(rotated);
+        transformsToFree.push_back(rotated);
     }
     // Reflections
     for (int i = 0; i < initial->order; i++) {
@@ -16,8 +19,15 @@ std::vector<ITransformable*> Isometry::GenerateTransforms(ITransformable* initia
             auto reflected = form->MakeCopy();
             reflected->Reflect(i);
             transforms.push_back(reflected);
+            transformsToFree.push_back(reflected);
         }
     }
     // Done
     return transforms;
+}
+
+void Isometry::CleanupTransforms() {
+    for (auto transform : transformsToFree) {
+        delete transform;
+    }
 }

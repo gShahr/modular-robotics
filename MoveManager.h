@@ -111,8 +111,6 @@ public:
     [[nodiscard]]
     const std::vector<std::pair<Move::AnimType, std::valarray<int>>>& AnimSequence() const;
 
-    virtual ~MoveBase() = default;
-
     friend class MoveManager;
 };
 

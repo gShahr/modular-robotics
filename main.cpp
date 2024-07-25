@@ -38,5 +38,7 @@ int main() {
     }
     std::string exportFolder = "Visualization/Scenarios/";
     Scenario::exportToScen(path, exportFolder + "move_line_with_colors.scen");
+
+    Isometry::CleanupTransforms();
     return 0;
 }

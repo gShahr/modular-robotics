@@ -13,12 +13,20 @@ public:
     [[nodiscard]]
     virtual ITransformable* MakeCopy() const = 0;
 
+    virtual ~ITransformable() = default;
+
     friend class Isometry;
 };
 
 class Isometry {
+private:
+    static std::vector<ITransformable*> transformsToFree;
 public:
     static std::vector<ITransformable*> GenerateTransforms(ITransformable* initial);
+
+    static void CleanupTransforms();
+
+    friend class MoveManager;
 };
 
 #endif //MODULAR_ROBOTICS_ISOMETRY_H

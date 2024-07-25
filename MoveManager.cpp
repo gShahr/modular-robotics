@@ -262,12 +262,14 @@ void MoveManager::RegisterAllMoves(const std::string& movePath) {
                 DEBUG("Registering 2d move " << moveDef["name"] << std::endl);
 #endif
                 auto move = new Move2d();
+                Isometry::transformsToFree.push_back(move);
                 move->InitMove(moveDef);
             } else if (moveDef["order"] == 3) {
 #if MOVEMANAGER_VERBOSE > MM_LOG_NONE
                 DEBUG("Registering 3d move " << moveDef["name"] << std::endl);
 #endif
                 auto move = new Move3d();
+                Isometry::transformsToFree.push_back(move);
                 move->InitMove(moveDef);
             } else {
                 // Not currently supported
