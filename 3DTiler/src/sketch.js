@@ -98,7 +98,7 @@ var sketch1 = function (sketch) {
                     threeScreen.removeCube(lastMove.x, lastMove.y, lastMove.z);
                 } else {
                     screen.addCube(new Cube(lastMove.x, lastMove.y, lastMove.z));
-                    threeScreen.addCube(new Cube(lastMove.x, lastMove.y, lastMove.z));
+                    threeScreen.addCube(new Cube(lastMove.x, lastMove.y, lastMove.z, lastMove.color));
                 }
             }
             undoPressed = false;
@@ -109,7 +109,7 @@ var sketch1 = function (sketch) {
                 historyStack.push(lastMove);
                 if (lastMove.action === 'add') {
                     screen.addCube(new Cube(lastMove.x, lastMove.y, lastMove.z));
-                    threeScreen.addCube(new Cube(lastMove.x, lastMove.y, lastMove.z));
+                    threeScreen.addCube(new Cube(lastMove.x, lastMove.y, lastMove.z, lastMove.color));
                 } else {
                     screen.removeCube(lastMove.x, lastMove.y, lastMove.z);
                     threeScreen.removeCube(lastMove.x, lastMove.y, lastMove.z);
@@ -120,17 +120,15 @@ var sketch1 = function (sketch) {
     }
 
     sketch.mousePressed = function () {
-        console.log(sketch.mouseY);
         if (sketch.mouseX < canvasW / 2 && sketch.mouseY < canvasH && sketch.mouseY > 0) {
-            console.log(sketch.mouseX);
             x = Math.floor(sketch.mouseX / twoDtileSize);
             y = Math.floor(sketch.mouseY / twoDtileSize);
             console.log(x + ", " + y);
             if (!screen.removeCube(x, y, screen.layer)) {
                 screen.addCube(new Cube(x, y, screen.layer));
-                historyStack.push({ action: 'add', x: x, y: y, z: screen.layer });
+                historyStack.push({ action: 'add', x: x, y: y, z: screen.layer, color: rgbColor });
             } else {
-                historyStack.push({ action: 'remove', x: x, y: y, z: screen.layer });
+                historyStack.push({ action: 'remove', x: x, y: y, z: screen.layer, color: rgbColor });
             }
         }
     }
@@ -142,8 +140,6 @@ var sketch2 = function (sketch) {
         canv2.position(canvasW / 2, 30);
         threeScreen = new threeDScreen(canvasW / 2, canvasH, twoDtileSize / 5);
         sketch._center = [0, 0, 0];
-        console.log(sketch._renderer);
-        console.log("Setup", Object.keys(sketch));
         sketch.createEasyCam();
     }
 
@@ -157,7 +153,6 @@ var sketch2 = function (sketch) {
         if (mX < canvasW / 2 && sketch.mouseY < canvasH && sketch.mouseY > 0) {
             x = Math.floor(mX / twoDtileSize);
             y = Math.floor(sketch.mouseY / twoDtileSize);
-            console.log(x + ", " + y);
             if (!threeScreen.removeCube(x, y, layer)) {
                 threeScreen.addCube(new Cube(x, y, layer, rgbColor));
             }

@@ -10,16 +10,12 @@ class threeDScreen {
         this.cubes.push(cube);
     }
 
-    removeCube(x,y,z) {
-        for(let i = 0; i < this.cubes.length; i++){
-            if(this.cubes[i].x === x 
-                && this.cubes[i].y === y
-                && this.cubes[i].z === z){
-                    this.cubes.splice(i,1);
-                    console.log("here");
-                    console.log(this.cubes.length);
-                    return true;
-                }
+    removeCube(x, y, z) {
+        for (let i = 0; i < this.cubes.length; i++) {
+            if (this.cubes[i].x === x && this.cubes[i].y === y && this.cubes[i].z === z) {
+                this.cubes.splice(i, 1);
+                return true;
+            }
         }
         return false;
     }
