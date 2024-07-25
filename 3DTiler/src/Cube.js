@@ -1,13 +1,15 @@
 class Cube {
-    constructor(x, y, z) {
+    constructor(x, y, z, color = [255, 255, 255]) {
         this.x = x;
         this.y = y;
         this.z = z;
+        this.color = color;
     }
 
     set x(val) {
         this._x = val;
     }
+
     get x() {
         return this._x;
     }
@@ -15,6 +17,7 @@ class Cube {
     set y(val) {
         this._y = val;
     }
+
     get y() {
         return this._y;
     }
@@ -22,7 +25,16 @@ class Cube {
     set z(val) {
         this._z = val;
     }
+
     get z() {
         return this._z;
+    }
+
+    set color(val) {
+        this.color = val;
+    }
+
+    get color() {
+        return this.color;
     }
 }
