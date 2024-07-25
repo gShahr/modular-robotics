@@ -1,15 +1,17 @@
-document.oncontextmenu = () => {return false;}
-canvasW = window.screen.width*.99;
-canvasH = window.screen.height*.8;
+document.oncontextmenu = () => { return false; }
+canvasW = window.screen.width * .99;
+canvasH = window.screen.height * .8;
 canvasZ = 75;
-twoDtileSize = canvasW/(2*30);
+twoDtileSize = canvasW / (2 * 30);
 layer = 0;
 highlight = false;
 blocks = [];
+historyStack = [];
+redoStack = [];
 
 function saveConfig() {
     var output = "";
-    for(i = 0; i < blocks.length; i++){
+    for (i = 0; i < blocks.length; i++) {
         output += blocks[i].x + "," + blocks[i].y + ",";
     }
     dwnldAsTxt("3Dtiles.txt", output);
@@ -48,53 +50,103 @@ function highlightLayer() {
     highlight = !highlight;
 }
 
-var sketch1 = function(sketch) {
-    sketch.setup = function() {
+function redo() {
+    if (redoStack.length > 0) {
+        let lastUndo = redoStack.pop();
+        historyStack.push(lastUndo);
+        if (lastUndo.action === 'add') {
+            screen.addCube(new Cube(lastUndo.x, lastUndo.y, lastUndo.z));
+        } else {
+            screen.removeCube(lastUndo.x, lastUndo.y, lastUndo.z);
+        }
+    }
+}
+
+var sketch1 = function (sketch) {
+    let undoPressed = false;
+    let redoPressed = false;
+
+    sketch.setup = function () {
         canv1 = sketch.createCanvas(canvasW / 2, canvasH);
-        canv1.position(0,30);
+        canv1.position(0, 30);
         screen = new twoDScreen(canvasW / 2, canvasH, twoDtileSize);
         prevLayer = layer;
+        let undoButton = document.getElementById('undo');
+        if (undoButton) {
+            undoButton.addEventListener('click', function () {
+                undoPressed = true;
+            });
+        }
+        let redoButton = document.getElementById('redo');
+        if (redoButton) {
+            redoButton.addEventListener('click', function () {
+                redoPressed = true;
+            });
+        }
     }
-    sketch.draw = function() {
-        if(layer > prevLayer){
+
+    sketch.draw = function () {
+        if (layer > prevLayer) {
             screen.upLayer();
         }
-        if(layer < prevLayer){
+        if (layer < prevLayer) {
             screen.downLayer();
         }
         sketch.background(0, 255, 0);
         screen.draw(sketch);
         prevLayer = layer;
         blocks = screen.getCubes;
-    }
-    
-    sketch.mousePressed = function() {
-        console.log(sketch.mouseY);
-        if (sketch.mouseX < canvasW / 2 && sketch.mouseY < canvasH && sketch.mouseY > 0){
-            console.log(sketch.mouseX);
-            x = math.floor(sketch.mouseX/twoDtileSize);
-            y = math.floor(sketch.mouseY/twoDtileSize);
-            console.log(x + ", " + y);
-            if (!screen.removeCube(x,y,screen.layer)) {
-                screen.addCube(new Cube(x, y, screen.layer));
+        if (undoPressed) {
+            if (historyStack.length > 0) {
+                let lastMove = historyStack.pop();
+                redoStack.push(lastMove);
+                if (lastMove.action === 'add') {
+                    screen.removeCube(lastMove.x, lastMove.y, lastMove.z);
+                    threeScreen.removeCube(lastMove.x, lastMove.y, lastMove.z);
+                } else {
+                    screen.addCube(new Cube(lastMove.x, lastMove.y, lastMove.z));
+                    threeScreen.addCube(new Cube(lastMove.x, lastMove.y, lastMove.z));
+                }
             }
-            let cubeXs = screen.cubes.map(cube => cube.x);
-            let cubeYs = screen.cubes.map(cube => cube.y);
-            let cubeZs = screen.cubes.map(cube => cube.z);
+            undoPressed = false;
+        }
+        if (redoPressed) {
+            if (redoStack.length > 0) {
+                let lastMove = redoStack.pop();
+                historyStack.push(lastMove);
+                if (lastMove.action === 'add') {
+                    console.log(lastMove);
+                    screen.addCube(0, 0, 0);
+                    screen.addCube(new Cube(lastMove.x, lastMove.y, lastMove.z));
+                    threeScreen.addCube(new Cube(lastMove.x, lastMove.y, lastMove.z));
+                } else {
+                    screen.removeCube(lastMove.x, lastMove.y, lastMove.z);
+                    threeScreen.removeCube(lastMove.x, lastMove.y, lastMove.z);
+                }
+            }
+            redoPressed = false;
+        }
+    }
 
-            let xSum = cubeXs.reduce((sum, cur) => sum + cur, 0);
-            let ySum = cubeYs.reduce((sum, cur) => sum + cur, 0);
-            let zSum = cubeZs.reduce((sum, cur) => sum + cur, 0);
-
-            let cX = xSum/cubeXs.length;
-            let cY = ySum/cubeYs.length;
-            let cZ = zSum/cubeZs.length;
+    sketch.mousePressed = function () {
+        console.log(sketch.mouseY);
+        if (sketch.mouseX < canvasW / 2 && sketch.mouseY < canvasH && sketch.mouseY > 0) {
+            console.log(sketch.mouseX);
+            x = Math.floor(sketch.mouseX / twoDtileSize);
+            y = Math.floor(sketch.mouseY / twoDtileSize);
+            console.log(x + ", " + y);
+            if (!screen.removeCube(x, y, screen.layer)) {
+                screen.addCube(new Cube(x, y, screen.layer));
+                historyStack.push({ action: 'add', x: x, y: y, z: screen.layer });
+            } else {
+                historyStack.push({ action: 'remove', x: x, y: y, z: screen.layer });
+            }
         }
     }
 }
 
-var sketch2 = function(sketch) {
-    sketch.setup = function() {
+var sketch2 = function (sketch) {
+    sketch.setup = function () {
         canv2 = sketch.createCanvas(canvasW / 2, canvasH, sketch.WEBGL);
         canv2.position(canvasW / 2, 30);
         threeScreen = new threeDScreen(canvasW / 2, canvasH, twoDtileSize / 5);
@@ -104,18 +156,18 @@ var sketch2 = function(sketch) {
         sketch.createEasyCam();
     }
 
-    sketch.draw = function() {
+    sketch.draw = function () {
         sketch.background(205, 102, 94);
         threeScreen.draw(sketch, highlight, layer);
     }
-    
-    sketch.mousePressed = function() {
-        let mX = sketch.mouseX+(canvasW/2);
-        if (mX < canvasW / 2 && sketch.mouseY < canvasH && sketch.mouseY > 0){
-            x = math.floor(mX/twoDtileSize);
-            y = math.floor(sketch.mouseY/twoDtileSize);
+
+    sketch.mousePressed = function () {
+        let mX = sketch.mouseX + (canvasW / 2);
+        if (mX < canvasW / 2 && sketch.mouseY < canvasH && sketch.mouseY > 0) {
+            x = Math.floor(mX / twoDtileSize);
+            y = Math.floor(sketch.mouseY / twoDtileSize);
             console.log(x + ", " + y);
-            if (!threeScreen.removeCube(x, y ,layer)) {
+            if (!threeScreen.removeCube(x, y, layer)) {
                 threeScreen.addCube(new Cube(x, y, layer));
             }
         }
