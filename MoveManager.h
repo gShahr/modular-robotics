@@ -101,7 +101,7 @@ public:
 
     MoveBase* MakeCopy() const override = 0;
 
-    void Rotate(int index) override;
+    void Rotate(int a, int b) override;
 
     void Reflect(int index) override;
 
@@ -110,8 +110,6 @@ public:
 
     [[nodiscard]]
     const std::vector<std::pair<Move::AnimType, std::valarray<int>>>& AnimSequence() const;
-
-    virtual ~MoveBase() = default;
 
     friend class MoveManager;
 };

@@ -35,7 +35,7 @@ class threeDScreen {
                 sketch.fill(0, 0, 255);
             }
             sketch.box(this.tileSize);
-            sketch.fill(255);
+            sketch.fill(this.cubes[i].color[0], this.cubes[i].color[1], this.cubes[i].color[2]);
             sketch.translate(-this.cubes[i].x*this.tileSize,
                                  -this.cubes[i].y*this.tileSize,
                                  -this.cubes[i].z*this.tileSize);

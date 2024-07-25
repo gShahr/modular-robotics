@@ -3,16 +3,16 @@
 #include <filesystem>
 #include "MoveManager.h"
 
-void MoveBase::Rotate(int index) {
-    std::swap(initPos[0], initPos[index]);
-    std::swap(finalPos[0], finalPos[index]);
-    std::swap(bounds[0], bounds[index]);
+void MoveBase::Rotate(int a, int b) {
+    std::swap(initPos[a], initPos[b]);
+    std::swap(finalPos[a], finalPos[b]);
+    std::swap(bounds[a], bounds[b]);
     for (auto& move : moves) {
-        std::swap(move.first[0], move.first[index]);
+        std::swap(move.first[a], move.first[b]);
     }
     for (auto& anim : animSequence) {
-        anim.first = Move::AnimRotationMap.at(anim.first)[index];
-        std::swap(anim.second[0], anim.second[index]);
+        anim.first = Move::AnimRotationMap.at(anim.first)[b];
+        std::swap(anim.second[a], anim.second[b]);
     }
 }
 
@@ -259,19 +259,30 @@ void MoveManager::RegisterAllMoves(const std::string& movePath) {
         for (const auto& moveDef : moveJson["moves"]) {
             if (moveDef["order"] == 2) {
 #if MOVEMANAGER_VERBOSE > MM_LOG_NONE
-                DEBUG("Registering 2d move " << moveDef["name"] << std::endl);
+                DEBUG("Registering 2d move in " << Lattice::order << "d space: " << moveDef["name"] << std::endl);
 #endif
-                auto move = new Move2d();
-                move->InitMove(moveDef);
+                //auto move = new Move2d();
+                //Isometry::transformsToFree.push_back(move);
+                //move->InitMove(moveDef);
             } else if (moveDef["order"] == 3) {
 #if MOVEMANAGER_VERBOSE > MM_LOG_NONE
-                DEBUG("Registering 3d move " << moveDef["name"] << std::endl);
+                DEBUG("Registering 3d move " << Lattice::order << "d space: " << moveDef["name"] << std::endl);
 #endif
-                auto move = new Move3d();
-                move->InitMove(moveDef);
+                //auto move = new Move3d();
+                //Isometry::transformsToFree.push_back(move);
+                //move->InitMove(moveDef);
             } else {
                 // Not currently supported
                 std::cout << "Attempted to create move of order != 2 or 3, moveDef at: " << moveFile.path() << std::endl;
+            }
+            if (Lattice::order == 2) {
+                auto move = new Move2d();
+                Isometry::transformsToFree.push_back(move);
+                move->InitMove(moveDef);
+            } else if (Lattice::order == 3) {
+                auto move = new Move3d();
+                Isometry::transformsToFree.push_back(move);
+                move->InitMove(moveDef);
             }
         }
         // might need to close the ifstream idk yet

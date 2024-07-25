@@ -1,0 +1,36 @@
+{
+  "order": 2,
+  "axisSize": 14,
+  "modules": [
+    {
+      "position": [2, 2],
+      "static": false,
+      "color": "red"
+    },
+    {
+      "position": [2, 3],
+      "static": false,
+      "color": "green"
+    },
+    {
+      "position": [2, 4],
+      "static": false,
+      "color": "blue"
+    },
+    {
+      "position": [2, 5],
+      "static": false,
+      "color": "cyan"
+    },
+    {
+      "position": [2, 6],
+      "static": false,
+      "color": "black"
+    },
+    {
+      "position": [2, 7],
+      "static": true,
+      "color": "white"
+    }
+  ]
+}

@@ -13,7 +13,7 @@
  * FINAL_DEPTH: Output final depth and configuration upon BFS completion
  * EVERY_DEPTH: Output current depth and configuration every time BFS depth increases
  */
-#define CONFIG_VERBOSE CS_LOG_FINAL_DEPTH
+#define CONFIG_VERBOSE CS_LOG_EVERY_DEPTH
 
 class HashedState {
 private:
@@ -23,14 +23,14 @@ public:
 
     explicit HashedState(size_t seed);
 
-    explicit HashedState(const CoordTensor<bool>& state, const CoordTensor<std::string>& colors);
+    explicit HashedState(const CoordTensor<bool>& state, const CoordTensor<int>& colors);
 
     HashedState(const HashedState& other);
 
     [[nodiscard]]
     size_t GetSeed() const;
 
-    void HashCoordTensor(const CoordTensor<bool>& state, const CoordTensor<std::string>& colors);
+    void HashCoordTensor(const CoordTensor<bool>& state, const CoordTensor<int>& colors);
 
     bool operator==(const HashedState& other) const;
 
@@ -49,17 +49,17 @@ private:
     Configuration* parent = nullptr;
     std::vector<Configuration*> next;
     CoordTensor<bool> _state;
-    CoordTensor<std::string> _colors;
+    CoordTensor<int> _colors;
     HashedState hash;
 public:
     int depth = 0;
     explicit Configuration(CoordTensor<bool> state);
 
-    explicit Configuration(CoordTensor<bool> state, CoordTensor<std::string> colors);
+    explicit Configuration(CoordTensor<bool> state, CoordTensor<int> colors);
 
     ~Configuration();
 
-    std::vector<std::pair<CoordTensor<bool>, CoordTensor<std::string>>> MakeAllMoves();
+    std::vector<std::pair<CoordTensor<bool>, CoordTensor<int>>> MakeAllMoves();
 
     void AddEdge(Configuration* configuration);
 
@@ -71,12 +71,12 @@ public:
     const CoordTensor<bool>& GetState() const;
 
     [[nodiscard]]
-    const CoordTensor<std::string>& GetColors() const;
+    const CoordTensor<int>& GetColors() const;
 
     [[nodiscard]]
     const HashedState& GetHash() const;
 
-    void SetStateAndHash(const CoordTensor<bool>& state, const CoordTensor<std::string>& colors);
+    void SetStateAndHash(const CoordTensor<bool>& state, const CoordTensor<int>& colors);
 
     void SetParent(Configuration* configuration);
 

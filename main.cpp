@@ -19,7 +19,7 @@
 
 int main() {
     // Set up Lattice
-    LatticeSetup::setupFromJson("docs/examples/move_line_with_colors_initial.json");
+    LatticeSetup::setupFromJson("docs/examples/basic_3d_initial.json");
     std::cout << Lattice::ToString();
 
     // Set up moves
@@ -29,14 +29,16 @@ int main() {
     // BFS
     std::cout << "BFS Testing:\n";
     Configuration start(Lattice::stateTensor, Lattice::colorTensor);
-    Configuration* end = LatticeSetup::setupFinalFromJson("docs/examples/move_line_with_colors_final.json");
-    auto path = ConfigurationSpace::BFS(&start, end);
+    Configuration end = LatticeSetup::setupFinalFromJson("docs/examples/basic_3d_final.json");
+    auto path = ConfigurationSpace::BFS(&start, &end);
     std::cout << "Path:\n";
     for (auto config : path) {
         Lattice::UpdateFromState(config->GetState(), config->GetColors());
         std::cout << Lattice::ToString();
     }
     std::string exportFolder = "Visualization/Scenarios/";
-    Scenario::exportToScen(path, exportFolder + "move_line_with_colors.scen");
+    Scenario::exportToScen(path, exportFolder + "move_line_upside_down.scen");
+
+    Isometry::CleanupTransforms();
     return 0;
 }

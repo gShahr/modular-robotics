@@ -1,6 +1,7 @@
 #include "LatticeSetup.h"
 #include "ConfigurationSpace.h"
 #include "MetaModule.h"
+#include "Colors.h"
 
 namespace LatticeSetup {
     void setupFromJson(const std::string& filename) {
@@ -26,16 +27,16 @@ namespace LatticeSetup {
         Lattice::BuildMovableModules();
     }
 
-    Configuration* setupFinalFromJson(const std::string& filename) {
+    Configuration setupFinalFromJson(const std::string& filename) {
         std::ifstream file(filename);
         if (!file) {
             std::cerr << "Unable to open file " << filename << std::endl;
-            return nullptr;
+            throw std::ios_base::failure("Unable to open file " + filename + "\n");
         }
         nlohmann::json j;
         file >> j;
         CoordTensor<bool> desiredState(Lattice::Order(), Lattice::AxisSize(), false);
-        CoordTensor<std::string> colors(Lattice::Order(), Lattice::AxisSize(), "");
+        CoordTensor<int> colors(Lattice::Order(), Lattice::AxisSize(), -1);
         for (const auto& module : j["modules"]) {
             std::vector<int> position = module["position"];
             std::transform(position.begin(), position.end(), position.begin(),
@@ -43,14 +44,14 @@ namespace LatticeSetup {
             std::valarray<int> coords(position.data(), position.size());
             desiredState[coords] = true;
             if (module.contains("color")) {
-                colors[coords] = module["color"];
+                colors[coords] = Color::colorToInt[module["color"]];
             }
         }
-        return new Configuration(desiredState, colors);
+        return Configuration(desiredState, colors);
     }
 
-    void setupInitial(const std::string& filename) {
-        Lattice::InitLattice(2, 9);
+    void setupInitial(const std::string& filename, int order, int axisSize) {
+        Lattice::InitLattice(order, axisSize);
         std::vector<std::vector<char>> image;
         int x = 0;
         int y = 0;
@@ -77,16 +78,16 @@ namespace LatticeSetup {
         Lattice::BuildMovableModules();
     }
 
-    Configuration* setupFinal(const std::string& filename) {
+    Configuration setupFinal(const std::string& filename) {
         int x = 0;
         int y = 0;
         std::ifstream file(filename);
         if (!file) {
             std::cerr << "Unable to open file " << filename << std::endl;
-            return nullptr;
+            throw std::ios_base::failure("Unable to open file " + filename + "\n");
         }
         CoordTensor<bool> desiredState(Lattice::Order(), Lattice::AxisSize(), false);
-        CoordTensor<std::string> colors(Lattice::Order(), Lattice::AxisSize(), "");
+        CoordTensor<int> colors(Lattice::Order(), Lattice::AxisSize(), -1);
         std::string line;
         while (std::getline(file, line)) {
             for (char c : line) {
@@ -99,7 +100,7 @@ namespace LatticeSetup {
             x = 0;
             y++;
         }
-        return new Configuration(desiredState, colors);
+        return Configuration(desiredState, colors);
     }
 
     void setUpMetamodule(MetaModule* metamodule) {
