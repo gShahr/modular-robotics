@@ -25,7 +25,7 @@ public:
 
     void readFromJson(const std::string& filename);
 
-    void Rotate(int index) override;
+    void Rotate(int a, int b) override;
 
     void Reflect(int index) override;
 

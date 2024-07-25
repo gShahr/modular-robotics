@@ -48,9 +48,9 @@ void MetaModule::readFromJson(const std::string& filename) {
     }
 }
 
-void MetaModule::Rotate(int index) {
+void MetaModule::Rotate(int a, int b) {
     for (auto& coord : coords) {
-        std::swap(coord[0], coord[index]);
+        std::swap(coord[a], coord[b]);
     }
 }
 

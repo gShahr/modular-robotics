@@ -3,16 +3,16 @@
 #include <filesystem>
 #include "MoveManager.h"
 
-void MoveBase::Rotate(int index) {
-    std::swap(initPos[0], initPos[index]);
-    std::swap(finalPos[0], finalPos[index]);
-    std::swap(bounds[0], bounds[index]);
+void MoveBase::Rotate(int a, int b) {
+    std::swap(initPos[a], initPos[b]);
+    std::swap(finalPos[a], finalPos[b]);
+    std::swap(bounds[a], bounds[b]);
     for (auto& move : moves) {
-        std::swap(move.first[0], move.first[index]);
+        std::swap(move.first[a], move.first[b]);
     }
     for (auto& anim : animSequence) {
-        anim.first = Move::AnimRotationMap.at(anim.first)[index];
-        std::swap(anim.second[0], anim.second[index]);
+        anim.first = Move::AnimRotationMap.at(anim.first)[b];
+        std::swap(anim.second[a], anim.second[b]);
     }
 }
 
