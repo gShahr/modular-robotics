@@ -47,6 +47,28 @@ extern GLFWwindow* createWindowAndContext();
 extern void registerWindowCallbacks(GLFWwindow* window);
 extern void setupGl(GLFWwindow* window);
 
+// TODO clean this up, comment it, and bulletproof it
+Cube* raymarch(glm::vec3 pos, glm::vec3 dir) {
+    float dist;
+    float mindist = 100.0f;
+    int i;
+    Cube* cube;
+
+    for (i = 20; (i > 0) && (mindist > 0.0f); i--) {
+        mindist = 100.0f;
+        for (std::pair<int, Cube*> pair : glob_objects) {
+            cube = pair.second;
+            dist = cube->distanceTo(pos);
+            mindist = glm::min(dist, mindist);
+            if (mindist == 0.0f) { std::cout << "Clicked on cube ID " << cube->id << std::endl; return cube; }
+        }
+
+        pos += glm::max(0.1f, mindist * 0.99f) * dir;
+    }
+    std::cout << "No cube at click location" << std::endl;
+    return NULL;
+}
+
 int main(int argc, char** argv) {
     // Establishes a Window, creates an OpenGL context, and invokes GLAD
     GLFWwindow* window = createWindowAndContext(); // setuputils.cpp
