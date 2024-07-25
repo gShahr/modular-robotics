@@ -51,11 +51,12 @@ void Lattice::MoveModule(Module &mod, const std::valarray<int> &offset) {
     ClearAdjacencies(mod.id);
     coordTensor[mod.coords] = -1;
     stateTensor[mod.coords] = false;
+    std::string color = colorTensor[mod.coords];
     colorTensor[mod.coords] = "";
     mod.coords += offset;
     coordTensor[mod.coords] = mod.id;
     stateTensor[mod.coords] = true;
-    colorTensor[mod.coords] = mod.color;
+    colorTensor[mod.coords] = color;
     EdgeCheck(mod);
 }
 
