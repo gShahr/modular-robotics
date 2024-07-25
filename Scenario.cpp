@@ -15,6 +15,18 @@ namespace ColorConverter {
         {"red", {255, 0, 0}},
         {"green", {0, 255, 0}},
         {"blue", {0, 0, 255}},
+        {"cyan", {0, 255, 255}},
+        {"pink", {255, 192, 203}},
+        {"orange", {255, 165, 0}},
+        {"purple", {128, 0, 128}},
+        {"yellow", {255, 255, 0}},
+        {"brown", {165, 42, 42}},
+        {"black", {0, 0, 0}},
+        {"white", {255, 255, 255}},
+        {"gray", {128, 128, 128}},
+        {"lightgray", {211, 211, 211}},
+        {"darkgray", {169, 169, 169}},
+        {"magenta", {255, 0, 255}}
     };
 
     RGB convertColorNameToRGB(const std::string& colorName) {
