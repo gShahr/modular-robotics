@@ -84,6 +84,29 @@ void Cube::setColor(int r, int g, int b) {
     this->color = glm::vec3((float)r/255.0f, (float)g/255.0f, (float)b/255.0f);
 }
 
+float Cube::distanceTo(glm::vec3 worldPoint) {
+    // Transform the world point to local space
+    glm::mat4 modelmat = glm::translate(glm::mat4(1.0f), glm::vec3(this->pos));
+    glm::vec4 localPoint;
+
+    glm::mat4 transform = glm::mat4(1.0f);
+    transform = glm::scale(transform, this->scale);
+    transform = this->rotation * transform;
+    if (this->move) {
+        transform = this->processAnimation() * transform;
+    };
+
+    localPoint = glm::inverse(transform) * glm::inverse(modelmat) * glm::vec4(worldPoint, 1.0f);
+
+    // Not magic: because local space has cube centered at (0,0,0) with size 0.5,
+    //  this relatively simple normalization works to calculate distance in local space
+    //  (which has the same units as world space, so we can return the value as-is)
+    return glm::sqrt(\
+        glm::pow(glm::max(0.0f, abs(localPoint[0]) - 0.5f), 2.0f) +\
+        glm::pow(glm::max(0.0f, abs(localPoint[1]) - 0.5f), 2.0f) +\
+        glm::pow(glm::max(0.0f, abs(localPoint[2]) - 0.5f), 2.0f));
+}
+
 Cube::Cube(int id, int x, int y, int z) {
     this->id = id;
     this->setPos(x, y, z);

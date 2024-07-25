@@ -72,7 +72,6 @@ glm::vec4 convertClickCoordToWorldDir(float xp, float yp) {
     return rayDir;
 }
 
-
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
     if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
         rmbClicked = true;
@@ -84,7 +83,8 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
     } else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) { // Left-click
         double xp, yp;
         glfwGetCursorPos(window, &xp, &yp);
-        convertClickCoordToWorldDir(xp, yp);
+        // TODO dispatch to ray-marching algorithm to identify which cube was clicked
+        //  via convertClickCoordToWorldDir(), and Cube.distanceTo()
     }
 }
 

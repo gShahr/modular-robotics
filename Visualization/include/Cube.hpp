@@ -27,6 +27,7 @@ public:
     void setPos(int x, int y, int z);
     void setScale(int scale);
     void setColor(int r, int g, int b);
+    float distanceTo(glm::vec3 point); // Takes a point in world space, and calculates the smallest distance from the point to a face on the cube (or 0.0f for all points inside the cube)
     void draw();
     void startAnimation(bool* markWhenAnimFinished, Move* move);
     void stopAnimation();
