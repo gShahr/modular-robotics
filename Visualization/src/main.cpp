@@ -32,8 +32,9 @@ const char *texturePath = "resources/textures/face_debug.png";
 float glob_deltaTime = 0.0f;                    // Frame-time info
 float glob_lastFrame = 0.0f;
 float glob_animSpeed = 2.0f;                    // Animation attributes
-bool glob_animateRequest = false;               //  When the current animation finishes (if any), should another be fetched?
-bool glob_animateAuto = false;                  //  Is the scene in auto-animate mode? (will automa
+bool glob_animateRequest = false;               //  When the current animation chain finishes (if any), should another be fetched?
+bool glob_animateChaining = false;              //  Continue fetching animations until reaching a checkpoint move
+bool glob_animateAuto = false;                  //  Is the scene in auto-animate mode? (will automatically set animateRequest to true upon reaching a checkpoint move)
 bool glob_animateForward = true;                //  Direction to fetch animations
 
 Camera camera = Camera();
@@ -66,7 +67,7 @@ Cube* raymarch(glm::vec3 pos, glm::vec3 dir) {
                     _.second->setBorder();
                 }
                 cube->setBorderWidth(0.02f);
-                cube->setBorderColor(255, 255, 255);
+                cube->setBorderColor(1.0f, 1.0f, 1.0f);
                 return cube;
             }
         }
@@ -125,22 +126,53 @@ int main(int argc, char** argv) {
         camera.calcViewMat(glm::vec3(0.0f));
 #endif
 
-        if (readyForNewAnim && glob_animateRequest) {
-            Move* move;
-            glob_animateRequest = glob_animateAuto;  // Set global variable: reset the request-anim flag, unless auto-animating
+        if (readyForNewAnim) {
+            // If there's no need to fetch another move, bypass
+            if (!glob_animateRequest && !glob_animateChaining) {
+                goto render;
+            }
 
-            if (glob_animateForward) { move = scenMoveSeq->pop(); }
-            else { move = scenMoveSeq->undo(); }
+            // Peek the next move; if there is none, reset flags and bypass
+            Move* move = glob_animateForward ? scenMoveSeq->peek() : scenMoveSeq->peekBack();
+            if (!move) {
+                glob_animateRequest = false;
+                glob_animateChaining = false;
+                goto render;
+            }
 
-            if (move) {
-                Cube* mover = glob_objects.at(move->moverId);
+            // If we're chaining, and going forwards, peek the next move
+            //  If it's a checkpoint move, reset the chaining flag. If there's ALSO no request, bypass to render
+            if (glob_animateChaining && glob_animateForward) {
+                if (move->checkpointMove) {
+                    glob_animateChaining = false;
+                    if (!glob_animateRequest) {
+                        std::cout << "c";
+                        goto render;
+                    }
+                }
+            }
 
-                mover->startAnimation(&readyForNewAnim, move);
-                readyForNewAnim = false;
-            } else { glob_animateRequest = false; }
+            // Whether or not we're chaining, update the request status
+            if (glob_animateRequest) {
+                glob_animateRequest = glob_animateAuto;
+            }
+            
+            // Okay -- all variables updated appropriately, fetch the move and animate it
+            //  (Remember we already checked that the move exists, so we don't need to check again)
+            move = glob_animateForward ? scenMoveSeq->pop() : scenMoveSeq->undo();
+            Cube* mover = glob_objects.at(move->moverId);
+            mover->startAnimation(&readyForNewAnim, move);
+            readyForNewAnim = false;
+
+            // Last thing: set chaining flag to true, UNLESS we're going backwards and this move is a checkpoint move
+            if (!glob_animateForward && move->checkpointMove) {
+                glob_animateChaining = false;
+            } else {
+                glob_animateChaining = true;
+            }
         }
 
-        // -- Rendering --
+render: // -- Rendering --
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

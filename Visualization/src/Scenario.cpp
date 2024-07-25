@@ -39,12 +39,14 @@ Scenario::Scenario(const char* filepath) {
     bool sliding;               // As above: sliding moves are encoded by sign of int. Extract to this helper variable
     VisGroup* vg;
     Cube* cube;
+    bool checkpointMove = true;
 
     while (std::getline(stream, line)) {
         line = line.substr(0, line.find("//"));
         if (line.empty()) {
             currentBlock++;
-            std::cout << " -- Parsing new block -- " << currentBlock << std::endl;
+            checkpointMove = true;
+            if (currentBlock < 3) { std::cout << " -- Parsing new block -- " << currentBlock << std::endl; }
             continue;
         }
 
@@ -71,7 +73,7 @@ Scenario::Scenario(const char* filepath) {
                 this->cubes.push_back(cube);
                 break;
             }
-            case 2: {
+            default: {
                 switch (abs(buf[1])) {
                     case (0): { anchorDir = glm::vec3(0.0f); break; }
                     case (1): { anchorDir = glm::vec3(1.0f, 0.0f, 0.0f); break; }
@@ -84,9 +86,10 @@ Scenario::Scenario(const char* filepath) {
                 }
                 sliding = buf[1] > 0 ? false : true;
 
-                this->moves.push_back(new Move(buf[0], anchorDir, glm::vec3(buf[2], buf[3], buf[4]), sliding));
-                if (sliding) { std::cout << "Creating Sliding Move of Cube ID " << buf[0] << " with anchorDir " << glm::to_string(anchorDir) << " with delta position " << buf[2] << ", " << buf[3] << ", " << buf[4] << std::endl; }
-                else { std::cout << "Creating Pivot Move of Cube ID " << buf[0] << " with anchorDir " << glm::to_string(anchorDir) << " with delta position " << buf[2] << ", " << buf[3] << ", " << buf[4] << std::endl; }
+                this->moves.push_back(new Move(buf[0], anchorDir, glm::vec3(buf[2], buf[3], buf[4]), sliding, checkpointMove));
+                if (sliding) { std::cout << (checkpointMove ? " (c.p.) " : "        ") << "Creating Sliding Move of Cube ID " << buf[0] << " with anchorDir " << glm::to_string(anchorDir) << " with delta position " << buf[2] << ", " << buf[3] << ", " << buf[4] << std::endl; }
+                else { std::cout << (checkpointMove ? " (c.p.) " : "        ") << "Creating Pivot Move of Cube ID " << buf[0] << " with anchorDir " << glm::to_string(anchorDir) << " with delta position " << buf[2] << ", " << buf[3] << ", " << buf[4] << std::endl; }
+                if (checkpointMove) { checkpointMove = false; }
                 break; // Switch break
             }
         }
