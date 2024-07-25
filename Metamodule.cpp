@@ -57,7 +57,9 @@ void MetaModule::Rotate(int index) {
 void MetaModule::Reflect(int index) {
     for (auto& coord : coords) {
         coord[index] *= -1;
-        coord[index] += size - 1;
+        // Ternary needs testing
+        //coord[index] += size - 1;
+        coord[index] += size - size % 2;
     }
 }
 
