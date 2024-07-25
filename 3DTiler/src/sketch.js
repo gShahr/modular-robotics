@@ -8,6 +8,7 @@ highlight = false;
 blocks = [];
 historyStack = [];
 redoStack = [];
+rgbColor = [255, 255, 255];
 
 function saveConfig() {
     var output = "";
@@ -32,6 +33,10 @@ function dwnldAsTxt(filename, text) {
     document.body.removeChild(element);
 }
 
+function changeColor(color) {
+    rgbColor = color;
+}
+
 function ChangeLabel(newString) {
     document.getElementById("curLayer").textContent = newString;
 }
@@ -48,18 +53,6 @@ function downLayer() {
 
 function highlightLayer() {
     highlight = !highlight;
-}
-
-function redo() {
-    if (redoStack.length > 0) {
-        let lastUndo = redoStack.pop();
-        historyStack.push(lastUndo);
-        if (lastUndo.action === 'add') {
-            screen.addCube(new Cube(lastUndo.x, lastUndo.y, lastUndo.z));
-        } else {
-            screen.removeCube(lastUndo.x, lastUndo.y, lastUndo.z);
-        }
-    }
 }
 
 var sketch1 = function (sketch) {
@@ -115,8 +108,6 @@ var sketch1 = function (sketch) {
                 let lastMove = redoStack.pop();
                 historyStack.push(lastMove);
                 if (lastMove.action === 'add') {
-                    console.log(lastMove);
-                    screen.addCube(0, 0, 0);
                     screen.addCube(new Cube(lastMove.x, lastMove.y, lastMove.z));
                     threeScreen.addCube(new Cube(lastMove.x, lastMove.y, lastMove.z));
                 } else {
@@ -168,7 +159,7 @@ var sketch2 = function (sketch) {
             y = Math.floor(sketch.mouseY / twoDtileSize);
             console.log(x + ", " + y);
             if (!threeScreen.removeCube(x, y, layer)) {
-                threeScreen.addCube(new Cube(x, y, layer));
+                threeScreen.addCube(new Cube(x, y, layer, rgbColor));
             }
         }
     }

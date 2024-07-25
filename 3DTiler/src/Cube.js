@@ -31,10 +31,10 @@ class Cube {
     }
 
     set color(val) {
-        this.color = val;
+        this._color = val;
     }
 
     get color() {
-        return this.color;
+        return this._color;
     }
 }
