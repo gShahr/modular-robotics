@@ -222,7 +222,7 @@ std::string Lattice::ToString() {
     for (int i = 0; i < coordTensor.GetArrayInternal().size(); i++) {
         auto id = coordTensor.GetElementDirect(i);
         if (id >= 0) {
-            out << '#';
+            out << colorTensor.GetElementDirect(i)[0];
         } else {
             out << '-';
         }
