@@ -42,7 +42,7 @@ public:
     // Module tensor
     static CoordTensor<int> coordTensor;
     // Color tensor
-    static CoordTensor<std::string> colorTensor;
+    static CoordTensor<int> colorTensor;
 
     Lattice() = delete;
     Lattice(Lattice&) = delete;
@@ -72,7 +72,7 @@ public:
     static const std::vector<Module*>& MovableModules();
 
     // Assign from state tensor
-    static void UpdateFromState(const CoordTensor<bool>& state, const CoordTensor<std::string>& colors);
+    static void UpdateFromState(const CoordTensor<bool>& state, const CoordTensor<int>& colors);
 
     static int Order();
 

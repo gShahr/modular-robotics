@@ -19,7 +19,7 @@
 
 int main() {
     // Set up Lattice
-    LatticeSetup::setupFromJson("docs/examples/move_line_upside_down_initial.json");
+    LatticeSetup::setupFromJson("docs/examples/move_line_upside_down_3d_initial.json");
     std::cout << Lattice::ToString();
 
     // Set up moves
@@ -29,7 +29,7 @@ int main() {
     // BFS
     std::cout << "BFS Testing:\n";
     Configuration start(Lattice::stateTensor, Lattice::colorTensor);
-    Configuration end = LatticeSetup::setupFinalFromJson("docs/examples/move_line_upside_down_final.json");
+    Configuration end = LatticeSetup::setupFinalFromJson("docs/examples/move_line_upside_down_3d_final.json");
     auto path = ConfigurationSpace::BFS(&start, &end);
     std::cout << "Path:\n";
     for (auto config : path) {

@@ -105,7 +105,7 @@ namespace Scenario {
         file.close();
     }
 
-    void exportToScen(const CoordTensor<bool>& state, const CoordTensor<std::string>& colors, const std::string& filename) {
+    void exportToScen(const CoordTensor<bool>& state, const CoordTensor<int>& colors, const std::string& filename) {
         std::ofstream file(filename);
         file << "0, 244, 244, 0, 95\n";
         file << "1, 255, 255, 255, 85\n\n";

@@ -1,6 +1,7 @@
 #include "LatticeSetup.h"
 #include "ConfigurationSpace.h"
 #include "MetaModule.h"
+#include "Colors.h"
 
 namespace LatticeSetup {
     void setupFromJson(const std::string& filename) {
@@ -35,7 +36,7 @@ namespace LatticeSetup {
         nlohmann::json j;
         file >> j;
         CoordTensor<bool> desiredState(Lattice::Order(), Lattice::AxisSize(), false);
-        CoordTensor<std::string> colors(Lattice::Order(), Lattice::AxisSize(), "");
+        CoordTensor<int> colors(Lattice::Order(), Lattice::AxisSize(), -1);
         for (const auto& module : j["modules"]) {
             std::vector<int> position = module["position"];
             std::transform(position.begin(), position.end(), position.begin(),
@@ -43,7 +44,7 @@ namespace LatticeSetup {
             std::valarray<int> coords(position.data(), position.size());
             desiredState[coords] = true;
             if (module.contains("color")) {
-                colors[coords] = module["color"];
+                colors[coords] = Color::colorToInt[module["color"]];
             }
         }
         return Configuration(desiredState, colors);
@@ -86,7 +87,7 @@ namespace LatticeSetup {
             throw std::ios_base::failure("Unable to open file " + filename + "\n");
         }
         CoordTensor<bool> desiredState(Lattice::Order(), Lattice::AxisSize(), false);
-        CoordTensor<std::string> colors(Lattice::Order(), Lattice::AxisSize(), "");
+        CoordTensor<int> colors(Lattice::Order(), Lattice::AxisSize(), -1);
         std::string line;
         while (std::getline(file, line)) {
             for (char c : line) {

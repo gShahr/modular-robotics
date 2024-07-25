@@ -1,7 +1,9 @@
 #include <queue>
 #include <sstream>
 #include <string>
+#include <map>
 #include "debug_util.h"
+#include "Colors.h"
 #include "Lattice.h"
 
 std::vector<std::vector<int>> Lattice::adjList;
@@ -12,7 +14,7 @@ int Lattice::moduleCount = 0;
 std::vector<Module*> Lattice::movableModules;
 CoordTensor<bool> Lattice::stateTensor(1, 1, false);
 CoordTensor<int> Lattice::coordTensor(1, 1, -1);
-CoordTensor<std::string> Lattice::colorTensor(1, 1, "");
+CoordTensor<int> Lattice::colorTensor(1, 1, -1);
 
 void Lattice::ClearAdjacencies(int moduleId) {
     for (int id : adjList[moduleId]) {
@@ -31,7 +33,7 @@ void Lattice::InitLattice(int _order, int _axisSize) {
     axisSize = _axisSize;
     stateTensor = CoordTensor<bool>(order, axisSize, false);
     coordTensor = CoordTensor<int>(order, axisSize, -1);
-    colorTensor = CoordTensor<std::string>(order, axisSize, "");
+    colorTensor = CoordTensor<int>(order, axisSize, -1);
 }
 
 void Lattice::AddModule(const std::valarray<int> &coords, bool isStatic, const std::string& color) {
@@ -40,7 +42,7 @@ void Lattice::AddModule(const std::valarray<int> &coords, bool isStatic, const s
     // Update state and coord tensor
     stateTensor[coords] = true;
     coordTensor[coords] = mod.id;
-    colorTensor[coords] = color;
+    colorTensor[coords] = Color::colorToInt[color];
     // Adjacency check
     EdgeCheck(mod, false);
     moduleCount++;
@@ -51,8 +53,8 @@ void Lattice::MoveModule(Module &mod, const std::valarray<int> &offset) {
     ClearAdjacencies(mod.id);
     coordTensor[mod.coords] = -1;
     stateTensor[mod.coords] = false;
-    std::string color = colorTensor[mod.coords];
-    colorTensor[mod.coords] = "";
+    int color = colorTensor[mod.coords];
+    colorTensor[mod.coords] = -1;
     mod.coords += offset;
     coordTensor[mod.coords] = mod.id;
     stateTensor[mod.coords] = true;
@@ -155,7 +157,7 @@ const std::vector<Module*>& Lattice::MovableModules() {
     return movableModules;
 }
 
-void Lattice::UpdateFromState(const CoordTensor<bool> &state, const CoordTensor<std::string>& colors) {
+void Lattice::UpdateFromState(const CoordTensor<bool> &state, const CoordTensor<int>& colors) {
     std::queue<int> modsToMove;
     std::queue<int> destinations;
     for (int i = 0; i < state.GetArrayInternal().size(); i++) {
@@ -223,7 +225,7 @@ std::string Lattice::ToString() {
     for (int i = 0; i < coordTensor.GetArrayInternal().size(); i++) {
         auto id = coordTensor.GetElementDirect(i);
         if (id >= 0) {
-            out << colorTensor.GetElementDirect(i)[0];
+            out << Color::intToColor[colorTensor.GetElementDirect(i)][0];
         } else {
             out << '-';
         }
