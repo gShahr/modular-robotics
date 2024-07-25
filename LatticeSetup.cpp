@@ -49,8 +49,8 @@ namespace LatticeSetup {
         return Configuration(desiredState, colors);
     }
 
-    void setupInitial(const std::string& filename) {
-        Lattice::InitLattice(2, 9);
+    void setupInitial(const std::string& filename, int order, int axisSize) {
+        Lattice::InitLattice(order, axisSize);
         std::vector<std::vector<char>> image;
         int x = 0;
         int y = 0;
