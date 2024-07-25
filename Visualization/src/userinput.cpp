@@ -46,6 +46,33 @@ void cursormove_callback(GLFWwindow* window, double xpos, double ypos) {
     }
 }
 
+glm::vec4 convertClickCoordToWorldDir(float xp, float yp) {
+    // Objective: calculate the direction we clicked in, by
+    //  transforming our click-point into world space, subtracting
+    //  that point from our camera's position in world space,
+    //  and normalizing.
+    glm::mat4 invViewMat, invProjMat;
+    glm::vec4 clickPoint, rayDir;
+
+    invViewMat = glm::inverse(camera.getViewMat());
+    invProjMat = glm::inverse(camera.getProjMat());
+
+    clickPoint = glm::vec4( // Convert our click-coordinates into clip space (NDC; -1.0 to 1.0).
+        (float)(xp / glob_resolution[0] * 2.0 - 1.0),
+        (float)-(yp / glob_resolution[1] * 2.0 - 1.0), // (negative)
+        0.0f, 1.0f);
+    clickPoint = invProjMat * clickPoint;       // Convert to view space
+    clickPoint = invViewMat * clickPoint;       // Convert to world space
+    clickPoint = clickPoint / clickPoint[3];    // Normalize homogenous coord to 1
+
+    rayDir = glm::normalize(clickPoint - glm::vec4(camera.getPos(), 1.0f));
+
+    std::cout << "Click direction: " << glm::to_string(rayDir) << std::endl;
+
+    return rayDir;
+}
+
+
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
     if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
         rmbClicked = true;
@@ -54,6 +81,10 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
         rmbClicked = false;
         firstMouse = true;
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    } else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) { // Left-click
+        double xp, yp;
+        glfwGetCursorPos(window, &xp, &yp);
+        convertClickCoordToWorldDir(xp, yp);
     }
 }
 
