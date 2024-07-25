@@ -79,6 +79,8 @@ public:
     static int AxisSize();
 
     static std::string ToString();
+
+    friend class MoveManager;
 };
 
 #endif //MODULAR_ROBOTICS_LATTICE_H
