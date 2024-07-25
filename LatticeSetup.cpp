@@ -26,7 +26,7 @@ namespace LatticeSetup {
         Lattice::BuildMovableModules();
     }
 
-    Configuration* setupFinalFromJson(const std::string& filename) {
+    Configuration setupFinalFromJson(const std::string& filename) {
         std::ifstream file(filename);
         if (!file) {
             std::cerr << "Unable to open file " << filename << std::endl;
@@ -46,7 +46,7 @@ namespace LatticeSetup {
                 colors[coords] = module["color"];
             }
         }
-        return new Configuration(desiredState, colors);
+        return Configuration(desiredState, colors);
     }
 
     void setupInitial(const std::string& filename) {
@@ -77,7 +77,7 @@ namespace LatticeSetup {
         Lattice::BuildMovableModules();
     }
 
-    Configuration* setupFinal(const std::string& filename) {
+    Configuration setupFinal(const std::string& filename) {
         int x = 0;
         int y = 0;
         std::ifstream file(filename);
@@ -99,7 +99,7 @@ namespace LatticeSetup {
             x = 0;
             y++;
         }
-        return new Configuration(desiredState, colors);
+        return Configuration(desiredState, colors);
     }
 
     void setUpMetamodule(MetaModule* metamodule) {
