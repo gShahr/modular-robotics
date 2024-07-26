@@ -84,6 +84,8 @@ public:
 };
 
 namespace ConfigurationSpace {
+    extern int depth;
+
     std::vector<Configuration*> BFS(Configuration* start, Configuration* final);
 
     std::vector<Configuration*> FindPath(Configuration* start, Configuration* final);

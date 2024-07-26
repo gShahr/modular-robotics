@@ -100,10 +100,9 @@ std::ostream& operator<<(std::ostream& out, const Configuration& config) {
     return out;
 }
 
+int ConfigurationSpace::depth = -1;
+
 std::vector<Configuration*> ConfigurationSpace::BFS(Configuration* start, Configuration* final) {
-#if CONFIG_VERBOSE > CS_LOG_NONE
-    int depth = -1;
-#endif
     std::queue<Configuration*> q;
     std::unordered_set<HashedState> visited;
     start->SetStateAndHash(start->GetState(), start->GetColors());
