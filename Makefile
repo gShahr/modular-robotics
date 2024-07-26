@@ -10,6 +10,9 @@ LDFLAGS = -L $(VCPKG_ROOT)/installed/x64-windows/lib -lgmock -lgtest -lbenchmark
 # Source files
 SOURCES = main.cpp ConfigurationSpace.cpp Lattice.cpp ModuleManager.cpp MoveManager.cpp MetaModule.cpp LatticeSetup.cpp Scenario.cpp Isometry.cpp Colors.cpp
 
+# Source files without main
+SOURCES2 = ConfigurationSpace.cpp Lattice.cpp ModuleManager.cpp MoveManager.cpp MetaModule.cpp LatticeSetup.cpp Scenario.cpp Isometry.cpp Colors.cpp
+
 # Object files
 OBJECTS = $(SOURCES:.cpp=.o)
 
@@ -24,8 +27,11 @@ $(EXECUTABLE): $(OBJECTS)
 .cpp.o:
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-test: tests/metamodule/test_1.cpp Metamodule.cpp
-	$(CXX) $(CXXFLAGS) -I. -o test tests/metamodule/test_1.cpp Metamodule.cpp
+test: tests/metamodule/metamodule_1.cpp Metamodule.cpp Isometry.cpp
+	$(CXX) $(CXXFLAGS) -I. -o test tests/metamodule/metamodule_1.cpp Metamodule.cpp Isometry.cpp
+
+test2: tests/colorTest.cpp $(SOURCES2)
+	$(CXX) $(CXXFLAGS) -I. -o test2 tests/colorTest.cpp $(SOURCES2)
 
 clean:
 	rm -f $(OBJECTS) $(EXECUTABLE)
