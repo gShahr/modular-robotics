@@ -18,15 +18,22 @@
 #include "debug_util.h"
 #include "MetaModule.h"
 
+// set --log_level=all to see boost output
+
+BOOST_AUTO_TEST_CASE(InitTest) {
+    std::string fileS = "docs/examples/basic_3d_initial.json";
+    std::string fileF = "docs/examples/basic_3d_final.json";
+    LatticeSetup::setupFromJson(fileS);
+    MoveManager::InitMoveManager(Lattice::Order(), Lattice::AxisSize());
+    MoveManager::RegisterAllMoves();
+}
+
 BOOST_AUTO_TEST_CASE(TestNotIgnoreColorsAfterBFS) {
     std::string fileS = "docs/examples/basic_3d_initial.json";
     std::string fileF = "docs/examples/basic_3d_final.json";
     bool ignoreColors = false;
 
     Lattice::setFlags(ignoreColors);
-    LatticeSetup::setupFromJson(fileS);
-    MoveManager::InitMoveManager(Lattice::Order(), Lattice::AxisSize());
-    MoveManager::RegisterAllMoves();
     Configuration start(Lattice::stateTensor, Lattice::colorTensor);
     Configuration end = LatticeSetup::setupFinalFromJson(fileF);
     auto path = ConfigurationSpace::BFS(&start, &end);
@@ -44,9 +51,6 @@ BOOST_AUTO_TEST_CASE(TestIgnoreColorsAfterBFS) {
     bool ignoreColors = true;
 
     Lattice::setFlags(ignoreColors);
-    LatticeSetup::setupFromJson(fileS);
-    MoveManager::InitMoveManager(Lattice::Order(), Lattice::AxisSize());
-    MoveManager::RegisterAllMoves();
     Configuration start(Lattice::stateTensor, Lattice::colorTensor);
     Configuration end = LatticeSetup::setupFinalFromJson(fileF);
     auto path = ConfigurationSpace::BFS(&start, &end);
