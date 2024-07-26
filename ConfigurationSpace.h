@@ -53,9 +53,8 @@ private:
     HashedState hash;
 public:
     int depth = 0;
-    explicit Configuration(CoordTensor<bool> state);
 
-    explicit Configuration(CoordTensor<bool> state, CoordTensor<int> colors);
+    Configuration(CoordTensor<bool> state, CoordTensor<int> colors);
 
     ~Configuration();
 

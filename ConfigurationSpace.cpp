@@ -36,8 +36,6 @@ size_t std::hash<HashedState>::operator()(const HashedState& state) const {
     return std::hash<size_t>()(state.GetSeed());
 }
 
-Configuration::Configuration(CoordTensor<bool> state) : _state(std::move(state)), _colors(CoordTensor<int>(state.Order(), state.AxisSize(), -1)){}
-
 Configuration::Configuration(CoordTensor<bool> state, CoordTensor<int> colors) : _state(std::move(state)), _colors(std::move(colors)) {}
 
 Configuration::~Configuration() {
