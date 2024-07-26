@@ -13,7 +13,7 @@ namespace ColorConverter {
 
         RGB(int r, int g, int b) : red(r), green(g), blue(b) {}
 
-        RGB(int rgbInt) {
+        explicit RGB(int rgbInt) {
             red = rgbInt & 0xFF0000;
             green = rgbInt & 0x00FF00;
             blue = rgbInt & 0x0000FF;
@@ -76,7 +76,7 @@ namespace Scenario {
             file << "1, 255, 255, 255, 85\n\n";
         } else {
             for (auto color : Lattice::colorTensor.GetArrayInternal()) {
-                ColorConverter::RGB rgb = ColorConverter::RGB(color);
+                ColorConverter::RGB rgb(color);
                 file << color << ", " << rgb.red << ", " << rgb.green << ", " << rgb.blue << ", 85\n";
             }
             file << "\n";
