@@ -70,6 +70,10 @@ namespace Scenario {
     }
 
     void exportToScen(const std::vector<Configuration*>& path, const std::string& filename) {
+        if (path.empty()) {
+            std::cerr << "Tried to export empty path, no good!" << std::endl;
+            return;
+        }
         std::ofstream file(filename);
         if (Lattice::ignoreColors) {
             file << "0, 244, 244, 0, 95\n";
@@ -89,8 +93,7 @@ namespace Scenario {
             auto& mod = ModuleIdManager::Modules()[id];
             if (Lattice::ignoreColors) {
                 modDef % id % (mod.moduleStatic ? 1 : 0) % mod.coords[0] % mod.coords[1] % (mod.coords.size() > 2 ? mod.coords[2] : 0);
-            }
-            else {
+            } else {
                 modDef % id % Lattice::colorTensor[mod.coords] % mod.coords[0] % mod.coords[1] % (mod.coords.size() > 2 ? mod.coords[2] : 0);
             }
             file << modDef.str() << std::endl;
