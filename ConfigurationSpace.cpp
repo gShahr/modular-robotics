@@ -4,6 +4,10 @@
 #include "MoveManager.h"
 #include "ConfigurationSpace.h"
 
+const char * BFSExcept::what() const noexcept {
+    return "BFS exhausted without finding a path!";
+}
+
 HashedState::HashedState() : seed(0) {}
 
 HashedState::HashedState(size_t seed) : seed(seed) {}
@@ -138,7 +142,7 @@ std::vector<Configuration*> ConfigurationSpace::BFS(Configuration* start, Config
             }
         }
     }
-    return {};
+    throw BFSExcept();
 }
 
 std::vector<Configuration*> ConfigurationSpace::FindPath(Configuration* start, Configuration* final) {

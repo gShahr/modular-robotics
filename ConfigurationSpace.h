@@ -15,6 +15,12 @@
  */
 #define CONFIG_VERBOSE CS_LOG_EVERY_DEPTH
 
+class BFSExcept : std::exception {
+public:
+    [[nodiscard]]
+    const char * what() const noexcept override;
+};
+
 class HashedState {
 private:
     size_t seed;
