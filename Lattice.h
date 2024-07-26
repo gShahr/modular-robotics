@@ -43,12 +43,16 @@ public:
     static CoordTensor<int> coordTensor;
     // Color tensor
     static CoordTensor<int> colorTensor;
+    // Color flag
+    static bool ignoreColors;
 
     Lattice() = delete;
     Lattice(Lattice&) = delete;
 
     //Lattice(int order, int axisSize);
     static void InitLattice(int _order, int _axisSize);
+
+    static void setFlags(bool _ignoreColors);
 
     // Add a new module
     static void AddModule(const std::valarray<int>& coords, bool isStatic = false, const std::string& color = "");
