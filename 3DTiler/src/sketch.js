@@ -117,6 +117,8 @@ var sketch1 = function (sketch) {
             }
             redoPressed = false;
         }
+        let message = areAllCubesConnected(blocks) ? "Yes" : "No";
+        document.getElementById("checkConnectivity").innerText = "Connected: " + message;    
     }
 
     sketch.mousePressed = function () {
@@ -158,6 +160,45 @@ var sketch2 = function (sketch) {
             }
         }
     }
+}
+
+function areAdjacent(block1, block2) {
+    // Assuming blocks are adjacent if they share a face
+    return Math.abs(block1.x - block2.x) + Math.abs(block1.y - block2.y) + Math.abs(block1.z - block2.z) === 1;
+}
+
+function areAllCubesConnected(blocks) {
+    if (blocks.length === 0) return true;
+
+    // Create an adjacency list
+    let adjacencyList = new Map();
+    blocks.forEach(block => {
+        adjacencyList.set(block, []);
+    });
+
+    // Populate the adjacency list
+    blocks.forEach(block => {
+        blocks.forEach(otherBlock => {
+            if (block !== otherBlock && areAdjacent(block, otherBlock)) {
+                adjacencyList.get(block).push(otherBlock);
+            }
+        });
+    });
+
+    // Perform DFS
+    let visited = new Set();
+    function dfs(block) {
+        visited.add(block);
+        adjacencyList.get(block).forEach(neighbor => {
+            if (!visited.has(neighbor)) {
+                dfs(neighbor);
+            }
+        });
+    }
+
+    // Start DFS from the first block
+    dfs(blocks[0]);
+    return visited.size === blocks.length;
 }
 
 twodCanv = new p5(sketch1);
