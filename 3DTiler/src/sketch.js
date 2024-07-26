@@ -58,6 +58,7 @@ function highlightLayer() {
 var sketch1 = function (sketch) {
     let undoPressed = false;
     let redoPressed = false;
+    let clearPressed = false;
 
     sketch.setup = function () {
         canv1 = sketch.createCanvas(canvasW / 2, canvasH);
@@ -74,6 +75,12 @@ var sketch1 = function (sketch) {
         if (redoButton) {
             redoButton.addEventListener('click', function () {
                 redoPressed = true;
+            });
+        }
+        let clearButton = document.getElementById('clear');
+        if (clearButton) {
+            clearButton.addEventListener('click', function () {
+                clearPressed = true;
             });
         }
     }
@@ -116,6 +123,12 @@ var sketch1 = function (sketch) {
                 }
             }
             redoPressed = false;
+        }
+        if (clearPressed) {
+            console.log("Clearing Screen");
+            screen.removeAllCubes()
+            threeScreen.removeAllCubes();
+            clearPressed = false;
         }
         let message = areAllCubesConnected(blocks) ? "Yes" : "No";
         document.getElementById("checkConnectivity").innerText = "Connected: " + message;    

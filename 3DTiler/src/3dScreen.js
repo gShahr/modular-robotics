@@ -6,6 +6,14 @@ class threeDScreen {
         this.cubes    = [];
     }
 
+    get getCubes() {
+        return this.cubes;
+    }
+
+    set setCubes(cubes) {
+        this._cubes = cubes;
+    }
+
     addCube(cube) {
         this.cubes.push(cube);
     }
@@ -18,6 +26,12 @@ class threeDScreen {
             }
         }
         return false;
+    }
+
+    removeAllCubes() {
+        while (this.cubes.length > 0) {
+            this.removeCube(this.cubes.pop());
+        }
     }
 
     draw(sketch, highlight, highLayer) {
