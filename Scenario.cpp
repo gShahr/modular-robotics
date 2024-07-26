@@ -129,4 +129,4 @@ namespace Scenario {
         file << std::endl;
         file.close();
     }
-};
+}
