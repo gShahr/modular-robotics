@@ -19,7 +19,7 @@ CoordTensor<int> Lattice::colorTensor(0, 0, 0);
 
 void Lattice::ClearAdjacencies(int moduleId) {
     for (int id : adjList[moduleId]) {
-        for (int i = 0; i < adjList[id].size(); i++) {
+        for (size_t i = 0; i < adjList[id].size(); i++) {
             if (adjList[id][i] == moduleId) {
                 adjList[id].erase(adjList[id].begin() + i);
                 break;
@@ -174,7 +174,7 @@ const std::vector<Module*>& Lattice::MovableModules() {
 void Lattice::UpdateFromState(const CoordTensor<bool> &state, const CoordTensor<int>& colors) {
     std::queue<int> modsToMove;
     std::queue<int> destinations;
-    for (int i = 0; i < state.GetArrayInternal().size(); i++) {
+    for (size_t i = 0; i < state.GetArrayInternal().size(); i++) {
         // Search for state differences
         if (stateTensor.GetElementDirect(i) != state.GetElementDirect(i)) {
             if (state.GetElementDirect(i)) {
@@ -236,7 +236,7 @@ std::string Lattice::ToString() {
         return "";
     }
     out << "Lattice State:\n";
-    for (int i = 0; i < coordTensor.GetArrayInternal().size(); i++) {
+    for (size_t i = 0; i < coordTensor.GetArrayInternal().size(); i++) {
         auto id = coordTensor.GetElementDirect(i);
         if (id >= 0 && !ignoreColors) {
             out << Color::intToColor[colorTensor.GetElementDirect(i)][0];
