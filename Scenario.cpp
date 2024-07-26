@@ -9,6 +9,12 @@ namespace ColorConverter {
         int red;
         int green;
         int blue;
+
+        RGB(int rgbInt) {
+            red = rgbInt & 0xFF0000;
+            green = rgbInt & 0x00FF00;
+            blue = rgbInt & 0x0000FF;
+        }
     };
 
     std::map<std::string, RGB> colorToRGB = {
