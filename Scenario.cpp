@@ -108,6 +108,7 @@ namespace Scenario {
                 modDef % modToMove->id % anim.first % anim.second[0] % anim.second[1] % anim.second[2];
                 file << modDef.str() << std::endl;
             }
+            file << std::endl;
             Lattice::MoveModule(*modToMove, movePair.second->MoveOffset());
         }
         file.close();
