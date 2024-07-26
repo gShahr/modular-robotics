@@ -3,6 +3,7 @@
 #include <boost/format.hpp>
 #include "ModuleManager.h"
 #include "MoveManager.h"
+#include "Colors.h"
 
 namespace ColorConverter {
     struct RGB {
@@ -62,29 +63,29 @@ namespace Scenario {
 
     void exportToScen(const std::vector<Configuration*>& path, const std::string& filename) {
         std::ofstream file(filename);
-        // file << "0, 244, 244, 0, 95\n";
-        // file << "1, 255, 255, 255, 85\n\n";
-        std::vector<std::string> colors;
-        std::for_each(ModuleIdManager::Modules().begin(), ModuleIdManager::Modules().end(), [&colors](const auto& module) {
-            colors.push_back(module.color);
-        });
-        int groupId = 0;
-        std::map<std::string, int> colorToGroupId;
-        for (auto color: colors) {
-            ColorConverter::RGB rgb = ColorConverter::convertColorNameToRGB(color);
-            file << groupId << ", " << rgb.red << ", " << rgb.green << ", " << rgb.blue << ", 85\n";
-            colorToGroupId[color] = groupId;
-            groupId++;
+        if (Lattice::ignoreColors) {
+            file << "0, 244, 244, 0, 95\n";
+            file << "1, 255, 255, 255, 85\n\n";
+        } else {
+            std::map<std::string, int> colorToGroupId;
+            for (auto color : Lattice::colorTensor.GetArrayInternal()) {
+                ColorConverter::RGB rgb = ColorConverter::convertColorNameToRGB(Color::intToColor[color]);
+                file << color << ", " << rgb.red << ", " << rgb.green << ", " << rgb.blue << ", 85\n";
+            }
+            file << "\n";
         }
-        file << "\n";
         auto idLen = std::to_string(ModuleIdManager::Modules().size()).size();
         boost::format padding("%%0%dd, %s");
         boost::format modDef((padding % idLen %  "%d, %d, %d, %d").str());
         Lattice::UpdateFromState(path[0]->GetState(), path[0]->GetColors());
         for (int id = 0; id < ModuleIdManager::Modules().size(); id++) {
             auto& mod = ModuleIdManager::Modules()[id];
-            //modDef % id % (mod.moduleStatic ? 1 : 0) % mod.coords[0] % mod.coords[1] % (mod.coords.size() > 2 ? mod.coords[2] : 0);
-            modDef % id % colorToGroupId[mod.color] % mod.coords[0] % mod.coords[1] % (mod.coords.size() > 2 ? mod.coords[2] : 0);
+            if (Lattice::ignoreColors) {
+                modDef % id % (mod.moduleStatic ? 1 : 0) % mod.coords[0] % mod.coords[1] % (mod.coords.size() > 2 ? mod.coords[2] : 0);
+            }
+            else {
+                modDef % id % ColorConverter::convertColorNameToRGB(Color::intToColor[Lattice::colorTensor[mod.coords]]) % mod.coords[0] % mod.coords[1] % (mod.coords.size() > 2 ? mod.coords[2] : 0);
+            }
             file << modDef.str() << std::endl;
         }
         file << std::endl;
