@@ -113,7 +113,7 @@ namespace LatticeSetup {
     void setUpMetamodule(MetaModule* metamodule) {
         Lattice::InitLattice(metamodule->order, metamodule->size);
         for (const auto &coord: metamodule->coords) {
-            Lattice::AddModule(coord);
+            Lattice::AddModule(coord.second, coord.first);
         }
     }
 
@@ -124,12 +124,12 @@ namespace LatticeSetup {
                 if ((i%2==0 && j&1) || (i&1 && j%2 == 0)) {
                     for (const auto &coord: MetaModuleManager::metamodules[5]->coords) {
                         std::valarray<int> newCoord = {MetaModuleManager::metamodules[5]->size * i, MetaModuleManager::metamodules[5]->size * j};
-                        Lattice::AddModule(coord + newCoord);
+                        Lattice::AddModule(coord.second + newCoord, coord.first);
                     }
                 } else {
                     for (const auto &coord: MetaModuleManager::metamodules[0]->coords) {
                         std::valarray<int> newCoord = {MetaModuleManager::metamodules[0]->size * i, MetaModuleManager::metamodules[0]->size * j};
-                        Lattice::AddModule(coord + newCoord);
+                        Lattice::AddModule(coord.second + newCoord, coord.first);
                     }
                 }
             }

@@ -20,7 +20,7 @@ void MetaModule::readFromTxt2d(const std::string& filename) {
     while (std::getline(file, line)) {
         for (char c : line) {
             if (c == '#') {
-                coords.push_back({x, y});
+                coords.emplace_back(-1, std::valarray<int>(x, y));
             }
             x++;
         }
@@ -28,7 +28,6 @@ void MetaModule::readFromTxt2d(const std::string& filename) {
         y++;
     }
     file.close();
-
 }
 
 void MetaModule::readFromJson(const std::string& filename) {
@@ -44,29 +43,29 @@ void MetaModule::readFromJson(const std::string& filename) {
         std::transform(position.begin(), position.end(), position.begin(),
                     [](int coord) { return coord; });
         std::valarray<int> coords(position.data(), position.size());
-        this->coords.push_back(coords);
+        this->coords.emplace_back(Color::colorToInt[module["color"]], coords);
     }
 }
 
 void MetaModule::Rotate(int a, int b) {
     for (auto& coord : coords) {
-        std::swap(coord[a], coord[b]);
+        std::swap(coord.second[a], coord.second[b]);
     }
 }
 
 void MetaModule::Reflect(int index) {
     for (auto& coord : coords) {
-        coord[index] *= -1;
+        coord.second[index] *= -1;
         // Ternary needs testing
         //coord[index] += size - 1;
-        coord[index] += size - size % 2;
+        coord.second[index] += size - size % 2;
     }
 }
 
 void MetaModule::printCoordsOnly() const {
     for (size_t i = 0; i < coords.size(); ++i) {
         std::cout << "Configuration " << i << " coordinates:\n";
-        for (const auto& coord : coords[i]) {
+        for (const auto& coord : coords[i].second) {
             std::cout << coord << ' ';
         }
         std::cout << "\n";
@@ -85,7 +84,7 @@ void MetaModule::printConfigurations() const {
                 grid[m][n] = '.';
             }
         }
-        grid[coords[i][0] + offset][coords[i][1] + offset] = '#';
+        grid[coords[i].second[0] + offset][coords[i].second[1] + offset] = '#';
         for (int y = 0; y < width; ++y) {
             for (int x = 0; x < height; ++x) {
                 std::cout << grid[y][x] << " ";

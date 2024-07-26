@@ -9,11 +9,14 @@
 #include <valarray>
 #include <nlohmann/json.hpp>
 #include "Isometry.h"
+#include "CoordTensor.h"
+#include "Colors.h"
 
 class MetaModule : public ITransformable {
 private:
 public:
-    std::vector<std::valarray<int>> coords;
+    // <color, coords>
+    std::vector<std::pair<int, std::valarray<int>>> coords;
     int order;
     int size;
 
@@ -28,10 +31,6 @@ public:
     void Rotate(int a, int b) override;
 
     void Reflect(int index) override;
-
-    void generateRotations();
-
-    void generateReflections();
 
     void printCoordsOnly() const;
 
