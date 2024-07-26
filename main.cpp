@@ -16,7 +16,7 @@
 
 int main(int argc, char* argv[]) {
     bool ignoreColors = false;
-    std::string filename;
+    std::string filename = "docs/examples/basic_3d_initial.json";
 
     // Define the long options
     static struct option long_options[] = {

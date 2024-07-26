@@ -11,6 +11,8 @@ namespace ColorConverter {
         int green;
         int blue;
 
+        RGB(int r, int g, int b) : red(r), green(g), blue(b) {}
+
         RGB(int rgbInt) {
             red = rgbInt & 0xFF0000;
             green = rgbInt & 0x00FF00;
@@ -41,7 +43,7 @@ namespace ColorConverter {
         if (it != colorToRGB.end()) {
             return it->second;
         } else {
-            return {0, 0, 0};
+            return RGB(0);
         }
     }
 
@@ -73,9 +75,8 @@ namespace Scenario {
             file << "0, 244, 244, 0, 95\n";
             file << "1, 255, 255, 255, 85\n\n";
         } else {
-            std::map<std::string, int> colorToGroupId;
             for (auto color : Lattice::colorTensor.GetArrayInternal()) {
-                ColorConverter::RGB rgb = ColorConverter::convertColorNameToRGB(Color::intToColor[color]);
+                ColorConverter::RGB rgb = ColorConverter::RGB(color);
                 file << color << ", " << rgb.red << ", " << rgb.green << ", " << rgb.blue << ", 85\n";
             }
             file << "\n";
@@ -90,7 +91,7 @@ namespace Scenario {
                 modDef % id % (mod.moduleStatic ? 1 : 0) % mod.coords[0] % mod.coords[1] % (mod.coords.size() > 2 ? mod.coords[2] : 0);
             }
             else {
-                modDef % id % ColorConverter::convertColorNameToRGB(Color::intToColor[Lattice::colorTensor[mod.coords]]) % mod.coords[0] % mod.coords[1] % (mod.coords.size() > 2 ? mod.coords[2] : 0);
+                modDef % id % Lattice::colorTensor[mod.coords] % mod.coords[0] % mod.coords[1] % (mod.coords.size() > 2 ? mod.coords[2] : 0);
             }
             file << modDef.str() << std::endl;
         }
