@@ -20,19 +20,24 @@
 
 // set --log_level=all to see boost output
 
-BOOST_AUTO_TEST_CASE(InitTest) {
-    std::string fileS = "docs/examples/basic_3d_initial.json";
-    std::string fileF = "docs/examples/basic_3d_final.json";
+struct TestFixture {
+    std::string fileS;
+    std::string fileF;
+
+    TestFixture() {
+        fileS = "docs/examples/basic_3d_initial.json";
+        fileF = "docs/examples/basic_3d_final.json";
+    }
+};
+
+BOOST_FIXTURE_TEST_CASE(InitTest, TestFixture) {
     LatticeSetup::setupFromJson(fileS);
     MoveManager::InitMoveManager(Lattice::Order(), Lattice::AxisSize());
     MoveManager::RegisterAllMoves();
 }
 
-BOOST_AUTO_TEST_CASE(TestNotIgnoreColorsAfterBFS) {
-    std::string fileS = "docs/examples/basic_3d_initial.json";
-    std::string fileF = "docs/examples/basic_3d_final.json";
+BOOST_FIXTURE_TEST_CASE(TestNotIgnoreColorsAfterBFS, TestFixture) {
     bool ignoreColors = false;
-
     Lattice::setFlags(ignoreColors);
     Configuration start(Lattice::stateTensor, Lattice::colorTensor);
     Configuration end = LatticeSetup::setupFinalFromJson(fileF);
@@ -45,11 +50,8 @@ BOOST_AUTO_TEST_CASE(TestNotIgnoreColorsAfterBFS) {
     Isometry::CleanupTransforms();
 }
 
-BOOST_AUTO_TEST_CASE(TestIgnoreColorsAfterBFS) {
-    std::string fileS = "docs/examples/basic_3d_initial.json";
-    std::string fileF = "docs/examples/basic_3d_final.json";
+BOOST_FIXTURE_TEST_CASE(TestIgnoreColorsAfterBFS, TestFixture) {
     bool ignoreColors = true;
-
     Lattice::setFlags(ignoreColors);
     Configuration start(Lattice::stateTensor, Lattice::colorTensor);
     Configuration end = LatticeSetup::setupFinalFromJson(fileF);
