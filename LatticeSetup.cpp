@@ -2,6 +2,7 @@
 #include "ConfigurationSpace.h"
 #include "MetaModule.h"
 #include "Colors.h"
+#include <set>
 
 namespace LatticeSetup {
     void setupFromJson(const std::string& filename) {
@@ -13,16 +14,22 @@ namespace LatticeSetup {
         nlohmann::json j;
         file >> j;
         Lattice::InitLattice(j["order"], j["axisSize"]);
+        std::set<int> colors;
         for (const auto& module : j["modules"]) {
             std::vector<int> position = module["position"];
             std::transform(position.begin(), position.end(), position.begin(),
                         [](int coord) { return coord; });
             std::valarray<int> coords(position.data(), position.size());
-            if (module.contains("color")) {
+            if (!Lattice::ignoreColors && module.contains("color")) {
                 Lattice::AddModule(coords, module["static"], module["color"]);
+                colors.insert(Color::colorToInt[module["color"]]);
             } else {
                 Lattice::AddModule(coords, module["static"]);
             }
+        }
+        if (colors.size() <= 1) {
+            Lattice::colorTensor = CoordTensor<int>(0, 0, 0);
+            Lattice::ignoreColors = true;
         }
         Lattice::BuildMovableModules();
     }
@@ -36,18 +43,17 @@ namespace LatticeSetup {
         nlohmann::json j;
         file >> j;
         CoordTensor<bool> desiredState(Lattice::Order(), Lattice::AxisSize(), false);
-        CoordTensor<int> colors(Lattice::Order(), Lattice::AxisSize(), -1);
         for (const auto& module : j["modules"]) {
             std::vector<int> position = module["position"];
             std::transform(position.begin(), position.end(), position.begin(),
                         [](int coord) { return coord; });
             std::valarray<int> coords(position.data(), position.size());
             desiredState[coords] = true;
-            if (module.contains("color")) {
-                colors[coords] = Color::colorToInt[module["color"]];
+            if (!Lattice::ignoreColors && module.contains("color")) {
+                Lattice::colorTensor[coords] = Color::colorToInt[module["color"]];
             }
         }
-        return Configuration(desiredState, colors);
+        return Configuration(desiredState, Lattice::colorTensor);
     }
 
     void setupInitial(const std::string& filename, int order, int axisSize) {

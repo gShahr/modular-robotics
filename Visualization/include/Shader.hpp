@@ -19,7 +19,7 @@ public:
     // Call to glUseProgram() and update global modelLoc, transformLoc, etc.
     void use();
 
-    int colorLoc, modelLoc, transformLoc, surfaceNormalLoc; // Object attribute locations
+    int colorLoc, modelLoc, transformLoc, surfaceNormalLoc, borderAttrsLoc; // Object attribute locations
     int viewLoc, projLoc; // Camera attribute locations
     int timeLoc; // Additional attribute locations
 

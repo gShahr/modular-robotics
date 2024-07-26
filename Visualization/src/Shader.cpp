@@ -77,6 +77,7 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
     this->projLoc = glGetUniformLocation(this->ID, "projmat");
     this->transformLoc = glGetUniformLocation(this->ID, "transform");
     this->surfaceNormalLoc = glGetUniformLocation(this->ID, "baseSurfaceNorm");
+    this->borderAttrsLoc = glGetUniformLocation(this->ID, "borderAttrs");
 }
 
 void Shader::use() {

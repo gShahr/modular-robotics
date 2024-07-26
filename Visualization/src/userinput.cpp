@@ -1,11 +1,13 @@
-#include "glfw3.h"
+#include "Cube.hpp"
 #include "Camera.hpp"
+#include "glfw3.h"
 
 extern Camera camera;
 extern float glob_resolution[2];
 extern float glob_aspectRatio;
 extern float glob_animSpeed, glob_deltaTime;
 extern bool glob_animateAuto, glob_animateForward, glob_animateRequest;
+extern Cube* raymarch(glm::vec3 pos, glm::vec3 dir);
 
 float lastX, lastY, yaw, pitch;         // Helper variables for user interaction
 bool rmbClicked = false;
@@ -46,7 +48,7 @@ void cursormove_callback(GLFWwindow* window, double xpos, double ypos) {
     }
 }
 
-glm::vec4 convertClickCoordToWorldDir(float xp, float yp) {
+glm::vec3 convertClickCoordToWorldDir(float xp, float yp) {
     // Objective: calculate the direction we clicked in, by
     //  transforming our click-point into world space, subtracting
     //  that point from our camera's position in world space,
@@ -67,9 +69,9 @@ glm::vec4 convertClickCoordToWorldDir(float xp, float yp) {
 
     rayDir = glm::normalize(clickPoint - glm::vec4(camera.getPos(), 1.0f));
 
-    std::cout << "Click direction: " << glm::to_string(rayDir) << std::endl;
+    // std::cout << "Click direction: " << glm::to_string(rayDir) << std::endl;
 
-    return rayDir;
+    return glm::vec3(rayDir[0], rayDir[1], rayDir[2]);
 }
 
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
@@ -83,8 +85,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
     } else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) { // Left-click
         double xp, yp;
         glfwGetCursorPos(window, &xp, &yp);
-        // TODO dispatch to ray-marching algorithm to identify which cube was clicked
-        //  via convertClickCoordToWorldDir(), and Cube.distanceTo()
+        raymarch(camera.getPos(), convertClickCoordToWorldDir(xp, yp));
     }
 }
 
