@@ -53,7 +53,7 @@ namespace Scenario {
     void exportStateTensorToJson(int id, const CoordTensor<bool>& stateTensor, const std::string& filename) {
         int indentSize = 4;
         nlohmann::json jsonOutput;
-        for (int i = 0; i < stateTensor.GetArrayInternal().size(); i++) {
+        for (size_t i = 0; i < stateTensor.GetArrayInternal().size(); i++) {
             jsonOutput["configurations"][id]["state"].push_back(stateTensor.GetElementDirect(i));
         }
         std::ofstream file(filename);
@@ -64,7 +64,7 @@ namespace Scenario {
     }
 
     void exportConfigurationSpaceToJson(const std::vector<Configuration*>& path, const std::string& filename) {
-        for (int i = 0; i < path.size(); i++) {
+        for (size_t i = 0; i < path.size(); i++) {
             exportStateTensorToJson(i, path[i]->GetState(), filename);
         }
     }
@@ -85,7 +85,7 @@ namespace Scenario {
         boost::format padding("%%0%dd, %s");
         boost::format modDef((padding % idLen %  "%d, %d, %d, %d").str());
         Lattice::UpdateFromState(path[0]->GetState(), path[0]->GetColors());
-        for (int id = 0; id < ModuleIdManager::Modules().size(); id++) {
+        for (size_t id = 0; id < ModuleIdManager::Modules().size(); id++) {
             auto& mod = ModuleIdManager::Modules()[id];
             if (Lattice::ignoreColors) {
                 modDef % id % (mod.moduleStatic ? 1 : 0) % mod.coords[0] % mod.coords[1] % (mod.coords.size() > 2 ? mod.coords[2] : 0);
@@ -96,7 +96,7 @@ namespace Scenario {
             file << modDef.str() << std::endl;
         }
         file << std::endl;
-        for (int i = 1; i < path.size(); i++) {
+        for (size_t i = 1; i < path.size(); i++) {
             auto movePair = MoveManager::FindMoveToState(path[i]->GetState());
             if (movePair.second == nullptr) {
                 std::cout << "Failed to generate scenario file, no move to next state found.\n";
@@ -122,7 +122,7 @@ namespace Scenario {
         boost::format padding("%%0%dd, %s");
         boost::format modDef((padding % idLen %  "%d, %d, %d, %d").str());
         Lattice::UpdateFromState(state, colors);
-        for (int id = 0; id < ModuleIdManager::Modules().size(); id++) {
+        for (size_t id = 0; id < ModuleIdManager::Modules().size(); id++) {
             auto& mod = ModuleIdManager::Modules()[id];
             modDef % id % (mod.moduleStatic ? 1 : 0) % mod.coords[0] % mod.coords[1] % (mod.coords.size() > 2 ? mod.coords[2] : 0);
             file << modDef.str() << std::endl;
