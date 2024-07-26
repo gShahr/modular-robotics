@@ -7,7 +7,7 @@ std::vector<ITransformable*> Isometry::GenerateTransforms(ITransformable* initia
     // Set up working vector
     std::vector<ITransformable*> transforms = {initial};
     // Rotations
-    for (int i = 0; i < initial->order -1; i++) {
+    for (int i = 0; i < initial->order - 1; i++) {
         auto forms = transforms;
         for (int j = i + 1; j < initial->order; j++) {
             for (auto form : forms) {
