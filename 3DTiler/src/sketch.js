@@ -16,8 +16,47 @@ function saveConfig() {
 }
 
 function exportToJson() {
-    var jsonOutput = JSON.stringify(blocks, null, 2);
-    dwnldAsTxt("3Dtiles.json", jsonOutput);
+    var jsonOutput = "{\n";
+    var maxSize = 0
+    for (var i=0; i < blocks.length; i++){
+	current_block = blocks[i];
+	if(current_block.x > maxSize){
+		maxSize = current_block.x;
+	}
+	if(current_block.y > maxSize){
+		maxSize = current_block.y;
+	}
+	if(current_block.z > maxSize){
+		maxSize = current_block.z;
+	}
+    }
+    maxSize = maxSize + 1;
+    jsonOutput += "    \"order\": 3,\n"
+    jsonOutput += "    \"axisSize\": " + maxSize + ",\n"
+    jsonOutput += "    \"modules\": ["
+    for (var i=0; i < blocks.length; i++){
+	current_block = blocks[i];
+	jsonOutput += "\n{\n	\"position\": [" + current_block.x + ", " + current_block.y + ", " + current_block.z + "],\n"
+	jsonOutput += "	\"static\": true\n},"
+    }
+    //var jsonOutput = JSON.stringify(blocks, null, 2);
+    dwnldAsTxt("3Dtiles.scen", jsonOutput);
+}
+
+function exportToScen() {
+    var ScenOutput = "";
+    ScenOutput += "0 244 244 0 100\n\n"
+    for (var i=0; i < blocks.length; i++){
+	if(i < 10){
+		ScenOutput += "0";
+	}
+	current_block = blocks[i];
+	//console.log(current_block.x,current_block.y,current_block.z);
+	//block_info = [i,current_block.x,current_block.y,current_block.z];
+	ScenOutput += i + "," + "0" + "," + current_block.x + "," + current_block.y + "," + current_block.z + "\n";
+    }
+    //var jsonOutput = JSON.stringify(blocks, null, 2);
+    dwnldAsTxt("3Dtiles.scen", ScenOutput);
 }
 
 function dwnldAsTxt(filename, text) {
