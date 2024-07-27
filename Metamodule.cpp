@@ -43,7 +43,11 @@ void MetaModule::readFromJson(const std::string& filename) {
         std::transform(position.begin(), position.end(), position.begin(),
                     [](int coord) { return coord; });
         std::valarray<int> coords(position.data(), position.size());
-        this->coords.emplace_back(Color::colorToInt[module["color"]], coords);
+        if (module.contains("color")) {
+            this->coords.emplace_back(Color::colorToInt[module["color"]], coords);
+        } else {
+            this->coords.emplace_back(-1, coords);
+        }
     }
 }
 
