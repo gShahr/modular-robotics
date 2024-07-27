@@ -33,23 +33,25 @@ class threeDScreen {
             this.removeCube(this.cubes.pop());
         }
     }
-
+    
     draw(sketch, highlight, highLayer) {
         sketch.fill(255);
-        sketch.translate(-this.width/2, -this.height/2);
-        for (let i = 0; i < this.cubes.length; i++){
-            sketch.translate(this.cubes[i].x*this.tileSize,
-                                 this.cubes[i].y*this.tileSize, 
-                                 this.cubes[i].z*this.tileSize);
+        const halfWidth = this.width / 2;
+        const halfHeight = this.height / 2;
+    
+        for (let i = 0; i < this.cubes.length; i++) {
+            const x = this.cubes[i].x * this.tileSize - halfWidth;
+            const y = this.cubes[i].y * this.tileSize - halfHeight;
+            const z = this.cubes[i].z * this.tileSize;
+            sketch.push();
+            sketch.translate(x, y, z);
             if (highlight && this.cubes[i].z === highLayer) {
                 sketch.fill(0, 0, 255);
+            } else {
+                sketch.fill(this.cubes[i].color[0], this.cubes[i].color[1], this.cubes[i].color[2]);
             }
             sketch.box(this.tileSize);
-            sketch.fill(this.cubes[i].color[0], this.cubes[i].color[1], this.cubes[i].color[2]);
-            sketch.translate(-this.cubes[i].x*this.tileSize,
-                                 -this.cubes[i].y*this.tileSize,
-                                 -this.cubes[i].z*this.tileSize);
+            sketch.pop();
         }
-        sketch.translate(this.width/2, this.height/2);
     }
 }
