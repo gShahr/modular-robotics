@@ -139,6 +139,7 @@ var sketch1 = function (sketch) {
         prevLayer = layer;
         blocks = screen.getCubes;
         if (undoPressed) {
+            console.log("Undo Move");
             if (historyStack.length > 0) {
                 let lastMove = historyStack.pop();
                 redoStack.push(lastMove);
@@ -154,6 +155,7 @@ var sketch1 = function (sketch) {
         }
         if (redoPressed) {
             if (redoStack.length > 0) {
+                console.log("Redo Move");
                 let lastMove = redoStack.pop();
                 historyStack.push(lastMove);
                 if (lastMove.action === 'add') {
@@ -192,7 +194,6 @@ var sketch1 = function (sketch) {
         if (screen.shape === "cube") {
             x = Math.floor(sketch.mouseX / twoDtileSize);
             y = Math.floor(sketch.mouseY / twoDtileSize);
-            console.log(x + ", " + y);
             if (!screen.removeCube(x, y, screen.layer)) {
                 screen.addCube(new Cube(x, y, screen.layer, rgbColor));
                 historyStack.push({ action: 'add', x: x, y: y, z: screen.layer, color: rgbColor });
@@ -200,14 +201,10 @@ var sketch1 = function (sketch) {
                 historyStack.push({ action: 'remove', x: x, y: y, z: screen.layer, color: rgbColor });
             }
         } else {
-            x = pixelToHex(sketch.mouseX, sketch.mouseY, twoDtileSize).q;
-            y = pixelToHex(sketch.mouseX, sketch.mouseY, twoDtileSize).r;
-            console.log(x + ", " + y);
+            let [x, y] = pixelToHex(sketch.mouseX, sketch.mouseY, twoDtileSize);
             if (!screen.removeHexagon(x, y, screen.layer)) {
                 screen.addHexagon(new Hexagon(x, y, screen.layer));
-                // historyStack.push({ action: 'add', x: x, y: y, z: screen.layer, color: rgbColor });
             } else {
-                // historyStack.push({ action: 'remove', x: x, y: y, z: screen.layer, color: rgbColor });
             }
         }
     }
@@ -303,9 +300,18 @@ function hexRound(q, r) {
 }
 
 function pixelToHex(x, y, size) {
-    const q = (x * Math.sqrt(3)/3 - y / 3) / size;
-    const r = y * 2/3 / size;
-    return hexRound(q, r);
+    const vertDist = (Math.sqrt(3) * size);
+    const horizDist = (1.5 * size);
+    let q = (Math.floor(x / horizDist) * horizDist);
+    let r = (Math.floor(y / vertDist) * vertDist);
+    let off = (Math.floor(x / horizDist) - 1) * Math.floor(y / vertDist) + Math.floor(x / horizDist + Math.floor(y / vertDist));
+    if (off&1) {
+        r += vertDist / 2;
+    }
+    let values = hexRound(q, r);
+    q = values.q;
+    r = values.r;
+    return [q, r];
 }
 
 twodCanv = new p5(sketch1);
