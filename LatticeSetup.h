@@ -15,11 +15,11 @@
 namespace LatticeSetup {
     void setupFromJson(const std::string& filename);
 
-    Configuration* setupFinalFromJson(const std::string& filename);
+    Configuration setupFinalFromJson(const std::string& filename);
 
     void setupInitial(const std::string& filename);
 
-    Configuration* setupFinal(const std::string& filename);
+    Configuration setupFinal(const std::string& filename);
 
     void setUpMetamodule(MetaModule* metamodule);
     

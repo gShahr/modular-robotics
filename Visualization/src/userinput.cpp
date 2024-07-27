@@ -1,11 +1,13 @@
-#include "glfw3.h"
+#include "Cube.hpp"
 #include "Camera.hpp"
+#include "glfw3.h"
 
 extern Camera camera;
 extern float glob_resolution[2];
 extern float glob_aspectRatio;
 extern float glob_animSpeed, glob_deltaTime;
 extern bool glob_animateAuto, glob_animateForward, glob_animateRequest;
+extern Cube* raymarch(glm::vec3 pos, glm::vec3 dir);
 
 float lastX, lastY, yaw, pitch;         // Helper variables for user interaction
 bool rmbClicked = false;
@@ -46,6 +48,32 @@ void cursormove_callback(GLFWwindow* window, double xpos, double ypos) {
     }
 }
 
+glm::vec3 convertClickCoordToWorldDir(float xp, float yp) {
+    // Objective: calculate the direction we clicked in, by
+    //  transforming our click-point into world space, subtracting
+    //  that point from our camera's position in world space,
+    //  and normalizing.
+    glm::mat4 invViewMat, invProjMat;
+    glm::vec4 clickPoint, rayDir;
+
+    invViewMat = glm::inverse(camera.getViewMat());
+    invProjMat = glm::inverse(camera.getProjMat());
+
+    clickPoint = glm::vec4( // Convert our click-coordinates into clip space (NDC; -1.0 to 1.0).
+        (float)(xp / glob_resolution[0] * 2.0 - 1.0),
+        (float)-(yp / glob_resolution[1] * 2.0 - 1.0), // (negative)
+        0.0f, 1.0f);
+    clickPoint = invProjMat * clickPoint;       // Convert to view space
+    clickPoint = invViewMat * clickPoint;       // Convert to world space
+    clickPoint = clickPoint / clickPoint[3];    // Normalize homogenous coord to 1
+
+    rayDir = glm::normalize(clickPoint - glm::vec4(camera.getPos(), 1.0f));
+
+    // std::cout << "Click direction: " << glm::to_string(rayDir) << std::endl;
+
+    return glm::vec3(rayDir[0], rayDir[1], rayDir[2]);
+}
+
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
     if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
         rmbClicked = true;
@@ -54,6 +82,10 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
         rmbClicked = false;
         firstMouse = true;
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    } else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) { // Left-click
+        double xp, yp;
+        glfwGetCursorPos(window, &xp, &yp);
+        raymarch(camera.getPos(), convertClickCoordToWorldDir(xp, yp));
     }
 }
 
@@ -81,11 +113,11 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     } else if ((key == GLFW_KEY_LEFT) && (action == GLFW_PRESS)) {  // Left arrow --
         glob_animateForward = false;
         glob_animateRequest = true;
-    } else if ((key == GLFW_KEY_UP) && (action == GLFW_PRESS)) {
-        glob_animSpeed = std::min(12.0f, glob_animSpeed * 1.2f);
+    } else if ((key == GLFW_KEY_UP) && (action != GLFW_RELEASE)) {
+        glob_animSpeed = std::min(25.0f, glob_animSpeed * (action == GLFW_PRESS ? 1.2f : 1.05f));
         std::cout << "Animation speed RAISED to " << glob_animSpeed << std::endl;
-    } else if ((key == GLFW_KEY_DOWN) && (action == GLFW_PRESS)) {
-        glob_animSpeed = std::max(0.5f, glob_animSpeed * 0.833f);
+    } else if ((key == GLFW_KEY_DOWN) && (action != GLFW_RELEASE)) {
+        glob_animSpeed = std::max(0.5f, glob_animSpeed * (action == GLFW_PRESS ? 0.8333f : 0.96f));
         std::cout << "Animation speed LOWERED to " << glob_animSpeed << std::endl;
     }
 }

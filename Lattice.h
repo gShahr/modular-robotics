@@ -42,13 +42,17 @@ public:
     // Module tensor
     static CoordTensor<int> coordTensor;
     // Color tensor
-    static CoordTensor<std::string> colorTensor;
+    static CoordTensor<int> colorTensor;
+    // Color flag
+    static bool ignoreColors;
 
     Lattice() = delete;
     Lattice(Lattice&) = delete;
 
     //Lattice(int order, int axisSize);
     static void InitLattice(int _order, int _axisSize);
+
+    static void setFlags(bool _ignoreColors);
 
     // Add a new module
     static void AddModule(const std::valarray<int>& coords, bool isStatic = false, const std::string& color = "");
@@ -72,13 +76,15 @@ public:
     static const std::vector<Module*>& MovableModules();
 
     // Assign from state tensor
-    static void UpdateFromState(const CoordTensor<bool>& state, const CoordTensor<std::string>& colors);
+    static void UpdateFromState(const CoordTensor<bool>& state, const CoordTensor<int>& colors);
 
     static int Order();
 
     static int AxisSize();
 
     static std::string ToString();
+
+    friend class MoveManager;
 };
 
 #endif //MODULAR_ROBOTICS_LATTICE_H

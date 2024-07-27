@@ -19,16 +19,24 @@ class twoDScreen {
         return this.cubes;
     }
 
+    set setCubes(cubes) {
+        this._cubes = cubes;
+    }
+
     removeCube(x, y, z) {
-        for(let i = 0; i < this.cubes.length; i++) {
-            if(this.cubes[i].x === x 
-                && this.cubes[i].y === y
-                && this.cubes[i].z === z) {
-                    this.cubes.splice(i,1);
-                    return true;
-                }
+        for (let i = 0; i < this.cubes.length; i++) {
+            if (this.cubes[i].x === x && this.cubes[i].y === y && this.cubes[i].z === z) {
+                this.cubes.splice(i, 1);
+                return true;
+            }
         }
         return false;
+    }
+
+    removeAllCubes() {
+        while (this.cubes.length > 0) {
+            this.removeCube(this.cubes.pop());
+        }
     }
 
     draw(sketch) {

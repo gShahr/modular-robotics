@@ -41,3 +41,13 @@ Move* MoveSequence::undo() {
 
     return move;
 }
+
+Move* MoveSequence::peek() {
+    if (this->remainingMoves == 0) { return NULL; }
+    return this->moves.front();
+}
+
+Move* MoveSequence::peekBack() {
+    if (this->currentMove == 0) { return NULL; }
+    return this->undostack.top();
+}

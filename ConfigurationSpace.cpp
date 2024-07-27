@@ -4,11 +4,15 @@
 #include "MoveManager.h"
 #include "ConfigurationSpace.h"
 
+const char * BFSExcept::what() const noexcept {
+    return "BFS exhausted without finding a path!";
+}
+
 HashedState::HashedState() : seed(0) {}
 
 HashedState::HashedState(size_t seed) : seed(seed) {}
 
-HashedState::HashedState(const CoordTensor<bool>& state, const CoordTensor<std::string>& colors) {
+HashedState::HashedState(const CoordTensor<bool>& state, const CoordTensor<int>& colors) {
     HashCoordTensor(state, colors);
 }
 
@@ -18,7 +22,7 @@ size_t HashedState::GetSeed() const {
     return seed;
 }
 
-void HashedState::HashCoordTensor(const CoordTensor<bool>& state, const CoordTensor<std::string>& colors) {
+void HashedState::HashCoordTensor(const CoordTensor<bool>& state, const CoordTensor<int>& colors) {
     seed = boost::hash_range(state.GetArrayInternal().begin(), state.GetArrayInternal().end());
     size_t seed2 = boost::hash_range(colors.GetArrayInternal().begin(), colors.GetArrayInternal().end());
     boost::hash_combine(seed, seed2);
@@ -36,9 +40,7 @@ size_t std::hash<HashedState>::operator()(const HashedState& state) const {
     return std::hash<size_t>()(state.GetSeed());
 }
 
-Configuration::Configuration(CoordTensor<bool> state) : _state(std::move(state)), _colors(CoordTensor<std::string>(state.Order(), state.AxisSize(), "")){}
-
-Configuration::Configuration(CoordTensor<bool> state, CoordTensor<std::string> colors) : _state(std::move(state)), _colors(std::move(colors)) {}
+Configuration::Configuration(CoordTensor<bool> state, CoordTensor<int> colors) : _state(std::move(state)), _colors(std::move(colors)) {}
 
 Configuration::~Configuration() {
     for (auto i = next.rbegin(); i != next.rend(); i++) {
@@ -46,8 +48,8 @@ Configuration::~Configuration() {
     }
 }
 
-std::vector<std::pair<CoordTensor<bool>, CoordTensor<std::string>>> Configuration::MakeAllMoves() {
-    std::vector<std::pair<CoordTensor<bool>, CoordTensor<std::string>>> result;
+std::vector<std::pair<CoordTensor<bool>, CoordTensor<int>>> Configuration::MakeAllMoves() {
+    std::vector<std::pair<CoordTensor<bool>, CoordTensor<int>>> result;
     Lattice::UpdateFromState(_state, _colors);
     std::vector<Module*> movableModules = Lattice::MovableModules();
     for (auto module: movableModules) {
@@ -77,7 +79,7 @@ const CoordTensor<bool>& Configuration::GetState() const {
     return _state;
 }
 
-const CoordTensor<std::string>& Configuration::GetColors() const {
+const CoordTensor<int>& Configuration::GetColors() const {
     return _colors;
 }
 
@@ -85,7 +87,7 @@ const HashedState& Configuration::GetHash() const {
     return hash;
 }
 
-void Configuration::SetStateAndHash(const CoordTensor<bool>& state, const CoordTensor<std::string>& colors) {
+void Configuration::SetStateAndHash(const CoordTensor<bool>& state, const CoordTensor<int>& colors) {
     _state = state;
     _colors = colors;
     hash = HashedState(state, colors);
@@ -100,10 +102,9 @@ std::ostream& operator<<(std::ostream& out, const Configuration& config) {
     return out;
 }
 
+int ConfigurationSpace::depth = -1;
+
 std::vector<Configuration*> ConfigurationSpace::BFS(Configuration* start, Configuration* final) {
-#if CONFIG_VERBOSE > CS_LOG_NONE
-    int depth = -1;
-#endif
     std::queue<Configuration*> q;
     std::unordered_set<HashedState> visited;
     start->SetStateAndHash(start->GetState(), start->GetColors());
@@ -141,7 +142,7 @@ std::vector<Configuration*> ConfigurationSpace::BFS(Configuration* start, Config
             }
         }
     }
-    return {};
+    throw BFSExcept();
 }
 
 std::vector<Configuration*> ConfigurationSpace::FindPath(Configuration* start, Configuration* final) {

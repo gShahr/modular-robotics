@@ -80,17 +80,52 @@ void Cube::setScale(int scale) {
     this->scale = glm::vec3((float)scale / 100.0f);
 }
 
-void Cube::setColor(int r, int g, int b) {
-    this->color = glm::vec3((float)r/255.0f, (float)g/255.0f, (float)b/255.0f);
+void Cube::setColor(float r, float g, float b) {
+    this->color = glm::vec3(r, g, b);
+}
+
+void Cube::setBorder() {
+    this->setBorderWidth(0.01f);
+    this->setBorderColor(0, 0, 0);
+}
+void Cube::setBorderWidth(float size) {
+    this->borderSize = size;
+}
+void Cube::setBorderColor(float r, float g, float b) {
+    this->borderColor = glm::vec3(r, g, b);
+}
+
+float Cube::distanceTo(glm::vec3 worldPoint) {
+    // Transform the world point to local space
+    glm::mat4 modelmat = glm::translate(glm::mat4(1.0f), glm::vec3(this->pos));
+    glm::vec4 localPoint;
+
+    glm::mat4 transform = glm::mat4(1.0f);
+    transform = glm::scale(transform, this->scale);
+    transform = this->rotation * transform;
+    if (this->move) {
+        transform = this->processAnimation() * transform;
+    };
+
+    localPoint = glm::inverse(transform) * glm::inverse(modelmat) * glm::vec4(worldPoint, 1.0f);
+
+    // Not magic: because local space has cube centered at (0,0,0) with size 0.5,
+    //  this relatively simple normalization works to calculate distance in local space
+    //  (which has the same units as world space, so we can return the value as-is)
+    return glm::sqrt(\
+        glm::pow(glm::max(0.0f, abs(localPoint[0]) - 0.5f), 2.0f) +\
+        glm::pow(glm::max(0.0f, abs(localPoint[1]) - 0.5f), 2.0f) +\
+        glm::pow(glm::max(0.0f, abs(localPoint[2]) - 0.5f), 2.0f));
 }
 
 Cube::Cube(int id, int x, int y, int z) {
     this->id = id;
     this->setPos(x, y, z);
     this->move = NULL;
-    this->scale = glm::vec3(0.9f);
-    this->color = glm::vec3(1.0f);
+    this->setScale(0.9f);
+    this->setColor(1.0f, 1.0f, 1.0f);
     this->rotation = glm::mat4(1.0f);
+    this->setBorder();
     glob_objects.insert(std::pair<int, Cube*>(id, this));
 }
 
@@ -104,7 +139,7 @@ void Cube::startAnimation(bool* markWhenAnimFinished, Move* move) {
 inline float _animInterp(float pct) {
     //return pct < 0.5 ? 4 * pct * pct * pct : 1 - std::pow(-2 * pct + 2, 3) / 2; // Cubic ease in-out
     return pct < 0.5 ? 2 * pct * pct : 1 - std::pow(-2 * pct + 2, 2) / 2; // Quadratic ease in-out
-    //return pct;
+    //return pct; // Bypass
 }
 
 glm::mat4 Cube::processAnimation() {
@@ -187,6 +222,10 @@ void Cube::draw() {
     glUniform3fv(glob_shader->colorLoc, 1, glm::value_ptr(this->color));
     glUniformMatrix4fv(glob_shader->transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
     glUniformMatrix4fv(glob_shader->modelLoc, 1, GL_FALSE, glm::value_ptr(modelmat));
+    // TODO this is getting ugly
+    if (glob_shader->borderAttrsLoc >= 0) {
+        glUniform4fv(glob_shader->borderAttrsLoc, 1, glm::value_ptr(glm::vec4(this->borderColor[0], this->borderColor[1], this->borderColor[2], this->borderSize)));
+    }
     if (glob_shader->surfaceNormalLoc >= 0) {
         for (int i = 0; i < 6; i++) {
             glUniform3fv(glob_shader->surfaceNormalLoc, 1, glm::value_ptr(_cubeSurfaceNorms[i]));

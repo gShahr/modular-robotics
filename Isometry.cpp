@@ -1,13 +1,22 @@
 #include "Isometry.h"
 
+std::vector<ITransformable*> Isometry::transformsToFree;
+
+// If you are trying to refactor this good luck
 std::vector<ITransformable*> Isometry::GenerateTransforms(ITransformable* initial) {
     // Set up working vector
     std::vector<ITransformable*> transforms = {initial};
     // Rotations
-    for (int i = 1; i < initial->order; i++) {
-        auto rotated = initial->MakeCopy();
-        rotated->Rotate(i);
-        transforms.push_back(rotated);
+    for (int i = 0; i < initial->order - 1; i++) {
+        auto forms = transforms;
+        for (int j = i + 1; j < initial->order; j++) {
+            for (auto form : forms) {
+                auto rotated = form->MakeCopy();
+                rotated->Rotate(i, j);
+                transforms.push_back(rotated);
+                transformsToFree.push_back(rotated);
+            }
+        }
     }
     // Reflections
     for (int i = 0; i < initial->order; i++) {
@@ -16,8 +25,15 @@ std::vector<ITransformable*> Isometry::GenerateTransforms(ITransformable* initia
             auto reflected = form->MakeCopy();
             reflected->Reflect(i);
             transforms.push_back(reflected);
+            transformsToFree.push_back(reflected);
         }
     }
     // Done
     return transforms;
+}
+
+void Isometry::CleanupTransforms() {
+    for (auto transform : transformsToFree) {
+        delete transform;
+    }
 }
