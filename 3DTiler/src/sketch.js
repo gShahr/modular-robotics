@@ -43,7 +43,7 @@ function exportToJson() {
 	jsonOutput += "	\"static\": true\n},"
     }
     //var jsonOutput = JSON.stringify(blocks, null, 2);
-    dwnldAsTxt("3Dtiles.scen", jsonOutput);
+    dwnldAsTxt("3Dtiles.json", jsonOutput);
 }
 
 function exportToScen() {
