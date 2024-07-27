@@ -146,7 +146,7 @@ var sketch1 = function (sketch) {
                     screen.removeCube(lastMove.x, lastMove.y, lastMove.z);
                     threeScreen.removeCube(lastMove.x, lastMove.y, lastMove.z);
                 } else {
-                    screen.addCube(new Cube(lastMove.x, lastMove.y, lastMove.z));
+                    screen.addCube(new Cube(lastMove.x, lastMove.y, lastMove.z, lastMove.color));
                     threeScreen.addCube(new Cube(lastMove.x, lastMove.y, lastMove.z, lastMove.color));
                 }
             }
@@ -157,7 +157,7 @@ var sketch1 = function (sketch) {
                 let lastMove = redoStack.pop();
                 historyStack.push(lastMove);
                 if (lastMove.action === 'add') {
-                    screen.addCube(new Cube(lastMove.x, lastMove.y, lastMove.z));
+                    screen.addCube(new Cube(lastMove.x, lastMove.y, lastMove.z, lastMove.color));
                     threeScreen.addCube(new Cube(lastMove.x, lastMove.y, lastMove.z, lastMove.color));
                 } else {
                     screen.removeCube(lastMove.x, lastMove.y, lastMove.z);
@@ -188,15 +188,26 @@ var sketch1 = function (sketch) {
     }
 
     sketch.mousePressed = function () {
-        if (sketch.mouseX < canvasW / 2 && sketch.mouseY < canvasH && sketch.mouseY > 0) {
+        if (!(sketch.mouseX < canvasW / 2 && sketch.mouseY < canvasH && sketch.mouseY > 0)) return;
+        if (screen.shape === "cube") {
             x = Math.floor(sketch.mouseX / twoDtileSize);
             y = Math.floor(sketch.mouseY / twoDtileSize);
             console.log(x + ", " + y);
             if (!screen.removeCube(x, y, screen.layer)) {
-                screen.addCube(new Cube(x, y, screen.layer));
+                screen.addCube(new Cube(x, y, screen.layer, rgbColor));
                 historyStack.push({ action: 'add', x: x, y: y, z: screen.layer, color: rgbColor });
             } else {
                 historyStack.push({ action: 'remove', x: x, y: y, z: screen.layer, color: rgbColor });
+            }
+        } else {
+            x = pixelToHex(sketch.mouseX, sketch.mouseY, twoDtileSize).q;
+            y = pixelToHex(sketch.mouseX, sketch.mouseY, twoDtileSize).r;
+            console.log(x + ", " + y);
+            if (!screen.removeHexagon(x, y, screen.layer)) {
+                screen.addHexagon(new Hexagon(x, y, screen.layer));
+                // historyStack.push({ action: 'add', x: x, y: y, z: screen.layer, color: rgbColor });
+            } else {
+                // historyStack.push({ action: 'remove', x: x, y: y, z: screen.layer, color: rgbColor });
             }
         }
     }
@@ -265,6 +276,36 @@ function areAllCubesConnected(blocks) {
     // Start DFS from the first block
     dfs(blocks[0]);
     return visited.size === blocks.length;
+}
+
+function hexRound(q, r) {
+    let x = q;
+    let z = r;
+    let y = -x - z;
+
+    let rx = Math.round(x);
+    let ry = Math.round(y);
+    let rz = Math.round(z);
+
+    let x_diff = Math.abs(rx - x);
+    let y_diff = Math.abs(ry - y);
+    let z_diff = Math.abs(rz - z);
+
+    if (x_diff > y_diff && x_diff > z_diff) {
+        rx = -ry - rz;
+    } else if (y_diff > z_diff) {
+        ry = -rx - rz;
+    } else {
+        rz = -rx - ry;
+    }
+
+    return { q: rx, r: rz };
+}
+
+function pixelToHex(x, y, size) {
+    const q = (x * Math.sqrt(3)/3 - y / 3) / size;
+    const r = y * 2/3 / size;
+    return hexRound(q, r);
 }
 
 twodCanv = new p5(sketch1);

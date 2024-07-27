@@ -53,6 +53,10 @@ class twoDScreen {
         this.cubes.push(cube);
     }
 
+    addHexagon(hexagon) {
+        this.hexagons.push(hexagon);
+    }
+
     setShape(shape) {
         this.shape = shape;
     }
@@ -83,12 +87,12 @@ class twoDScreen {
         }
     }
 
-    hexagon = (sketch, x, y, size) => {
+    hexagon = (sketch, centerX, centerY, radius) => {
         const angle = Math.PI / 3;
         sketch.beginShape();
         for (let i = 0; i < 6; i++) {
-            const x_i = x + size * Math.cos(angle * i);
-            const y_i = y + size * Math.sin(angle * i);
+            const x_i = centerX + radius * Math.cos(angle * i);
+            const y_i = centerY + radius * Math.sin(angle * i);
             sketch.vertex(x_i, y_i);
         }
         sketch.endShape(sketch.CLOSE);
@@ -109,19 +113,12 @@ class twoDScreen {
         }
     };
 
-    draw(sketch) {
-        sketch.background(255);
-        sketch.stroke(0);
-        if (this.shape == "cube") {
-            for(let i = 0; i < this.width; i++) {
-                sketch.line(0, i*this.tileSize, this.width, i*this.tileSize);
-                sketch.line(i*this.tileSize, 0, i*this.tileSize, this.height);
-            }
-        } else if (this.shape == "hexagon") {
-            this.drawHexGrid(sketch, this.width, this.height, this.tileSize);
+    drawCubes(sketch) {
+        for(let i = 0; i < this.width; i++) {
+            sketch.line(0, i*this.tileSize, this.width, i*this.tileSize);
+            sketch.line(i*this.tileSize, 0, i*this.tileSize, this.height);
         }
-        sketch.stroke(255);
-        for(let i = 0; i < this.cubes.length; i++) {
+        for (let i = 0; i < this.cubes.length; i++) {
             switch(this.cubes[i].z) {
                 case this.layer:
                     sketch.fill(0);
@@ -142,5 +139,33 @@ class twoDScreen {
                     sketch.fill(255);
             }
         }
+    }
+
+    drawHexagons(sketch) {
+        this.drawHexGrid(sketch, this.width, this.height, this.tileSize);
+        for (let i = 0; i < this.hexagons.length; i++) {
+            switch(this.hexagons[i].z) {
+                case this.layer:
+                    sketch.fill(0);
+                    this.hexagon(sketch, this.hexagons[i].x, this.hexagons[i].y, this.tileSize);
+                    sketch.fill(255);
+                    break;
+                case this.layer-1:
+                    sketch.fill(166, 166, 166);
+                    this.hexagon(sketch, this.hexagons[i].x, this.hexagons[i].y, this.tileSize);
+                    sketch.fill(255);
+            }
+        }
+    }
+
+    draw(sketch) {
+        sketch.background(255);
+        sketch.stroke(0);
+        if (this.shape == "cube") {
+            this.drawCubes(sketch);
+        } else if (this.shape == "hexagon") {
+            this.drawHexagons(sketch);
+        }
+        sketch.stroke(255);
     }
 }
