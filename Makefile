@@ -33,5 +33,8 @@ test: tests/metamodule/metamodule_1.cpp $(SOURCES2)
 test2: tests/colorTest.cpp $(SOURCES2)
 	$(CXX) $(CXXFLAGS) -I. -o test2 tests/colorTest.cpp $(SOURCES2)
 
+benchmarks: tests/benchmarks/benchmarks.cpp $(SOURCES2)
+	$(CXX) $(CXXFLAGS) -I. -o benchmarks tests/benchmarks/benchmarks.cpp $(SOURCES2)
+
 clean:
 	rm -f $(OBJECTS) $(EXECUTABLE)
