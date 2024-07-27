@@ -42,7 +42,6 @@ function exportToJson() {
 	jsonOutput += "\n{\n	\"position\": [" + current_block.x + ", " + current_block.y + ", " + current_block.z + "],\n"
 	jsonOutput += "	\"static\": true\n},"
     }
-    //var jsonOutput = JSON.stringify(blocks, null, 2);
     dwnldAsTxt("3Dtiles.json", jsonOutput);
 }
 
@@ -54,11 +53,8 @@ function exportToScen() {
 		ScenOutput += "0";
 	}
 	current_block = blocks[i];
-	//console.log(current_block.x,current_block.y,current_block.z);
-	//block_info = [i,current_block.x,current_block.y,current_block.z];
 	ScenOutput += i + "," + "0" + "," + current_block.x + "," + current_block.y + "," + current_block.z + "\n";
     }
-    //var jsonOutput = JSON.stringify(blocks, null, 2);
     dwnldAsTxt("3Dtiles.scen", ScenOutput);
 }
 
@@ -98,6 +94,7 @@ var sketch1 = function (sketch) {
     let undoPressed = false;
     let redoPressed = false;
     let clearPressed = false;
+    let switchShapePressed = false;
 
     sketch.setup = function () {
         canv1 = sketch.createCanvas(canvasW / 2, canvasH);
@@ -120,6 +117,12 @@ var sketch1 = function (sketch) {
         if (clearButton) {
             clearButton.addEventListener('click', function () {
                 clearPressed = true;
+            });
+        }
+        let switchShapeButton = document.getElementById('switch-shape');
+        if (switchShapeButton) {
+            switchShapeButton.addEventListener('click', function () {
+                switchShapePressed ^= true;
             });
         }
     }
@@ -168,6 +171,17 @@ var sketch1 = function (sketch) {
             screen.removeAllCubes()
             threeScreen.removeAllCubes();
             clearPressed = false;
+        }
+        if (switchShapePressed) {
+            if (document.getElementById("switch-shape").innerText === "Switch to Hexagon") {
+                document.getElementById("switch-shape").innerText = "Switch to Cube";
+                screen.setShape("hexagon");
+            } else {
+                document.getElementById("switch-shape").innerText = "Switch to Hexagon";
+                screen.setShape("cube");
+            }
+            switchShapePressed = false;
+            clearPressed = true;
         }
         let message = areAllCubesConnected(blocks) ? "Yes" : "No";
         document.getElementById("checkConnectivity").innerText = "Connected: " + message;    
