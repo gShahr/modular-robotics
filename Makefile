@@ -27,8 +27,8 @@ $(EXECUTABLE): $(OBJECTS)
 .cpp.o:
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-test: tests/metamodule/metamodule_1.cpp Metamodule.cpp Isometry.cpp
-	$(CXX) $(CXXFLAGS) -I. -o test tests/metamodule/metamodule_1.cpp Metamodule.cpp Isometry.cpp
+test: tests/metamodule/metamodule_1.cpp $(SOURCES2)
+	$(CXX) $(CXXFLAGS) -I. -o test tests/metamodule/metamodule_1.cpp $(SOURCES2)
 
 test2: tests/colorTest.cpp $(SOURCES2)
 	$(CXX) $(CXXFLAGS) -I. -o test2 tests/colorTest.cpp $(SOURCES2)

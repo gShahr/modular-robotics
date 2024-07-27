@@ -11,7 +11,7 @@ struct MetaModuleFixture {
         std::ofstream file("temp_metamodule.txt");
         file << "##\n##";
         file.close();
-        metaModule = new MetaModule("tests/metamodule/metamodule_1.txt", 2, 5);
+        metaModule = new MetaModule("docs/examples/3_by_3_metamodule.json", 2, 3);
     }
     ~MetaModuleFixture() {
         delete metaModule;
