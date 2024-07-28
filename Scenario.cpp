@@ -5,50 +5,6 @@
 #include "MoveManager.h"
 #include "Colors.h"
 
-namespace ColorConverter {
-    struct RGB {
-        int red;
-        int green;
-        int blue;
-
-        RGB(int r, int g, int b) : red(r), green(g), blue(b) {}
-
-        explicit RGB(int rgbInt) {
-            red = rgbInt & 0xFF0000;
-            green = rgbInt & 0x00FF00;
-            blue = rgbInt & 0x0000FF;
-        }
-    };
-
-    std::map<std::string, RGB> colorToRGB = {
-        {"red", {255, 0, 0}},
-        {"green", {0, 255, 0}},
-        {"blue", {0, 0, 255}},
-        {"cyan", {0, 255, 255}},
-        {"pink", {255, 192, 203}},
-        {"orange", {255, 165, 0}},
-        {"purple", {128, 0, 128}},
-        {"yellow", {255, 255, 0}},
-        {"brown", {165, 42, 42}},
-        {"black", {0, 0, 0}},
-        {"white", {255, 255, 255}},
-        {"gray", {128, 128, 128}},
-        {"lightgray", {211, 211, 211}},
-        {"darkgray", {169, 169, 169}},
-        {"magenta", {255, 0, 255}}
-    };
-
-    RGB convertColorNameToRGB(const std::string& colorName) {
-        auto it = colorToRGB.find(colorName);
-        if (it != colorToRGB.end()) {
-            return it->second;
-        } else {
-            return RGB(0);
-        }
-    }
-
-}
-
 namespace Scenario {
     void exportStateTensorToJson(int id, const CoordTensor<bool>& stateTensor, const std::string& filename) {
         int indentSize = 4;
@@ -80,7 +36,7 @@ namespace Scenario {
             file << "1, 255, 255, 255, 85\n\n";
         } else {
             for (auto color : Lattice::colorTensor.GetArrayInternal()) {
-                ColorConverter::RGB rgb(color);
+                Colors::RGB rgb(color);
                 file << color << ", " << rgb.red << ", " << rgb.green << ", " << rgb.blue << ", 85\n";
             }
             file << "\n";
