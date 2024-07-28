@@ -232,6 +232,9 @@ var sketch2 = function (sketch) {
             if (!threeScreen.removeCube(x, y, layer)) {
                 threeScreen.addCube(new Cube(x, y, layer, rgbColor));
             }
+            if (!threeScreen.removeHexagon(x, y, layer)) {
+                threeScreen.addHexagon(new Hexagon(x, y, layer, rgbColor));
+            }
         }
     }
 }
