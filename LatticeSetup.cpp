@@ -22,7 +22,7 @@ namespace LatticeSetup {
             std::valarray<int> coords(position.data(), position.size());
             if (!Lattice::ignoreColors && module.contains("color")) {
                 Lattice::AddModule(coords, module["static"], module["color"]);
-                colors.insert(Color::colorToInt[module["color"]]);
+                colors.insert(Colors::colorToInt[module["color"]]);
             } else {
                 Lattice::AddModule(coords, module["static"]);
             }
@@ -51,7 +51,7 @@ namespace LatticeSetup {
             std::valarray<int> coords(position.data(), position.size());
             desiredState[coords] = true;
             if (!Lattice::ignoreColors && module.contains("color")) {
-                desiredColors[coords] = Color::colorToInt[module["color"]];
+                desiredColors[coords] = Colors::colorToInt[module["color"]];
             }
         }
         return {desiredState, desiredColors};

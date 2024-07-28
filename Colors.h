@@ -4,7 +4,7 @@
 #include <map>
 #include <string>
 
-namespace Color {
+namespace Colors {
     extern std::map<std::string, int> colorToInt;
 
     extern std::map<int, std::string> intToColor;

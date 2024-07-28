@@ -50,7 +50,7 @@ void Lattice::AddModule(const std::valarray<int> &coords, bool isStatic, const s
     stateTensor[coords] = true;
     coordTensor[coords] = mod.id;
     if (!ignoreColors) {
-        colorTensor[coords] = Color::colorToInt[color];
+        colorTensor[coords] = Colors::colorToInt[color];
     }
     // Adjacency check
     EdgeCheck(mod, false);
@@ -239,7 +239,7 @@ std::string Lattice::ToString() {
     for (size_t i = 0; i < coordTensor.GetArrayInternal().size(); i++) {
         auto id = coordTensor.GetElementDirect(i);
         if (id >= 0 && !ignoreColors) {
-            out << Color::intToColor[colorTensor.GetElementDirect(i)][0];
+            out << Colors::intToColor[colorTensor.GetElementDirect(i)][0];
         } else {
             out << '-';
         }

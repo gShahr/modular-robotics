@@ -1,6 +1,6 @@
 #include "Colors.h"
 
-namespace Color {
+namespace Colors {
     std::map<std::string, int> colorToInt = {
             {"red", 0xFF0000},
             {"green", 0x00FF00},
