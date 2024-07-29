@@ -6,7 +6,7 @@
 #include "Colors.h"
 
 namespace Scenario {
-    void exportStateTensorToJson(int id, const CoordTensor<bool>& stateTensor, const std::string& filename) {
+    /*void exportStateTensorToJson(int id, const CoordTensor<bool>& stateTensor, const std::string& filename) {
         int indentSize = 4;
         nlohmann::json jsonOutput;
         for (size_t i = 0; i < stateTensor.GetArrayInternal().size(); i++) {
@@ -23,7 +23,7 @@ namespace Scenario {
         for (size_t i = 0; i < path.size(); i++) {
             exportStateTensorToJson(i, path[i]->GetState(), filename);
         }
-    }
+    }*/
 
     void exportToScen(const std::vector<Configuration*>& path, const std::string& filename) {
         if (path.empty()) {
@@ -31,11 +31,11 @@ namespace Scenario {
             return;
         }
         std::ofstream file(filename);
-        if (Lattice::ignoreColors) {
+        if (Lattice::ignoreProperties) {
             file << "0, 244, 244, 0, 95\n";
             file << "1, 255, 255, 255, 85\n\n";
         } else {
-            for (auto color : Lattice::colorTensor.GetArrayInternal()) {
+            for (auto color : ColorProperty::Palette()) {
                 Colors::RGB rgb(color);
                 file << color << ", " << rgb.red << ", " << rgb.green << ", " << rgb.blue << ", 85\n";
             }
@@ -44,19 +44,19 @@ namespace Scenario {
         auto idLen = std::to_string(ModuleIdManager::Modules().size()).size();
         boost::format padding("%%0%dd, %s");
         boost::format modDef((padding % idLen %  "%d, %d, %d, %d").str());
-        Lattice::UpdateFromState(path[0]->GetState(), path[0]->GetColors());
+        Lattice::UpdateFromModuleInfo(path[0]->GetModData());
         for (size_t id = 0; id < ModuleIdManager::Modules().size(); id++) {
             auto& mod = ModuleIdManager::Modules()[id];
-            if (Lattice::ignoreColors) {
+            if (Lattice::ignoreProperties) {
                 modDef % id % (mod.moduleStatic ? 1 : 0) % mod.coords[0] % mod.coords[1] % (mod.coords.size() > 2 ? mod.coords[2] : 0);
             } else {
-                modDef % id % Lattice::colorTensor[mod.coords] % mod.coords[0] % mod.coords[1] % (mod.coords.size() > 2 ? mod.coords[2] : 0);
+                modDef % id % dynamic_cast<ColorProperty*>(mod.properties.Find(COLOR_PROP_NAME))->GetColorInt() % mod.coords[0] % mod.coords[1] % (mod.coords.size() > 2 ? mod.coords[2] : 0);
             }
             file << modDef.str() << std::endl;
         }
         file << std::endl;
         for (size_t i = 1; i < path.size(); i++) {
-            auto movePair = MoveManager::FindMoveToState(path[i]->GetState());
+            auto movePair = MoveManager::FindMoveToState(path[i]->GetModData());
             if (movePair.second == nullptr) {
                 std::cout << "Failed to generate scenario file, no move to next state found.\n";
                 file.close();
@@ -73,7 +73,7 @@ namespace Scenario {
         file.close();
     }
 
-    void exportToScen(const CoordTensor<bool>& state, const CoordTensor<int>& colors, const std::string& filename) {
+    /*void exportToScen(const CoordTensor<bool>& state, const CoordTensor<int>& colors, const std::string& filename) {
         std::ofstream file(filename);
         file << "0, 244, 244, 0, 95\n";
         file << "1, 255, 255, 255, 85\n\n";
@@ -88,5 +88,5 @@ namespace Scenario {
         }
         file << std::endl;
         file.close();
-    }
+    }*/
 }

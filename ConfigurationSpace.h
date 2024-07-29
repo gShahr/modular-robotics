@@ -21,6 +21,7 @@ public:
     const char * what() const noexcept override;
 };
 
+// For comparing the state of a lattice and a configuration
 class HashedState {
 private:
     size_t seed;
@@ -29,14 +30,12 @@ public:
 
     explicit HashedState(size_t seed);
 
-    explicit HashedState(const CoordTensor<bool>& state, const CoordTensor<int>& colors);
+    explicit HashedState(const std::unordered_set<ModuleBasic>& modData);
 
     HashedState(const HashedState& other);
 
     [[nodiscard]]
     size_t GetSeed() const;
-
-    void HashCoordTensor(const CoordTensor<bool>& state, const CoordTensor<int>& colors);
 
     bool operator==(const HashedState& other) const;
 
@@ -50,21 +49,23 @@ namespace std {
     };
 }
 
+// For tracking the state of a lattice
 class Configuration {
 private:
     Configuration* parent = nullptr;
     std::vector<Configuration*> next;
-    CoordTensor<bool> _state;
-    CoordTensor<int> _colors;
+    std::unordered_set<ModuleBasic> _nonStatModData;
+    //CoordTensor<bool> _state;
+    //CoordTensor<ModuleProperties> _properties;
     HashedState hash;
 public:
     int depth = 0;
 
-    Configuration(CoordTensor<bool> state, CoordTensor<int> colors);
+    explicit Configuration(std::unordered_set<ModuleBasic> modData);
 
     ~Configuration();
 
-    std::vector<std::pair<CoordTensor<bool>, CoordTensor<int>>> MakeAllMoves();
+    std::vector<std::unordered_set<ModuleBasic>> MakeAllMoves();
 
     void AddEdge(Configuration* configuration);
 
@@ -73,15 +74,12 @@ public:
     std::vector<Configuration*> GetNext();
 
     [[nodiscard]]
-    const CoordTensor<bool>& GetState() const;
-
-    [[nodiscard]]
-    const CoordTensor<int>& GetColors() const;
-
-    [[nodiscard]]
     const HashedState& GetHash() const;
 
-    void SetStateAndHash(const CoordTensor<bool>& state, const CoordTensor<int>& colors);
+    [[nodiscard]]
+    const std::unordered_set<ModuleBasic>& GetModData() const;
+
+    //void SetStateAndHash(const std::vector<ModuleBasic>& modData);
 
     void SetParent(Configuration* configuration);
 

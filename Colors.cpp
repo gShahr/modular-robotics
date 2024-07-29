@@ -72,3 +72,48 @@ namespace Colors {
             {0xFF00FF,"magenta"}
     };
 }
+
+// Make sure this properties constructor is in the constructor map
+PropertyInitializer ColorProperty::initializer(COLOR_PROP_NAME, &PropertyInitializer::InitProperty<ColorProperty>);
+
+std::unordered_set<int> ColorProperty::allColors;
+
+bool ColorProperty::CompareProperty(const IModuleProperty& right) {
+    return color == dynamic_cast<const ColorProperty&>(right).color;
+}
+
+IModuleProperty* ColorProperty::MakeCopy() const {
+    return new ColorProperty(*this);
+}
+
+std::size_t ColorProperty::GetHash() {
+    boost::hash<int> hash;
+    return hash(color);
+}
+
+ColorProperty::ColorProperty(const nlohmann::basic_json<>& propertyDef) {
+    key = COLOR_PROP_NAME;
+    if (propertyDef[COLOR].is_array()) {
+        if (std::all_of(propertyDef[COLOR].begin(), propertyDef[COLOR].end(),
+                        [](const nlohmann::basic_json<>& i){return i.is_number_integer();})) {
+            color = 0;
+            for (int channel : propertyDef[COLOR]) {
+                color += channel;
+            }
+        }
+    } else if (propertyDef[COLOR].is_string()) {
+        color = Colors::colorToInt[propertyDef[COLOR]];
+    } else {
+        std::cerr << "Color improperly formatted." << std::endl;
+        return;
+    }
+    allColors.insert(color);
+}
+
+int ColorProperty::GetColorInt() const {
+    return color;
+}
+
+const std::unordered_set<int>& ColorProperty::Palette() {
+    return allColors;
+}

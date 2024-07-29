@@ -54,7 +54,7 @@ int main(int argc, char* argv[]) {
     MoveManager::RegisterAllMoves();
     // BFS
     std::cout << "BFS Testing:\n";
-    Configuration start(Lattice::stateTensor, Lattice::colorTensor);
+    Configuration start(Lattice::GetModuleInfo());
     Configuration end = LatticeSetup::setupFinalFromJson("docs/examples/basic_3d_final.json");
     std::vector<Configuration*> path;
     try {
@@ -64,7 +64,7 @@ int main(int argc, char* argv[]) {
     }
     std::cout << "Path:\n";
     for (auto config : path) {
-        Lattice::UpdateFromState(config->GetState(), config->GetColors());
+        Lattice::UpdateFromModuleInfo(config->GetModData());
         std::cout << Lattice::ToString();
     }
     std::string exportFolder = "Visualization/Scenarios/";

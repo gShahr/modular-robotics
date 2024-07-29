@@ -5,12 +5,20 @@
     {
       "position": [2, 2, 2],
       "static": true,
-      "color": "blue"
+      "properties": {
+        "colorProperty": {
+          "color": "blue"
+        }
+      }
     },
     {
-      "position": [3, 2, 2],
+      "position": [2, 2, 3],
       "static": false,
-      "color": "black"
+      "properties": {
+        "colorProperty": {
+          "color": "black"
+        }
+      }
     }
   ]
 }

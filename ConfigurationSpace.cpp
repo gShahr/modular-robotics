@@ -1,6 +1,7 @@
 #include <boost/functional/hash.hpp>
 #include <unordered_set>
 #include <queue>
+#include <utility>
 #include "MoveManager.h"
 #include "ConfigurationSpace.h"
 
@@ -12,20 +13,19 @@ HashedState::HashedState() : seed(0) {}
 
 HashedState::HashedState(size_t seed) : seed(seed) {}
 
-HashedState::HashedState(const CoordTensor<bool>& state, const CoordTensor<int>& colors) {
-    HashCoordTensor(state, colors);
+HashedState::HashedState(const std::unordered_set<ModuleBasic>& modData) {
+    seed = 0;
+    for (const auto& data : modData) {
+        boost::hash<ModuleBasic> modBasicHasher;
+        boost::hash_combine(seed, modBasicHasher(data));
+    }
+    //seed = boost::hash_range(modData.begin(), modData.end());
 }
 
 HashedState::HashedState(const HashedState& other) : seed(other.GetSeed()) {}
 
 size_t HashedState::GetSeed() const {
     return seed;
-}
-
-void HashedState::HashCoordTensor(const CoordTensor<bool>& state, const CoordTensor<int>& colors) {
-    seed = boost::hash_range(state.GetArrayInternal().begin(), state.GetArrayInternal().end());
-    size_t seed2 = boost::hash_range(colors.GetArrayInternal().begin(), colors.GetArrayInternal().end());
-    boost::hash_combine(seed, seed2);
 }
 
 bool HashedState::operator==(const HashedState& other) const {
@@ -40,7 +40,9 @@ size_t std::hash<HashedState>::operator()(const HashedState& state) const {
     return std::hash<size_t>()(state.GetSeed());
 }
 
-Configuration::Configuration(CoordTensor<bool> state, CoordTensor<int> colors) : _state(std::move(state)), _colors(std::move(colors)) {}
+Configuration::Configuration(std::unordered_set<ModuleBasic> modData) : _nonStatModData(modData) {
+    hash = HashedState(modData);
+}
 
 Configuration::~Configuration() {
     for (auto i = next.rbegin(); i != next.rend(); i++) {
@@ -48,15 +50,15 @@ Configuration::~Configuration() {
     }
 }
 
-std::vector<std::pair<CoordTensor<bool>, CoordTensor<int>>> Configuration::MakeAllMoves() {
-    std::vector<std::pair<CoordTensor<bool>, CoordTensor<int>>> result;
-    Lattice::UpdateFromState(_state, _colors);
+std::vector<std::unordered_set<ModuleBasic>> Configuration::MakeAllMoves() {
+    std::vector<std::unordered_set<ModuleBasic>> result;
+    Lattice::UpdateFromModuleInfo(_nonStatModData);
     std::vector<Module*> movableModules = Lattice::MovableModules();
     for (auto module: movableModules) {
         auto legalMoves = MoveManager::CheckAllMoves(Lattice::coordTensor, *module);
         for (auto move : legalMoves) {
             Lattice::MoveModule(*module, move->MoveOffset());
-            result.emplace_back(Lattice::stateTensor, Lattice::colorTensor);
+            result.emplace_back(Lattice::GetModuleInfo());
             Lattice::MoveModule(*module, -move->MoveOffset());
         }
     }
@@ -75,23 +77,18 @@ std::vector<Configuration*> Configuration::GetNext() {
     return next;
 }
 
-const CoordTensor<bool>& Configuration::GetState() const {
-    return _state;
-}
-
-const CoordTensor<int>& Configuration::GetColors() const {
-    return _colors;
-}
-
 const HashedState& Configuration::GetHash() const {
     return hash;
 }
 
-void Configuration::SetStateAndHash(const CoordTensor<bool>& state, const CoordTensor<int>& colors) {
-    _state = state;
-    _colors = colors;
-    hash = HashedState(state, colors);
+const std::unordered_set<ModuleBasic>& Configuration::GetModData() const {
+    return _nonStatModData;
 }
+
+/*void Configuration::SetStateAndHash(const std::vector<ModuleBasic>& modData) {
+    _nonStatModData = modData;
+    hash = HashedState(modData);
+}*/
 
 void Configuration::SetParent(Configuration* configuration) {
     parent = configuration;
@@ -107,13 +104,13 @@ int ConfigurationSpace::depth = -1;
 std::vector<Configuration*> ConfigurationSpace::BFS(Configuration* start, Configuration* final) {
     std::queue<Configuration*> q;
     std::unordered_set<HashedState> visited;
-    start->SetStateAndHash(start->GetState(), start->GetColors());
-    final->SetStateAndHash(final->GetState(), final->GetColors());
+    //start->SetStateAndHash(start->GetModData());
+    //final->SetStateAndHash(final->GetModData());
     q.push(start);
     visited.insert(start->GetHash());
     while (!q.empty()) {
         Configuration* current = q.front();
-        Lattice::UpdateFromState(q.front()->GetState(), q.front()->GetColors());
+        Lattice::UpdateFromModuleInfo(q.front()->GetModData());
 #if CONFIG_VERBOSE > CS_LOG_NONE
         if (q.front()->depth != depth) {
             depth++;
@@ -123,22 +120,23 @@ std::vector<Configuration*> ConfigurationSpace::BFS(Configuration* start, Config
         }
 #endif
         q.pop();
-        if (current->GetHash() == final->GetHash()) {
+        //if (current->GetHash() == final->GetHash()) {
+        if (current->GetModData() == final->GetModData()) {
 #if CONFIG_VERBOSE == CS_LOG_FINAL_DEPTH
             std::cout << "bfs depth: " << depth << std::endl << Lattice::ToString() << std::endl;
 #endif
             return FindPath(start, current);
         }
         auto adjList = current->MakeAllMoves();
-        for (const auto& [state, colors]: adjList) {
-            if (visited.find(HashedState(state, colors)) == visited.end()) {
-                auto nextConfiguration = new Configuration(state, colors);
+        for (const auto& moduleInfo : adjList) {
+            if (visited.find(HashedState(moduleInfo)) == visited.end()) {
+                auto nextConfiguration = new Configuration(moduleInfo);
                 nextConfiguration->SetParent(current);
-                nextConfiguration->SetStateAndHash(state, colors);
+                //nextConfiguration->SetStateAndHash(moduleInfo);
                 q.push(nextConfiguration);
                 current->AddEdge(nextConfiguration);
                 nextConfiguration->depth = current->depth + 1;
-                visited.insert(HashedState(state, colors));
+                visited.insert(HashedState(moduleInfo));
             }
         }
     }

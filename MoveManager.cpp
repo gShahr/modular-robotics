@@ -325,10 +325,37 @@ std::vector<MoveBase*> MoveManager::CheckAllMoves(CoordTensor<int> &tensor, Modu
     return legalMoves;
 }
 
-std::pair<Module*, MoveBase*> MoveManager::FindMoveToState(const CoordTensor<bool> &state) {
+std::pair<Module*, MoveBase*> MoveManager::FindMoveToState(const std::unordered_set<ModuleBasic>& modData) {
     Module* modToMove = nullptr;
+    std::valarray<int> destination;
+    std::unordered_set<int> candidates;
+    for (int id = 0; id < ModuleIdManager::MinStaticID(); id++) {
+        candidates.insert(id);
+    }
+    for (const auto& info : modData) {
+        auto id = Lattice::coordTensor[info.coords];
+        if (id >= 0) {
+            candidates.erase(id);
+        } else {
+            destination = info.coords;
+        }
+    }
+    if (candidates.size() != 1) {
+        return {nullptr, nullptr};
+    }
+    modToMove = &ModuleIdManager::GetModule(*candidates.begin());
+    if (modToMove == nullptr) {
+        return {nullptr, nullptr};
+    }
+    auto offset = destination - modToMove->coords;
+    for (auto move : _movesByOffset[offset]) {
+        if (move->MoveCheck(Lattice::coordTensor, *modToMove)) {
+            return {modToMove, move};
+        }
+    }
+    return {modToMove, nullptr};
     // Find module to move
-    for (size_t i = 0; i < Lattice::stateTensor.GetArrayInternal().size(); i++) {
+    /*for (size_t i = 0; i < Lattice::stateTensor.GetArrayInternal().size(); i++) {
         if (Lattice::stateTensor.GetElementDirect(i) != state.GetElementDirect(i) && !state.GetElementDirect(i)) {
             modToMove = &ModuleIdManager::Modules()[Lattice::coordTensor.GetElementDirect(i)];
             break;
@@ -348,5 +375,5 @@ std::pair<Module*, MoveBase*> MoveManager::FindMoveToState(const CoordTensor<boo
             }
         }
     }
-    return {modToMove, nullptr};
+    return {modToMove, nullptr};*/
 }

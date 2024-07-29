@@ -1,3 +1,4 @@
+#include <boost/functional/hash.hpp>
 #include "ModuleManager.h"
 #include "CoordTensor.h"
 
@@ -16,7 +17,6 @@
  * ALL: Output both adjacency and cut vertex information
  */
 #define LATTICE_VERBOSE LAT_LOG_NONE
-
 
 class Lattice {
 private:
@@ -41,10 +41,8 @@ public:
     static CoordTensor<bool> stateTensor;
     // Module tensor
     static CoordTensor<int> coordTensor;
-    // Color tensor
-    static CoordTensor<int> colorTensor;
     // Color flag
-    static bool ignoreColors;
+    static bool ignoreProperties;
 
     Lattice() = delete;
     Lattice(Lattice&) = delete;
@@ -55,7 +53,7 @@ public:
     static void setFlags(bool _ignoreColors);
 
     // Add a new module
-    static void AddModule(const std::valarray<int>& coords, bool isStatic = false, const std::string& color = "");
+    static void AddModule(const Module& mod);
 
     // Move a module
     static void MoveModule(Module& mod, const std::valarray<int>& offset);
@@ -75,8 +73,14 @@ public:
     // Get movable modules
     static const std::vector<Module*>& MovableModules();
 
+    // Update lattice using a vector of non-static module information
+    static void UpdateFromModuleInfo(const std::unordered_set<ModuleBasic>& moduleInfo);
+
+    // Get non-static module information
+    static std::unordered_set<ModuleBasic> GetModuleInfo();
+
     // Assign from state tensor
-    static void UpdateFromState(const CoordTensor<bool>& state, const CoordTensor<int>& colors);
+    //static void UpdateFromState(const CoordTensor<bool>& state, const CoordTensor<int>& colors);
 
     static int Order();
 

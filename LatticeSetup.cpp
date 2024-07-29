@@ -20,16 +20,22 @@ namespace LatticeSetup {
             std::transform(position.begin(), position.end(), position.begin(),
                         [](int coord) { return coord; });
             std::valarray<int> coords(position.data(), position.size());
-            if (!Lattice::ignoreColors && module.contains("color")) {
-                Lattice::AddModule(coords, module["static"], module["color"]);
-                colors.insert(Colors::colorToInt[module["color"]]);
+            if (!Lattice::ignoreProperties && module.contains("properties")) {
+                ModuleIdManager::RegisterModule(coords, module["static"], module["properties"]);
+                //colors.insert(Colors::colorToInt[module["color"]]);
             } else {
-                Lattice::AddModule(coords, module["static"]);
+                ModuleIdManager::RegisterModule(coords, module["static"]);
             }
         }
-        if (colors.size() <= 1) {
-            Lattice::colorTensor = CoordTensor<int>(0, 0, 0);
-            Lattice::ignoreColors = true;
+        // Register static modules after non-static modules
+        ModuleIdManager::DeferredRegistration();
+        if (ColorProperty::Palette().size() <= 1) {
+            //Lattice::colorTensor = CoordTensor<int>(0, 0, 0);
+            //TODO: add property stuff here
+            Lattice::ignoreProperties = true;
+        }
+        for (const auto& mod : ModuleIdManager::Modules()) {
+            Lattice::AddModule(mod);
         }
         Lattice::BuildMovableModules();
     }
@@ -42,21 +48,29 @@ namespace LatticeSetup {
         }
         nlohmann::json j;
         file >> j;
-        CoordTensor<bool> desiredState(Lattice::Order(), Lattice::AxisSize(), false);
-        CoordTensor<int> desiredColors(Lattice::Order(), Lattice::AxisSize(), -1);
+        //CoordTensor<bool> desiredState(Lattice::Order(), Lattice::AxisSize(), false);
+        //CoordTensor<int> desiredColors(Lattice::Order(), Lattice::AxisSize(), -1);
+        std::unordered_set<ModuleBasic> desiredState;
         for (const auto& module : j["modules"]) {
             std::vector<int> position = module["position"];
             std::transform(position.begin(), position.end(), position.begin(),
                         [](int coord) { return coord; });
             std::valarray<int> coords(position.data(), position.size());
-            desiredState[coords] = true;
-            if (!Lattice::ignoreColors && module.contains("color")) {
-                desiredColors[coords] = Colors::colorToInt[module["color"]];
+            ModuleBasic mod;
+            mod.coords = coords;
+            //desiredState[coords] = true;
+            if (!Lattice::ignoreProperties && module.contains("properties")) {
+                mod.properties.InitProperties(module["properties"]);
+                //desiredColors[coords] = Colors::colorToInt[module["color"]];
             }
+            desiredState.insert(mod);
         }
-        return {desiredState, desiredColors};
+        //return {desiredState, desiredColors};
+        //TODO: add property stuff here
+        return Configuration(desiredState);
     }
 
+    [[deprecated("Should use setupFromJson instead")]]
     void setupInitial(const std::string& filename, int order, int axisSize) {
         Lattice::InitLattice(order, axisSize);
         std::vector<std::vector<char>> image;
@@ -72,19 +86,24 @@ namespace LatticeSetup {
             for (char c : line) {
                 if (c == '1') {
                     std::valarray<int> coords = {x, y};
-                    Lattice::AddModule(coords);
+                    ModuleIdManager::RegisterModule(coords, false);
                 } else if (c == '@') {
                     std::valarray<int> coords = {x, y};
-                    Lattice::AddModule(coords, true);
+                    ModuleIdManager::RegisterModule(coords, true);
                 }
                 x++;
             }
             x = 0;
             y++;
         }
+        ModuleIdManager::DeferredRegistration();
+        for (const auto& mod : ModuleIdManager::Modules()) {
+            Lattice::AddModule(mod);
+        }
         Lattice::BuildMovableModules();
     }
 
+    [[deprecated("Should use setupFinalFromJson instead")]]
     Configuration setupFinal(const std::string& filename) {
         int x = 0;
         int y = 0;
@@ -107,13 +126,17 @@ namespace LatticeSetup {
             x = 0;
             y++;
         }
-        return Configuration(desiredState, colors);
+        return Configuration({});
     }
 
     void setUpMetamodule(MetaModule* metamodule) {
         Lattice::InitLattice(metamodule->order, metamodule->size);
         for (const auto &coord: metamodule->coords) {
-            Lattice::AddModule(coord.second, coord.first);
+            ModuleIdManager::RegisterModule(coord.second, coord.first);
+        }
+        ModuleIdManager::DeferredRegistration();
+        for (const auto& mod : ModuleIdManager::Modules()) {
+            Lattice::AddModule(mod);
         }
     }
 
@@ -124,15 +147,19 @@ namespace LatticeSetup {
                 if ((i%2==0 && j&1) || (i&1 && j%2 == 0)) {
                     for (const auto &coord: MetaModuleManager::metamodules[5]->coords) {
                         std::valarray<int> newCoord = {MetaModuleManager::metamodules[5]->size * i, MetaModuleManager::metamodules[5]->size * j};
-                        Lattice::AddModule(coord.second + newCoord, coord.first);
+                        ModuleIdManager::RegisterModule(coord.second + newCoord, coord.first);
                     }
                 } else {
                     for (const auto &coord: MetaModuleManager::metamodules[0]->coords) {
                         std::valarray<int> newCoord = {MetaModuleManager::metamodules[0]->size * i, MetaModuleManager::metamodules[0]->size * j};
-                        Lattice::AddModule(coord.second + newCoord, coord.first);
+                        ModuleIdManager::RegisterModule(coord.second + newCoord, coord.first);
                     }
                 }
             }
+        }
+        ModuleIdManager::DeferredRegistration();
+        for (const auto& mod : ModuleIdManager::Modules()) {
+            Lattice::AddModule(mod);
         }
         // for (const auto &coord: MetaModuleManager::metamodules[0]->coords) {
         //     Lattice::AddModule(coord);
