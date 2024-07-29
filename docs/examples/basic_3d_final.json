@@ -3,15 +3,6 @@
   "axisSize": 5,
   "modules": [
     {
-      "position": [2, 2, 2],
-      "static": true,
-      "properties": {
-        "colorProperty": {
-          "color": "blue"
-        }
-      }
-    },
-    {
       "position": [3, 2, 2],
       "static": false,
       "properties": {

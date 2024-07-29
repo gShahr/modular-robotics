@@ -52,6 +52,7 @@ namespace LatticeSetup {
         //CoordTensor<int> desiredColors(Lattice::Order(), Lattice::AxisSize(), -1);
         std::unordered_set<ModuleBasic> desiredState;
         for (const auto& module : j["modules"]) {
+            if (module["static"] == true) continue;
             std::vector<int> position = module["position"];
             std::transform(position.begin(), position.end(), position.begin(),
                         [](int coord) { return coord; });
