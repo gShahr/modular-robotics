@@ -69,10 +69,10 @@ bool ModuleProperties::operator==(const ModuleProperties& right) const {
     if (_properties.size() != right._properties.size()) {
         return false;
     }
-    std::unordered_set<IModuleProperty*> leftProps = _properties;
 
+    std::unordered_set<IModuleProperty*> leftProps = _properties;
     for (auto rProp : right._properties) {
-        auto lProp = right.Find(rProp->key);
+        auto lProp = Find(rProp->key);
         if (lProp != nullptr && lProp->CompareProperty(*rProp)) {
             leftProps.erase(lProp);
         } else {
@@ -80,7 +80,7 @@ bool ModuleProperties::operator==(const ModuleProperties& right) const {
         }
     }
 
-    return true;
+    return leftProps.empty();
 }
 
 bool ModuleProperties::operator!=(const ModuleProperties& right) const {
