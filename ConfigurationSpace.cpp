@@ -195,6 +195,78 @@ std::vector<Configuration*> ConfigurationSpace::BFSParallelized(Configuration* s
     throw BFSExcept();
 }
 
+int Configuration::GetCost() {
+    return cost;
+}
+
+void Configuration::SetCost(int cost) {
+    this->cost = cost;
+}
+
+int Configuration::Heuristic(Configuration* final) {
+    auto currentData = this->GetModData();
+    auto finalData = final->GetModData();
+    auto currentIt = currentData.begin();
+    auto finalIt = finalData.begin();
+    int h = 0;
+    while (currentIt != currentData.end() && finalIt != finalData.end()) {
+        const auto& currentModule = *currentIt;
+        const auto& finalModule = *finalIt;
+        std::valarray<int> diff = currentModule.coords - finalModule.coords;
+        for (auto& val : diff) {
+            h += std::abs(val);
+        }        currentIt++;
+        finalIt++;
+    }
+    return h;
+}
+
+std::vector<Configuration*> ConfigurationSpace::AStar(Configuration* start, Configuration* final) {
+    auto CompareConfiguration = [final](Configuration* c1, Configuration* c2) {
+        return c1->GetCost() + c1->Heuristic(final) > c2->GetCost() + c2->Heuristic(final);
+    };
+    using CompareType = decltype(CompareConfiguration);
+    std::priority_queue<Configuration*, std::vector<Configuration*>, CompareType> pq(CompareConfiguration);
+    std::unordered_set<HashedState> visited;
+    start->SetCost(0);
+    pq.push(start);
+    visited.insert(start->GetHash());
+
+    while (!pq.empty()) {
+        Configuration* current = pq.top();
+        Lattice::UpdateFromModuleInfo(current->GetModData());
+#if CONFIG_VERBOSE > CS_LOG_NONE
+        if (current->depth != depth) {
+            depth++;
+#if CONFIG_VERBOSE > CS_LOG_FINAL_DEPTH
+            std::cout << "A* depth: " << current->depth << std::endl << Lattice::ToString() << std::endl;
+#endif
+        }
+#endif
+        pq.pop();
+        if (current->GetModData() == final->GetModData()) {
+#if CONFIG_VERBOSE == CS_LOG_FINAL_DEPTH
+            std::cout << "A* depth: " << depth << std::endl << Lattice::ToString() << std::endl;
+#endif
+            return FindPath(start, current);
+        }
+        auto adjList = current->MakeAllMoves();
+        for (const auto& moduleInfo : adjList) {
+            HashedState hashedState(moduleInfo);
+            if (visited.find(hashedState) == visited.end()) {
+                auto nextConfiguration = new Configuration(moduleInfo);
+                nextConfiguration->SetParent(current);
+                nextConfiguration->SetCost(current->GetCost() + 1);
+                pq.push(nextConfiguration);
+                current->AddEdge(nextConfiguration);
+                nextConfiguration->depth = current->depth + 1;
+                visited.insert(hashedState);
+            }
+        }
+    }
+    throw BFSExcept();
+}
+
 std::vector<Configuration*> ConfigurationSpace::FindPath(Configuration* start, Configuration* final) {
     std::vector<Configuration*> path;
     Configuration* current = final;

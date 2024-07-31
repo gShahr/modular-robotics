@@ -58,6 +58,7 @@ private:
     //CoordTensor<bool> _state;
     //CoordTensor<ModuleProperties> _properties;
     HashedState hash;
+    int cost;
 public:
     int depth = 0;
 
@@ -84,6 +85,12 @@ public:
     void SetParent(Configuration* configuration);
 
     friend std::ostream& operator<<(std::ostream& out, const Configuration& config);
+
+    int GetCost();
+
+    void SetCost(int cost);
+
+    int Heuristic(Configuration* final);
 };
 
 namespace ConfigurationSpace {
@@ -92,6 +99,8 @@ namespace ConfigurationSpace {
     std::vector<Configuration*> BFS(Configuration* start, Configuration* final);
 
     std::vector<Configuration*> BFSParallelized(Configuration* start, Configuration* final);
+
+    std::vector<Configuration*> ConfigurationSpace::AStar(Configuration* start, Configuration* final);
 
     std::vector<Configuration*> FindPath(Configuration* start, Configuration* final);
 }
