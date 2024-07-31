@@ -2,6 +2,7 @@
 #include <unordered_set>
 #include <queue>
 #include <utility>
+#include <omp.h>
 #include "MoveManager.h"
 #include "ConfigurationSpace.h"
 
@@ -134,6 +135,57 @@ std::vector<Configuration*> ConfigurationSpace::BFS(Configuration* start, Config
                 nextConfiguration->SetParent(current);
                 //nextConfiguration->SetStateAndHash(moduleInfo);
                 q.push(nextConfiguration);
+                current->AddEdge(nextConfiguration);
+                nextConfiguration->depth = current->depth + 1;
+                visited.insert(HashedState(moduleInfo));
+            }
+        }
+    }
+    throw BFSExcept();
+}
+
+std::vector<Configuration*> ConfigurationSpace::BFSParallelized(Configuration* start, Configuration* final) {
+    std::queue<Configuration*> q;
+    std::unordered_set<HashedState> visited;
+    q.push(start);
+    visited.insert(start->GetHash());
+
+    while (!q.empty()) {
+        Configuration* current = q.front();
+        Lattice::UpdateFromModuleInfo(q.front()->GetModData());
+#if CONFIG_VERBOSE > CS_LOG_NONE
+        if (q.front()->depth != depth) {
+            depth++;
+#if CONFIG_VERBOSE > CS_LOG_FINAL_DEPTH
+            std::cout << "bfs depth: " << q.front()->depth << std::endl << Lattice::ToString() << std::endl;
+#endif
+        }
+#endif
+        q.pop();
+        if (current->GetModData() == final->GetModData()) {
+#if CONFIG_VERBOSE == CS_LOG_FINAL_DEPTH
+            std::cout << "bfs depth: " << depth << std::endl << Lattice::ToString() << std::endl;
+#endif
+            return FindPath(start, current);
+        }
+        auto adjList = current->MakeAllMoves();
+        #pragma omp parallel for
+        for (const auto& moduleInfo : adjList) {
+            int thread_id = omp_get_thread_num();
+            std::cout << "Thread " << thread_id << " is processing moduleInfo." << std::endl;
+            HashedState hashedState(moduleInfo);
+            bool isVisited = false;
+            #pragma omp critical
+            {
+                isVisited = (visited.find(hashedState) != visited.end());
+            }
+            if (!isVisited) {
+                auto nextConfiguration = new Configuration(moduleInfo);
+                nextConfiguration->SetParent(current);
+                #pragma omp critical
+                {
+                    q.push(nextConfiguration);
+                }
                 current->AddEdge(nextConfiguration);
                 nextConfiguration->depth = current->depth + 1;
                 visited.insert(HashedState(moduleInfo));
