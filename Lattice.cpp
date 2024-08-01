@@ -219,6 +219,8 @@ std::string Lattice::ToString() {
         if (id >= 0 && !ignoreProperties) {
             auto colorProp = dynamic_cast<ColorProperty*>(ModuleIdManager::Modules()[id].properties.Find(COLOR_PROP_NAME));
             out << Colors::intToColor[colorProp->GetColorInt()][0];
+        } else if (id >= 0) {
+            out << '#';
         } else {
             out << '-';
         }
