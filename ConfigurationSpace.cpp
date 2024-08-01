@@ -238,22 +238,22 @@ int Configuration::SymmetricDifferenceHeuristic(Configuration* final) {
     auto currentIt = currentData.begin();
     auto finalIt = finalData.begin();
     int h = 0;
-    std::set<std::valarray<int>, ValarrayComparator> coords;
+    std::set<std::valarray<int>, ValarrayComparator> unionCoords;
     while (currentIt != currentData.end() && finalIt != finalData.end()) {
         const auto& currentModule = *currentIt;
         const auto& finalModule = *finalIt;
-        coords.insert(currentModule.coords);
-        coords.insert(finalModule.coords);
+        unionCoords.insert(currentModule.coords);
+        unionCoords.insert(finalModule.coords);
         currentIt++;
         finalIt++;
     }
-    int difference = (currentData.size() + finalData.size()) - 2 * (currentData.size() + finalData.size() - coords.size());
-    return difference;
+    int symDifference = 2 * unionCoords.size() - (currentData.size() + finalData.size());
+    return symDifference;
 }
 
 std::vector<Configuration*> ConfigurationSpace::AStar(Configuration* start, Configuration* final) {
     auto CompareConfiguration = [final](Configuration* c1, Configuration* c2) {
-        return c1->GetCost() + c1->Heuristic(final) > c2->GetCost() + c2->Heuristic(final);
+        return c1->GetCost() + c1->SymmetricDifferenceHeuristic(final) > c2->GetCost() + c2->SymmetricDifferenceHeuristic(final);
     };
     using CompareType = decltype(CompareConfiguration);
     std::priority_queue<Configuration*, std::vector<Configuration*>, CompareType> pq(CompareConfiguration);
