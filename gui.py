@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox
 import subprocess
+import os
 
 class App:
     def __init__(self, root):
@@ -9,6 +10,7 @@ class App:
 
         self.initial_file = ""
         self.final_file = ""
+        self.scen_file = ""
 
         self.create_widgets()
 
@@ -21,6 +23,9 @@ class App:
 
         self.run_bfs_button = tk.Button(self.root, text="Run BFS", command=self.run_bfs)
         self.run_bfs_button.pack()
+
+        self.select_scen_button = tk.Button(self.root, text="Select Scen File", command=self.select_scen_file)
+        self.select_scen_button.pack()
 
         self.run_visualization_button = tk.Button(self.root, text="Run Visualization", command=self.run_visualization)
         self.run_visualization_button.pack()
@@ -38,6 +43,11 @@ class App:
         if self.final_file:
             self.result_text.insert(tk.END, f"Selected final file: {self.final_file}\n")
 
+    def select_scen_file(self):
+        self.scen_file = filedialog.askopenfilename(title="Select SCEN File", filetypes=[("SCEN files", "*.scen")])
+        if self.scen_file:
+            self.result_text.insert(tk.END, f"Selected SCEN file: {self.scen_file}\n")
+
     def run_bfs(self):
         if not self.initial_file or not self.final_file:
             messagebox.showerror("Error", "Please select both initial and final files.")
@@ -52,11 +62,21 @@ class App:
             self.result_text.insert(tk.END, str(e) + "\n")
 
     def run_visualization(self):
+        if not self.scen_file:
+            messagebox.showerror("Error", "Please select .scen file.")
+            return
+
         try:
-            result = subprocess.run(['visualization/main.exe'], capture_output=True, text=True)
+            root_dir = os.getcwd()
+            visualization_dir = os.path.join(root_dir, "Visualization")
+            os.chdir(visualization_dir)
+            scen_file_base = os.path.splitext(os.path.basename(self.scen_file))[0]
+            print(scen_file_base)
+            result = subprocess.run(['./main.exe', scen_file_base], capture_output=True, text=True)
             self.result_text.insert(tk.END, result.stdout + "\n")
             if result.stderr:
                 self.result_text.insert(tk.END, "Errors:\n" + result.stderr + "\n")
+            os.chdir(root_dir)
         except Exception as e:
             self.result_text.insert(tk.END, str(e) + "\n")
 
