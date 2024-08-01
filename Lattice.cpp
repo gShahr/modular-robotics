@@ -183,6 +183,8 @@ void Lattice::UpdateFromModuleInfo(const std::unordered_set<ModuleBasic>& module
         auto& mod = ModuleIdManager::GetModule(id);
         Lattice::coordTensor[mod.coords] = -1;
         mod.coords = destinations.front()->coords;
+        ClearAdjacencies(id);
+        EdgeCheck(mod, true);
         Lattice::coordTensor[mod.coords] = mod.id;
         mod.properties = destinations.front()->properties;
         destinations.pop();
