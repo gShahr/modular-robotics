@@ -113,28 +113,26 @@ class twoDScreen {
         sketch.endShape(sketch.CLOSE);
     };
 
-    rhombicDodecahedron = (sketch, centerX, centerY, radius) => {
-        const angle = Math.PI / 3;
-        const rhombus = (cx, cy, r, rotation) => {
-            sketch.beginShape();
-            for (let i = 0; i < 4; i++) {
-                const x_i = cx + r * Math.cos(Math.PI / 2 * i + rotation);
-                const y_i = cy + r * Math.sin(Math.PI / 2 * i + rotation);
-                sketch.vertex(x_i, y_i);
-            }
-            sketch.endShape(sketch.CLOSE);
-        };
-    
-        // Draw the central rhombus
-        rhombus(centerX, centerY, radius, 0);
-        return;
-    
-        // Draw surrounding rhombuses
-        for (let i = 0; i < 6; i++) {
-            const x_i = centerX + radius * Math.cos(angle * i);
-            const y_i = centerY + radius * Math.sin(angle * i);
-            rhombus(x_i, y_i, radius, angle / 2);
+    rhombus = (sketch, centerX, centerY, sideLength) => {
+        const halfSide = sideLength / 2;
+        sketch.beginShape();
+        for (let i = 0; i < 4; i++) {
+            const angle = Math.PI / 2 * i;
+            const x_i = centerX + halfSide * Math.cos(angle);
+            const y_i = centerY + halfSide * Math.sin(angle);
+            sketch.vertex(x_i, y_i);
         }
+        sketch.endShape(sketch.CLOSE);
+    };
+
+    square = (sketch, centerX, centerY, sideLength) => {
+        const halfSide = sideLength / 2;
+        sketch.beginShape();
+        sketch.vertex(centerX - halfSide, centerY - halfSide); // Top-left
+        sketch.vertex(centerX + halfSide, centerY - halfSide); // Top-right
+        sketch.vertex(centerX + halfSide, centerY + halfSide); // Bottom-right
+        sketch.vertex(centerX - halfSide, centerY + halfSide); // Bottom-left
+        sketch.endShape(sketch.CLOSE);
     };
 
     drawHexGrid = (sketch, width, height, tileSize) => {
@@ -153,17 +151,12 @@ class twoDScreen {
     };
 
     drawRhombicDodecahedronGrid = (sketch, width, height, tileSize) => {
-        const vertDist = Math.sqrt(3) * tileSize;
-        const horizDist = 1.5 * tileSize;
-        let count = 0;
-    
-        for (let y = 0; y < height; y += vertDist) {
-            for (let x = 0; x < width; x += horizDist) {
-                const yOffset = count % 2 === 0 ? 0 : vertDist / 2;
-                this.rhombicDodecahedron(sketch, x, y + yOffset, tileSize);
-                count++;
+        const vertDist = tileSize;
+        const horizDist = tileSize;    
+        for (let y = tileSize/2; y < height; y += vertDist) {
+            for (let x = tileSize/2; x < width; x += horizDist) {
+                this.square(sketch, x, y, tileSize);
             }
-            count++;
         }
     };
 
@@ -214,16 +207,26 @@ class twoDScreen {
 
     drawRhombicDodecahedrons(sketch) {
         this.drawRhombicDodecahedronGrid(sketch, this.width, this.height, this.tileSize);
-        for (let i = 0; i < this.rhombicDodecahedrons.length; i++) {
-            switch(this.rhombicDodecahedrons[i].z) {
+        for (let i = 0; i < this.rhomdod.length; i++) {
+            switch(this.rhomdod[i].z) {
                 case this.layer:
                     sketch.fill(0);
-                    this.rhombicDodecahedron(sketch, this.rhombicDodecahedrons[i].x, this.rhombicDodecahedrons[i].y, this.tileSize);
+                    sketch.rect(
+                        this.rhomdod[i].x * this.tileSize, 
+                        this.rhomdod[i].y * this.tileSize, 
+                        this.tileSize, 
+                        this.tileSize
+                    );
                     sketch.fill(255);
                     break;
-                case this.layer-1:
+                case this.layer - 1:
                     sketch.fill(166, 166, 166);
-                    this.rhombicDodecahedron(sketch, this.rhombicDodecahedrons[i].x, this.rhombicDodecahedrons[i].y, this.tileSize);
+                    sketch.rect(
+                        this.rhomdod[i].x * this.tileSize, 
+                        this.rhomdod[i].y * this.tileSize, 
+                        this.tileSize, 
+                        this.tileSize
+                    );
                     sketch.fill(255);
             }
         }
