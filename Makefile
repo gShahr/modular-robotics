@@ -2,10 +2,10 @@
 CXX = g++
 
 # Compiler flags
-CXXFLAGS = -Wall -std=c++17 -I $(VCPKG_ROOT)/installed/x64-windows/include
+CXXFLAGS = -w -std=c++17 -I $(VCPKG_ROOT)/installed/x64-windows/include
 
 # Linker flags
-LDFLAGS = -L $(VCPKG_ROOT)/installed/x64-windows/lib -lgmock -lgtest -lbenchmark -lpthread 
+LDFLAGS = -L $(VCPKG_ROOT)/installed/x64-windows/lib -lgmock -lgtest -lbenchmark -lpthread -fopenmp
 
 # Source files
 SOURCES = main.cpp ConfigurationSpace.cpp Lattice.cpp ModuleManager.cpp MoveManager.cpp MetaModule.cpp LatticeSetup.cpp Scenario.cpp Isometry.cpp Colors.cpp
@@ -35,6 +35,9 @@ test2: tests/colorTest.cpp $(SOURCES2)
 
 benchmarks: tests/benchmarks/benchmarks.cpp $(SOURCES2)
 	$(CXX) $(CXXFLAGS) -I. -o benchmarks tests/benchmarks/benchmarks.cpp $(SOURCES2)
+
+gui: gui/gui.cpp
+	$(CXX) $(CXXFLAGS) -I. -o gui gui/gui.cpp
 
 clean:
 	rm -f $(OBJECTS) $(EXECUTABLE)
