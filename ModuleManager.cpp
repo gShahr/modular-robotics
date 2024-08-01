@@ -173,7 +173,7 @@ Module::Module(const std::valarray<int>& coords, bool isStatic, const nlohmann::
 int ModuleIdManager::_nextId = 0;
 std::vector<DeferredModCnstrArgs> ModuleIdManager::_deferredInitMods;
 std::vector<Module> ModuleIdManager::_modules;
-int ModuleIdManager::_staticStart = -1;
+int ModuleIdManager::_staticStart = 0;
 
 void ModuleIdManager::RegisterModule(const std::valarray<int>& coords, bool isStatic, const nlohmann::basic_json<>& propertyDefs, bool deferred) {
     if (!deferred && isStatic) {
@@ -182,6 +182,7 @@ void ModuleIdManager::RegisterModule(const std::valarray<int>& coords, bool isSt
         args.isStatic = isStatic;
         args.propertyDefs = propertyDefs;
         _deferredInitMods.emplace_back(args);
+        _staticStart--;
     } else {
         _modules.emplace_back(coords, isStatic, propertyDefs);
         _staticStart++;
