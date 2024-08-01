@@ -54,7 +54,11 @@ class App:
             return
 
         try:
-            result = subprocess.run(['./main.exe', self.initial_file, self.final_file], capture_output=True, text=True)
+            result = subprocess.run([
+                './main.exe',
+                '--initial-file', self.initial_file,
+                '--final-file', self.final_file
+            ], capture_output=True, text=True)
             self.result_text.insert(tk.END, result.stdout + "\n")
             if result.stderr:
                 self.result_text.insert(tk.END, "Errors:\n" + result.stderr + "\n")
