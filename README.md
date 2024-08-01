@@ -2,6 +2,7 @@
 
 - [Usage](#usage)
 - [Install](#install)
+- [3DTiler](#3DTiler)
 - [Visualization](#visualization)
 - [Examples](#examples)
 - [License](#license)
@@ -13,9 +14,15 @@
 
 ## Install
 
+## 3DTiler
+
+[Documentation]()
+
+[Live Demo]((https://gshahr.github.io/modular-robotics/3DTiler/Index.html))
+
 ## Visualization
 
-[Visualization Tool](https://github.com/gShahr/modular-robotics/wiki/Visualization-Tool)
+[Documentation](https://github.com/gShahr/modular-robotics/wiki/Visualization-Tool)
 
 ## Examples
 
