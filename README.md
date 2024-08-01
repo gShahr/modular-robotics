@@ -18,7 +18,7 @@
 
 [Documentation]()
 
-[Live Demo]((https://gshahr.github.io/modular-robotics/3DTiler/Index.html))
+[Live Demo](https://gshahr.github.io/modular-robotics/3DTiler/Index.html)
 
 ## Visualization
 
