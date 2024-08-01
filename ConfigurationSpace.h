@@ -91,6 +91,8 @@ public:
     void SetCost(int cost);
 
     int Heuristic(Configuration* final);
+
+    int SymmetricDifferenceHeuristic(Configuration* final);
 };
 
 namespace ConfigurationSpace {

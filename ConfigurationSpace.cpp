@@ -1,6 +1,7 @@
 #include <boost/functional/hash.hpp>
 #include <unordered_set>
 #include <queue>
+#include <set>
 #include <utility>
 #include <omp.h>
 #include "MoveManager.h"
@@ -219,6 +220,35 @@ int Configuration::Heuristic(Configuration* final) {
         finalIt++;
     }
     return h;
+}
+
+struct ValarrayComparator {
+    bool operator()(const std::valarray<int>& lhs, const std::valarray<int>& rhs) const {
+        for (size_t i = 0; i < std::min(lhs.size(), rhs.size()); ++i) {
+            if (lhs[i] < rhs[i]) return true;
+            if (lhs[i] > rhs[i]) return false;
+        }
+        return lhs.size() < rhs.size();
+    }
+};
+
+int Configuration::SymmetricDifferenceHeuristic(Configuration* final) {
+    auto currentData = this->GetModData();
+    auto finalData = final->GetModData();
+    auto currentIt = currentData.begin();
+    auto finalIt = finalData.begin();
+    int h = 0;
+    std::set<std::valarray<int>, ValarrayComparator> coords;
+    while (currentIt != currentData.end() && finalIt != finalData.end()) {
+        const auto& currentModule = *currentIt;
+        const auto& finalModule = *finalIt;
+        coords.insert(currentModule.coords);
+        coords.insert(finalModule.coords);
+        currentIt++;
+        finalIt++;
+    }
+    int difference = (currentData.size() + finalData.size()) - 2 * (currentData.size() + finalData.size() - coords.size());
+    return difference;
 }
 
 std::vector<Configuration*> ConfigurationSpace::AStar(Configuration* start, Configuration* final) {
