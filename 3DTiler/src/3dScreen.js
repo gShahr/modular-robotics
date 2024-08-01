@@ -5,7 +5,8 @@ class threeDScreen {
         this.tileSize = tileSize*5;
         this.cubes    = [];
         this.hexagons = [];
-        this.shape    = "cube";
+        this.rhomdod  = [];
+        this.shape    = "rhombicDodecahedron";
     }
 
     get getCubes() {
@@ -22,6 +23,10 @@ class threeDScreen {
 
     addHexagon(hexagon) {
         this.hexagons.push(hexagon);
+    }
+
+    addRhomdod(rhomdod) {
+        this.rhomdod.push(rhomdod);
     }
 
     setShape(shape) {
@@ -48,6 +53,16 @@ class threeDScreen {
         return false
     }
 
+    removeRhomdod(x, y, z) {
+        for (let i = 0; i < this.rhomdod.length; i++) {
+            if (this.rhomdod[i].x === x && this.rhomdod[i].y === y && this.rhomdod[i].z === z) {
+                this.rhomdod.splice(i, 1);
+                return true;
+            }
+        }
+        return false
+    }
+
     removeAllCubes() {
         while (this.cubes.length > 0) {
             this.removeCube(this.cubes.pop());
@@ -57,6 +72,12 @@ class threeDScreen {
     removeAllHexagons() {
         while (this.hexagons.length > 0) {
             this.removeHexagon(this.hexagons.pop());
+        }
+    }
+
+    removeAllRhomdods() {
+        while (this.rhomdod.length > 0) {
+            this.removeRhomdod(this.rhomdod.pop());
         }
     }
 
@@ -139,13 +160,100 @@ class threeDScreen {
             sketch.pop();
         }
     }
+
+    drawRhombicDodecahedron(sketch, size) {
+        // coords from https://stackoverflow.com/questions/29314787/three-js-trying-to-render-a-custom-mesh-rhombic-dodecahedron
+        const vertices = [
+            [-1, 1, -1], // A       (0)
+            [1, 1, -1],  // B       (1)
+            [1, 1, 1],   // C       (2)
+            [-1, 1, 1],  // D       (3)
+            [-1, -1, -1],// E       (4)
+            [1, -1, -1], // F       (5)
+            [1, -1, 1],  // G       (6)
+            [-1, -1, 1], // H       (7)
+            [-2, 0, 0],  // left    (8)
+            [2, 0, 0],   // right   (9)
+            [0, 2, 0],   // top     (10)
+            [0, -2, 0],  // bottom  (11)
+            [0, 0, 2],   // front   (12)
+            [0, 0, -2]   // back    (13)
+        ];
+        
+        const faces = [
+            [12, 2, 10, 3],  // (front, C, top, D)
+            [12, 6, 9, 2],   // (front, G, right, C)
+            [12, 7, 11, 6],  // (front, H, bottom, G)
+            [12, 3, 8, 7],   // (front, D, left, H)
+            [13, 5, 11, 4],  // (back, F, bottom, E)
+            [13, 4, 8, 0],   // (back, E, left, A)
+            [13, 0, 10, 1],  // (back, A, top, B)
+            [13, 1, 9, 5],   // (back, B, right, F)
+            [8, 3, 10, 0],   // (left, D, top, A)
+            [8, 4, 11, 7],   // (left, E, bottom, H)
+            [9, 1, 10, 2],   // (right, B, top, C)
+            [9, 6, 11, 5]    // (right, G, bottom, F)
+        ];
+    
+        const colors = [
+            [255, 0, 0],    // Red
+            [0, 255, 0],    // Green
+            [0, 0, 255],    // Blue
+            [255, 255, 0],  // Yellow
+            [0, 255, 255],  // Cyan
+            [255, 0, 255],  // Magenta
+            [192, 192, 192],// Silver
+            [128, 128, 128],// Gray
+            [128, 0, 0],    // Maroon
+            [128, 128, 0],  // Olive
+            [0, 128, 0],    // Dark Green
+            [0, 128, 128]   // Teal
+        ];
+    
+        for (let i = 0; i < faces.length; i++) {
+            sketch.fill(colors[i][0], colors[i][1], colors[i][2]);
+            sketch.beginShape();
+            const face = faces[i];
+            for (let j = 0; j < face.length; j++) {
+                const vertex = vertices[face[j]];
+                sketch.vertex(vertex[0], vertex[1], vertex[2]);
+            }
+            sketch.endShape(sketch.CLOSE);
+        }
+    }
+    
+    drawRhombicDodecahedrons(sketch) {
+        const halfWidth = this.width / 2;
+        const halfHeight = this.height / 2;
+        const sclaeFactor = 10;
+    
+        for (let i = 0; i < this.rhomdod.length; i++) {
+            const x = this.rhomdod[i].x * this.tileSize - halfWidth;
+            const y = this.rhomdod[i].y * this.tileSize - halfHeight;
+            const z = this.rhomdod[i].z * this.tileSize;
+            sketch.push();
+            sketch.translate(x, y, z);
+            sketch.scale(sclaeFactor);
+            sketch.fill(this.rhomdod[i].color[0], this.rhomdod[i].color[1], this.rhomdod[i].color[2]);
+            this.drawRhombicDodecahedron(sketch, this.tileSize);
+            sketch.pop();
+        }
+    }
     
     draw(sketch) {
         sketch.fill(255);
-        if (this.shape == "cube") {
-            this.drawCubes(sketch);
-        } else if (this.shape == "hexagon") {
-            this.drawHexagons(sketch);
+        switch (this.shape) {
+            case "cube":
+                this.drawCubes(sketch);
+                break;
+            case "hexagon":
+                this.drawHexagons(sketch);
+                break;
+            case "rhombicDodecahedron":
+                this.drawRhombicDodecahedrons(sketch);
+                break;
+            default:
+                break;
         }
     }
 }
