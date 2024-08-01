@@ -6,7 +6,8 @@ class twoDScreen {
         this.layer    = 0;
         this.cubes    = [];
         this.hexagons = [];
-        this.shape = "cube";
+        this.rhomdod  = [];
+        this.shape = "rhombicDodecahedron";
     }
 
     set layer(value) {
@@ -57,6 +58,10 @@ class twoDScreen {
         this.hexagons.push(hexagon);
     }
 
+    addRhomdod(rhomdod) {
+        this.rhomdod.push(rhomdod);
+    }
+
     setShape(shape) {
         this.shape = shape;
     }
@@ -81,6 +86,16 @@ class twoDScreen {
         return false;
     }
 
+    removeRhomdod(x, y, z) {
+        for (let i = 0; i < this.rhomdod.length; i++) {
+            if (this.rhomdod[i].x === x && this.rhomdod[i].y === y && this.rhomdod[i].z === z) {
+                this.rhomdod.splice(i, 1);
+                return true;
+            }
+        }
+        return false;
+    }
+
     removeAllCubes() {
         while (this.cubes.length > 0) {
             this.removeCube(this.cubes.pop());
@@ -98,6 +113,30 @@ class twoDScreen {
         sketch.endShape(sketch.CLOSE);
     };
 
+    rhombicDodecahedron = (sketch, centerX, centerY, radius) => {
+        const angle = Math.PI / 3;
+        const rhombus = (cx, cy, r, rotation) => {
+            sketch.beginShape();
+            for (let i = 0; i < 4; i++) {
+                const x_i = cx + r * Math.cos(Math.PI / 2 * i + rotation);
+                const y_i = cy + r * Math.sin(Math.PI / 2 * i + rotation);
+                sketch.vertex(x_i, y_i);
+            }
+            sketch.endShape(sketch.CLOSE);
+        };
+    
+        // Draw the central rhombus
+        rhombus(centerX, centerY, radius, 0);
+        return;
+    
+        // Draw surrounding rhombuses
+        for (let i = 0; i < 6; i++) {
+            const x_i = centerX + radius * Math.cos(angle * i);
+            const y_i = centerY + radius * Math.sin(angle * i);
+            rhombus(x_i, y_i, radius, angle / 2);
+        }
+    };
+
     drawHexGrid = (sketch, width, height, tileSize) => {
         const vertDist = Math.sqrt(3) * tileSize;
         const horizDist = 1.5 * tileSize;
@@ -107,6 +146,21 @@ class twoDScreen {
             for (let x = 0; x < width; x += horizDist) {
                 const yOffset = count % 2 === 0 ? 0 : vertDist / 2;
                 this.hexagon(sketch, x, y + yOffset, tileSize);
+                count++;
+            }
+            count++;
+        }
+    };
+
+    drawRhombicDodecahedronGrid = (sketch, width, height, tileSize) => {
+        const vertDist = Math.sqrt(3) * tileSize;
+        const horizDist = 1.5 * tileSize;
+        let count = 0;
+    
+        for (let y = 0; y < height; y += vertDist) {
+            for (let x = 0; x < width; x += horizDist) {
+                const yOffset = count % 2 === 0 ? 0 : vertDist / 2;
+                this.rhombicDodecahedron(sketch, x, y + yOffset, tileSize);
                 count++;
             }
             count++;
@@ -158,13 +212,38 @@ class twoDScreen {
         }
     }
 
+    drawRhombicDodecahedrons(sketch) {
+        this.drawRhombicDodecahedronGrid(sketch, this.width, this.height, this.tileSize);
+        for (let i = 0; i < this.rhombicDodecahedrons.length; i++) {
+            switch(this.rhombicDodecahedrons[i].z) {
+                case this.layer:
+                    sketch.fill(0);
+                    this.rhombicDodecahedron(sketch, this.rhombicDodecahedrons[i].x, this.rhombicDodecahedrons[i].y, this.tileSize);
+                    sketch.fill(255);
+                    break;
+                case this.layer-1:
+                    sketch.fill(166, 166, 166);
+                    this.rhombicDodecahedron(sketch, this.rhombicDodecahedrons[i].x, this.rhombicDodecahedrons[i].y, this.tileSize);
+                    sketch.fill(255);
+            }
+        }
+    }
+
     draw(sketch) {
         sketch.background(255);
         sketch.stroke(0);
-        if (this.shape == "cube") {
-            this.drawCubes(sketch);
-        } else if (this.shape == "hexagon") {
-            this.drawHexagons(sketch);
+        switch (this.shape) {
+            case "cube":
+                this.drawCubes(sketch);
+                break;
+            case "hexagon":
+                this.drawHexagons(sketch);
+                break;
+            case "rhombicDodecahedron":
+                this.drawRhombicDodecahedrons(sketch);
+                break;
+            default:
+                break;
         }
         sketch.stroke(255);
     }
