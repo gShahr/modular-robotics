@@ -44,7 +44,7 @@ void Lattice::AddModule(const Module& mod) {
     stateTensor[mod.coords] = true;
     coordTensor[mod.coords] = mod.id;
     // Adjacency check
-    EdgeCheck(mod, false);
+    EdgeCheck(mod, true);
     moduleCount++;
     adjList.resize(moduleCount + 1);
 }
