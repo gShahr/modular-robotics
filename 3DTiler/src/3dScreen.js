@@ -24,6 +24,10 @@ class threeDScreen {
         this.hexagons.push(hexagon);
     }
 
+    setShape(shape) {
+        this.shape = shape;
+    }
+
     removeCube(x, y, z) {
         for (let i = 0; i < this.cubes.length; i++) {
             if (this.cubes[i].x === x && this.cubes[i].y === y && this.cubes[i].z === z) {
@@ -138,8 +142,6 @@ class threeDScreen {
     
     draw(sketch) {
         sketch.fill(255);
-        this.drawHexagons(sketch);
-        return;
         if (this.shape == "cube") {
             this.drawCubes(sketch);
         } else if (this.shape == "hexagon") {

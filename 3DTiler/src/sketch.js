@@ -178,9 +178,11 @@ var sketch1 = function (sketch) {
             if (document.getElementById("switch-shape").innerText === "Switch to Hexagon") {
                 document.getElementById("switch-shape").innerText = "Switch to Cube";
                 screen.setShape("hexagon");
+                threeScreen.setShape("hexagon");
             } else {
                 document.getElementById("switch-shape").innerText = "Switch to Hexagon";
                 screen.setShape("cube");
+                threeScreen.setShape("cube");
             }
             switchShapePressed = false;
             clearPressed = true;
