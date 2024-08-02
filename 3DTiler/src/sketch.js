@@ -176,13 +176,17 @@ var sketch1 = function (sketch) {
         }
         if (switchShapePressed) {
             if (document.getElementById("switch-shape").innerText === "Switch to Hexagon") {
-                document.getElementById("switch-shape").innerText = "Switch to Cube";
+                document.getElementById("switch-shape").innerText = "Switch to Rhombic Dodecahedron";
                 screen.setShape("hexagon");
                 threeScreen.setShape("hexagon");
-            } else {
+            } else if (document.getElementById("switch-shape").innerText === "Switch to Cube") {
                 document.getElementById("switch-shape").innerText = "Switch to Hexagon";
                 screen.setShape("cube");
                 threeScreen.setShape("cube");
+            } else if (document.getElementById("switch-shape").innerText === "Switch to Rhombic Dodecahedron") {
+                document.getElementById("switch-shape").innerText = "Switch to Cube";
+                screen.setShape("rhombicDodecahedron");
+                threeScreen.setShape("rhombicDodecahedron");
             }
             switchShapePressed = false;
             clearPressed = true;
@@ -245,7 +249,7 @@ var sketch2 = function (sketch) {
                     threeScreen.addRhomdod(new RhomDod(x, y, layer, rgbColor));
                 }
             }
-        } else {
+        } else if (screen.shape === "cube") {
             let mX = sketch.mouseX + (canvasW / 2);
             if (mX < canvasW / 2 && sketch.mouseY < canvasH && sketch.mouseY > 0) {
                 x = Math.floor(mX / twoDtileSize);
@@ -253,6 +257,12 @@ var sketch2 = function (sketch) {
                 if (!threeScreen.removeCube(x, y, layer)) {
                     threeScreen.addCube(new Cube(x, y, layer, rgbColor));
                 }
+            }
+        } else if (screen.shape === "hexagon") {
+            let mX = sketch.mouseX + (canvasW / 2);
+            if (mX < canvasW / 2 && sketch.mouseY < canvasH && sketch.mouseY > 0) {
+                x = Math.floor(mX / twoDtileSize);
+                y = Math.floor(sketch.mouseY / twoDtileSize);
                 if (!threeScreen.removeHexagon(x, y, layer)) {
                     threeScreen.addHexagon(new Hexagon(x, y, layer, rgbColor));
                 }
