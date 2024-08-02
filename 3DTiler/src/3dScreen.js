@@ -6,7 +6,7 @@ class threeDScreen {
         this.cubes    = [];
         this.hexagons = [];
         this.rhomdod  = [];
-        this.shape    = "rhombicDodecahedron";
+        this.shape    = "cube";
     }
 
     get getCubes() {
@@ -359,7 +359,6 @@ class threeDScreen {
                 this.drawHexagons(sketch);
                 break;
             case "rhombicDodecahedron":
-                //this.drawPyramid(sketch, this.tileSize, this.tileSize);
                 this.drawRhombicDodecahedrons(sketch);
                 break;
             default:

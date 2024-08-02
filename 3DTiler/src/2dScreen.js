@@ -8,7 +8,7 @@ class twoDScreen {
         this.hexagons = [];
         this.rhomdod  = [];
         this.invalidRhomdod = [];
-        this.shape = "rhombicDodecahedron";
+        this.shape = "cube";
     }
 
     set layer(value) {
@@ -68,6 +68,7 @@ class twoDScreen {
         let x = rhomdod.x;
         let y = rhomdod.y;
         let z = this.layer;
+
         // current layer 4 adjacent faces
         this.invalidRhomdod.push([x-1, y, z]);
         this.invalidRhomdod.push([x, y-1, z]);
@@ -88,10 +89,9 @@ class twoDScreen {
     }
 
     removeInvalidRhomdod(rhomdod) {
-        console.log(rhomdod);
         let x = rhomdod.x;
         let y = rhomdod.y;
-        let z = this.layer;
+        let z = rhomdod.z;
     
         const coordinatesToRemove = [
             // current layer 4 adjacent faces
@@ -113,11 +113,16 @@ class twoDScreen {
             [x+1, y+1, z-1]
         ];
     
-        this.invalidRhomdod = this.invalidRhomdod.filter(coord => 
-            !coordinatesToRemove.some(removeCoord => 
-                removeCoord[0] === coord[0] && removeCoord[1] === coord[1] && removeCoord[2] === coord[2]
-            )
-        );
+        for (let i = 0; i < coordinatesToRemove.length; i++) {
+            for (let j = 0; j < this.rhomdod.length; j++) {
+                if (this.rhomdod[j].x === coordinatesToRemove[i][0] &&
+                    this.rhomdod[j].y === coordinatesToRemove[i][1] &&
+                    this.rhomdod[j].z === coordinatesToRemove[i][2]) {
+                    this.rhomdod.splice(j, 1);
+                    break;
+                }
+            }
+        }
     }
 
     setShape(shape) {
