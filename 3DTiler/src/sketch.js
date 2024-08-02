@@ -241,7 +241,7 @@ var sketch2 = function (sketch) {
             if (mX < canvasW / 2 && sketch.mouseY < canvasH && sketch.mouseY > 0) {
                 x = Math.floor(mX / twoDtileSize);
                 y = Math.floor(sketch.mouseY / twoDtileSize);
-                if (!threeScreen.removeRhomdod(x, y, layer)) {
+                if (!includesArray(screen.invalidRhomdod, [x, y, screen.layer]) && !threeScreen.removeRhomdod(x, y, layer)) {
                     threeScreen.addRhomdod(new RhomDod(x, y, layer, rgbColor));
                 }
             }
