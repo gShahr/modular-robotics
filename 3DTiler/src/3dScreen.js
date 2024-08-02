@@ -276,7 +276,7 @@ class threeDScreen {
     // }
 
     drawPyramid(sketch, baseSize, height) {
-        // Base vertices
+        // Precompute vertices
         const v0 = [-baseSize / 2, baseSize / 2, 0];
         const v1 = [baseSize / 2, baseSize / 2, 0];
         const v2 = [baseSize / 2, -baseSize / 2, 0];
@@ -305,10 +305,21 @@ class threeDScreen {
             sketch.endShape(sketch.CLOSE);
         });
     }
-
+    
     drawRhombicDodecahedrons(sketch) {
         const halfWidth = this.width / 2;
         const halfHeight = this.height / 2;
+        const pyramidHeight = this.tileSize / 2;
+        const halfTileSize = this.tileSize / 2;
+    
+        const transformations = [
+            { translate: [0, 0, halfTileSize], rotate: [0, 0, 0] }, // Front face
+            { translate: [0, 0, -halfTileSize], rotate: [0, Math.PI, 0] }, // Back face
+            { translate: [-halfTileSize, 0, 0], rotate: [0, -Math.PI / 2, 0] }, // Left face
+            { translate: [halfTileSize, 0, 0], rotate: [0, Math.PI / 2, 0] }, // Right face
+            { translate: [0, halfTileSize, 0], rotate: [-Math.PI / 2, 0, 0] }, // Top face
+            { translate: [0, -halfTileSize, 0], rotate: [Math.PI / 2, 0, 0] } // Bottom face
+        ];
     
         for (let i = 0; i < this.rhomdod.length; i++) {
             const x = this.rhomdod[i].x * this.tileSize - halfWidth;
@@ -324,49 +335,15 @@ class threeDScreen {
             sketch.box(this.tileSize);
     
             // Draw pyramids on each face of the cube
-            const pyramidHeight = this.tileSize / 2;
-            const halfTileSize = this.tileSize / 2;
-    
-            // Front face
-            sketch.push();
-            sketch.translate(0, 0, halfTileSize);
-            this.drawPyramid(sketch, this.tileSize, pyramidHeight);
-            sketch.pop();
-    
-            // Back face
-            sketch.push();
-            sketch.translate(0, 0, -halfTileSize);
-            sketch.rotateY(Math.PI);
-            this.drawPyramid(sketch, this.tileSize, pyramidHeight);
-            sketch.pop();
-    
-            // Left face
-            sketch.push();
-            sketch.translate(-halfTileSize, 0, 0);
-            sketch.rotateY(-Math.PI / 2);
-            this.drawPyramid(sketch, this.tileSize, pyramidHeight);
-            sketch.pop();
-    
-            // Right face
-            sketch.push();
-            sketch.translate(halfTileSize, 0, 0);
-            sketch.rotateY(Math.PI / 2);
-            this.drawPyramid(sketch, this.tileSize, pyramidHeight);
-            sketch.pop();
-    
-            // Top face
-            sketch.push();
-            sketch.translate(0, halfTileSize, 0);
-            sketch.rotateX(-Math.PI / 2);
-            this.drawPyramid(sketch, this.tileSize, pyramidHeight);
-            sketch.pop();
-    
-            // Bottom face
-            sketch.push();
-            sketch.translate(0, -halfTileSize, 0);
-            sketch.rotateX(Math.PI / 2);
-            this.drawPyramid(sketch, this.tileSize, pyramidHeight);
-            sketch.pop();
+            transformations.forEach(trans => {
+                sketch.push();
+                sketch.translate(...trans.translate);
+                sketch.rotateX(trans.rotate[0]);
+                sketch.rotateY(trans.rotate[1]);
+                sketch.rotateZ(trans.rotate[2]);
+                this.drawPyramid(sketch, this.tileSize, pyramidHeight);
+                sketch.pop();
+            });
     
             sketch.pop();
         }
