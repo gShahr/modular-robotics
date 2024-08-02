@@ -87,6 +87,39 @@ class twoDScreen {
         this.invalidRhomdod.push([x+1, y+1, z-1]);
     }
 
+    removeInvalidRhomdod(rhomdod) {
+        console.log(rhomdod);
+        let x = rhomdod.x;
+        let y = rhomdod.y;
+        let z = this.layer;
+    
+        const coordinatesToRemove = [
+            // current layer 4 adjacent faces
+            [x-1, y, z],
+            [x, y-1, z],
+            [x+1, y, z],
+            [x, y+1, z],
+    
+            // top layer 4 non-adjacent faces
+            [x-1, y-1, z+1],
+            [x+1, y-1, z+1],
+            [x-1, y+1, z+1],
+            [x+1, y+1, z+1],
+    
+            // bottom layer 4 non-adjacent faces
+            [x-1, y-1, z-1],
+            [x+1, y-1, z-1],
+            [x-1, y+1, z-1],
+            [x+1, y+1, z-1]
+        ];
+    
+        this.invalidRhomdod = this.invalidRhomdod.filter(coord => 
+            !coordinatesToRemove.some(removeCoord => 
+                removeCoord[0] === coord[0] && removeCoord[1] === coord[1] && removeCoord[2] === coord[2]
+            )
+        );
+    }
+
     setShape(shape) {
         this.shape = shape;
     }
@@ -114,6 +147,7 @@ class twoDScreen {
     removeRhomdod(x, y, z) {
         for (let i = 0; i < this.rhomdod.length; i++) {
             if (this.rhomdod[i].x === x && this.rhomdod[i].y === y && this.rhomdod[i].z === z) {
+                this.removeInvalidRhomdod(this.rhomdod[i]);
                 this.rhomdod.splice(i, 1);
                 return true;
             }
