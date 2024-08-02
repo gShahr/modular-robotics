@@ -211,10 +211,12 @@ var sketch1 = function (sketch) {
         } else if (screen.shape = "rhombicDodecahedron") {
             x = Math.floor(sketch.mouseX / twoDtileSize);
             y = Math.floor(sketch.mouseY / twoDtileSize);
-            if (!screen.removeRhomdod(x, y, screen.layer)) {
+            if (!includesArray(screen.invalidRhomdod, [x, y, screen.layer]) && !screen.removeRhomdod(x, y, screen.layer)) {
                 screen.addRhomdod(new RhomDod(x, y, screen.layer));
             } else {
             }
+            console.log(x, y, screen.layer);
+            console.log(screen.invalidRhomdod);
         }
     }
 }
@@ -257,6 +259,21 @@ var sketch2 = function (sketch) {
             }
         }
     }
+}
+
+function arraysEqual(arr1, arr2) {
+    if (arr1.length !== arr2.length) return false;
+    for (let i = 0; i < arr1.length; i++) {
+        if (arr1[i] !== arr2[i]) return false;
+    }
+    return true;
+}
+
+function includesArray(mainArray, subArray) {
+    for (let arr of mainArray) {
+        if (arraysEqual(arr, subArray)) return true;
+    }
+    return false;
 }
 
 function areAdjacent(block1, block2) {

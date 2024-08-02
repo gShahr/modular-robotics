@@ -7,6 +7,7 @@ class twoDScreen {
         this.cubes    = [];
         this.hexagons = [];
         this.rhomdod  = [];
+        this.invalidRhomdod = [];
         this.shape = "rhombicDodecahedron";
     }
 
@@ -59,7 +60,19 @@ class twoDScreen {
     }
 
     addRhomdod(rhomdod) {
+        this.addInvalidRhomdod(rhomdod);
         this.rhomdod.push(rhomdod);
+    }
+
+    addInvalidRhomdod(rhomdod) {
+        let x = rhomdod.x;
+        let y = rhomdod.y;
+        let z = this.layer;
+        // current layer 4 adjacent faces
+        this.invalidRhomdod.push([x-1, y, z]);
+        this.invalidRhomdod.push([x, y-1, z]);
+        this.invalidRhomdod.push([x+1, y, z]);
+        this.invalidRhomdod.push([x, y+1, z]);
     }
 
     setShape(shape) {
