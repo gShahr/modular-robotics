@@ -73,6 +73,18 @@ class twoDScreen {
         this.invalidRhomdod.push([x, y-1, z]);
         this.invalidRhomdod.push([x+1, y, z]);
         this.invalidRhomdod.push([x, y+1, z]);
+
+        // top layer 4 non-adjacent faces
+        this.invalidRhomdod.push([x-1, y-1, z+1]);
+        this.invalidRhomdod.push([x+1, y-1, z+1]);
+        this.invalidRhomdod.push([x-1, y+1, z+1]);
+        this.invalidRhomdod.push([x+1, y+1, z+1]);
+
+        // top layer 4 non-adjacent faces
+        this.invalidRhomdod.push([x-1, y-1, z-1]);
+        this.invalidRhomdod.push([x+1, y-1, z-1]);
+        this.invalidRhomdod.push([x-1, y+1, z-1]);
+        this.invalidRhomdod.push([x+1, y+1, z-1]);
     }
 
     setShape(shape) {
