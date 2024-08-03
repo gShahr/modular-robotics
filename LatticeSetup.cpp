@@ -194,7 +194,8 @@ namespace LatticeSetup {
         nlohmann::json j;
         file >> j;
         // Potentially move this to main function because it is static
-        MetaModuleManager::MetaModuleManager(metamoduleOrder, metamoduleSize);
+        MetaModuleManager::order = latticeOrder;
+        MetaModuleManager::axisSize = latticeSize;
         MetaModuleManager::GenerateFrom(&metamodule);
         for (const auto& metamodule : j["metamodules"]) {
             std::valarray<int> position = metamodule["position"];
