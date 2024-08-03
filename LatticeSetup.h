@@ -24,6 +24,8 @@ namespace LatticeSetup {
     void setUpMetamodule(MetaModule* metamodule);
     
     void setUpTiling();
+
+    void setUpTilingFromJson(const std::string& filename);
 };
 
 #endif

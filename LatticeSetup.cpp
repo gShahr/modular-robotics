@@ -178,4 +178,40 @@ namespace LatticeSetup {
         //     Lattice::AddModule(coord + newCoord);
         // }
     }
+
+    void setUpTilingFromJson(const std::string& metamoduleFile, const std::string& config) {
+        // TODO Replace hard-coded values
+        int metamoduleOrder = 2;
+        int metamoduleSize = 3;
+        int latticeOrder = metamoduleOrder;
+        int latticeSize = 10;
+        MetaModule metamodule(metamoduleFile, metamoduleOrder, metamoduleSize);
+        std::ifstream file(config);
+        if (!file) {
+            std::cerr << "Unable to open file " << config << std::endl;
+            return;
+        }
+        nlohmann::json j;
+        file >> j;
+        // Potentially move this to main function because it is static
+        MetaModuleManager::MetaModuleManager(metamoduleOrder, metamoduleSize);
+        MetaModuleManager::GenerateFrom(&metamodule);
+        for (const auto& metamodule : j["metamodules"]) {
+            std::valarray<int> position = metamodule["position"];
+            std::string config = metamodule["config"];
+            // TODO 
+            // Pick the correct metamodule
+            // Replace coord.first with something more descriptive
+            MetaModule* currentMetamodule = MetaModuleManager::metamodules[0];
+            for (const auto &coord: currentMetamodule->coords) {
+                std::valarray<int> newCoord = coord.second + position * currentMetamodule->size;
+                ModuleIdManager::RegisterModule(coord.second + newCoord, coord.first);
+            }
+        }
+        Lattice::InitLattice(MetaModuleManager::order, MetaModuleManager::axisSize);
+        ModuleIdManager::DeferredRegistration();
+        for (const auto& mod : ModuleIdManager::Modules()) {
+            Lattice::AddModule(mod);
+        }
+    }
 };
