@@ -81,6 +81,170 @@ class threeDScreen {
         }
     }
 
+    generateCubeObjects() {
+        let objData = '';
+        let vertexOffset = 1;
+
+        this.cubes.forEach(cube => {
+            const x = cube.x * this.tileSize;
+            const y = cube.y * this.tileSize;
+            const z = cube.z * this.tileSize;
+            const size = this.tileSize / 2;
+
+            objData += `# Cube at (${x}, ${y}, ${z})\n`;
+            // Define vertices for the cube
+            const vertices = [
+                { x: x - size, y: y - size, z: z - size },
+                { x: x + size, y: y - size, z: z - size },
+                { x: x + size, y: y + size, z: z - size },
+                { x: x - size, y: y + size, z: z - size },
+                { x: x - size, y: y - size, z: z + size },
+                { x: x + size, y: y - size, z: z + size },
+                { x: x + size, y: y + size, z: z + size },
+                { x: x - size, y: y + size, z: z + size }
+            ];
+
+            // Add vertices to objData
+            vertices.forEach(vertex => {
+                objData += `v ${vertex.x} ${vertex.y} ${vertex.z}\n`;
+            });
+
+            // Define faces for the cube (each face is two triangles)
+            const faces = [
+                { a: 1, b: 2, c: 3 }, { a: 1, b: 3, c: 4 }, // Front face
+                { a: 5, b: 6, c: 7 }, { a: 5, b: 7, c: 8 }, // Back face
+                { a: 1, b: 5, c: 8 }, { a: 1, b: 8, c: 4 }, // Left face
+                { a: 2, b: 6, c: 7 }, { a: 2, b: 7, c: 3 }, // Right face
+                { a: 4, b: 3, c: 7 }, { a: 4, b: 7, c: 8 }, // Top face
+                { a: 1, b: 2, c: 6 }, { a: 1, b: 6, c: 5 }  // Bottom face
+            ];
+
+            // Add faces to objData
+            faces.forEach(face => {
+                objData += `f ${face.a + vertexOffset - 1} ${face.b + vertexOffset - 1} ${face.c + vertexOffset - 1}\n`;
+            });
+
+            vertexOffset += vertices.length;
+            objData += '\n';
+        });
+
+        return objData;
+    }
+
+    generateHexagonsOjects() {
+
+    }
+
+    generateRhomdodObjects() {
+        let objData = '';
+        let vertexOffset = 1;
+    
+        this.rhomdod.forEach(rhomdod => {
+            const x = rhomdod.x * this.tileSize;
+            const y = rhomdod.y * this.tileSize;
+            const z = rhomdod.z * this.tileSize;
+            const halfTileSize = this.tileSize / 2;
+            const pyramidHeight = this.tileSize / 2;
+    
+            objData += `# Rhombic Dodecahedron at (${x}, ${y}, ${z})\n`;
+    
+            // Define vertices for the central cube
+            const cubeVertices = [
+                { x: x - halfTileSize, y: y - halfTileSize, z: z - halfTileSize },
+                { x: x + halfTileSize, y: y - halfTileSize, z: z - halfTileSize },
+                { x: x + halfTileSize, y: y + halfTileSize, z: z - halfTileSize },
+                { x: x - halfTileSize, y: y + halfTileSize, z: z - halfTileSize },
+                { x: x - halfTileSize, y: y - halfTileSize, z: z + halfTileSize },
+                { x: x + halfTileSize, y: y - halfTileSize, z: z + halfTileSize },
+                { x: x + halfTileSize, y: y + halfTileSize, z: z + halfTileSize },
+                { x: x - halfTileSize, y: y + halfTileSize, z: z + halfTileSize }
+            ];
+    
+            // Add cube vertices to objData
+            cubeVertices.forEach(vertex => {
+                objData += `v ${vertex.x} ${vertex.y} ${vertex.z}\n`;
+            });
+    
+            // Define vertices for the pyramids
+            const pyramidVertices = [
+                { x: x, y: y, z: z + halfTileSize + pyramidHeight }, // Front face
+                { x: x, y: y, z: z - halfTileSize - pyramidHeight }, // Back face
+                { x: x - halfTileSize - pyramidHeight, y: y, z: z }, // Left face
+                { x: x + halfTileSize + pyramidHeight, y: y, z: z }, // Right face
+                { x: x, y: y + halfTileSize + pyramidHeight, z: z }, // Top face
+                { x: x, y: y - halfTileSize - pyramidHeight, z: z }, // Bottom face
+                // front cube
+                { x: x - halfTileSize, y: y - halfTileSize, z: z + this.tileSize / 2},
+                { x: x + halfTileSize, y: y - halfTileSize, z: z + this.tileSize / 2},
+                { x: x + halfTileSize, y: y + halfTileSize, z: z + this.tileSize / 2},
+                { x: x - halfTileSize, y: y + halfTileSize, z: z + this.tileSize / 2},
+                // back cube
+                { x: x - halfTileSize, y: y - halfTileSize, z: z + halfTileSize - this.tileSize},
+                { x: x + halfTileSize, y: y - halfTileSize, z: z + halfTileSize - this.tileSize},
+                { x: x + halfTileSize, y: y + halfTileSize, z: z + halfTileSize - this.tileSize},
+                { x: x - halfTileSize, y: y + halfTileSize, z: z + halfTileSize - this.tileSize}
+            ];
+    
+            // Add pyramid vertices to objData
+            pyramidVertices.forEach(vertex => {
+                objData += `v ${vertex.x} ${vertex.y} ${vertex.z}\n`;
+            });
+    
+            // Define faces for the central cube (each face is two triangles)
+            const cubeFaces = [
+                { a: 1, b: 2, c: 3 }, { a: 1, b: 3, c: 4 }, // Front face
+                { a: 5, b: 6, c: 7 }, { a: 5, b: 7, c: 8 }, // Back face
+                { a: 1, b: 5, c: 8 }, { a: 1, b: 8, c: 4 }, // Left face
+                { a: 2, b: 6, c: 7 }, { a: 2, b: 7, c: 3 }, // Right face
+                { a: 4, b: 3, c: 7 }, { a: 4, b: 7, c: 8 }, // Top face
+                { a: 1, b: 2, c: 6 }, { a: 1, b: 6, c: 5 }  // Bottom face
+            ];
+    
+            // Add cube faces to objData
+            cubeFaces.forEach(face => {
+                objData += `f ${face.a + vertexOffset - 1} ${face.b + vertexOffset - 1} ${face.c + vertexOffset - 1}\n`;
+            });
+    
+            // Define faces for the pyramids
+            const pyramidFaces = [
+                { a: 15, b: 16, c: 9 }, // Front face
+                { a: 16, b: 17, c: 9 },
+                { a: 17, b: 18, c: 9 },
+                { a: 18, b: 15, c: 9 },
+                { a: 19, b: 20, c: 10 }, // Back face
+                { a: 20, b: 21, c: 10 },
+                { a: 21, b: 22, c: 10 },
+                { a: 22, b: 19, c: 10 },
+                { a: 1, b: 5, c: 11 }, // Left face
+                { a: 5, b: 8, c: 11 },
+                { a: 8, b: 4, c: 11 },
+                { a: 4, b: 1, c: 11 },
+                { a: 2, b: 6, c: 12 }, // Right face
+                { a: 6, b: 7, c: 12 },
+                { a: 7, b: 3, c: 12 },
+                { a: 3, b: 2, c: 12 },
+                { a: 4, b: 3, c: 13 }, // Top face
+                { a: 3, b: 7, c: 13 },
+                { a: 7, b: 8, c: 13 },
+                { a: 8, b: 4, c: 13 },
+                { a: 1, b: 2, c: 14 }, // Bottom face
+                { a: 2, b: 6, c: 14 },
+                { a: 6, b: 5, c: 14 },
+                { a: 5, b: 1, c: 14 }
+            ];
+    
+            // Add pyramid faces to objData
+            pyramidFaces.forEach(face => {
+                objData += `f ${face.a + vertexOffset - 1} ${face.b + vertexOffset - 1} ${face.c + vertexOffset - 1}\n`;
+            });
+    
+            vertexOffset += cubeVertices.length + pyramidVertices.length;
+            objData += '\n';
+        });
+    
+        return objData;
+    }
+
     drawCubes(sketch) {
         const halfWidth = this.width / 2;
         const halfHeight = this.height / 2;

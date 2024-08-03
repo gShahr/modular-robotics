@@ -5,6 +5,7 @@ canvasZ = 75;
 twoDtileSize = canvasW / (2 * 30);
 layer = 0;
 highlight = false;
+objects = [];
 blocks = [];
 historyStack = [];
 redoStack = [];
@@ -56,6 +57,60 @@ function exportToScen() {
 	ScenOutput += i + "," + "0" + "," + current_block.x + "," + current_block.y + "," + current_block.z + "\n";
     }
     dwnldAsTxt("3Dtiles.scen", ScenOutput);
+}
+
+function exportToObj() {
+    let objData = '';
+    let vertexOffset = 1;
+    // let objects = [
+    //     {
+    //         vertices: [
+    //             { x: 0, y: 0, z: 0 }, // Vertex 0
+    //             { x: 1, y: 0, z: 0 }, // Vertex 1
+    //             { x: 1, y: 1, z: 0 }, // Vertex 2
+    //             { x: 0, y: 1, z: 0 }, // Vertex 3
+    //             { x: 0, y: 0, z: 1 }, // Vertex 4
+    //             { x: 1, y: 0, z: 1 }, // Vertex 5
+    //             { x: 1, y: 1, z: 1 }, // Vertex 6
+    //             { x: 0, y: 1, z: 1 }  // Vertex 7
+    //         ],
+    //         faces: [
+    //             { a: 0, b: 1, c: 2 }, { a: 0, b: 2, c: 3 }, // Front face
+    //             { a: 1, b: 5, c: 6 }, { a: 1, b: 6, c: 2 }, // Right face
+    //             { a: 5, b: 4, c: 7 }, { a: 5, b: 7, c: 6 }, // Back face
+    //             { a: 4, b: 0, c: 3 }, { a: 4, b: 3, c: 7 }, // Left face
+    //             { a: 3, b: 2, c: 6 }, { a: 3, b: 6, c: 7 }, // Top face
+    //             { a: 4, b: 5, c: 1 }, { a: 4, b: 1, c: 0 }  // Bottom face
+    //         ]
+    //     }
+    // ];
+
+    // Assuming you have an array of 3D objects, each with vertices and faces
+    // objects.forEach(object => {
+    //     object.vertices.forEach(vertex => {
+    //         objData += `v ${vertex.x} ${vertex.y} ${vertex.z}\n`;
+    //     });
+
+    //     object.faces.forEach(face => {
+    //         objData += `f ${face.a + vertexOffset} ${face.b + vertexOffset} ${face.c + vertexOffset}\n`;
+    //     });
+
+    //     vertexOffset += object.vertices.length;
+    // });
+
+    downloadObj(objects);
+}
+
+function downloadObj(data) {
+    const blob = new Blob([data], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'model.obj';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
 }
 
 function dwnldAsTxt(filename, text) {
@@ -137,7 +192,24 @@ var sketch1 = function (sketch) {
         sketch.background(0, 255, 0);
         screen.draw(sketch);
         prevLayer = layer;
-        blocks = screen.getCubes;
+        switch (screen.shape) {
+            case 'hexagon':
+                blocks = screen.getHexagons;
+                objects = threeScreen.generateHexagonsOjects();
+                break;
+            case 'cube':
+                blocks = screen.getCubes;
+                objects = threeScreen.generateCubeObjects();
+                break;
+            case 'rhombicDodecahedron':
+                blocks = screen.getRhomdods;
+                objects = threeScreen.generateRhomdodObjects();
+                break;
+            default:
+                console.error('Unknown shape:', screen.shape);
+                blocks = [];
+                break;
+        }
         if (undoPressed) {
             console.log("Undo Move");
             if (historyStack.length > 0) {
@@ -191,8 +263,8 @@ var sketch1 = function (sketch) {
             switchShapePressed = false;
             clearPressed = true;
         }
-        let message = areAllCubesConnected(blocks) ? "Yes" : "No";
-        document.getElementById("checkConnectivity").innerText = "Connected: " + message;    
+        // let message = areAllCubesConnected(blocks) ? "Yes" : "No";
+        // document.getElementById("checkConnectivity").innerText = "Connected: " + message;    
     }
 
     sketch.mousePressed = function () {
