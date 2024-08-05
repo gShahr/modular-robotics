@@ -43,7 +43,7 @@ public:
     static int order;
     static int axisSize;
 
-    MetaModuleManager(int order, int axisSize);
+    static void InitMetaModuleManager(int _order, int _axisSize);
 
     static void GenerateFrom(MetaModule* metamodule);
 };

@@ -103,9 +103,9 @@ std::vector<MetaModule*> MetaModuleManager::metamodules = {};
 int MetaModuleManager::order = 0;
 int MetaModuleManager::axisSize = 0;
 
-MetaModuleManager::MetaModuleManager(int order, int axisSize) {
-    this->order = order;
-    this->axisSize = axisSize;
+void MetaModuleManager::InitMetaModuleManager(int _order, int _axisSize) {
+    order = _order;
+    axisSize = _axisSize;
 }
 
 void MetaModuleManager::GenerateFrom(MetaModule* metamodule) {
