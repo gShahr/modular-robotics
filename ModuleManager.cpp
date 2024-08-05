@@ -182,10 +182,11 @@ void ModuleIdManager::RegisterModule(const std::valarray<int>& coords, bool isSt
         args.isStatic = isStatic;
         args.propertyDefs = propertyDefs;
         _deferredInitMods.emplace_back(args);
-        _staticStart--;
     } else {
         _modules.emplace_back(coords, isStatic, propertyDefs);
-        _staticStart++;
+        if (!isStatic) {
+            _staticStart++;
+        }
     }
 }
 
