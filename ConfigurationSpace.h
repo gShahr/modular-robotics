@@ -55,8 +55,6 @@ private:
     Configuration* parent = nullptr;
     std::vector<Configuration*> next;
     std::unordered_set<ModuleBasic> _nonStatModData;
-    //CoordTensor<bool> _state;
-    //CoordTensor<ModuleProperties> _properties;
     HashedState hash;
     int cost;
 public:
@@ -79,8 +77,6 @@ public:
 
     [[nodiscard]]
     const std::unordered_set<ModuleBasic>& GetModData() const;
-
-    //void SetStateAndHash(const std::vector<ModuleBasic>& modData);
 
     void SetParent(Configuration* configuration);
 
