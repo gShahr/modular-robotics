@@ -192,7 +192,7 @@ void Lattice::UpdateFromModuleInfo(const std::unordered_set<ModuleBasic>& module
 }
 
 std::unordered_set<ModuleBasic> Lattice::GetModuleInfo() {
-    std::unordered_set<ModuleBasic> modInfo(ModuleIdManager::MinStaticID());
+    std::unordered_set<ModuleBasic> modInfo;
     for (int id = 0; id < ModuleIdManager::MinStaticID(); id++) {
         auto& mod = ModuleIdManager::GetModule(id);
         ModuleBasic modBasic = {mod.coords, mod.properties};

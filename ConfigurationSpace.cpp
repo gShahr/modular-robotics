@@ -17,11 +17,14 @@ HashedState::HashedState(size_t seed) : seed(seed) {}
 
 HashedState::HashedState(const std::unordered_set<ModuleBasic>& modData) {
     seed = 0;
+    auto cmp = [](int a, int b) { return a < b; };
+    std::set<std::size_t, decltype(cmp)> hashes(cmp);
     for (const auto& data : modData) {
         boost::hash<ModuleBasic> modBasicHasher;
-        boost::hash_combine(seed, modBasicHasher(data));
+        hashes.insert(modBasicHasher(data));
+        //boost::hash_combine(seed, modBasicHasher(data));
     }
-    //seed = boost::hash_range(modData.begin(), modData.end());
+    seed = boost::hash_range(hashes.begin(), hashes.end());
 }
 
 HashedState::HashedState(const HashedState& other) : seed(other.GetSeed()) {}
@@ -40,6 +43,7 @@ bool HashedState::operator!=(const HashedState& other) const {
 
 size_t std::hash<HashedState>::operator()(const HashedState& state) const {
     return std::hash<size_t>()(state.GetSeed());
+    //return state.GetSeed();
 }
 
 Configuration::Configuration(std::unordered_set<ModuleBasic> modData) : _nonStatModData(modData) {
@@ -104,6 +108,7 @@ std::ostream& operator<<(std::ostream& out, const Configuration& config) {
 int ConfigurationSpace::depth = -1;
 
 std::vector<Configuration*> ConfigurationSpace::BFS(Configuration* start, Configuration* final) {
+    int dupesAvoided = 0;
     std::queue<Configuration*> q;
     std::unordered_set<HashedState> visited;
     //start->SetStateAndHash(start->GetModData());
@@ -117,7 +122,9 @@ std::vector<Configuration*> ConfigurationSpace::BFS(Configuration* start, Config
         if (q.front()->depth != depth) {
             depth++;
 #if CONFIG_VERBOSE > CS_LOG_FINAL_DEPTH
-            std::cout << "bfs depth: " << q.front()->depth << std::endl << Lattice::ToString() << std::endl;
+            std::cout << "bfs depth: " << q.front()->depth << std::endl
+            << "duplicate states avoided: " << dupesAvoided << std::endl
+            << Lattice::ToString() << std::endl;
 #endif
         }
 #endif
@@ -139,6 +146,8 @@ std::vector<Configuration*> ConfigurationSpace::BFS(Configuration* start, Config
                 current->AddEdge(nextConfiguration);
                 nextConfiguration->depth = current->depth + 1;
                 visited.insert(HashedState(moduleInfo));
+            } else {
+                dupesAvoided++;
             }
         }
     }

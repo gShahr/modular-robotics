@@ -16,8 +16,8 @@
 
 int main(int argc, char* argv[]) {
     bool ignoreColors = false;
-    std::string initialFile = "docs/examples/3d_move_gauntlet_initial.json";
-    std::string finalFile = "docs/examples/3d_move_gauntlet_final.json";
+    std::string initialFile = "docs/examples/zigzag_initial.json";
+    std::string finalFile = "docs/examples/zigzag_final.json";
     std::string exportFile = initialFile.substr(0, initialFile.find_last_of('.')) + ".scen";
 
     // Define the long options

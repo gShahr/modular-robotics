@@ -1,3 +1,4 @@
+#include <set>
 #include "Lattice.h"
 #include "debug_util.h"
 #include "ModuleManager.h"
@@ -123,10 +124,6 @@ bool ModuleBasic::operator==(const ModuleBasic& right) const {
     if (coords.size() != right.coords.size()) {
         return false;
     }
-    std::unordered_set<ModuleBasic*> modsToCheck;
-    for (int id = 0; id < ModuleIdManager::MinStaticID(); id++) {
-
-    }
     for (int i = 0; i < coords.size(); i++) {
         if (coords[i] != right.coords[i]) {
             return false;
@@ -151,12 +148,16 @@ std::size_t boost::hash<ModuleBasic>::operator()(const ModuleBasic& modData) con
 }
 
 std::size_t boost::hash<ModuleProperties>::operator()(const ModuleProperties& moduleProperties) {
-    std::size_t prev = 0;
+    //std::size_t prev = 0;
+    auto cmp = [](int a, int b) { return a < b; };
+    std::set<std::size_t, decltype(cmp)> hashes(cmp);
     for (auto property : moduleProperties._properties) {
-        auto current = property->GetHash();
-        boost::hash_combine(prev, current);
+        //auto current = property->GetHash();
+        hashes.insert(property->GetHash());
+        //boost::hash_combine(prev, current);
     }
-    return prev;
+    //return prev;
+    return boost::hash_range(hashes.begin(), hashes.end());
 }
 
 Module::Module(Module&& mod) noexcept {
