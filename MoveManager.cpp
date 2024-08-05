@@ -3,6 +3,46 @@
 #include <filesystem>
 #include "MoveManager.h"
 
+void Move::RotateAnim(Move::AnimType& anim, int a, int b) {
+    // For easily rotating move types
+    static std::unordered_map<AnimType, std::vector<int>> AnimToOffset = {
+            {Z_SLIDE, {0, 0, 1}},
+            {Y_SLIDE, {0, 1, 0}},
+            {X_SLIDE, {1, 0, 0}},
+            {GEN_SLIDE, {0, 0, 0}},
+            {PIVOT_PX, {1, 0, 0}},
+            {PIVOT_PY, {0, 1, 0}},
+            {PIVOT_PZ, {0, 0, 1}},
+            {PIVOT_NX, {-1, 0, 0}},
+            {PIVOT_NY, {0, -1, 0}},
+            {PIVOT_NZ, {0, 0, -1}}
+    };
+
+    static std::map<std::vector<int>, AnimType> OffsetToSlideAnim = {
+            {{0, 0, 1}, Z_SLIDE},
+            {{0, 1, 0}, Y_SLIDE},
+            {{1, 0, 0}, X_SLIDE},
+            {{0, 0, 0}, GEN_SLIDE}
+    };
+
+    static std::map<std::vector<int>, AnimType> OffsetToAnim = {
+            {{1, 0, 0}, PIVOT_PX},
+            {{0, 1, 0}, PIVOT_PY},
+            {{0, 0, 1}, PIVOT_PZ},
+            {{-1, 0, 0}, PIVOT_NX},
+            {{0, -1, 0}, PIVOT_NY},
+            {{0, 0, -1}, PIVOT_NZ}
+    };
+
+    auto offset = AnimToOffset[anim];
+    std::swap(offset[a], offset[b]);
+    if (anim > GEN_SLIDE) {
+        anim = OffsetToAnim[offset];
+    } else {
+        anim = OffsetToSlideAnim[offset];
+    }
+}
+
 void MoveBase::Rotate(int a, int b) {
     std::swap(initPos[a], initPos[b]);
     std::swap(finalPos[a], finalPos[b]);
@@ -11,8 +51,8 @@ void MoveBase::Rotate(int a, int b) {
         std::swap(move.first[a], move.first[b]);
     }
     for (auto& anim : animSequence) {
-        anim.first = Move::AnimRotationMap.at(anim.first)[b];
         std::swap(anim.second[a], anim.second[b]);
+        Move::RotateAnim(anim.first, a, b);
     }
 }
 

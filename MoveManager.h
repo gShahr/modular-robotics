@@ -29,6 +29,7 @@ namespace Move {
     };
 
     enum AnimType {
+        INVALID_ANIM = -4,
         Z_SLIDE = -3,
         Y_SLIDE = -2,
         X_SLIDE = -1,
@@ -55,19 +56,9 @@ namespace Move {
             {"pivot-z", PIVOT_NZ}
     };
 
-    // For easily rotating move types
-    const std::unordered_map<AnimType, std::vector<AnimType>> AnimRotationMap = {
-            {Z_SLIDE, {Z_SLIDE, Z_SLIDE, X_SLIDE}},
-            {Y_SLIDE, {Y_SLIDE, X_SLIDE, Y_SLIDE}},
-            {X_SLIDE, {X_SLIDE, Y_SLIDE, Z_SLIDE}},
-            {GEN_SLIDE, {GEN_SLIDE, GEN_SLIDE, GEN_SLIDE}},
-            {PIVOT_PX, {PIVOT_PX, PIVOT_PY, PIVOT_PZ}},
-            {PIVOT_PY, {PIVOT_PY, PIVOT_PX, PIVOT_PY}},
-            {PIVOT_PZ, {PIVOT_PZ, PIVOT_PX, PIVOT_PY}},
-            {PIVOT_NX, {PIVOT_NX, PIVOT_NY, PIVOT_NZ}},
-            {PIVOT_NY, {PIVOT_NY, PIVOT_NX, PIVOT_NY}},
-            {PIVOT_NZ, {PIVOT_NZ, PIVOT_NX, PIVOT_NY}}
-    };
+
+
+    void RotateAnim(AnimType& anim, int a, int b);
 
     // For easily reflecting move types
     const std::unordered_map<AnimType, std::vector<AnimType>> AnimReflectionMap = {
