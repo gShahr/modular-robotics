@@ -31,7 +31,7 @@ public:
 // the affected module.
 class IModuleDynamicProperty : public IModuleProperty {
 protected:
-    virtual void UpdateProperty(std::valarray<int> moveInfo) = 0;
+    virtual void UpdateProperty(const std::valarray<int>& moveInfo) = 0;
 
     friend class ModuleProperties;
 
