@@ -129,8 +129,8 @@ std::vector<Configuration*> ConfigurationSpace::BFS(Configuration* start, Config
         }
 #endif
         q.pop();
-        //if (current->GetHash() == final->GetHash()) {
-        if (current->GetModData() == final->GetModData()) {
+        if (current->GetHash() == final->GetHash()) {
+        //if (current->GetModData() == final->GetModData()) {
 #if CONFIG_VERBOSE == CS_LOG_FINAL_DEPTH
             std::cout << "bfs depth: " << depth << std::endl << Lattice::ToString() << std::endl;
 #endif
