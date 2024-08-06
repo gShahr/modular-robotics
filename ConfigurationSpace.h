@@ -86,7 +86,7 @@ public:
 
     void SetCost(int cost);
 
-    int Heuristic(Configuration* final);
+    float Heuristic(Configuration* final);
 
     int SymmetricDifferenceHeuristic(Configuration* final);
 };

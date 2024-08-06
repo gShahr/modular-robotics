@@ -124,6 +124,7 @@ std::vector<Configuration*> ConfigurationSpace::BFS(Configuration* start, Config
 #if CONFIG_VERBOSE > CS_LOG_FINAL_DEPTH
             std::cout << "bfs depth: " << q.front()->depth << std::endl
             << "duplicate states avoided: " << dupesAvoided << std::endl
+            << "states visited: " << visited.size() << std::endl
             << Lattice::ToString() << std::endl;
 #endif
         }
@@ -213,22 +214,24 @@ void Configuration::SetCost(int cost) {
     this->cost = cost;
 }
 
-int Configuration::Heuristic(Configuration* final) {
+float Configuration::Heuristic(Configuration* final) {
     auto currentData = this->GetModData();
     auto finalData = final->GetModData();
     auto currentIt = currentData.begin();
     auto finalIt = finalData.begin();
-    int h = 0;
+    float h = 0;
     while (currentIt != currentData.end() && finalIt != finalData.end()) {
         const auto& currentModule = *currentIt;
         const auto& finalModule = *finalIt;
         std::valarray<int> diff = currentModule.coords - finalModule.coords;
         for (auto& val : diff) {
             h += std::abs(val);
-        }        currentIt++;
+        }
+        currentIt++;
         finalIt++;
     }
-    return h;
+    //TODO: find out what the right number is
+    return h / 6;
 }
 
 struct ValarrayComparator {
@@ -257,12 +260,15 @@ int Configuration::SymmetricDifferenceHeuristic(Configuration* final) {
         finalIt++;
     }
     int symDifference = 2 * unionCoords.size() - (currentData.size() + finalData.size());
-    return symDifference;
+    return symDifference / 2;
 }
 
 std::vector<Configuration*> ConfigurationSpace::AStar(Configuration* start, Configuration* final) {
+    int dupesAvoided = 0;
     auto CompareConfiguration = [final](Configuration* c1, Configuration* c2) {
-        return c1->GetCost() + c1->SymmetricDifferenceHeuristic(final) > c2->GetCost() + c2->SymmetricDifferenceHeuristic(final);
+        return (c1->GetCost() + c1->Heuristic(final) == c2->GetCost() + c2->Heuristic(final)) ?
+        c1->GetCost() > c2->GetCost() :
+        c1->GetCost() + c1->Heuristic(final) > c2->GetCost() + c2->Heuristic(final);
     };
     using CompareType = decltype(CompareConfiguration);
     std::priority_queue<Configuration*, std::vector<Configuration*>, CompareType> pq(CompareConfiguration);
@@ -278,12 +284,16 @@ std::vector<Configuration*> ConfigurationSpace::AStar(Configuration* start, Conf
         if (current->depth != depth) {
             depth++;
 #if CONFIG_VERBOSE > CS_LOG_FINAL_DEPTH
-            std::cout << "A* depth: " << current->depth << std::endl << Lattice::ToString() << std::endl;
+            std::cout << "A* depth: " << current->depth << std::endl
+                    << "duplicate states avoided: " << dupesAvoided << std::endl
+                    << "states visited: " << visited.size() << std::endl
+                    << Lattice::ToString() << std::endl;
 #endif
         }
 #endif
         pq.pop();
-        if (current->GetModData() == final->GetModData()) {
+        //if (current->GetModData() == final->GetModData()) {
+        if (current->GetHash() == final->GetHash()) {
 #if CONFIG_VERBOSE == CS_LOG_FINAL_DEPTH
             std::cout << "A* depth: " << depth << std::endl << Lattice::ToString() << std::endl;
 #endif
@@ -300,6 +310,8 @@ std::vector<Configuration*> ConfigurationSpace::AStar(Configuration* start, Conf
                 current->AddEdge(nextConfiguration);
                 nextConfiguration->depth = current->depth + 1;
                 visited.insert(hashedState);
+            } else {
+                dupesAvoided++;
             }
         }
     }

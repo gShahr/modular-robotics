@@ -67,7 +67,7 @@ int main(int argc, char* argv[]) {
     Configuration end = LatticeSetup::setupFinalFromJson(finalFile);
     std::vector<Configuration*> path;
     try {
-        path = ConfigurationSpace::BFS(&start, &end);
+        path = ConfigurationSpace::AStar(&start, &end);
     } catch(BFSExcept& bfsExcept) {
         std::cerr << bfsExcept.what() << std::endl;
     }
