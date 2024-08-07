@@ -149,7 +149,7 @@ public:
     // Register a move without generating additional moves
     static void RegisterSingleMove(MoveBase* move);
 
-    static void RegisterAllMoves(const std::string& movePath = "./Moves");
+    static void RegisterAllMoves(const std::string& movePath = "Moves/");
 
     // Get what moves can be made by a module
     static std::vector<MoveBase*> CheckAllMoves(CoordTensor<int>& tensor, Module& mod);
