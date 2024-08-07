@@ -96,13 +96,10 @@ ModuleProperties& ModuleProperties::operator=(const ModuleProperties& right) {
     for (auto property : right._properties) {
         _properties.insert(property->MakeCopy());
     }
-    _dynamicProperties.clear();
-    if (right._dynamicProperties.empty()) {
-        return *this;
-    }
     for (auto dynamicProperty : right._dynamicProperties) {
         _dynamicProperties.insert(dynamicProperty->MakeCopy());
     }
+    return *this;
 }
 
 IModuleProperty* ModuleProperties::Find(std::string key) const {
