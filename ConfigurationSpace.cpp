@@ -376,6 +376,7 @@ Configuration ConfigurationSpace::GenerateRandomFinal(int targetMoves) {
             return Configuration(nextState);
         }
         // Otherwise, update lattice with new state and resume loop
+        visited.insert(HashedState(nextState));
         Lattice::UpdateFromModuleInfo(nextState);
     }
 
