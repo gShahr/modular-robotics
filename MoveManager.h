@@ -155,7 +155,7 @@ public:
     static std::vector<MoveBase*> CheckAllMoves(CoordTensor<int>& tensor, Module& mod);
 
     // Get a pair containing which module has to make what move in order to reach an adjacent state
-    static std::pair<Module*, MoveBase*> FindMoveToState(const std::unordered_set<ModuleBasic>& modData);
+    static std::pair<Module*, MoveBase*> FindMoveToState(const std::set<ModuleBasic>& modData);
 };
 
 #endif //MODULAR_ROBOTICS_MOVEMANAGER_H
