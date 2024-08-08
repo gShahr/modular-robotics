@@ -166,6 +166,18 @@ class twoDScreen {
         }
     }
 
+    removeAllHexagons() {
+        while (this.hexagons.length > 0) {
+            this.removeHexagon(this.hexagons.pop());
+        }
+    }
+    
+    removeAllRhomdods() {
+        while (this.rhomdod.length > 0) {
+            this.removeRhomdod(this.rhomdod.pop());
+        }
+    }
+
     hexagon = (sketch, centerX, centerY, radius) => {
         const angle = Math.PI / 3;
         sketch.beginShape();
