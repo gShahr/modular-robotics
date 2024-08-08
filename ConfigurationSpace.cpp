@@ -206,7 +206,7 @@ void Configuration::SetCost(int cost) {
     this->cost = cost;
 }
 
-float Configuration::Heuristic(Configuration* final) {
+float Configuration::ManhattanDistance(Configuration* final) {
     auto currentData = this->GetModData();
     auto finalData = final->GetModData();
     auto currentIt = currentData.begin();
@@ -255,12 +255,33 @@ int Configuration::SymmetricDifferenceHeuristic(Configuration* final) {
     return symDifference / 2;
 }
 
+int Configuration::ChebyshevDistance(Configuration* final) {
+    auto currentData = this->GetModData();
+    auto finalData = final->GetModData();
+    auto currentIt = currentData.begin();
+    auto finalIt = finalData.begin();
+    int h = 0;
+    while (currentIt != currentData.end() && finalIt != finalData.end()) {
+        const auto& currentModule = *currentIt;
+        const auto& finalModule = *finalIt;
+        std::valarray<int> diff = currentModule.coords - finalModule.coords;
+        int maxDiff = 0;
+        for (auto& val : diff) {
+            maxDiff = std::max(maxDiff, std::abs(val));
+        }
+        h += maxDiff;
+        currentIt++;
+        finalIt++;
+    }
+    return h;
+}
+
 std::vector<Configuration*> ConfigurationSpace::AStar(Configuration* start, Configuration* final) {
     int dupesAvoided = 0;
     auto CompareConfiguration = [final](Configuration* c1, Configuration* c2) {
-        return (c1->GetCost() + c1->Heuristic(final) == c2->GetCost() + c2->Heuristic(final)) ?
+        return (c1->GetCost() + c1->ManhattanDistance(final) == c2->GetCost() + c2->ManhattanDistance(final)) ?
         c1->GetCost() > c2->GetCost() :
-        c1->GetCost() + c1->Heuristic(final) > c2->GetCost() + c2->Heuristic(final);
+        c1->GetCost() + c1->ManhattanDistance(final) > c2->GetCost() + c2->ManhattanDistance(final);
     };
     using CompareType = decltype(CompareConfiguration);
     std::priority_queue<Configuration*, std::vector<Configuration*>, CompareType> pq(CompareConfiguration);
