@@ -18,7 +18,7 @@ CoordTensor<int> Lattice::coordTensor(1, 1, -1);
 
 void Lattice::ClearAdjacencies(int moduleId) {
     for (int id : adjList[moduleId]) {
-        for (size_t i = 0; i < adjList[id].size(); i++) {
+        for (int i = 0; i < adjList[id].size(); i++) {
             if (adjList[id][i] == moduleId) {
                 adjList[id].erase(adjList[id].begin() + i);
                 break;
@@ -216,7 +216,7 @@ std::string Lattice::ToString() {
         return "";
     }
     out << "Lattice State:\n";
-    for (size_t i = 0; i < coordTensor.GetArrayInternal().size(); i++) {
+    for (int i = 0; i < coordTensor.GetArrayInternal().size(); i++) {
         auto id = coordTensor.GetElementDirect(i);
         if (id >= 0 && !ignoreProperties) {
             auto colorProp = dynamic_cast<ColorProperty*>(ModuleIdManager::Modules()[id].properties.Find(COLOR_PROP_NAME));
