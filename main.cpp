@@ -15,10 +15,12 @@
 #include "LatticeSetup.h"
 #include "Scenario.h"
 
+#define GENERATE_FINAL_STATE true
+
 int main(int argc, char* argv[]) {
     bool ignoreColors = false;
-    std::string initialFile = "docs/examples/zigzag_initial.json";
-    std::string finalFile = "docs/examples/zigzag_final.json";
+    std::string initialFile = "docs/examples/move_nofinal_initial.json";
+    std::string finalFile = "docs/examples/INVALID.json";
     std::string exportFile = initialFile.substr(0, initialFile.find_last_of('.')) + ".scen";
 
     // Define the long options
@@ -65,7 +67,11 @@ int main(int argc, char* argv[]) {
     // BFS
     std::cout << "BFS Testing:\n";
     Configuration start(Lattice::GetModuleInfo());
+#if GENERATE_FINAL_STATE
+    Configuration end = ConfigurationSpace::GenerateRandomFinal();
+#else
     Configuration end = LatticeSetup::setupFinalFromJson(finalFile);
+#endif
     std::vector<Configuration*> path;
     try {
         auto timeBegin = std::chrono::high_resolution_clock::now();
