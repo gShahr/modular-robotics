@@ -41,6 +41,7 @@ namespace LatticeSetup {
     }
 
     Configuration setupFinalFromJson(const std::string& filename) {
+        std::hash<ModuleBasic> hasher;
         std::ifstream file(filename);
         if (!file) {
             std::cerr << "Unable to open file " << filename << std::endl;
@@ -64,6 +65,7 @@ namespace LatticeSetup {
                 mod.properties.InitProperties(module["properties"]);
                 //desiredColors[coords] = Colors::colorToInt[module["color"]];
             }
+            hasher(mod);
             desiredState.insert(mod);
         }
         //return {desiredState, desiredColors};
