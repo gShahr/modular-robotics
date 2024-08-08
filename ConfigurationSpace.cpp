@@ -255,6 +255,27 @@ int Configuration::SymmetricDifferenceHeuristic(Configuration* final) {
     return symDifference / 2;
 }
 
+int Configuration::ChebyshevDistance(Configuration* final) {
+    auto currentData = this->GetModData();
+    auto finalData = final->GetModData();
+    auto currentIt = currentData.begin();
+    auto finalIt = finalData.begin();
+    int h = 0;
+    while (currentIt != currentData.end() && finalIt != finalData.end()) {
+        const auto& currentModule = *currentIt;
+        const auto& finalModule = *finalIt;
+        std::valarray<int> diff = currentModule.coords - finalModule.coords;
+        int maxDiff = 0;
+        for (auto& val : diff) {
+            maxDiff = std::max(maxDiff, std::abs(val));
+        }
+        h += maxDiff;
+        currentIt++;
+        finalIt++;
+    }
+    return h;
+}
+
 std::vector<Configuration*> ConfigurationSpace::AStar(Configuration* start, Configuration* final) {
     int dupesAvoided = 0;
     auto CompareConfiguration = [final](Configuration* c1, Configuration* c2) {
