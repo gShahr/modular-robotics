@@ -30,7 +30,7 @@ public:
 
     explicit HashedState(size_t seed);
 
-    explicit HashedState(const std::unordered_set<ModuleBasic>& modData);
+    explicit HashedState(const std::set<ModuleBasic>& modData);
 
     HashedState(const HashedState& other);
 
@@ -54,17 +54,17 @@ class Configuration {
 private:
     Configuration* parent = nullptr;
     std::vector<Configuration*> next;
-    std::unordered_set<ModuleBasic> _nonStatModData;
+    std::set<ModuleBasic> _nonStatModData;
     HashedState hash;
     int cost;
 public:
     int depth = 0;
 
-    explicit Configuration(std::unordered_set<ModuleBasic> modData);
+    explicit Configuration(const std::set<ModuleBasic>& modData);
 
     ~Configuration();
 
-    std::vector<std::unordered_set<ModuleBasic>> MakeAllMoves();
+    std::vector<std::set<ModuleBasic>> MakeAllMoves();
 
     void AddEdge(Configuration* configuration);
 
@@ -76,7 +76,7 @@ public:
     const HashedState& GetHash() const;
 
     [[nodiscard]]
-    const std::unordered_set<ModuleBasic>& GetModData() const;
+    const std::set<ModuleBasic>& GetModData() const;
 
     void SetParent(Configuration* configuration);
 

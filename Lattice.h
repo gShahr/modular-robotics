@@ -1,3 +1,4 @@
+#include <set>
 #include <boost/functional/hash.hpp>
 #include "ModuleManager.h"
 #include "CoordTensor.h"
@@ -74,10 +75,10 @@ public:
     static const std::vector<Module*>& MovableModules();
 
     // Update lattice using a vector of non-static module information
-    static void UpdateFromModuleInfo(const std::unordered_set<ModuleBasic>& moduleInfo);
+    static void UpdateFromModuleInfo(const std::set<ModuleBasic>& moduleInfo);
 
     // Get non-static module information
-    static std::unordered_set<ModuleBasic> GetModuleInfo();
+    static std::set<ModuleBasic> GetModuleInfo();
 
     // Assign from state tensor
     //static void UpdateFromState(const CoordTensor<bool>& state, const CoordTensor<int>& colors);
