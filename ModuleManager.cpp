@@ -138,9 +138,10 @@ bool ModuleBasic::operator==(const ModuleBasic& right) const {
     return properties == right.properties;
 }
 
-std::size_t std::hash<ModuleBasic>::operator()(const ModuleBasic& modData) const {
-    boost::hash<ModuleBasic> hasher;
-    return hasher(modData);
+bool ModuleBasic::operator<(const ModuleBasic& right) const {
+    return hash < right.hash;
+}
+
 std::size_t std::hash<ModuleBasic>::operator()(ModuleBasic& modData) const {
     if (!modData.hashCacheValid) {
         boost::hash<ModuleBasic> hasher;

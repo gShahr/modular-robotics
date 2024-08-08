@@ -109,6 +109,8 @@ public:
 
     bool operator==(const ModuleBasic& right) const;
 
+    bool operator<(const ModuleBasic& right) const;
+
     friend class std::hash<ModuleBasic>;
 };
 
