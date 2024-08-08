@@ -506,5 +506,17 @@ function pixelToHex(x, y, size) {
     return [q, r];
 }
 
+document.addEventListener('mousemove', function(event) {
+    const coordinates = getTileCoordinates(event.clientX, event.clientY);
+    document.getElementById('coordinates').innerText = `Tile Coordinates: x=${coordinates.x}, y=${coordinates.y}`;
+    console.log(`Tile Coordinates: x=${coordinates.x}, y=${coordinates.y}`);
+});
+
+function getTileCoordinates(mouseX, mouseY) {
+    const tileX = Math.floor(mouseX / twoDtileSize);
+    const tileY = Math.floor(mouseY / twoDtileSize);
+    return { x: tileX, y: tileY };
+}
+
 twodCanv = new p5(sketch1);
 threeDCanv = new p5(sketch2);
