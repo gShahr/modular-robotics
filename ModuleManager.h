@@ -92,17 +92,29 @@ struct PropertyInitializer {
 };
 
 // Class used to hold bare minimum representation of a module, for use in Configuration class
-struct ModuleBasic {
+class ModuleBasic {
+private:
+    std::size_t hash = -1;
+
+    bool hashCacheValid = false;
+
+public:
     std::valarray<int> coords;
 
     ModuleProperties properties;
 
+    ModuleBasic() = default;
+
+    ModuleBasic(const std::valarray<int>& coords, const ModuleProperties& properties);
+
     bool operator==(const ModuleBasic& right) const;
+
+    friend class std::hash<ModuleBasic>;
 };
 
 template<>
 struct std::hash<ModuleBasic> {
-    std::size_t operator()(const ModuleBasic& modData) const;
+    std::size_t operator()(ModuleBasic& modData) const;
 };
 
 template<>

@@ -120,6 +120,11 @@ PropertyInitializer::PropertyInitializer(const std::string& name, IModulePropert
     ModuleProperties::Constructors()[name] = constructor;
 }
 
+ModuleBasic::ModuleBasic(const std::valarray<int>& coords, const ModuleProperties& properties) : coords(coords), properties(properties) {
+    std::hash<ModuleBasic> hasher;
+    hasher(*this);
+}
+
 bool ModuleBasic::operator==(const ModuleBasic& right) const {
     if (coords.size() != right.coords.size()) {
         return false;
@@ -135,6 +140,13 @@ bool ModuleBasic::operator==(const ModuleBasic& right) const {
 std::size_t std::hash<ModuleBasic>::operator()(const ModuleBasic& modData) const {
     boost::hash<ModuleBasic> hasher;
     return hasher(modData);
+std::size_t std::hash<ModuleBasic>::operator()(ModuleBasic& modData) const {
+    if (!modData.hashCacheValid) {
+        boost::hash<ModuleBasic> hasher;
+        modData.hash = hasher(modData);
+        modData.hashCacheValid = true;
+    }
+    return modData.hash;
 }
 
 std::size_t boost::hash<ModuleBasic>::operator()(const ModuleBasic& modData) const {
