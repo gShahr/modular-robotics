@@ -15,16 +15,8 @@ HashedState::HashedState() : seed(0) {}
 
 HashedState::HashedState(size_t seed) : seed(seed) {}
 
-HashedState::HashedState(const std::unordered_set<ModuleBasic>& modData) {
-    seed = 0;
-    auto cmp = [](int a, int b) { return a < b; };
-    std::set<std::size_t, decltype(cmp)> hashes(cmp);
-    for (const auto& data : modData) {
-        boost::hash<ModuleBasic> modBasicHasher;
-        hashes.insert(modBasicHasher(data));
-        //boost::hash_combine(seed, modBasicHasher(data));
-    }
-    seed = boost::hash_range(hashes.begin(), hashes.end());
+HashedState::HashedState(const std::set<ModuleBasic>& modData) {
+    seed = boost::hash_range(modData.begin(), modData.end());
 }
 
 HashedState::HashedState(const HashedState& other) : seed(other.GetSeed()) {}
@@ -46,7 +38,7 @@ size_t std::hash<HashedState>::operator()(const HashedState& state) const {
     //return state.GetSeed();
 }
 
-Configuration::Configuration(std::unordered_set<ModuleBasic> modData) : _nonStatModData(modData) {
+Configuration::Configuration(std::set<ModuleBasic> modData) : _nonStatModData(modData) {
     hash = HashedState(modData);
 }
 
@@ -56,8 +48,8 @@ Configuration::~Configuration() {
     }
 }
 
-std::vector<std::unordered_set<ModuleBasic>> Configuration::MakeAllMoves() {
-    std::vector<std::unordered_set<ModuleBasic>> result;
+std::vector<std::set<ModuleBasic>> Configuration::MakeAllMoves() {
+    std::vector<std::set<ModuleBasic>> result;
     Lattice::UpdateFromModuleInfo(_nonStatModData);
     std::vector<Module*> movableModules = Lattice::MovableModules();
     for (auto module: movableModules) {
@@ -87,7 +79,7 @@ const HashedState& Configuration::GetHash() const {
     return hash;
 }
 
-const std::unordered_set<ModuleBasic>& Configuration::GetModData() const {
+const std::set<ModuleBasic>& Configuration::GetModData() const {
     return _nonStatModData;
 }
 
