@@ -1,6 +1,6 @@
 #include "LatticeSetup.h"
 #include "ConfigurationSpace.h"
-#include "MetaModule.h"
+#include "Metamodule.h"
 #include "Colors.h"
 #include <set>
 
@@ -216,4 +216,4 @@ namespace LatticeSetup {
             Lattice::AddModule(mod);
         }
     }
-};
+}
