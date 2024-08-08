@@ -1,0 +1,356 @@
+{
+	"order": 2,
+	"axisSize": 18,
+	"modules": [
+		{
+			"position": [
+				7,
+				11
+			],
+			"static": false
+		},
+		{
+			"position": [
+				8,
+				11
+			],
+			"static": false
+		},
+		{
+			"position": [
+				8,
+				10
+			],
+			"static": false
+		},
+		{
+			"position": [
+				8,
+				9
+			],
+			"static": false
+		},
+		{
+			"position": [
+				9,
+				9
+			],
+			"static": false
+		},
+		{
+			"position": [
+				10,
+				9
+			],
+			"static": true
+		},
+		{
+			"position": [
+				10,
+				10
+			],
+			"static": true
+		},
+		{
+			"position": [
+				11,
+				10
+			],
+			"static": true
+		},
+		{
+			"position": [
+				12,
+				10
+			],
+			"static": true
+		},
+		{
+			"position": [
+				12,
+				11
+			],
+			"static": true
+		},
+		{
+			"position": [
+				7,
+				12
+			],
+			"static": true
+		},
+		{
+			"position": [
+				7,
+				13
+			],
+			"static": true
+		},
+		{
+			"position": [
+				8,
+				13
+			],
+			"static": true
+		},
+		{
+			"position": [
+				9,
+				13
+			],
+			"static": true
+		},
+		{
+			"position": [
+				9,
+				14
+			],
+			"static": true
+		},
+		{
+			"position": [
+				13,
+				11
+			],
+			"static": true
+		},
+		{
+			"position": [
+				14,
+				11
+			],
+			"static": true
+		},
+		{
+			"position": [
+				14,
+				10
+			],
+			"static": true
+		},
+		{
+			"position": [
+				14,
+				9
+			],
+			"static": true
+		},
+		{
+			"position": [
+				15,
+				9
+			],
+			"static": true
+		},
+		{
+			"position": [
+				9,
+				15
+			],
+			"static": true
+		},
+		{
+			"position": [
+				8,
+				15
+			],
+			"static": true
+		},
+		{
+			"position": [
+				8,
+				16
+			],
+			"static": true
+		},
+		{
+			"position": [
+				8,
+				17
+			],
+			"static": true
+		},
+		{
+			"position": [
+				7,
+				17
+			],
+			"static": true
+		},
+		{
+			"position": [
+				10,
+				15
+			],
+			"static": true
+		},
+		{
+			"position": [
+				10,
+				16
+			],
+			"static": true
+		},
+		{
+			"position": [
+				11,
+				16
+			],
+			"static": true
+		},
+		{
+			"position": [
+				12,
+				16
+			],
+			"static": true
+		},
+		{
+			"position": [
+				12,
+				17
+			],
+			"static": true
+		},
+		{
+			"position": [
+				13,
+				12
+			],
+			"static": true
+		},
+		{
+			"position": [
+				13,
+				13
+			],
+			"static": true
+		},
+		{
+			"position": [
+				14,
+				13
+			],
+			"static": true
+		},
+		{
+			"position": [
+				15,
+				13
+			],
+			"static": true
+		},
+		{
+			"position": [
+				15,
+				14
+			],
+			"static": true
+		},
+		{
+			"position": [
+				10,
+				8
+			],
+			"static": true
+		},
+		{
+			"position": [
+				11,
+				8
+			],
+			"static": true
+		},
+		{
+			"position": [
+				11,
+				7
+			],
+			"static": true
+		},
+		{
+			"position": [
+				11,
+				6
+			],
+			"static": true
+		},
+		{
+			"position": [
+				12,
+				6
+			],
+			"static": true
+		},
+		{
+			"position": [
+				6,
+				12
+			],
+			"static": true
+		},
+		{
+			"position": [
+				5,
+				12
+			],
+			"static": true
+		},
+		{
+			"position": [
+				5,
+				13
+			],
+			"static": true
+		},
+		{
+			"position": [
+				5,
+				14
+			],
+			"static": true
+		},
+		{
+			"position": [
+				4,
+				14
+			],
+			"static": true
+		},
+		{
+			"position": [
+				13,
+				17
+			],
+			"static": true
+		},
+		{
+			"position": [
+				14,
+				17
+			],
+			"static": true
+		},
+		{
+			"position": [
+				14,
+				15
+			],
+			"static": true
+		},
+		{
+			"position": [
+				14,
+				16
+			],
+			"static": true
+		},
+		{
+			"position": [
+				15,
+				15
+			],
+			"static": true
+		}
+	]
+}

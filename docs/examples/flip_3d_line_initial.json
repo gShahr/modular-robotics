@@ -1,0 +1,51 @@
+{
+  "order": 3,
+  "axisSize": 9,
+  "modules": [
+    {
+      "position": [2, 3, 0],
+      "static": false,
+      "properties": {
+        "colorProperty": {
+          "color": "red"
+        }
+      }
+    },
+    {
+      "position": [2, 4, 0],
+      "static": false,
+      "properties": {
+        "colorProperty": {
+          "color": "blue"
+        }
+      }
+    },
+    {
+      "position": [2, 5, 0],
+      "static": true,
+      "properties": {
+        "colorProperty": {
+          "color": "black"
+        }
+      }
+    },
+    {
+      "position": [2, 6, 0],
+      "static": false,
+      "properties": {
+        "colorProperty": {
+          "color": [100, 255, 100]
+        }
+      }
+    },
+    {
+      "position": [2, 7, 0],
+      "static": false,
+      "properties": {
+        "colorProperty": {
+          "color": [255, 255, 255]
+        }
+      }
+    }
+  ]
+}
