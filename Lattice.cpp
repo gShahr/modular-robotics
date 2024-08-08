@@ -220,7 +220,7 @@ void Lattice::BuildMovableModulesNonRec() {
     }
 }
 
-#define AP_Recursive false
+#define AP_Recursive true
 const std::vector<Module*>& Lattice::MovableModules() {
 #if AP_Recursive
     BuildMovableModules();
