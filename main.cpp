@@ -1,3 +1,4 @@
+#include <chrono>
 #include <iostream>
 #include <getopt.h>
 #include <set>
@@ -68,6 +69,10 @@ int main(int argc, char* argv[]) {
     std::vector<Configuration*> path;
     try {
         path = ConfigurationSpace::AStar(&start, &end);
+        auto timeBegin = std::chrono::high_resolution_clock::now();
+        auto timeEnd = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(timeEnd - timeBegin);
+        std::cout << "Search completed in " << duration.count() << " ms" << std::endl;
     } catch(BFSExcept& bfsExcept) {
         std::cerr << bfsExcept.what() << std::endl;
     }
