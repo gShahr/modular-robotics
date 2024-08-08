@@ -86,6 +86,13 @@ public:
 
     void SetCost(int cost);
 
+    template <typename Heuristic>
+    auto CompareConfiguration(Configuration* final, Heuristic heuristic);
+
+    struct ValarrayComparator {
+        bool operator()(const std::valarray<int>& lhs, const std::valarray<int>& rhs) const;
+    };
+
     float ManhattanDistance(Configuration* final);
 
     int SymmetricDifferenceHeuristic(Configuration* final);

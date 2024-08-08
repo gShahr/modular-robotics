@@ -206,6 +206,23 @@ void Configuration::SetCost(int cost) {
     this->cost = cost;
 }
 
+template <typename Heuristic>
+auto CompareConfiguration(Configuration* final, Heuristic heuristic) {
+    return [final, heuristic](Configuration* c1, Configuration* c2) {
+        int cost1 = c1->GetCost() + (c1->*heuristic)(final);
+        int cost2 = c2->GetCost() + (c2->*heuristic)(final);
+        return (cost1 == cost2) ? c1->GetCost() > c2->GetCost() : cost1 > cost2;
+    };
+}
+
+bool Configuration::ValarrayComparator::operator()(const std::valarray<int>& lhs, const std::valarray<int>& rhs) const {
+    for (size_t i = 0; i < std::min(lhs.size(), rhs.size()); ++i) {
+        if (lhs[i] < rhs[i]) return true;
+        if (lhs[i] > rhs[i]) return false;
+    }
+    return lhs.size() < rhs.size();
+}
+
 float Configuration::ManhattanDistance(Configuration* final) {
     auto currentData = this->GetModData();
     auto finalData = final->GetModData();
@@ -225,16 +242,6 @@ float Configuration::ManhattanDistance(Configuration* final) {
     //TODO: find out what the right number is
     return h / 6;
 }
-
-struct ValarrayComparator {
-    bool operator()(const std::valarray<int>& lhs, const std::valarray<int>& rhs) const {
-        for (size_t i = 0; i < std::min(lhs.size(), rhs.size()); ++i) {
-            if (lhs[i] < rhs[i]) return true;
-            if (lhs[i] > rhs[i]) return false;
-        }
-        return lhs.size() < rhs.size();
-    }
-};
 
 int Configuration::SymmetricDifferenceHeuristic(Configuration* final) {
     auto currentData = this->GetModData();
@@ -278,13 +285,9 @@ int Configuration::ChebyshevDistance(Configuration* final) {
 
 std::vector<Configuration*> ConfigurationSpace::AStar(Configuration* start, Configuration* final) {
     int dupesAvoided = 0;
-    auto CompareConfiguration = [final](Configuration* c1, Configuration* c2) {
-        return (c1->GetCost() + c1->ManhattanDistance(final) == c2->GetCost() + c2->ManhattanDistance(final)) ?
-        c1->GetCost() > c2->GetCost() :
-        c1->GetCost() + c1->ManhattanDistance(final) > c2->GetCost() + c2->ManhattanDistance(final);
-    };
-    using CompareType = decltype(CompareConfiguration);
-    std::priority_queue<Configuration*, std::vector<Configuration*>, CompareType> pq(CompareConfiguration);
+    auto compare = CompareConfiguration(final, &Configuration::ManhattanDistance);
+    using CompareType = decltype(compare);
+    std::priority_queue<Configuration*, std::vector<Configuration*>, CompareType> pq(compare);
     std::unordered_set<HashedState> visited;
     start->SetCost(0);
     pq.push(start);
