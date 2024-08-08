@@ -7,6 +7,7 @@ layer = 0;
 highlight = false;
 objects = [];
 blocks = [];
+importBlocks = [];
 historyStack = [];
 redoStack = [];
 rgbColor = [255, 255, 255];
@@ -17,6 +18,41 @@ function saveConfig() {
         output += blocks[i].x + "," + blocks[i].y + ",";
     }
     dwnldAsTxt("3Dtiles.txt", output);
+}
+
+function triggerFileInput() {
+    document.getElementById('fileInput').click();
+}
+
+function importFromJson(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const jsonContent = JSON.parse(e.target.result);
+                processJson(jsonContent);
+                console.log(jsonContent);
+            } catch (error) {
+                console.error("Error parsing JSON:", error);
+            }
+        };
+        reader.readAsText(file);
+    }
+}
+
+function processJson(parsedJson) {
+    var modules = parsedJson.modules;
+    for (var i = 0; i < modules.length; i++) {
+        var module = modules[i];
+        var position = module.position;
+        var block = {
+            x: position[0],
+            y: position[1],
+            z: position[2]
+        };
+        importBlocks.push(block);
+    }
 }
 
 function exportToJson() {
@@ -40,12 +76,13 @@ function exportToJson() {
     jsonOutput += "    \"modules\": [";
     for (var i = 0; i < blocks.length; i++){
         current_block = blocks[i];
-        jsonOutput += "\n{\n	\"position\": [" + current_block.x + ", " + current_block.y + ", " + current_block.z + "],\n"
-        jsonOutput += "	\"static\": true\n}"
+        jsonOutput += "\n\t{\n\t	\"position\": [" + current_block.x + ", " + current_block.y + ", " + current_block.z + "],\n"
+        jsonOutput += "\t	\"static\": true\n\t}"
         if (i < blocks.length - 1) {
             jsonOutput += ",";
         }
     }
+    jsonOutput += "\n    ]\n}";
     dwnldAsTxt("3Dtiles.json", jsonOutput);
 }
 
@@ -265,6 +302,35 @@ var sketch1 = function (sketch) {
             }
             switchShapePressed = false;
             clearPressed = true;
+        }
+        if (importBlocks.length > 0) {
+            screen.removeAllCubes()
+            threeScreen.removeAllCubes();
+            screen.removeAllHexagons();
+            threeScreen.removeAllHexagons();
+            screen.removeAllRhomdods();
+            threeScreen.removeAllRhomdods();
+            switch (screen.shape) {
+                case 'hexagon':
+                    for (let block of importBlocks) {
+                        screen.addHexagon(new Hexagon(block.x, block.y, block.z));
+                    }
+                    break;
+                case 'cube':
+                    for (let block of importBlocks) {
+                        screen.addCube(new Cube(block.x, block.y, block.z, rgbColor));
+                    }
+                    break;
+                case 'rhombicDodecahedron':
+                    for (let block of importBlocks) {
+                        screen.addRhomdod(new RhomDod(block.x, block.y, block.z));
+                    }
+                    break;
+                default:
+                    console.error('Unknown shape:', screen.shape);
+                    blocks = [];
+                    break;
+            }
         }
         // let message = areAllCubesConnected(blocks) ? "Yes" : "No";
         // document.getElementById("checkConnectivity").innerText = "Connected: " + message;    
