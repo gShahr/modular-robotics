@@ -358,12 +358,10 @@ Configuration ConfigurationSpace::GenerateRandomFinal(int targetMoves) {
         // Get adjacent configurations
         auto adjList = current.MakeAllMoves();
         // Shuffle the adjacent configurations
-        std::vector<std::set<ModuleBasic>> shuffledStates;
-        std::sample(adjList.begin(), adjList.end(), std::back_inserter(shuffledStates), adjList.size(),
-                    std::mt19937{std::random_device{}()});
+        std::shuffle(adjList.begin(), adjList.end(), std::mt19937{std::random_device{}()});
         // Search through shuffled configurations until an unvisited one is found
         nextState = {};
-        for (const auto& state: shuffledStates) {
+        for (const auto& state: adjList) {
             if (visited.find(HashedState(state)) == visited.end()) {
                 nextState = state;
                 break;
