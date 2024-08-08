@@ -42,14 +42,17 @@ function importFromJson(event) {
 }
 
 function processJson(parsedJson) {
+    defaultColor = "red";
     var modules = parsedJson.modules;
     for (var i = 0; i < modules.length; i++) {
         var module = modules[i];
         var position = module.position;
+        var color = module.properties && module.properties.colorProperty ? module.properties.colorProperty.color : defaultColor;
         var block = {
             x: position[0],
             y: position[1],
-            z: position[2]
+            z: position[2],
+            color: color
         };
         importBlocks.push(block);
     }
