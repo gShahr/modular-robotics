@@ -38,7 +38,7 @@ size_t std::hash<HashedState>::operator()(const HashedState& state) const {
     //return state.GetSeed();
 }
 
-Configuration::Configuration(std::set<ModuleBasic> modData) : _nonStatModData(modData) {
+Configuration::Configuration(const std::set<ModuleBasic>& modData) : _nonStatModData(modData) {
     hash = HashedState(modData);
 }
 

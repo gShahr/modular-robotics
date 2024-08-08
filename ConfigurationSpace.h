@@ -60,7 +60,7 @@ private:
 public:
     int depth = 0;
 
-    explicit Configuration(std::set<ModuleBasic> modData);
+    explicit Configuration(const std::set<ModuleBasic>& modData);
 
     ~Configuration();
 
