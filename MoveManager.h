@@ -90,6 +90,7 @@ public:
     // Check to see if move is possible for a given module
     virtual bool MoveCheck(CoordTensor<int>& tensor, const Module& mod) = 0;
 
+    [[nodiscard]]
     MoveBase* MakeCopy() const override = 0;
 
     void Rotate(int a, int b) override;
