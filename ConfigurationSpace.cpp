@@ -1,3 +1,4 @@
+#include <random>
 #include <boost/functional/hash.hpp>
 #include <unordered_set>
 #include <queue>
@@ -344,4 +345,41 @@ std::vector<Configuration*> ConfigurationSpace::FindPath(Configuration* start, C
     path.push_back(start);
     std::reverse(path.begin(), path.end());
     return path;
+}
+
+Configuration ConfigurationSpace::GenerateRandomFinal(int targetMoves) {
+    std::unordered_set<HashedState> visited;
+    std::set<ModuleBasic> initialState = Lattice::GetModuleInfo();
+    std::set<ModuleBasic> nextState;
+
+    for (int i = 0; i < targetMoves; i++) {
+        // Get current configuration
+        Configuration current(Lattice::GetModuleInfo());
+        // Get adjacent configurations
+        auto adjList = current.MakeAllMoves();
+        // Shuffle the adjacent configurations
+        std::vector<std::set<ModuleBasic>> shuffledStates;
+        std::sample(adjList.begin(), adjList.end(), std::back_inserter(shuffledStates), adjList.size(),
+                    std::mt19937{std::random_device{}()});
+        // Search through shuffled configurations until an unvisited one is found
+        nextState = {};
+        for (const auto& state: shuffledStates) {
+            if (visited.find(HashedState(state)) == visited.end()) {
+                nextState = state;
+                break;
+            }
+        }
+        // Check to see if a valid adjacent state was found
+        if (nextState.empty()) {
+            // If no adjacent state was found, return early
+            Lattice::UpdateFromModuleInfo(initialState);
+            return Configuration(nextState);
+        }
+        // Otherwise, update lattice with new state and resume loop
+        Lattice::UpdateFromModuleInfo(nextState);
+    }
+
+    // Reset lattice to original state and return
+    Lattice::UpdateFromModuleInfo(initialState);
+    return Configuration(nextState);
 }
