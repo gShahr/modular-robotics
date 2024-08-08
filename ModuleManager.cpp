@@ -60,7 +60,7 @@ void ModuleProperties::InitProperties(const nlohmann::basic_json<> &propertyDefs
     }
 }
 
-void ModuleProperties::UpdateProperties(std::valarray<int> moveInfo) {
+void ModuleProperties::UpdateProperties(const std::valarray<int>& moveInfo) {
     for (auto property : _dynamicProperties) {
         property->UpdateProperty(moveInfo);
     }
@@ -106,7 +106,7 @@ ModuleProperties& ModuleProperties::operator=(const ModuleProperties& right) {
     return *this;
 }
 
-IModuleProperty* ModuleProperties::Find(std::string key) const {
+IModuleProperty* ModuleProperties::Find(const std::string& key) const {
     for (auto property : _properties) {
         if (property->key == key) {
             return property;

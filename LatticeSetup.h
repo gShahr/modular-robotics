@@ -26,6 +26,6 @@ namespace LatticeSetup {
     void setUpTiling();
 
     void setUpTilingFromJson(const std::string& filename);
-};
+}
 
 #endif

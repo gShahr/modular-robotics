@@ -14,6 +14,6 @@ namespace Scenario {
     //void exportConfigurationSpaceToJson(const std::vector<Configuration*>& path, const std::string& filename);
     void exportToScen(const std::vector<Configuration*>& path, const std::string& filename);
     //void exportToScen(const CoordTensor<bool>& state, const CoordTensor<int>& colors, const std::string& filename);
-};
+}
 
 #endif

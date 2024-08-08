@@ -64,7 +64,7 @@ public:
 
     void InitProperties(const nlohmann::basic_json<>& propertyDefs);
 
-    void UpdateProperties(std::valarray<int> moveInfo);
+    void UpdateProperties(const std::valarray<int>& moveInfo);
 
     bool operator==(const ModuleProperties& right) const;
 
@@ -72,7 +72,7 @@ public:
 
     ModuleProperties& operator=(const ModuleProperties& right);
 
-    IModuleProperty* Find(std::string key) const;
+    IModuleProperty* Find(const std::string& key) const;
 
     friend class IModuleProperty;
     friend class PropertyInitializer;

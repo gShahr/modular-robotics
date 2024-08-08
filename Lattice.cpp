@@ -1,3 +1,4 @@
+#include <stack>
 #include <queue>
 #include <sstream>
 #include <string>
@@ -152,8 +153,80 @@ void Lattice::BuildMovableModules() {
     }
 }
 
+void Lattice::BuildMovableModulesNonRec() {
+    // Clear movableModules vector
+    movableModules.clear();
+
+    // Find articulation points non-recursively
+    int t = 0;
+    std::vector<bool> ap(moduleCount, false);
+    std::vector<bool> visited(moduleCount, false);
+    // this outer for loop I'm pretty sure isn't needed since the modules should all be connected
+    for (int id = 0; id < moduleCount; id++) {
+        if (visited[id]) {
+            continue;
+        }
+        // can probably convert these to vectors
+        std::vector<int> discovery(moduleCount, 0);
+        std::vector<int> low(moduleCount, 0);
+        int root_children = 0;
+        visited[id] = true;
+        std::stack<std::tuple<int, int, std::vector<int>::const_iterator>> stack;
+        stack.emplace(id, id, adjList[id].cbegin());
+
+        while (!stack.empty()) {
+            auto [grandparent, parent, children] = stack.top();
+            if (children != adjList[parent].cend()) {
+                int child = *children;
+                ++std::get<std::vector<int>::const_iterator>(stack.top());
+                //++children;
+
+                if (grandparent == child) {
+                    continue;
+                }
+
+                if (visited[child]) {
+                    if (discovery[child] <= discovery[parent]) {
+                        low[parent] = discovery[child] < low[parent] ? discovery[child] : low[parent];
+                    }
+                } else {
+                    t++;
+                    low[child] = discovery[child] = t;
+                    visited[child] = true;
+                    stack.emplace(parent, child, adjList[child].cbegin());
+                }
+            } else {
+                stack.pop();
+                if (stack.size() > 1) {
+                    if (low[parent] >= discovery[grandparent]) {
+                        ap[grandparent] = true;
+                    }
+                    low[grandparent] = low[parent] < low[grandparent] ? low[parent] : low[grandparent];
+                } else if (!stack.empty()) {
+                    root_children++;
+                }
+            }
+        }
+        if (root_children > 1) {
+            ap[id] = true;
+        }
+    }
+
+    // Rebuild movableModules vector
+    for (int id = 0; id < ModuleIdManager::MinStaticID(); id++) {
+        if (!ap[id]) {
+            movableModules.push_back(&ModuleIdManager::GetModule(id));
+        }
+    }
+}
+
+#define AP_Recursive false
 const std::vector<Module*>& Lattice::MovableModules() {
+#if AP_Recursive
     BuildMovableModules();
+#else
+    BuildMovableModulesNonRec();
+#endif
     return movableModules;
 }
 
