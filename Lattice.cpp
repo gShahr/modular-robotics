@@ -157,7 +157,7 @@ const std::vector<Module*>& Lattice::MovableModules() {
     return movableModules;
 }
 
-void Lattice::UpdateFromModuleInfo(const std::unordered_set<ModuleBasic>& moduleInfo) {
+void Lattice::UpdateFromModuleInfo(const std::set<ModuleBasic>& moduleInfo) {
     std::queue<const ModuleBasic*> destinations;
     std::unordered_set<int> modsToMove;
     for (int id = 0; id < ModuleIdManager::MinStaticID(); id++) {
@@ -191,8 +191,8 @@ void Lattice::UpdateFromModuleInfo(const std::unordered_set<ModuleBasic>& module
     }
 }
 
-std::unordered_set<ModuleBasic> Lattice::GetModuleInfo() {
-    std::unordered_set<ModuleBasic> modInfo;
+std::set<ModuleBasic> Lattice::GetModuleInfo() {
+    std::set<ModuleBasic> modInfo;
     for (int id = 0; id < ModuleIdManager::MinStaticID(); id++) {
         auto& mod = ModuleIdManager::GetModule(id);
         ModuleBasic modBasic = {mod.coords, mod.properties};
