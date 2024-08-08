@@ -331,6 +331,7 @@ var sketch1 = function (sketch) {
                     blocks = [];
                     break;
             }
+            importBlocks.length = 0;
         }
         // let message = areAllCubesConnected(blocks) ? "Yes" : "No";
         // document.getElementById("checkConnectivity").innerText = "Connected: " + message;    
