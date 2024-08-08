@@ -241,7 +241,7 @@ float Configuration::ManhattanDistance(Configuration* final) {
         finalIt++;
     }
     //TODO: find out what the right number is
-    return h / 6;
+    return h / 3;
 }
 
 int Configuration::SymmetricDifferenceHeuristic(Configuration* final) {
