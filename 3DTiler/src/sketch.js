@@ -60,27 +60,32 @@ function processJson(parsedJson) {
 
 function exportToJson() {
     var jsonOutput = "{\n";
-    var maxSize = 0
-    for (var i = 0; i < blocks.length; i++){
-        current_block = blocks[i];
-	if(current_block.x > maxSize){
-		maxSize = current_block.x;
-	}
-	if(current_block.y > maxSize){
-		maxSize = current_block.y;
-	}
-	if(current_block.z > maxSize){
-		maxSize = current_block.z;
-	}
+    var maxSize = 0;
+    for (var i = 0; i < blocks.length; i++) {
+        var current_block = blocks[i];
+        if (current_block.x > maxSize) {
+            maxSize = current_block.x;
+        }
+        if (current_block.y > maxSize) {
+            maxSize = current_block.y;
+        }
+        if (current_block.z > maxSize) {
+            maxSize = current_block.z;
+        }
     }
     maxSize = maxSize + 1;
     jsonOutput += "    \"order\": 3,\n";
     jsonOutput += "    \"axisSize\": " + maxSize + ",\n";
     jsonOutput += "    \"modules\": [";
-    for (var i = 0; i < blocks.length; i++){
-        current_block = blocks[i];
-        jsonOutput += "\n\t{\n\t	\"position\": [" + current_block.x + ", " + current_block.y + ", " + current_block.z + "],\n"
-        jsonOutput += "\t	\"static\": true\n\t}"
+    for (var i = 0; i < blocks.length; i++) {
+        var current_block = blocks[i];
+        jsonOutput += "\n\t{\n\t\t\"position\": [" + current_block.x + ", " + current_block.y + ", " + current_block.z + "],\n";
+        jsonOutput += "\t\t\"static\": true,\n";
+        jsonOutput += "\t\t\"properties\": {\n";
+        jsonOutput += "\t\t\t\"colorProperty\": {\n";
+        jsonOutput += "\t\t\t\t\"color\": \"" + current_block.color + "\"\n";
+        jsonOutput += "\t\t\t}\n";
+        jsonOutput += "\t\t}\n\t}";
         if (i < blocks.length - 1) {
             jsonOutput += ",";
         }
