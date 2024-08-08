@@ -372,8 +372,9 @@ Configuration ConfigurationSpace::GenerateRandomFinal(int targetMoves) {
         // Check to see if a valid adjacent state was found
         if (nextState.empty()) {
             // If no adjacent state was found, return early
+            std::cerr << "GenerateRandomFinal returning early (" << i << "/" << targetMoves << " moves) due to lack of new moves" << std::endl;
             Lattice::UpdateFromModuleInfo(initialState);
-            return Configuration(nextState);
+            return current;
         }
         // Otherwise, update lattice with new state and resume loop
         visited.insert(HashedState(nextState));

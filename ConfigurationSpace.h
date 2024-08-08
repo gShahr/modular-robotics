@@ -111,7 +111,7 @@ namespace ConfigurationSpace {
 
     std::vector<Configuration*> FindPath(Configuration* start, Configuration* final);
 
-    Configuration GenerateRandomFinal(int targetMoves = 8);
+    Configuration GenerateRandomFinal(int targetMoves = 24);
 }
 
 #endif //MODULAR_ROBOTICS_CONFIGURATIONSPACE_H
