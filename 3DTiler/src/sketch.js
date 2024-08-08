@@ -321,17 +321,17 @@ var sketch1 = function (sketch) {
             switch (screen.shape) {
                 case 'hexagon':
                     for (let block of importBlocks) {
-                        screen.addHexagon(new Hexagon(block.x, block.y, block.z));
+                        screen.addHexagon(new Hexagon(block.x, block.y, block.z, block.color));
                     }
                     break;
                 case 'cube':
                     for (let block of importBlocks) {
-                        screen.addCube(new Cube(block.x, block.y, block.z, rgbColor));
+                        screen.addCube(new Cube(block.x, block.y, block.z, block.color));
                     }
                     break;
                 case 'rhombicDodecahedron':
                     for (let block of importBlocks) {
-                        screen.addRhomdod(new RhomDod(block.x, block.y, block.z));
+                        screen.addRhomdod(new RhomDod(block.x, block.y, block.z, block.color));
                     }
                     break;
                 default:
