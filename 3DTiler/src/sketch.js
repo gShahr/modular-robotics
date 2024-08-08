@@ -22,8 +22,8 @@ function saveConfig() {
 function exportToJson() {
     var jsonOutput = "{\n";
     var maxSize = 0
-    for (var i=0; i < blocks.length; i++){
-	current_block = blocks[i];
+    for (var i = 0; i < blocks.length; i++){
+        current_block = blocks[i];
 	if(current_block.x > maxSize){
 		maxSize = current_block.x;
 	}
@@ -35,13 +35,16 @@ function exportToJson() {
 	}
     }
     maxSize = maxSize + 1;
-    jsonOutput += "    \"order\": 3,\n"
-    jsonOutput += "    \"axisSize\": " + maxSize + ",\n"
-    jsonOutput += "    \"modules\": ["
-    for (var i=0; i < blocks.length; i++){
-	current_block = blocks[i];
-	jsonOutput += "\n{\n	\"position\": [" + current_block.x + ", " + current_block.y + ", " + current_block.z + "],\n"
-	jsonOutput += "	\"static\": true\n},"
+    jsonOutput += "    \"order\": 3,\n";
+    jsonOutput += "    \"axisSize\": " + maxSize + ",\n";
+    jsonOutput += "    \"modules\": [";
+    for (var i = 0; i < blocks.length; i++){
+        current_block = blocks[i];
+        jsonOutput += "\n{\n	\"position\": [" + current_block.x + ", " + current_block.y + ", " + current_block.z + "],\n"
+        jsonOutput += "	\"static\": true\n}"
+        if (i < blocks.length - 1) {
+            jsonOutput += ",";
+        }
     }
     dwnldAsTxt("3Dtiles.json", jsonOutput);
 }
