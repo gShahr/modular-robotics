@@ -71,6 +71,8 @@ public:
     // Build / Rebuild movableModules vector
     static void BuildMovableModules();
 
+    static void BuildMovableModulesNonRec();
+
     // Get movable modules
     static const std::vector<Module*>& MovableModules();
 
