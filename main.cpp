@@ -68,8 +68,8 @@ int main(int argc, char* argv[]) {
     Configuration end = LatticeSetup::setupFinalFromJson(finalFile);
     std::vector<Configuration*> path;
     try {
-        path = ConfigurationSpace::AStar(&start, &end);
         auto timeBegin = std::chrono::high_resolution_clock::now();
+        path = ConfigurationSpace::AStar(&start, &end);
         auto timeEnd = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(timeEnd - timeBegin);
         std::cout << "Search completed in " << duration.count() << " ms" << std::endl;
