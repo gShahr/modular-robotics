@@ -12,14 +12,6 @@ historyStack = [];
 redoStack = [];
 rgbColor = [255, 255, 255];
 
-function saveConfig() {
-    var output = "";
-    for (i = 0; i < blocks.length; i++) {
-        output += blocks[i].x + "," + blocks[i].y + ",";
-    }
-    dwnldAsTxt("3Dtiles.txt", output);
-}
-
 function triggerFileInput() {
     document.getElementById('fileInput').click();
 }
@@ -80,7 +72,7 @@ function exportToJson() {
     for (var i = 0; i < blocks.length; i++) {
         var current_block = blocks[i];
         jsonOutput += "\n\t{\n\t\t\"position\": [" + current_block.x + ", " + current_block.y + ", " + current_block.z + "],\n";
-        jsonOutput += "\t\t\"static\": true,\n";
+        jsonOutput += "\t\t\"static\": false,\n";
         jsonOutput += "\t\t\"properties\": {\n";
         jsonOutput += "\t\t\t\"colorProperty\": {\n";
         jsonOutput += "\t\t\t\t\"color\": [" + current_block.color + "]\n";
