@@ -83,7 +83,7 @@ function exportToJson() {
         jsonOutput += "\t\t\"static\": true,\n";
         jsonOutput += "\t\t\"properties\": {\n";
         jsonOutput += "\t\t\t\"colorProperty\": {\n";
-        jsonOutput += "\t\t\t\t\"color\": \"" + current_block.color + "\"\n";
+        jsonOutput += "\t\t\t\t\"color\": [" + current_block.color + "]\n";
         jsonOutput += "\t\t\t}\n";
         jsonOutput += "\t\t}\n\t}";
         if (i < blocks.length - 1) {
