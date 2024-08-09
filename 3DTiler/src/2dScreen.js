@@ -250,6 +250,13 @@ class twoDScreen {
                         this.cubes[i].y*this.tileSize, 
                         this.tileSize, 
                         this.tileSize);
+                    if (this.cubes[i].mStatic) {
+                        sketch.fill(255);
+                        sketch.textAlign(sketch.CENTER, sketch.CENTER);
+                        sketch.text('S', 
+                            this.cubes[i].x*this.tileSize + this.tileSize/2, 
+                            this.cubes[i].y*this.tileSize + this.tileSize/2);
+                    }
                     sketch.fill(255);
                     break;
                 case this.layer-1:
@@ -259,6 +266,13 @@ class twoDScreen {
                         this.cubes[i].y*this.tileSize, 
                         this.tileSize, 
                         this.tileSize);
+                    if (this.cubes[i].mStatic) {
+                        sketch.fill(255);
+                        sketch.textAlign(sketch.CENTER, sketch.CENTER);
+                        sketch.text('S', 
+                            this.cubes[i].x*this.tileSize + this.tileSize/2, 
+                            this.cubes[i].y*this.tileSize + this.tileSize/2);
+                    }
                     sketch.fill(255);
             }
         }
