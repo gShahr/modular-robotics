@@ -359,14 +359,14 @@ var sketch1 = function (sketch) {
         } else if (screen.shape == "hexagon") {
             let [x, y] = pixelToHex(sketch.mouseX, sketch.mouseY, twoDtileSize);
             if (!screen.removeHexagon(x, y, screen.layer)) {
-                screen.addHexagon(new Hexagon(x, y, screen.layer, mStatic));
+                screen.addHexagon(new Hexagon(x, y, screen.layer, rgbColor, mStatic));
             } else {
             }
         } else if (screen.shape = "rhombicDodecahedron") {
             x = Math.floor(sketch.mouseX / twoDtileSize);
             y = Math.floor(sketch.mouseY / twoDtileSize);
             if (!includesArray(screen.invalidRhomdod, [x, y, screen.layer]) && !screen.removeRhomdod(x, y, screen.layer)) {
-                screen.addRhomdod(new RhomDod(x, y, screen.layer, mStatic));
+                screen.addRhomdod(new RhomDod(x, y, screen.layer, rgbColor, mStatic));
             } else {
             }
             console.log(x, y, screen.layer);

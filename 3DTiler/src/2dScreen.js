@@ -307,6 +307,14 @@ class twoDScreen {
                         this.tileSize, 
                         this.tileSize
                     );
+                    console.log(this.rhomdod[i]);
+                    if (this.rhomdod[i].mStatic) {
+                        sketch.fill(255);
+                        sketch.textAlign(sketch.CENTER, sketch.CENTER);
+                        sketch.text('S', 
+                            this.rhomdod[i].x * this.tileSize + this.tileSize / 2, 
+                            this.rhomdod[i].y * this.tileSize + this.tileSize / 2);
+                    }
                     sketch.fill(255);
                     break;
                 case this.layer - 1:
@@ -317,6 +325,13 @@ class twoDScreen {
                         this.tileSize, 
                         this.tileSize
                     );
+                    if (this.rhomdod[i].mStatic) {
+                        sketch.fill(255);
+                        sketch.textAlign(sketch.CENTER, sketch.CENTER);
+                        sketch.text('S', 
+                            this.rhomdod[i].x * this.tileSize + this.tileSize / 2, 
+                            this.rhomdod[i].y * this.tileSize + this.tileSize / 2);
+                    }
                     sketch.fill(255);
             }
         }
