@@ -5,6 +5,7 @@ canvasZ = 75;
 twoDtileSize = canvasW / (2 * 30);
 layer = 0;
 highlight = false;
+mStatic = false;
 objects = [];
 blocks = [];
 importBlocks = [];
@@ -186,6 +187,12 @@ function highlightLayer() {
     highlight = !highlight;
 }
 
+function toggleStatic() {
+    const button = document.getElementById('static');
+    button.classList.toggle('active');
+    mStatic = !mStatic;
+}
+
 var sketch1 = function (sketch) {
     let undoPressed = false;
     let redoPressed = false;
@@ -260,8 +267,8 @@ var sketch1 = function (sketch) {
                     screen.removeCube(lastMove.x, lastMove.y, lastMove.z);
                     threeScreen.removeCube(lastMove.x, lastMove.y, lastMove.z);
                 } else {
-                    screen.addCube(new Cube(lastMove.x, lastMove.y, lastMove.z, lastMove.color));
-                    threeScreen.addCube(new Cube(lastMove.x, lastMove.y, lastMove.z, lastMove.color));
+                    screen.addCube(new Cube(lastMove.x, lastMove.y, lastMove.z, lastMove.color, lastMove.mStatic));
+                    threeScreen.addCube(new Cube(lastMove.x, lastMove.y, lastMove.z, lastMove.color, lastMove.mStatic));
                 }
             }
             undoPressed = false;
@@ -272,8 +279,8 @@ var sketch1 = function (sketch) {
                 let lastMove = redoStack.pop();
                 historyStack.push(lastMove);
                 if (lastMove.action === 'add') {
-                    screen.addCube(new Cube(lastMove.x, lastMove.y, lastMove.z, lastMove.color));
-                    threeScreen.addCube(new Cube(lastMove.x, lastMove.y, lastMove.z, lastMove.color));
+                    screen.addCube(new Cube(lastMove.x, lastMove.y, lastMove.z, lastMove.color, lastMOve.mStatic));
+                    threeScreen.addCube(new Cube(lastMove.x, lastMove.y, lastMove.z, lastMove.color, lastMove.mStatic));
                 } else {
                     screen.removeCube(lastMove.x, lastMove.y, lastMove.z);
                     threeScreen.removeCube(lastMove.x, lastMove.y, lastMove.z);
@@ -314,17 +321,17 @@ var sketch1 = function (sketch) {
             switch (screen.shape) {
                 case 'hexagon':
                     for (let block of importBlocks) {
-                        screen.addHexagon(new Hexagon(block.x, block.y, block.z, block.color));
+                        screen.addHexagon(new Hexagon(block.x, block.y, block.z, block.color, block.mStatic));
                     }
                     break;
                 case 'cube':
                     for (let block of importBlocks) {
-                        screen.addCube(new Cube(block.x, block.y, block.z, block.color));
+                        screen.addCube(new Cube(block.x, block.y, block.z, block.color, block.mStatic));
                     }
                     break;
                 case 'rhombicDodecahedron':
                     for (let block of importBlocks) {
-                        screen.addRhomdod(new RhomDod(block.x, block.y, block.z, block.color));
+                        screen.addRhomdod(new RhomDod(block.x, block.y, block.z, block.color, block.mStatic));
                     }
                     break;
                 default:
@@ -344,22 +351,22 @@ var sketch1 = function (sketch) {
             x = Math.floor(sketch.mouseX / twoDtileSize);
             y = Math.floor(sketch.mouseY / twoDtileSize);
             if (!screen.removeCube(x, y, screen.layer)) {
-                screen.addCube(new Cube(x, y, screen.layer, rgbColor));
-                historyStack.push({ action: 'add', x: x, y: y, z: screen.layer, color: rgbColor });
+                screen.addCube(new Cube(x, y, screen.layer, rgbColor, mStatic));
+                historyStack.push({ action: 'add', x: x, y: y, z: screen.layer, color: rgbColor, mStatic: mStatic });
             } else {
                 historyStack.push({ action: 'remove', x: x, y: y, z: screen.layer, color: rgbColor });
             }
         } else if (screen.shape == "hexagon") {
             let [x, y] = pixelToHex(sketch.mouseX, sketch.mouseY, twoDtileSize);
             if (!screen.removeHexagon(x, y, screen.layer)) {
-                screen.addHexagon(new Hexagon(x, y, screen.layer));
+                screen.addHexagon(new Hexagon(x, y, screen.layer, mStatic));
             } else {
             }
         } else if (screen.shape = "rhombicDodecahedron") {
             x = Math.floor(sketch.mouseX / twoDtileSize);
             y = Math.floor(sketch.mouseY / twoDtileSize);
             if (!includesArray(screen.invalidRhomdod, [x, y, screen.layer]) && !screen.removeRhomdod(x, y, screen.layer)) {
-                screen.addRhomdod(new RhomDod(x, y, screen.layer));
+                screen.addRhomdod(new RhomDod(x, y, screen.layer, mStatic));
             } else {
             }
             console.log(x, y, screen.layer);
@@ -389,7 +396,7 @@ var sketch2 = function (sketch) {
                 x = Math.floor(mX / twoDtileSize);
                 y = Math.floor(sketch.mouseY / twoDtileSize);
                 if (!includesArray(screen.invalidRhomdod, [x, y, screen.layer]) && !threeScreen.removeRhomdod(x, y, layer)) {
-                    threeScreen.addRhomdod(new RhomDod(x, y, layer, rgbColor));
+                    threeScreen.addRhomdod(new RhomDod(x, y, layer, rgbColor, mStatic));
                 }
             }
         } else if (screen.shape === "cube") {
@@ -398,7 +405,7 @@ var sketch2 = function (sketch) {
                 x = Math.floor(mX / twoDtileSize);
                 y = Math.floor(sketch.mouseY / twoDtileSize);
                 if (!threeScreen.removeCube(x, y, layer)) {
-                    threeScreen.addCube(new Cube(x, y, layer, rgbColor));
+                    threeScreen.addCube(new Cube(x, y, layer, rgbColor, mStatic));
                 }
             }
         } else if (screen.shape === "hexagon") {
@@ -407,7 +414,7 @@ var sketch2 = function (sketch) {
                 x = Math.floor(mX / twoDtileSize);
                 y = Math.floor(sketch.mouseY / twoDtileSize);
                 if (!threeScreen.removeHexagon(x, y, layer)) {
-                    threeScreen.addHexagon(new Hexagon(x, y, layer, rgbColor));
+                    threeScreen.addHexagon(new Hexagon(x, y, layer, rgbColor, mStatic));
                 }
             }
         }

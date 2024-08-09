@@ -15,6 +15,9 @@
       margin:auto;
       width:60%; /* should just be pixels based on canvas size */
     }
+    .active {
+      background-color: yellow;
+    }
     </style>
   <!-- <header id="CH">Inital State</header> -->
   <script src="p5.js"></script>
@@ -49,6 +52,7 @@
 <input type="file" id="fileInput" accept=".json" style="display: none;" onchange="importFromJson(event)">
 <button id="exportToJson" onclick="exportToJson()">Export to JSON</button>
 <button id="exportToObj" onclick="exportToObj()">Export to OBJ</button>
+<button id="static" onclick="toggleStatic()">Static</button>
 <button id ="red" onclick="changeColor([255, 0, 0])">Red</button>
 <button id ="green" onclick="changeColor([0, 255, 0])">Green</button>
 <button id ="blue" onclick="changeColor([0, 0, 255])">Blue</button>

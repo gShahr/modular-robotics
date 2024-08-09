@@ -1,9 +1,9 @@
 class Hexagon {
-    constructor(x, y, z, static = false, color = [255, 255, 255]) {
+    constructor(x, y, z, color = [255, 255, 255], mStatic = false) {
         this.x = x;
         this.y = y;
         this.z = z;
-        this.static = static;
+        this.mStatic = mStatic;
         this.color = color;
     }
 
