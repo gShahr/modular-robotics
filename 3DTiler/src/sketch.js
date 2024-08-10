@@ -41,13 +41,14 @@ function processJson(parsedJson) {
         var module = modules[i];
         var position = module.position;
         var color = module.properties && module.properties.colorProperty ? module.properties.colorProperty.color : defaultColor;
+        var staticV = module.static ? module.static : false;
         var z = module.position[2] ? module.position[2] : 0;
         var block = {
             x: position[0],
             y: position[1],
             z: z,
-            static: module.static !== undefined ? module.static : false,
-            color: color
+            color: color,
+            static: staticV
         };
         importBlocks.push(block);
     }
@@ -55,27 +56,26 @@ function processJson(parsedJson) {
 
 function exportToJson() {
     var jsonOutput = "{\n";
-    var maxSize = 0;
+    var sameZ = true;
+    var firstZ = blocks.length > 0 ? blocks[0].z : null;
     for (var i = 0; i < blocks.length; i++) {
         var current_block = blocks[i];
-        if (current_block.x > maxSize) {
-            maxSize = current_block.x;
-        }
-        if (current_block.y > maxSize) {
-            maxSize = current_block.y;
-        }
-        if (current_block.z > maxSize) {
-            maxSize = current_block.z;
+        if (current_block.z !== firstZ) {
+            sameZ = false;
         }
     }
-    maxSize = maxSize + 1;
-    jsonOutput += "    \"order\": 3,\n";
-    jsonOutput += "    \"axisSize\": " + maxSize + ",\n";
+    var order = sameZ ? 2 : 3;
+    jsonOutput += "    \"order\": " + order + ",\n";
+    jsonOutput += "    \"axisSize\": " + (sameZ ? blocks.length : blocks.length + 1) + ",\n";
     jsonOutput += "    \"modules\": [";
     for (var i = 0; i < blocks.length; i++) {
         var current_block = blocks[i];
-        var staticV = current_block.static !== undefined ? current_block.static : false;
-        jsonOutput += "\n\t{\n\t\t\"position\": [" + current_block.x + ", " + current_block.y + ", " + current_block.z + "],\n";
+        var staticV = current_block.mStatic !== undefined ? current_block.mStatic : false;
+        jsonOutput += "\n\t{\n\t\t\"position\": [" + current_block.x + ", " + current_block.y;
+        if (!sameZ) {
+            jsonOutput += ", " + current_block.z;
+        }
+        jsonOutput += "],\n";
         jsonOutput += "\t\t\"static\": " + staticV + ",\n";
         jsonOutput += "\t\t\"properties\": {\n";
         jsonOutput += "\t\t\t\"colorProperty\": {\n";
@@ -323,20 +323,20 @@ var sketch1 = function (sketch) {
             switch (screen.shape) {
                 case 'hexagon':
                     for (let block of importBlocks) {
-                        screen.addHexagon(new Hexagon(block.x, block.y, block.z, block.color, block.mStatic));
-                        threeScreen.addHexagon(new Hexagon(block.x, block.y, block.z, block.color, block.mStatic));
+                        screen.addHexagon(new Hexagon(block.x, block.y, block.z, block.color, block.static));
+                        threeScreen.addHexagon(new Hexagon(block.x, block.y, block.z, block.color, block.static));
                     }
                     break;
                 case 'cube':
                     for (let block of importBlocks) {
-                        screen.addCube(new Cube(block.x, block.y, block.z, block.color, block.mStatic));
-                        threeScreen.addCube(new Cube(block.x, block.y, block.z, block.color, block.mStatic));
+                        screen.addCube(new Cube(block.x, block.y, block.z, block.color, block.static));
+                        threeScreen.addCube(new Cube(block.x, block.y, block.z, block.color, block.static));
                     }
                     break;
                 case 'rhombicDodecahedron':
                     for (let block of importBlocks) {
-                        screen.addRhomdod(new RhomDod(block.x, block.y, block.z, block.color, block.mStatic));
-                        threeScreen.addRhomdod(new RhomDod(block.x, block.y, block.z, block.color, block.mStatic));
+                        screen.addRhomdod(new RhomDod(block.x, block.y, block.z, block.color, block.static));
+                        threeScreen.addRhomdod(new RhomDod(block.x, block.y, block.z, block.color, block.static));
                     }
                     break;
                 default:
