@@ -25,7 +25,7 @@ function importFromJson(event) {
             try {
                 const jsonContent = JSON.parse(e.target.result);
                 processJson(jsonContent);
-                console.log(jsonContent);
+                // console.log(jsonContent);
             } catch (error) {
                 console.error("Error parsing JSON:", error);
             }
@@ -35,7 +35,7 @@ function importFromJson(event) {
 }
 
 function processJson(parsedJson) {
-    defaultColor = "red";
+    defaultColor = [255, 255, 255];
     var modules = parsedJson.modules;
     for (var i = 0; i < modules.length; i++) {
         var module = modules[i];
@@ -74,8 +74,9 @@ function exportToJson() {
     jsonOutput += "    \"modules\": [";
     for (var i = 0; i < blocks.length; i++) {
         var current_block = blocks[i];
+        var staticV = current_block.static !== undefined ? current_block.static : false;
         jsonOutput += "\n\t{\n\t\t\"position\": [" + current_block.x + ", " + current_block.y + ", " + current_block.z + "],\n";
-        jsonOutput += "\t\t\"static\": " + current_block.static + ",\n";
+        jsonOutput += "\t\t\"static\": " + staticV + ",\n";
         jsonOutput += "\t\t\"properties\": {\n";
         jsonOutput += "\t\t\t\"colorProperty\": {\n";
         jsonOutput += "\t\t\t\t\"color\": [" + current_block.color + "]\n";
@@ -323,16 +324,19 @@ var sketch1 = function (sketch) {
                 case 'hexagon':
                     for (let block of importBlocks) {
                         screen.addHexagon(new Hexagon(block.x, block.y, block.z, block.color, block.mStatic));
+                        threeScreen.addHexagon(new Hexagon(block.x, block.y, block.z, block.color, block.mStatic));
                     }
                     break;
                 case 'cube':
                     for (let block of importBlocks) {
                         screen.addCube(new Cube(block.x, block.y, block.z, block.color, block.mStatic));
+                        threeScreen.addCube(new Cube(block.x, block.y, block.z, block.color, block.mStatic));
                     }
                     break;
                 case 'rhombicDodecahedron':
                     for (let block of importBlocks) {
                         screen.addRhomdod(new RhomDod(block.x, block.y, block.z, block.color, block.mStatic));
+                        threeScreen.addRhomdod(new RhomDod(block.x, block.y, block.z, block.color, block.mStatic));
                     }
                     break;
                 default:

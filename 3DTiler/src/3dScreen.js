@@ -271,7 +271,6 @@ class threeDScreen {
         const depth = this.tileSize;
     
         for (let i = 0; i < this.hexagons.length; i++) {
-            console.log(this.hexagons[0]);
             const x = this.hexagons[i].x * this.tileSize - halfWidth;
             const y = this.hexagons[i].y * this.tileSize - halfHeight;
             const z = this.hexagons[i].z * this.tileSize;

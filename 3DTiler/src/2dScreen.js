@@ -130,7 +130,6 @@ class twoDScreen {
     }
 
     removeCube(x, y, z) {
-        console.log(this.cubes);
         for (let i = 0; i < this.cubes.length; i++) {
             if (this.cubes[i].x === x && this.cubes[i].y === y && this.cubes[i].z === z) {
                 this.cubes.splice(i, 1);
