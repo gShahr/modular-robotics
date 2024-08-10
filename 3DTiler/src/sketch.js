@@ -45,7 +45,7 @@ function processJson(parsedJson) {
             x: position[0],
             y: position[1],
             z: position[2],
-            static: module.static,
+            static: module.static !== undefined ? module.static : false,
             color: color
         };
         importBlocks.push(block);
