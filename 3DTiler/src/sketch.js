@@ -41,10 +41,11 @@ function processJson(parsedJson) {
         var module = modules[i];
         var position = module.position;
         var color = module.properties && module.properties.colorProperty ? module.properties.colorProperty.color : defaultColor;
+        var z = module.position[2] ? module.position[2] : 0;
         var block = {
             x: position[0],
             y: position[1],
-            z: position[2],
+            z: z,
             static: module.static !== undefined ? module.static : false,
             color: color
         };
