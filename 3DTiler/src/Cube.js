@@ -38,4 +38,12 @@ class Cube {
     get color() {
         return this._color;
     }
+
+    set mStatic(val) {
+        this._mStatic = val;
+    }
+
+    get mStatic() {
+        return this._mStatic;
+    }
 }
