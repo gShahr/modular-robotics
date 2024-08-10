@@ -130,6 +130,7 @@ class twoDScreen {
     }
 
     removeCube(x, y, z) {
+        console.log(this.cubes);
         for (let i = 0; i < this.cubes.length; i++) {
             if (this.cubes[i].x === x && this.cubes[i].y === y && this.cubes[i].z === z) {
                 this.cubes.splice(i, 1);
@@ -176,6 +177,15 @@ class twoDScreen {
         while (this.rhomdod.length > 0) {
             this.removeRhomdod(this.rhomdod.pop());
         }
+    }
+
+    hasCube(x, y, z) {
+        for (let i = 0; i < this.cubes.length; i++) {
+            if (this.cubes[i].x === x && this.cubes[i].y === y && this.cubes[i].z === z) {
+                return true;
+            }
+        }
+        return false; 
     }
 
     hexagon = (sketch, centerX, centerY, radius) => {

@@ -351,6 +351,7 @@ var sketch1 = function (sketch) {
             if (screen.shape === "cube") {
                 x = Math.floor(sketch.mouseX / twoDtileSize);
                 y = Math.floor(sketch.mouseY / twoDtileSize);
+                if (screen.hasCube(x, y, screen.layer)) return;
                 screen.addCube(new Cube(x, y, screen.layer, rgbColor, mStatic));
                 threeScreen.addCube(new Cube(x, y, screen.layer, rgbColor, mStatic));
             } else if (screen.shape == "hexagon") {
@@ -368,6 +369,7 @@ var sketch1 = function (sketch) {
             if (screen.shape === "cube") {
                 x = Math.floor(sketch.mouseX / twoDtileSize);
                 y = Math.floor(sketch.mouseY / twoDtileSize);
+                console.log("remove cube: " + x + ", " + y);
                 screen.removeCube(x, y, screen.layer);
                 threeScreen.removeCube(x, y, screen.layer);
             } else if (screen.shape == "hexagon") {
@@ -389,6 +391,7 @@ var sketch1 = function (sketch) {
             if (screen.shape === "cube") {
                 x = Math.floor(sketch.mouseX / twoDtileSize);
                 y = Math.floor(sketch.mouseY / twoDtileSize);
+                if (screen.hasCube(x, y, screen.layer)) return;
                 screen.addCube(new Cube(x, y, screen.layer, rgbColor, mStatic));
                 threeScreen.addCube(new Cube(x, y, screen.layer, rgbColor, mStatic));
             } else if (screen.shape == "hexagon") {
@@ -533,7 +536,7 @@ function pixelToHex(x, y, size) {
 document.addEventListener('mousemove', function(event) {
     const coordinates = getTileCoordinates(event.clientX, event.clientY);
     document.getElementById('coordinates').innerText = `Tile Coordinates: x=${coordinates.x}, y=${coordinates.y}`;
-    console.log(`Tile Coordinates: x=${coordinates.x}, y=${coordinates.y}`);
+    // console.log(`Tile Coordinates: x=${coordinates.x}, y=${coordinates.y}`);
 });
 
 function getTileCoordinates(mouseX, mouseY) {
