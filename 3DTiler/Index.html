@@ -18,6 +18,15 @@
     .active {
       background-color: yellow;
     }
+    #canvas-container {
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            position: relative;
+        }
+        canvas {
+            display: block;
+        }
     </style>
   <!-- <header id="CH">Inital State</header> -->
   <script src="p5.js"></script>
@@ -64,6 +73,9 @@
 </div>
 <body>
   <main>
+    <div id="canvas-container" style="overflow: auto; width: 100%; height: 80vh;">
+      <div id="2d-canvas-container" style="position: relative; width: 200%; height: 200%;"></div>
+    </div>
   </main>
 </body>
 
