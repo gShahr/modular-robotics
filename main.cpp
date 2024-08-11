@@ -11,7 +11,7 @@
 #include <queue>
 #include <unordered_set>
 #include <nlohmann/json.hpp>
-#include "MetaModule.h"
+#include "Metamodule.h"
 #include "LatticeSetup.h"
 #include "Scenario.h"
 

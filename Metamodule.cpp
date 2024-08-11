@@ -1,4 +1,4 @@
-#include "MetaModule.h"
+#include "Metamodule.h"
 
 MetaModule::MetaModule(const std::string& filename, int order, int size) : order(order), size(size) {
     readFromJson(filename);
