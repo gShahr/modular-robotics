@@ -1,5 +1,5 @@
 document.oncontextmenu = () => { return false; }
-canvasW = window.screen.width * .99;
+canvasW = window.screen.width * 1;
 canvasH = window.screen.height * .8;
 canvasZ = 75;
 twoDtileSize = canvasW / (2 * 30);
@@ -204,6 +204,7 @@ var sketch1 = function (sketch) {
     sketch.setup = function () {
         canv1 = sketch.createCanvas(canvasW / 2, canvasH);
         canv1.position(0, 30);
+        //canv1.parent('2d-canvas-container');
         screen = new twoDScreen(canvasW / 2, canvasH, twoDtileSize);
         prevLayer = layer;
         let undoButton = document.getElementById('undo');
@@ -233,6 +234,9 @@ var sketch1 = function (sketch) {
     }
 
     sketch.draw = function () {
+        offsetX = document.getElementById('canvas-container').scrollLeft;
+        offsetY = document.getElementById('canvas-container').scrollTop;
+        sketch.translate(-offsetX, -offsetY);
         if (layer > prevLayer) {
             screen.upLayer();
         }
@@ -368,7 +372,16 @@ var sketch1 = function (sketch) {
                 y = Math.floor(sketch.mouseY / twoDtileSize);
                 screen.addRhomdod(new RhomDod(x, y, screen.layer, rgbColor, mStatic));
                 threeScreen.addRhomdod(new RhomDod(x, y, screen.layer, rgbColor, mStatic));
-            }    
+            }
+            y = Math.floor(sketch.mouseY / twoDtileSize);
+            yM = Math.floor(canvasH / twoDtileSize);
+            if (y >= yM - 1) {
+                canvasH *= 2;
+                canv1 = sketch.createCanvas(canvasW / 2, canvasH);
+                canv1.position(0, 30);     
+                screen.width = canvasW / 2;
+                screen.height = canvasH;  
+            }
         } else {
             if (!(sketch.mouseX < canvasW / 2 && sketch.mouseY < canvasH && sketch.mouseY > 0)) return;
             if (screen.shape === "cube") {
