@@ -269,7 +269,7 @@ class twoDScreen {
         for (let i = 0; i < this.cubes.length; i++) {
             switch(this.cubes[i].z) {
                 case this.layer:
-                    sketch.fill(0);
+                    sketch.fill(60);
                     sketch.rect(
                         this.cubes[i].x*this.tileSize, 
                         this.cubes[i].y*this.tileSize, 
