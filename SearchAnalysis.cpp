@@ -55,7 +55,7 @@ void SearchAnalysis::InsertPoint(unsigned long x, unsigned long y) {
 }
 
 void SearchAnalysis::InsertTimePoint(unsigned long y) {
-    long t = std::chrono::duration_cast<std::chrono::milliseconds>(timePaused - clock).count();
+    long t = std::chrono::duration_cast<std::chrono::microseconds>(timePaused - clock).count();
     (*current)["Points"].push_back({t, y});
 }
 

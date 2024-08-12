@@ -105,11 +105,11 @@ std::vector<Configuration*> ConfigurationSpace::BFS(Configuration* start, Config
 #if CONFIG_OUTPUT_JSON
     SearchAnalysis::EnterGraph("BFSDepthOverTime");
     SearchAnalysis::LabelGraph("BFS Depth over Time");
-    SearchAnalysis::LabelAxes("Time (ms)", "Depth");
+    SearchAnalysis::LabelAxes("Time (μs)", "Depth");
     SearchAnalysis::SetInterpolationOrder(0);
     SearchAnalysis::EnterGraph("BFSStatesOverTime");
     SearchAnalysis::LabelGraph("BFS States visited over Time");
-    SearchAnalysis::LabelAxes("Time (ms)", "States visited");
+    SearchAnalysis::LabelAxes("Time (μs)", "States visited");
     SearchAnalysis::SetInterpolationOrder(1);
     SearchAnalysis::StartClock();
 #endif
@@ -324,11 +324,11 @@ std::vector<Configuration*> ConfigurationSpace::AStar(Configuration* start, Conf
 #if CONFIG_OUTPUT_JSON
     SearchAnalysis::EnterGraph("AStarDepthOverTime");
     SearchAnalysis::LabelGraph("A* Depth over Time");
-    SearchAnalysis::LabelAxes("Time (ms)", "Depth");
+    SearchAnalysis::LabelAxes("Time (μs)", "Depth");
     SearchAnalysis::SetInterpolationOrder(0);
     SearchAnalysis::EnterGraph("AStarStatesOverTime");
     SearchAnalysis::LabelGraph("A* States visited over Time");
-    SearchAnalysis::LabelAxes("Time (ms)", "States visited");
+    SearchAnalysis::LabelAxes("Time (μs)", "States visited");
     SearchAnalysis::SetInterpolationOrder(1);
     SearchAnalysis::StartClock();
 #endif
