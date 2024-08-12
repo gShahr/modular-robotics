@@ -14,6 +14,14 @@
  * EVERY_DEPTH: Output current depth and configuration every time BFS depth increases
  */
 #define CONFIG_VERBOSE CS_LOG_EVERY_DEPTH
+/* JSON Output Configuration
+ * In order to output JSON successfully logging must be enabled for every depth
+ */
+#define CONFIG_OUTPUT_JSON true
+#if CONFIG_VERBOSE != CS_LOG_EVERY_DEPTH
+#warning "JSON output disabled due to insufficient logging!"
+#define CONFIG_OUTPUT_JSON false
+#endif
 
 class BFSExcept : std::exception {
 public:

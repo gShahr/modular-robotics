@@ -8,10 +8,10 @@ CXXFLAGS = -w -std=c++17 -I $(VCPKG_ROOT)/installed/x64-windows/include
 LDFLAGS = -L $(VCPKG_ROOT)/installed/x64-windows/lib -lgmock -lgtest -lbenchmark -lpthread -fopenmp
 
 # Source files
-SOURCES = main.cpp ConfigurationSpace.cpp Lattice.cpp ModuleManager.cpp MoveManager.cpp Metamodule.cpp LatticeSetup.cpp Scenario.cpp Isometry.cpp Colors.cpp
+SOURCES = main.cpp ConfigurationSpace.cpp Lattice.cpp ModuleManager.cpp MoveManager.cpp Metamodule.cpp LatticeSetup.cpp Scenario.cpp Isometry.cpp Colors.cpp SearchAnalyis.cpp
 
 # Source files without main
-SOURCES2 = ConfigurationSpace.cpp Lattice.cpp ModuleManager.cpp MoveManager.cpp Metamodule.cpp LatticeSetup.cpp Scenario.cpp Isometry.cpp Colors.cpp
+SOURCES2 = ConfigurationSpace.cpp Lattice.cpp ModuleManager.cpp MoveManager.cpp Metamodule.cpp LatticeSetup.cpp Scenario.cpp Isometry.cpp Colors.cpp SearchAnalyis.cpp
 
 # Object files
 OBJECTS = $(SOURCES:.cpp=.o)
