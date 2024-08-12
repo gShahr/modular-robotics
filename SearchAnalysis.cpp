@@ -10,6 +10,7 @@ const nlohmann::json SearchAnalysis::emptyGraph = R"(
     "Title": "Title",
     "XLabel": "x",
     "YLabel": "y",
+    "InterpolationOrder": 0,
     "Points": []
 }
 )"_json;
@@ -43,6 +44,10 @@ void SearchAnalysis::LabelGraph(const std::string &title) {
 void SearchAnalysis::LabelAxes(const std::string &xLabel, const std::string &yLabel) {
     (*current)["XLabel"] = xLabel;
     (*current)["YLabel"] = yLabel;
+}
+
+void SearchAnalysis::SetInterpolationOrder(int order) {
+    (*current)["InterpolationOrder"] = order;
 }
 
 void SearchAnalysis::InsertPoint(unsigned long x, unsigned long y) {
