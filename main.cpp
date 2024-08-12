@@ -15,7 +15,6 @@
 #include "LatticeSetup.h"
 #include "Scenario.h"
 
-#define GENERATE_FINAL_STATE true
 #define GENERATE_FINAL_STATE false
 
 int main(int argc, char* argv[]) {
