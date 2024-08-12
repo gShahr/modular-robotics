@@ -125,8 +125,11 @@ std::vector<Configuration*> ConfigurationSpace::BFS(Configuration* start, Config
         q.pop();
         if (current->GetHash() == final->GetHash()) {
         //if (current->GetModData() == final->GetModData()) {
-#if CONFIG_VERBOSE == CS_LOG_FINAL_DEPTH
-            std::cout << "bfs depth: " << depth << std::endl << Lattice::ToString() << std::endl;
+#if CONFIG_VERBOSE > CS_LOG_FINAL_DEPTH
+            std::cout << "bfs final depth: " << q.front()->depth << std::endl
+            << "duplicate states avoided: " << dupesAvoided << std::endl
+            << "states visited: " << visited.size() << std::endl
+            << Lattice::ToString() << std::endl;
 #endif
             return FindPath(start, current);
         }
@@ -167,8 +170,8 @@ std::vector<Configuration*> ConfigurationSpace::BFSParallelized(Configuration* s
 #endif
         q.pop();
         if (current->GetModData() == final->GetModData()) {
-#if CONFIG_VERBOSE == CS_LOG_FINAL_DEPTH
-            std::cout << "bfs depth: " << depth << std::endl << Lattice::ToString() << std::endl;
+#if CONFIG_VERBOSE > CS_LOG_FINAL_DEPTH
+            std::cout << "bfs final depth: " << depth << std::endl << Lattice::ToString() << std::endl;
 #endif
             return FindPath(start, current);
         }
@@ -311,8 +314,11 @@ std::vector<Configuration*> ConfigurationSpace::AStar(Configuration* start, Conf
         pq.pop();
         //if (current->GetModData() == final->GetModData()) {
         if (current->GetHash() == final->GetHash()) {
-#if CONFIG_VERBOSE == CS_LOG_FINAL_DEPTH
-            std::cout << "A* depth: " << depth << std::endl << Lattice::ToString() << std::endl;
+#if CONFIG_VERBOSE > CS_LOG_FINAL_DEPTH
+            std::cout << "A* final depth: " << current->depth << std::endl
+                    << "duplicate states avoided: " << dupesAvoided << std::endl
+                    << "states visited: " << visited.size() << std::endl
+                    << Lattice::ToString() << std::endl;
 #endif
             return FindPath(start, current);
         }
