@@ -24,6 +24,13 @@ int main(int argc, char* argv[]) {
     std::string finalFile = "docs/examples/zigzag_final.json";
     std::string exportFile = initialFile.substr(0, initialFile.find_last_of('.')) + ".scen";
     std::string analysisFile = initialFile.substr(0, initialFile.find_last_of('.')) + "_analysis.json";
+    std::size_t trimPos;
+    if ((trimPos = exportFile.find("_initial")) != std::string::npos) {
+        exportFile.erase(trimPos, 8);
+    }
+    if ((trimPos = analysisFile.find("_initial")) != std::string::npos) {
+        analysisFile.erase(trimPos, 8);
+    }
 
     // Define the long options
     static struct option long_options[] = {
