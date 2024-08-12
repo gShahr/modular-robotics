@@ -106,9 +106,11 @@ std::vector<Configuration*> ConfigurationSpace::BFS(Configuration* start, Config
     SearchAnalysis::EnterGraph("BFSDepthOverTime");
     SearchAnalysis::LabelGraph("BFS Depth over Time");
     SearchAnalysis::LabelAxes("Time (ms)", "Depth");
+    SearchAnalysis::SetInterpolationOrder(0);
     SearchAnalysis::EnterGraph("BFSStatesOverTime");
     SearchAnalysis::LabelGraph("BFS States visited over Time");
     SearchAnalysis::LabelAxes("Time (ms)", "States visited");
+    SearchAnalysis::SetInterpolationOrder(1);
     SearchAnalysis::StartClock();
 #endif
     int dupesAvoided = 0;
@@ -323,9 +325,11 @@ std::vector<Configuration*> ConfigurationSpace::AStar(Configuration* start, Conf
     SearchAnalysis::EnterGraph("AStarDepthOverTime");
     SearchAnalysis::LabelGraph("A* Depth over Time");
     SearchAnalysis::LabelAxes("Time (ms)", "Depth");
+    SearchAnalysis::SetInterpolationOrder(0);
     SearchAnalysis::EnterGraph("AStarStatesOverTime");
     SearchAnalysis::LabelGraph("A* States visited over Time");
     SearchAnalysis::LabelAxes("Time (ms)", "States visited");
+    SearchAnalysis::SetInterpolationOrder(1);
     SearchAnalysis::StartClock();
 #endif
     int dupesAvoided = 0;
