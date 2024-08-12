@@ -302,7 +302,7 @@ std::vector<Configuration*> ConfigurationSpace::AStar(Configuration* start, Conf
         Lattice::UpdateFromModuleInfo(current->GetModData());
 #if CONFIG_VERBOSE > CS_LOG_NONE
         if (current->depth != depth) {
-            depth++;
+            depth = current->depth;
 #if CONFIG_VERBOSE > CS_LOG_FINAL_DEPTH
             std::cout << "A* depth: " << current->depth << std::endl
                     << "duplicate states avoided: " << dupesAvoided << std::endl
