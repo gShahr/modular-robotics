@@ -18,7 +18,7 @@
  * In order to output JSON successfully logging must be enabled for every depth
  */
 #define CONFIG_OUTPUT_JSON true
-#if CONFIG_VERBOSE != CS_LOG_EVERY_DEPTH
+#if CONFIG_VERBOSE != CS_LOG_EVERY_DEPTH && CONFIG_OUTPUT_JSON
 #warning "JSON output disabled due to insufficient logging!"
 #define CONFIG_OUTPUT_JSON false
 #endif
