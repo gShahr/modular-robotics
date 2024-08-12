@@ -13,3 +13,4 @@ Moves_LEGACY
 *.d
 *.opp
 build
+*_analysis.json
