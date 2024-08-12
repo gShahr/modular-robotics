@@ -14,6 +14,7 @@
 #include "Metamodule.h"
 #include "LatticeSetup.h"
 #include "Scenario.h"
+#include "SearchAnalysis.h"
 
 #define GENERATE_FINAL_STATE false
 
@@ -22,6 +23,7 @@ int main(int argc, char* argv[]) {
     std::string initialFile = "docs/examples/zigzag_initial.json";
     std::string finalFile = "docs/examples/zigzag_final.json";
     std::string exportFile = initialFile.substr(0, initialFile.find_last_of('.')) + ".scen";
+    std::string analysisFile = initialFile.substr(0, initialFile.find_last_of('.')) + "_analysis.json";
 
     // Define the long options
     static struct option long_options[] = {
@@ -79,6 +81,9 @@ int main(int argc, char* argv[]) {
         auto timeEnd = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(timeEnd - timeBegin);
         std::cout << "Search completed in " << duration.count() << " ms" << std::endl;
+#if CONFIG_OUTPUT_JSON
+        SearchAnalysis::ExportData(analysisFile);
+#endif
     } catch(BFSExcept& bfsExcept) {
         std::cerr << bfsExcept.what() << std::endl;
     }
