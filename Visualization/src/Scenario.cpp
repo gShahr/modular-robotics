@@ -43,6 +43,7 @@ Scenario::Scenario(const char* filepath) {
 
     while (std::getline(stream, line)) {
         line = line.substr(0, line.find("//"));
+        line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
         if (line.empty()) {
             currentBlock++;
             checkpointMove = true;
