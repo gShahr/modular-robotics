@@ -236,13 +236,15 @@ void Move3d::InitMove(const nlohmann::basic_json<>& moveDef) {
     bounds[1].second = maxBounds[1];
     bounds[2].second = maxBounds[2];
     // Set up animation data
-    for (const auto& animDef : moveDef["animSeq"]) {
-        Move::AnimType animType = Move::StrAnimMap.at(animDef[0]);
-        std::valarray<int> animOffset = animDef[1];
-        animSequence.emplace_back(animType, animOffset);
+    if (moveDef.contains("animSeq") == true) {
+        for (const auto& animDef : moveDef["animSeq"]) {
+            Move::AnimType animType = Move::StrAnimMap.at(animDef[0]);
+            std::valarray<int> animOffset = animDef[1];
+            animSequence.emplace_back(animType, animOffset);
+        }
     }
     // Generate move permutations if necessary (it pretty much always is)
-    if (moveDef["permGen"] == true) {
+    if (moveDef.contains("PermGen") == false || moveDef["permGen"] == true) {
         MoveManager::GenerateMovesFrom(this);
     } else {
         MoveManager::RegisterSingleMove(this);
