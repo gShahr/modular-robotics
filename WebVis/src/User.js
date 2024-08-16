@@ -9,7 +9,7 @@
 
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { gCanvas, gUser } from "./main.js";
+import { gCanvas, gUser, gRenderer } from "./main.js";
 
 export class User {
     constructor() {

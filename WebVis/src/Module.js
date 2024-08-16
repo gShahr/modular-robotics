@@ -5,30 +5,48 @@
 */
 
 import * as THREE from 'three';
-import { Vec3, ModuleType } from "./utils.js";
+import { ModuleType } from "./utils.js";
 import { ModuleGeometries } from "./ModuleGeometries.js";
 import { gScene } from "./main.js";
+import { Move } from "./Move.js"
 
-function _createModuleMesh(moduleType, pos = new Vec3(), color = 0x808080, scale = 1.0) {
+function _createModuleMesh(moduleType, color = 0x808080, scale = 1.0) {
     let geometry = ModuleGeometries.get(moduleType);
     let material = new THREE.MeshPhongMaterial({flatShading: true, color: color});
     let mesh = new THREE.Mesh(geometry, material);
-    mesh.position.set(pos.x, pos.y, pos.z);
     mesh.scale.set(scale, scale, scale);
     mesh.castShadow = true;
     mesh.receiveShadow = true;
+    mesh.matrixAutoUpdate = false; // We will calculate transformation matrices ourselves
     return mesh;
 }
 
 export class Module {
-    constructor(moduleType, id, v3Pos, color = 0x808080, scale = 1.0) {
+    constructor(moduleType, id, pos, color = 0x808080, scale = 1.0) {
         this.moduleType = moduleType;
         this.id = id;
-        this.pos = v3Pos;
+        this.pos = pos;
         this.color = color;
         this.scale = scale;
 
-        this.mesh = _createModuleMesh(moduleType, v3Pos, color, scale);
-        gScene.add(this.mesh);
+        this.mesh = _createModuleMesh(moduleType, color, scale);
+        this._setMeshMatrix();
+        this.parentMesh = new THREE.Object3D(); // Parent object will never rotate
+        this.parentMesh.position.set(...pos);
+        this.parentMesh.add(this.mesh);
+        gScene.add(this.parentMesh);
+    }
+
+    _setMeshMatrix(optionalPreTransform = new THREE.Matrix4()) {
+        let transform = new THREE.Matrix4().makeScale(this.scale, this.scale, this.scale).premultiply(optionalPreTransform);
+        this.mesh.matrix.copy(transform);
+    }
+
+    pivotAnimate(/*Move*/ move, /*float*/ pct) {
+        let trans1 = new THREE.Matrix4().makeTranslation(move.preTrans);
+        let rotate = new THREE.Matrix4().makeRotationAxis(move.rotAxis, move.maxAngle * pct);
+        let trans2 = new THREE.Matrix4().makeTranslation(move.postTrans);
+        let transform = new THREE.Matrix4().premultiply(trans2).premultiply(rotate).premultiply(trans1);
+        this._setMeshMatrix(transform);
     }
 }

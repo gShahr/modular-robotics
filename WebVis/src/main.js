@@ -1,7 +1,8 @@
 import * as THREE from 'three';
 import { Module } from "./Module.js";
 import { User } from "./User.js";
-import { Vec3, ModuleType } from "./utils.js";
+import { ModuleType } from "./utils.js";
+import { Move } from "./Move.js";
 
 /* --- setup --- */
 export const gCanvas = document.getElementById("scene");
@@ -10,13 +11,17 @@ export const gScene = new THREE.Scene();
 export const gUser = new User();
 export const gTexLoader = new THREE.TextureLoader();
 gRenderer.setSize( window.innerWidth, window.innerHeight );
-gRenderer.setAnimationLoop( animate );
 gRenderer.shadowMap.enabled = true;
+gRenderer.setAnimationLoop( animate );
 
 /* --- objects --- */
-const cubes = [-2.0, 2.0].map( (x) => new Module(ModuleType.CUBE, 0, new Vec3(x, 0.0, 0.0)))
+const cubes = [
+    [-2.0, 0.0, 0.0],
+    [-2.0, 1.0, 0.0],
+    [-3.0, 0.0, 0.0],
+].map( ([x, y, z]) => new Module(ModuleType.CUBE, 0, new THREE.Vector3(x, y, z), 0x808080, 0.9))
 
-const rhombicDodecahedron = new Module(ModuleType.RHOMBIC_DODECAHEDRON, new Vec3(0.0, 1.0, -1.0));
+const rhombicDodecahedron = new Module(ModuleType.RHOMBIC_DODECAHEDRON, 0, new THREE.Vector3(0.0, 1.0, -1.0));
 
 /* --- lights --- */
 const light0 = new THREE.AmbientLight(0xFFFFFF, 0.05);
@@ -48,12 +53,12 @@ planeMesh.position.y = -3.0;
 planeMesh.receiveShadow = true;
 gScene.add(planeMesh); 
 
+const move = new Move(0, new THREE.Vector3(0.0, 1.0, 0.0), new THREE.Vector3(-1.0, 1.0, 0.0), false);
 function animate(time) {
-	gRenderer.render( gScene, gUser.camera );
-    cubes.forEach((c) => { c.mesh.rotation.x += 0.01; c.mesh.rotation.y += 0.01; } );
+    cubes[0].pivotAnimate(move, Math.abs(Math.sin(time / 1000.0)));
     rhombicDodecahedron.mesh.rotation.x += 0.0015;
-    // rhombicDodecahedron.mesh.rotation.y += 0.002;
     light1.position.set(Math.cos(time / 3000.0) * 3.0, 3.0, Math.sin(time / 3000.0) * 3.0);
 
     gUser.controls.update();
+	gRenderer.render( gScene, gUser.camera );
 }
