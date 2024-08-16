@@ -1,10 +1,13 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { VertexNormalsHelper } from 'three/addons/helpers/VertexNormalsHelper.js';
 
 function window_resize_callback() {
     const width = window.innerWidth;
     const height = window.innerHeight;
     renderer.setSize(width, height);
+    user.camera.aspect = width/height;
+    user.camera.updateProjectionMatrix();
 }
 
 class User {
@@ -22,7 +25,7 @@ class Cube {
         this.x = x;
         this.y = y;
         this.z = z;
-        let material = new THREE.MeshPhongMaterial( { color: color } );
+        let material = new THREE.MeshPhongMaterial( { flatShading: true, color: color } );
         this.mesh = new THREE.Mesh( cubeGeometry, material );
         this.mesh.position.set(x, y, z);
         this.mesh.scale.set(scale, scale, scale);
@@ -69,14 +72,23 @@ const rhombicDodecahedronGeometry = new THREE.BufferGeometry();
 rhombicDodecahedronGeometry.setIndex(rhombicDodecahedronGeometryIndices);
 rhombicDodecahedronGeometry.setAttribute('position', new THREE.BufferAttribute(rhombicDodecahedronGeometryVertices, 3));
 rhombicDodecahedronGeometry.computeVertexNormals();
+const _helper = new THREE.WireframeGeometry(rhombicDodecahedronGeometry, 10);
 
 class RhombicDodecahedron {
-    constructor(x, y, z, color = 0x555555, scale = 1.0) {
+    constructor(x, y, z, scale = 1.0, color = 0x555555, emissive = 0x202020) {
         this.x = x;
         this.y = y;
         this.z = z;
-        let material = new THREE.MeshPhongMaterial( { color: color } );
+
+        let material = new THREE.MeshPhongMaterial( { flatShading: true, color: color, emissive: emissive} );
         this.mesh = new THREE.Mesh( rhombicDodecahedronGeometry, material );
+
+        // let material = new THREE.LineBasicMaterial( { color: 0xFFFFFF } );
+        // this.mesh = new THREE.LineSegments( _helper, material );
+        
+        // let material = new THREE.MeshNormalMaterial( );
+        // this.mesh = new THREE.Mesh( rhombicDodecahedronGeometry, material );
+        
         this.mesh.position.set(x, y, z);
         this.mesh.scale.set(scale, scale, scale);
         this.mesh.castShadow = true;
@@ -98,23 +110,26 @@ renderer.shadowMap.enabled = true;
 window.addEventListener('resize', window_resize_callback);
 
 /* --- lights --- */
-const light0 = new THREE.AmbientLight(0xFFFFFF, 0.6);
-const light1 = new THREE.PointLight(0xFF0000, 500.0);
+const light0 = new THREE.AmbientLight(0xFFFFFF, 0.05);
+const light1 = new THREE.PointLight(0x50C0FF, 500.0, 7.0);
 light1.position.set(5.0, 3.0, 2.0);
 light1.castShadow = true;
 scene.add(light0);
 scene.add(light1);
-const helper = new THREE.PointLightHelper(light1);
+const helper = new THREE.PointLightHelper(light1, 0.25);
 scene.add(helper);
 
 /* --- objects --- */
 const cubes = [-2.0, 2.0].map( (x) => new Cube(x, 0.0, 0.0))
 cubes.forEach((c) => scene.add(c.mesh));
-const rhombicDodecahedron = new RhombicDodecahedron(0.0, 1.0, -1.0);
+
+const rhombicDodecahedron = new RhombicDodecahedron(0.0, 1.0, -1.0, 1.0, 0x606060, 0x003000);
 scene.add(rhombicDodecahedron.mesh);
+const vnh = new VertexNormalsHelper( rhombicDodecahedron.mesh, 1, 0xFFFFFF);
+scene.add(vnh);
 
 /* --- floor --- */
-const planeSize = 400;
+const planeSize = 20;
 const texture = loader.load('resources/textures/ground.png');
 texture.wrapS = THREE.RepeatWrapping;
 texture.wrapT = THREE.RepeatWrapping;
@@ -124,6 +139,7 @@ texture.repeat.set(planeSize/2, planeSize/2);
 const planeGeo = new THREE.PlaneGeometry(planeSize, planeSize);
 const planeMat = new THREE.MeshPhongMaterial({
   map: texture,
+  emissive: 0x440000,
   side: THREE.DoubleSide,
 });
 const planeMesh = new THREE.Mesh(planeGeo, planeMat);
@@ -135,9 +151,10 @@ scene.add(planeMesh);
 function animate(time) {
 	renderer.render( scene, user.camera );
     cubes.forEach((c) => { c.mesh.rotation.x += 0.01; c.mesh.rotation.y += 0.01; } );
-    rhombicDodecahedron.mesh.rotation.x += 0.01;
-    rhombicDodecahedron.mesh.rotation.y += 0.02;
-    light1.position.set(Math.cos(time / 1000.0) * 3.0, 3.0, Math.sin(time / 1000.0) * 3.0);
+    //rhombicDodecahedron.mesh.rotation.x += 0.0015;
+    rhombicDodecahedron.mesh.rotation.y += 0.002;
+    vnh.update();
+    light1.position.set(Math.cos(time / 3000.0) * 3.0, 3.0, Math.sin(time / 3000.0) * 3.0);
 
     user.controls.update();
 }
