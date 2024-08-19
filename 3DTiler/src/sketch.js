@@ -375,10 +375,6 @@ var sketch1 = function (sketch) {
     }
     
     function handleMouseAction(isAdding) {
-        if (!(sketch.mouseX < canvasW / 2
-            && sketch.mouseX > 0 
-            && sketch.mouseY < canvasH 
-            && sketch.mouseY > 0)) return;
         let x, y, yM;
         if (screen.shape === "cube" || screen.shape === "rhombicDodecahedron") {
             x = Math.floor(sketch.mouseX / twoDtileSize);
@@ -413,9 +409,16 @@ var sketch1 = function (sketch) {
         y = Math.floor(sketch.mouseY / twoDtileSize);
         highlightCoords = [x, y, layer];
     }
+
+    function inBorder() {
+        return sketch.mouseX < canvasW / 2
+            && sketch.mouseX > 0
+            && sketch.mouseY < canvasH
+            && sketch.mouseY > 0;
+    }
     
     sketch.mousePressed = function () {
-        if (sketch.mouseButton === sketch.LEFT) {
+        if (sketch.mouseButton === sketch.LEFT && inBorder()) {
             handleMouseAction(true);
             highlightTile();
         } else {
@@ -424,7 +427,7 @@ var sketch1 = function (sketch) {
     };
     
     sketch.mouseDragged = function () {
-        if (sketch.mouseButton === sketch.LEFT) {
+        if (sketch.mouseButton === sketch.LEFT && inBorder()) {
             handleMouseAction(true);
         } else {
             handleMouseAction(false);
