@@ -34,6 +34,7 @@
       flex-grow: 1;
       overflow: auto;
       position: relative;
+      height: 100%;
     }
 
     canvas {
@@ -67,7 +68,7 @@
 </head>
 
 <body>
-  <div id="sidebar" class="controls">
+<div id="sidebar" class="controls">
     <button id="zUp" onclick="upLayer()">+1 Layer</button>
     <button id="zDown" onclick="downLayer()">-1 Layer</button>
     <button id="highlight" onclick="highlightLayer()">Highlight Layer</button>
@@ -90,6 +91,8 @@
     <button id="white" onclick="changeColor([255, 255, 255])">White</button>
     <p id="curLayer" style="width: 10em;">Current Layer = 0</p>
     <button id="coordinates">Tile Coordinates: x=0, y=0</button>
+    <button id="increaseTileSize" onclick="increaseTileSize()">Increase Tile Size</button>
+    <button id="decreaseTileSize" onclick="decreaseTileSize()">Decrease Tile Size</button>
     <!-- <span id="checkConnectivity">Connected: </span> -->
   </div>
   <script src="src/sketch.js"></script>

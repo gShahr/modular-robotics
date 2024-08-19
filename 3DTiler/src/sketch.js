@@ -4,6 +4,7 @@ canvasH = window.screen.height * .8;
 canvasPosition = [200, 0]
 canvasZ = 75;
 twoDtileSize = canvasW / (2 * 30);
+twoDtileSizeDelta = twoDtileSize * .1;
 layer = 0;
 highlight = false;
 mStatic = false;
@@ -153,6 +154,16 @@ function toggleStatic() {
     mStatic = !mStatic;
 }
 
+function increaseTileSize() {
+    twoDtileSize += twoDtileSizeDelta;
+}
+
+function decreaseTileSize() {
+    if (twoDtileSize > twoDtileSizeDelta) {
+        twoDtileSize -= twoDtileSizeDelta;
+    }
+}
+
 var sketch1 = function (sketch) {
     let undoPressed = false;
     let redoPressed = false;
@@ -162,7 +173,6 @@ var sketch1 = function (sketch) {
     sketch.setup = function () {
         canv1 = sketch.createCanvas(canvasW / 2, canvasH);
         canv1.position(canvasPosition[0], canvasPosition[1]);
-        //canv1.parent('2d-canvas-container');
         screen = new twoDScreen(canvasW / 2, canvasH, twoDtileSize);
         prevLayer = layer;
         let undoButton = document.getElementById('undo');
@@ -189,6 +199,28 @@ var sketch1 = function (sketch) {
                 switchShapePressed ^= true;
             });
         }
+        let increaseTileSizeButton = document.getElementById('increaseTileSize');
+        if (increaseTileSizeButton) {
+            increaseTileSizeButton.addEventListener('click', function () {
+                increaseTileSize();
+                console.log("Tile Size Increased");
+                updateCanvas();
+            });
+        }
+        let decreaseTileSizeButton = document.getElementById('decreaseTileSize');
+        if (decreaseTileSizeButton) {
+            decreaseTileSizeButton.addEventListener('click', function () {
+                decreaseTileSize();
+                console.log("Tile Size Decreased");
+                updateCanvas();
+            });
+        }
+    }
+
+    function updateCanvas() {
+        canv1 = sketch.createCanvas(canvasW / 2, canvasH);
+        canv1.position(canvasPosition[0], canvasPosition[1]);
+        screen = new twoDScreen(canvasW / 2, canvasH, twoDtileSize);
     }
 
     sketch.draw = function () {
@@ -345,14 +377,21 @@ var sketch1 = function (sketch) {
         if (screen.shape === "cube" || screen.shape === "rhombicDodecahedron") {
             x = Math.floor(sketch.mouseX / twoDtileSize);
             y = Math.floor(sketch.mouseY / twoDtileSize);
+            xM = Math.floor((canvasW / 2) / twoDtileSize);
             yM = Math.floor(canvasH / twoDtileSize);
-            if (y >= yM - 1) {
-                canvasH *= 2;
-                canv1 = sketch.createCanvas(canvasW / 2, canvasH);
-                canv1.position(canvasPosition[0], canvasPosition[1]);
-                screen.width = canvasW / 2;
-                screen.height = canvasH;
-            }
+            console.log(x, xM);
+            // if (x >= xM - 1) {
+            //     canvasW *= 2;
+            //     canv1 = sketch.createCanvas(canvasW / 2, canvasH);
+            //     canv1.position(canvasPosition[0], canvasPosition[1]);
+            //     screen.width = canvasW / 2;
+            // }
+            // if (y >= yM - 1) {
+            //     canvasH *= 2;
+            //     canv1 = sketch.createCanvas(canvasW / 2, canvasH);
+            //     canv1.position(canvasPosition[0], canvasPosition[1]);
+            //     screen.height = canvasH;
+            // }
         } else if (screen.shape === "hexagon") {
             [x, y] = pixelToHex(sketch.mouseX, sketch.mouseY, twoDtileSize);
         }
