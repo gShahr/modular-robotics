@@ -7,6 +7,7 @@ twoDtileSize = canvasW / (2 * 30);
 twoDtileSizeDelta = twoDtileSize * .1;
 layer = 0;
 highlight = false;
+highlightCoords = [-1, -1, -1];
 mStatic = false;
 objects = [];
 blocks = [];
@@ -406,10 +407,17 @@ var sketch1 = function (sketch) {
             handleRemoveShape(x, y);
         }
     }
+
+    function highlightTile() {
+        x = Math.floor(sketch.mouseX / twoDtileSize);
+        y = Math.floor(sketch.mouseY / twoDtileSize);
+        highlightCoords = [x, y, layer];
+    }
     
     sketch.mousePressed = function () {
         if (sketch.mouseButton === sketch.LEFT) {
             handleMouseAction(true);
+            highlightTile();
         } else {
             handleMouseAction(false);
         }
@@ -539,8 +547,8 @@ document.addEventListener('mousemove', function(event) {
 });
 
 function getTileCoordinates(mouseX, mouseY) {
-    const tileX = Math.floor(mouseX / twoDtileSize);
-    const tileY = Math.floor(mouseY / twoDtileSize);
+    const tileX = Math.floor((mouseX-canvasPosition[0]) / twoDtileSize);
+    const tileY = Math.floor((mouseY-canvasPosition[1]) / twoDtileSize);
     return { x: tileX, y: tileY };
 }
 
