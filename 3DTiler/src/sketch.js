@@ -219,9 +219,11 @@ var sketch1 = function (sketch) {
     }
 
     function updateCanvas() {
+        let existingCubes = screen ? screen.cubes : [];
         canv1 = sketch.createCanvas(canvasW / 2, canvasH);
         canv1.position(canvasPosition[0], canvasPosition[1]);
         screen = new twoDScreen(canvasW / 2, canvasH, twoDtileSize);
+        screen.cubes = existingCubes;
     }
 
     sketch.draw = function () {
