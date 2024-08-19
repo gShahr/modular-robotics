@@ -295,14 +295,14 @@ var sketch1 = function (sketch) {
         }
         if (switchShapePressed) {
             if (document.getElementById("switch-shape").innerText === "Switch to Hexagon") {
-                document.getElementById("switch-shape").innerText = "Switch to Rhombic Dodecahedron";
+                document.getElementById("switch-shape").innerText = "Switch to Dodecahedron";
                 screen.setShape("hexagon");
                 threeScreen.setShape("hexagon");
             } else if (document.getElementById("switch-shape").innerText === "Switch to Cube") {
-                document.getElementById("switch-shape").innerText = "Switch to Hexagon";
+                document.getElementById("switch-shape").innerText = "Switch to Dodecahedron";
                 screen.setShape("cube");
                 threeScreen.setShape("cube");
-            } else if (document.getElementById("switch-shape").innerText === "Switch to Rhombic Dodecahedron") {
+            } else if (document.getElementById("switch-shape").innerText === "Switch to Dodecahedron") {
                 document.getElementById("switch-shape").innerText = "Switch to Cube";
                 screen.setShape("rhombicDodecahedron");
                 threeScreen.setShape("rhombicDodecahedron");
