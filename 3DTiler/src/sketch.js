@@ -25,7 +25,6 @@ function importFromJson(event) {
             try {
                 const jsonContent = JSON.parse(e.target.result);
                 processJson(jsonContent);
-                // console.log(jsonContent);
             } catch (error) {
                 console.error("Error parsing JSON:", error);
             }
