@@ -1,6 +1,7 @@
 document.oncontextmenu = () => { return false; }
 canvasW = window.screen.width * 1;
 canvasH = window.screen.height * .8;
+canvasPosition = [30, 30]
 canvasZ = 75;
 twoDtileSize = canvasW / (2 * 30);
 layer = 0;
@@ -160,7 +161,7 @@ var sketch1 = function (sketch) {
 
     sketch.setup = function () {
         canv1 = sketch.createCanvas(canvasW / 2, canvasH);
-        canv1.position(0, 30);
+        canv1.position(canvasPosition[0], canvasPosition[1]);
         //canv1.parent('2d-canvas-container');
         screen = new twoDScreen(canvasW / 2, canvasH, twoDtileSize);
         prevLayer = layer;
@@ -348,7 +349,7 @@ var sketch1 = function (sketch) {
             if (y >= yM - 1) {
                 canvasH *= 2;
                 canv1 = sketch.createCanvas(canvasW / 2, canvasH);
-                canv1.position(0, 30);
+                canv1.position(canvasPosition[0], canvasPosition[1]);
                 screen.width = canvasW / 2;
                 screen.height = canvasH;
             }
