@@ -3,7 +3,6 @@
 #include <sstream>
 #include <string>
 #include <map>
-#include <bitset>
 #include "debug_util.h"
 #include "Colors.h"
 #include "Lattice.h"
@@ -95,63 +94,141 @@ void Lattice::EdgeCheck(const Module& mod, bool bothWays) {
 
 void Lattice::RDEdgeCheck(const Module& mod, bool bothWays) {
     auto adjCoords = mod.coords;
-    std::bitset<3> skip;
-    skip[0] = --adjCoords[0] < 0;
-    skip[1] = --adjCoords[1] < 0;
-    skip[2] = --adjCoords[2] < 0;
-    if (coordTensor[adjCoords] >= 0 && !skip.any()) {
-        AddEdge(mod.id, coordTensor[adjCoords]);
+    if (adjCoords[1] != 0) {
+        // offset: 0, -1, 0
+        adjCoords[1]--;
+        if (adjCoords[0] != 0) {
+            // offset: -1, -1, 0
+            adjCoords[0]--;
+            if (coordTensor[adjCoords] >= 0) {
+                AddEdge(mod.id, coordTensor[adjCoords]);
+            }
+            // offset: 1, -1, 0
+            adjCoords[0] += 2;
+        } else {
+            // offset: 1, -1, 0
+            adjCoords[0]++;
+        }
+        if (adjCoords[0] != axisSize) {
+            if (coordTensor[adjCoords] >= 0) {
+                AddEdge(mod.id, coordTensor[adjCoords]);
+            }
+        }
+        // offset: 0, -1, 0
+        adjCoords[0]--;
+        if (adjCoords[2] != 0) {
+            // offset: 0, -1, -1
+            adjCoords[2]--;
+            if (coordTensor[adjCoords] >= 0) {
+                AddEdge(mod.id, coordTensor[adjCoords]);
+            }
+            // offset: 0, -1, 1
+            adjCoords[2] += 2;
+        } else {
+            // offset: 0, -1, 1
+            adjCoords[2]++;
+        }
+        if (adjCoords[2] != axisSize) {
+            if (coordTensor[adjCoords] >= 0) {
+                AddEdge(mod.id, coordTensor[adjCoords]);
+            }
+        }
+        // offset: 0, 1, 0
+        adjCoords[2]--;
+        adjCoords[1] += 2;
+    } else {
+        // offset: 0, 1, 0
+        adjCoords[1]++;
     }
-    skip[1] = adjCoords[1] += 2 == axisSize;
-    if (coordTensor[adjCoords] >= 0 && !skip.any()) {
-        AddEdge(mod.id, coordTensor[adjCoords]);
+    if (adjCoords[1] != axisSize) {
+        if (adjCoords[0] != 0) {
+            // offset: -1, 1, 0
+            adjCoords[0]--;
+            if (coordTensor[adjCoords] >= 0) {
+                AddEdge(mod.id, coordTensor[adjCoords]);
+            }
+            // offset: 1, 1, 0
+            adjCoords[0] += 2;
+        } else {
+            // offset: 1, 1, 0
+            adjCoords[0]++;
+        }
+        if (adjCoords[0] != axisSize) {
+            if (coordTensor[adjCoords] >= 0) {
+                AddEdge(mod.id, coordTensor[adjCoords]);
+            }
+        }
+        // offset: 0, 1, 0
+        adjCoords[0]--;
+        if (adjCoords[2] != 0) {
+            // offset: 0, 1, -1
+            adjCoords[2]--;
+            if (coordTensor[adjCoords] >= 0) {
+                AddEdge(mod.id, coordTensor[adjCoords]);
+            }
+            // offset: 0, 1, 1
+            adjCoords[2] += 2;
+        } else {
+            // offset: 0, 1, 1
+            adjCoords[2]++;
+        }
+        if (adjCoords[2] != axisSize) {
+            if (coordTensor[adjCoords] >= 0) {
+                AddEdge(mod.id, coordTensor[adjCoords]);
+            }
+        }
+        // offset: 0, 0, 0
+        adjCoords[1]--;
+        adjCoords[2]--;
+    } else {
+        // offset: 0, 0, 0
+        adjCoords[1]--;
     }
-    skip[2] = adjCoords[2] += 2 == axisSize;
-    if (coordTensor[adjCoords] >= 0 && !skip.any()) {
-        AddEdge(mod.id, coordTensor[adjCoords]);
+    if (adjCoords[0] != 0) {
+        // offset: -1, 0, 0
+        adjCoords[0]--;
+        if (adjCoords[2] != 0) {
+            // offset: -1, 0, -1
+            adjCoords[2]--;
+            if (coordTensor[adjCoords] >= 0) {
+                AddEdge(mod.id, coordTensor[adjCoords]);
+            }
+            // offset: -1, 0, 1
+            adjCoords[2] += 2;
+        } else {
+            // offset: -1, 0, 1
+            adjCoords[2]++;
+        }
+        if (adjCoords[2] != axisSize) {
+            if (coordTensor[adjCoords] >= 0) {
+                AddEdge(mod.id, coordTensor[adjCoords]);
+            }
+        }
+        // offset: 1, 0, 0
+        adjCoords[2]--;
+        adjCoords[0] += 2;
+    } else {
+        // offset: 1, 0, 0
+        adjCoords[0]++;
     }
-    skip[1] = adjCoords[1] -= 2 < 0;
-    if (coordTensor[adjCoords] >= 0 && !skip.any()) {
-        AddEdge(mod.id, coordTensor[adjCoords]);
-    }
-    skip[0] = adjCoords[0] += 2 == axisSize;
-    if (coordTensor[adjCoords] >= 0 && !skip.any()) {
-        AddEdge(mod.id, coordTensor[adjCoords]);
-    }
-    skip[1] = adjCoords[1] += 2 == axisSize;
-    if (coordTensor[adjCoords] >= 0 && !skip.any()) {
-        AddEdge(mod.id, coordTensor[adjCoords]);
-    }
-    skip[2] = adjCoords[2] -= 2 < 0;
-    if (coordTensor[adjCoords] >= 0 && !skip.any()) {
-        AddEdge(mod.id, coordTensor[adjCoords]);
-    }
-    skip[1] = adjCoords[1] -= 2 < 0;
-    if (coordTensor[adjCoords] >= 0 && !skip.any()) {
-        AddEdge(mod.id, coordTensor[adjCoords]);
-    }
-    adjCoords[1]++;
-    adjCoords[2]++;
-    // y and z coords are in original position
-    skip[1] = false;
-    skip[2] = false;
-    if (coordTensor[adjCoords] >= 0 && !skip.any()) {
-        AddEdge(mod.id, coordTensor[adjCoords]);
-    }
-    skip = adjCoords[0] -= 2 < 0;
-    if (coordTensor[adjCoords] >= 0 && !skip.any()) {
-        AddEdge(mod.id, coordTensor[adjCoords]);
-    }
-    adjCoords[0]++;
-    // x coord is in original position
-    skip[0] = false;
-    skip[2] = ++adjCoords[2] == axisSize;
-    if (coordTensor[adjCoords] >= 0 && !skip.any()) {
-        AddEdge(mod.id, coordTensor[adjCoords]);
-    }
-    skip[2] = adjCoords[2] -= 2 < 0;
-    if (coordTensor[adjCoords] >= 0 && !skip.any()) {
-        AddEdge(mod.id, coordTensor[adjCoords]);
+    if (adjCoords[0] != axisSize) {
+        if (adjCoords[2] != 0) {
+            // offset: -1, 0, -1
+            adjCoords[2]--;
+            if (coordTensor[adjCoords] >= 0) {
+                AddEdge(mod.id, coordTensor[adjCoords]);
+            }
+            // offset: -1, 0, 1
+            adjCoords[2] += 2;
+        } else {
+            // offset: -1, 0, 1
+            adjCoords[2]++;
+        }
+        if (adjCoords[2] != axisSize) {
+            if (coordTensor[adjCoords] >= 0) {
+                AddEdge(mod.id, coordTensor[adjCoords]);
+            }
+        }
     }
 }
 
