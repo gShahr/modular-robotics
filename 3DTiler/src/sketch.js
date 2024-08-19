@@ -420,7 +420,8 @@ var sketch1 = function (sketch) {
     }
     
     sketch.mousePressed = function () {
-        if (sketch.mouseButton === sketch.LEFT && inBorder()) {
+        if (!inBorder()) return;
+        if (sketch.mouseButton === sketch.LEFT) {
             handleMouseAction(true);
             highlightTile();
         } else {
@@ -429,7 +430,8 @@ var sketch1 = function (sketch) {
     };
     
     sketch.mouseDragged = function () {
-        if (sketch.mouseButton === sketch.LEFT && inBorder()) {
+        if (!inBorder()) return;
+        if (sketch.mouseButton === sketch.LEFT) {
             handleMouseAction(true);
         } else {
             handleMouseAction(false);
