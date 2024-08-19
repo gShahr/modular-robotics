@@ -490,7 +490,7 @@ class threeDScreen {
             const z = this.rhomdod[i].z * this.tileSize;
             sketch.push();
             sketch.translate(x, y, z);
-            if (highlight && this.rhomdod[i].z === highLayer) {
+            if (highlight && this.rhomdod[i].z === layer) {
                 sketch.fill(0, 0, 255);
             } else {
                 sketch.fill(this.rhomdod[i].color[0], this.rhomdod[i].color[1], this.rhomdod[i].color[2]);
