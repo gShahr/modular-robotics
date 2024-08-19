@@ -19,6 +19,11 @@
  */
 #define LATTICE_VERBOSE LAT_LOG_NONE
 
+/* Edge Check Configuration
+ * Set this to true to check for all edges of a rhombic dodecahedron instead of a cube
+ */
+#define LATTICE_RD_EDGECHECK false
+
 class Lattice {
 private:
     // Vector that holds the IDs of adjacent modules, indexed by ID
