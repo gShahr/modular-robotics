@@ -63,7 +63,7 @@ void Lattice::MoveModule(Module &mod, const std::valarray<int>& offset) {
     }
 }
 
-void Lattice::EdgeCheck(const Module &mod, bool bothWays) {
+void Lattice::EdgeCheck(const Module& mod, bool bothWays) {
     // Copy module coordinates to adjCoords
     auto adjCoords = mod.coords;
     for (int i = 0; i < order; i++) {
