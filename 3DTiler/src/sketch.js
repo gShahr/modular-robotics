@@ -275,7 +275,7 @@ var sketch1 = function (sketch) {
                 let lastMove = redoStack.pop();
                 historyStack.push(lastMove);
                 if (lastMove.action === 'add') {
-                    screen.addCube(new Cube(lastMove.x, lastMove.y, lastMove.z, lastMove.color, lastMOve.mStatic));
+                    screen.addCube(new Cube(lastMove.x, lastMove.y, lastMove.z, lastMove.color, lastMove.mStatic));
                     threeScreen.addCube(new Cube(lastMove.x, lastMove.y, lastMove.z, lastMove.color, lastMove.mStatic));
                 } else {
                     screen.removeCube(lastMove.x, lastMove.y, lastMove.z);
@@ -349,6 +349,7 @@ var sketch1 = function (sketch) {
             if (screen.hasCube(x, y, screen.layer)) return;
             screen.addCube(new Cube(x, y, screen.layer, rgbColor, mStatic));
             threeScreen.addCube(new Cube(x, y, screen.layer, rgbColor, mStatic));
+            historyStack.push({ action: 'add', x: x, y: y, z: screen.layer, color: rgbColor, mStatic: mStatic });
         } else if (screen.shape === "hexagon") {
             screen.addHexagon(new Hexagon(x, y, screen.layer, rgbColor, mStatic));
             threeScreen.addHexagon(new Hexagon(x, y, screen.layer, rgbColor, mStatic));
@@ -362,6 +363,7 @@ var sketch1 = function (sketch) {
         if (screen.shape === "cube") {
             screen.removeCube(x, y, screen.layer);
             threeScreen.removeCube(x, y, screen.layer);
+            historyStack.push({ action: 'remove', x: x, y: y, z: screen.layer });
         } else if (screen.shape === "hexagon") {
             screen.removeHexagon(x, y, screen.layer);
             threeScreen.removeHexagon(x, y, screen.layer);
@@ -372,7 +374,10 @@ var sketch1 = function (sketch) {
     }
     
     function handleMouseAction(isAdding) {
-        if (!(sketch.mouseX < canvasW / 2 && sketch.mouseY < canvasH && sketch.mouseY > 0)) return;
+        if (!(sketch.mouseX < canvasW / 2
+            && sketch.mouseX > 0 
+            && sketch.mouseY < canvasH 
+            && sketch.mouseY > 0)) return;
         let x, y, yM;
         if (screen.shape === "cube" || screen.shape === "rhombicDodecahedron") {
             x = Math.floor(sketch.mouseX / twoDtileSize);
