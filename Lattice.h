@@ -62,6 +62,9 @@ public:
     // Adjacency Check
     static void EdgeCheck(const Module& mod, bool bothWays = true);
 
+    // Rhombic Dodecahedra Adjacency Check
+    static void RDEdgeCheck(const Module& mod, bool bothWays = true);
+
     // Update adjacency lists for two adjacent modules
     static void AddEdge(int modA, int modB);
 
