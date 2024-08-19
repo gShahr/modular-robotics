@@ -1,7 +1,7 @@
 document.oncontextmenu = () => { return false; }
 canvasW = window.screen.width * 1;
 canvasH = window.screen.height * .8;
-canvasPosition = [30, 30]
+canvasPosition = [200, 0]
 canvasZ = 75;
 twoDtileSize = canvasW / (2 * 30);
 layer = 0;
@@ -383,7 +383,7 @@ var sketch1 = function (sketch) {
 var sketch2 = function (sketch) {
     sketch.setup = function () {
         canv2 = sketch.createCanvas(canvasW / 2, canvasH, sketch.WEBGL);
-        canv2.position(canvasW / 2, 30);
+        canv2.position(canvasW / 2 + canvasPosition[0], canvasPosition[1]);
         threeScreen = new threeDScreen(canvasW / 2, canvasH, twoDtileSize / 5);
         sketch._center = [0, 0, 0];
         sketch.createEasyCam();
