@@ -253,6 +253,7 @@ class threeDScreen {
             const x = this.cubes[i].x * this.tileSize - halfWidth;
             const y = this.cubes[i].y * this.tileSize - halfHeight;
             const z = this.cubes[i].z * this.tileSize;
+            let highlightBorder = highlightCoords[0] == this.cubes[i].x && highlightCoords[1] == this.cubes[i].y && highlightCoords[2] == this.cubes[i].z;
             sketch.push();
             sketch.translate(x, y, z);
             if (highlight && this.cubes[i].z === layer) {
@@ -261,6 +262,11 @@ class threeDScreen {
                 sketch.fill(this.cubes[i].color[0], this.cubes[i].color[1], this.cubes[i].color[2]);
             }
             sketch.box(this.tileSize);
+            if (highlightBorder) {
+                sketch.stroke(255, 204, 0);
+                sketch.noFill();
+                sketch.box(this.tileSize * 1.1);
+            }
             sketch.pop();
         }
     }

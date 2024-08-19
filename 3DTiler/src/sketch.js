@@ -235,7 +235,7 @@ var sketch1 = function (sketch) {
             screen.downLayer();
         }
         sketch.background(0, 255, 0);
-        screen.draw(sketch);
+        screen.draw(sketch, highlightCoords);
         prevLayer = layer;
         switch (screen.shape) {
             case 'hexagon':
@@ -443,7 +443,7 @@ var sketch2 = function (sketch) {
 
     sketch.draw = function () {
         sketch.background(205, 102, 94);
-        threeScreen.draw(sketch, highlight, layer);
+        threeScreen.draw(sketch, highlight, highlightCoords, layer);
     }
 }
 
