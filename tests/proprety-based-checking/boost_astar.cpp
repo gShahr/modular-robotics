@@ -1,5 +1,6 @@
+#define BOOST_TEST_MODULE AStar
+#include <boost/test/included/unit_test.hpp>
 #include <random>
-#include <cassert>
 #include <chrono>
 #include <iostream>
 #include <getopt.h>
@@ -21,10 +22,12 @@ Configuration generateRandomConfiguration() {
     std::string initialFile = "docs/examples/move_nofinal_initial.json";
     LatticeSetup::setupFromJson(initialFile);
     Configuration config(Lattice::GetModuleInfo());
-    return config; //ConfigurationSpace::GenerateRandomFinal();
+    return ConfigurationSpace::GenerateRandomFinal();
 }
 
-int main(int argc, char* argv[]) {    
+BOOST_AUTO_TEST_CASE(testAStar) {
+    std::random_device rd;
+    std::mt19937 gen(rd());
     bool ignoreColors = false;
     Lattice::setFlags(ignoreColors);
     MoveManager::InitMoveManager(Lattice::Order(), Lattice::AxisSize());
@@ -32,16 +35,12 @@ int main(int argc, char* argv[]) {
     std::string initialFile = "docs/examples/move_nofinal_initial.json";
     LatticeSetup::setupFromJson(initialFile);
     Configuration start(Lattice::GetModuleInfo());
-    int tests = 10;
-    for (int i = 0; i < tests; i++) {
+    for (int i = 0; i < 100; ++i) { // Generate 100 random test cases
         Configuration end = generateRandomConfiguration();
         auto aStarPath = ConfigurationSpace::AStar(&start, &end);
         auto bfsPath = ConfigurationSpace::BFS(&start, &end);
-        std::cout << "Test " << i << std::endl;
-        if (aStarPath.size() != bfsPath.size()) {
-            std::cerr << "Error: A* path size does not match BFS path size for test " << i << std::endl;
-        }
+        BOOST_CHECK(aStarPath == bfsPath);
     }
-    std::cout << "AStar test passed " << tests <<  " tests" << std::endl;
-    return 0;
 }
+
+// BOOST_AUTO_TEST_SUITE_END()
