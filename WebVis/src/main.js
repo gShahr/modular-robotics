@@ -1,8 +1,9 @@
 import * as THREE from 'three';
 import { Module } from "./Module.js";
 import { User } from "./User.js";
-import { ModuleType } from "./utils.js";
+import { ModuleType, MoveType } from "./utils.js";
 import { Move } from "./Move.js";
+import { MoveSequence } from "./MoveSequence.js";
 
 /* --- setup --- */
 export const gCanvas = document.getElementById("scene");
@@ -15,11 +16,11 @@ gRenderer.shadowMap.enabled = true;
 gRenderer.setAnimationLoop( animate );
 
 /* --- objects --- */
-const cubes = [
-    [-2.0, 0.0, 0.0],
-    [-2.0, 1.0, 0.0],
-    [-3.0, 0.0, 0.0],
-].map( ([x, y, z]) => new Module(ModuleType.CUBE, 0, new THREE.Vector3(x, y, z), 0x808080, 0.9))
+export const gModules = {};
+[
+    [123, -2.0, 0.0, 0.0],
+    [124, -3.0, 0.0, 0.0],
+].map( ([id, x, y, z]) => new Module(ModuleType.CUBE, id, new THREE.Vector3(x, y, z), 0x808080, 0.9))
 
 const rhombicDodecahedron = new Module(ModuleType.RHOMBIC_DODECAHEDRON, 0, new THREE.Vector3(0.0, 1.0, -1.0));
 
@@ -53,11 +54,42 @@ planeMesh.position.y = -3.0;
 planeMesh.receiveShadow = true;
 gScene.add(planeMesh); 
 
-const move = new Move(0, new THREE.Vector3(0.0, 1.0, 0.0), new THREE.Vector3(-1.0, 1.0, 0.0), false);
+let currentAnimProgress = 0.0; // 0.0-1.0
+let moves = [
+    new Move(123, new THREE.Vector3(-1.0, 0.0, 0.0), new THREE.Vector3(-1.0, 1.0, 0.0), MoveType.PIVOT),
+    new Move(123, new THREE.Vector3(0.0, -1.0, 0.0), new THREE.Vector3(-1.0, -1.0, 0.0), MoveType.PIVOT),
+    new Move(123, new THREE.Vector3(1.0, 0.0, 0.0), new THREE.Vector3(1.0, 0.0, 1.0), MoveType.PIVOT),
+]
+let moveSequence = new MoveSequence(moves);
+let move;
+let gDeltaTime;
+let gAnimSpeed = 1.0;
+let readyForNewAnimation = true;
+let nextAnimationRequested = true;
+
+let lastFrameTime = 0;
 function animate(time) {
-    cubes[0].pivotAnimate(move, Math.abs(Math.sin(time / 1000.0)));
+    gDeltaTime = time - lastFrameTime;
+    lastFrameTime = time;
+
     rhombicDodecahedron.mesh.rotation.x += 0.0015;
     light1.position.set(Math.cos(time / 3000.0) * 3.0, 3.0, Math.sin(time / 3000.0) * 3.0);
+
+    if (currentAnimProgress > 1.0) {
+        gModules[move.id].finishMove(move);
+        readyForNewAnimation = true;
+        currentAnimProgress = 0.0;
+    }
+
+    if (readyForNewAnimation && nextAnimationRequested) {
+        readyForNewAnimation = false;
+        move = moveSequence.pop();
+    }
+
+    if (move) {
+        gModules[move.id].animateMove(move, currentAnimProgress);
+        currentAnimProgress += gDeltaTime * gAnimSpeed / 1000.0;
+    }
 
     gUser.controls.update();
 	gRenderer.render( gScene, gUser.camera );
