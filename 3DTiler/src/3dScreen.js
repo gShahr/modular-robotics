@@ -255,7 +255,7 @@ class threeDScreen {
             const z = this.cubes[i].z * this.tileSize;
             sketch.push();
             sketch.translate(x, y, z);
-            if (highlight && this.cubes[i].z === highLayer) {
+            if (highlight && this.cubes[i].z === layer) {
                 sketch.fill(0, 0, 255);
             } else {
                 sketch.fill(this.cubes[i].color[0], this.cubes[i].color[1], this.cubes[i].color[2]);
@@ -277,7 +277,7 @@ class threeDScreen {
             sketch.push();
             sketch.translate(x, y, z);
     
-            if (highlight && this.hexagons[i].z === highLayer) {
+            if (highlight && this.hexagons[i].z === layer) {
                 sketch.fill(0, 0, 255);
             } else {
                 sketch.fill(this.hexagons[i].color[0], this.hexagons[i].color[1], this.hexagons[i].color[2]);
