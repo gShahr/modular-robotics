@@ -71,7 +71,7 @@ void Lattice::MoveModule(Module &mod, const std::valarray<int>& offset) {
     }
 }
 
-void Lattice::EdgeCheck(const Module& mod, bool bothWays) {
+void Lattice::EdgeCheck(const Module& mod) {
     // Copy module coordinates to adjCoords
     auto adjCoords = mod.coords;
     for (int i = 0; i < order; i++) {
@@ -85,7 +85,7 @@ void Lattice::EdgeCheck(const Module& mod, bool bothWays) {
             AddEdge(mod.id, coordTensor[adjCoords]);
         }
         // Don't want to check both ways if it can be avoided, also don't want to check index beyond max value
-        if (!bothWays || adjCoords[i] + 2 == axisSize) {
+        if (adjCoords[i] + 2 == axisSize) {
             adjCoords[i]++;
             continue;
         }
@@ -100,7 +100,7 @@ void Lattice::EdgeCheck(const Module& mod, bool bothWays) {
     }
 }
 
-void Lattice::RDEdgeCheck(const Module& mod, bool bothWays) {
+void Lattice::RDEdgeCheck(const Module& mod) {
     auto adjCoords = mod.coords;
     if (adjCoords[1] != 0) {
         // offset: 0, -1, 0

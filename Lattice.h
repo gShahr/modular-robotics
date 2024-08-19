@@ -65,10 +65,10 @@ public:
     static void MoveModule(Module& mod, const std::valarray<int>& offset);
 
     // Adjacency Check
-    static void EdgeCheck(const Module& mod, bool bothWays = true);
+    static void EdgeCheck(const Module& mod);
 
     // Rhombic Dodecahedra Adjacency Check
-    static void RDEdgeCheck(const Module& mod, bool bothWays = true);
+    static void RDEdgeCheck(const Module& mod);
 
     // Update adjacency lists for two adjacent modules
     static void AddEdge(int modA, int modB);
