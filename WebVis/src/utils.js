@@ -10,3 +10,9 @@ export const ModuleType = Object.freeze({
     CUBE: 0,
     RHOMBIC_DODECAHEDRON: 1,
 });
+
+export const MoveType = Object.freeze({
+    PIVOT: 0,
+    SLIDING: 1,
+    MONKEY: 2,
+});
