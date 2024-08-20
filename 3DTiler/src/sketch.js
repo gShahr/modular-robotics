@@ -60,15 +60,24 @@ function exportToJson() {
     var jsonOutput = "{\n";
     var sameZ = true;
     var firstZ = blocks.length > 0 ? blocks[0].z : null;
+    let axisSize = 0;
     for (var i = 0; i < blocks.length; i++) {
         var current_block = blocks[i];
         if (current_block.z !== firstZ) {
             sameZ = false;
         }
     }
+    for (let i = 0; i < blocks.length; i++) {
+        for (let j = 0; j < blocks.length; j++) {
+            let diffX = Math.abs(blocks[i].x - blocks[j].x);
+            let diffY = Math.abs(blocks[i].y - blocks[j].y);
+            let diffZ = Math.abs(blocks[i].z - blocks[j].z);
+            axisSize = Math.max(axisSize, diffX, diffY, diffZ);
+        }
+    }
     var order = sameZ ? 2 : 3;
     jsonOutput += "    \"order\": " + order + ",\n";
-    jsonOutput += "    \"axisSize\": " + (sameZ ? blocks.length : blocks.length + 1) + ",\n";
+    jsonOutput += "    \"axisSize\": " + (axisSize + 1) + ",\n";
     jsonOutput += "    \"modules\": [";
     for (var i = 0; i < blocks.length; i++) {
         var current_block = blocks[i];
