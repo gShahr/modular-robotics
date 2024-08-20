@@ -5,9 +5,9 @@
 */
 
 import * as THREE from 'three';
-import { ModuleType } from "./utils.js";
+import { ModuleType, MoveType } from "./utils.js";
 import { ModuleGeometries } from "./ModuleGeometries.js";
-import { gScene } from "./main.js";
+import { gScene, gModules } from "./main.js";
 import { Move } from "./Move.js"
 
 function _createModuleMesh(moduleType, color = 0x808080, scale = 1.0) {
@@ -35,6 +35,7 @@ export class Module {
         this.parentMesh.position.set(...pos);
         this.parentMesh.add(this.mesh);
         gScene.add(this.parentMesh);
+        gModules[id] = this;
     }
 
     _setMeshMatrix(optionalPreTransform = new THREE.Matrix4()) {
@@ -42,7 +43,20 @@ export class Module {
         this.mesh.matrix.copy(transform);
     }
 
-    pivotAnimate(/*Move*/ move, /*float*/ pct) {
+    animateMove(move, pct) {
+        switch (move.moveType) {
+            case MoveType.PIVOT: this._pivotAnimate(move, pct); break;
+            case MoveType.SLIDING: this._slidingAnimate(move, pct); break;
+            case MoveType.MONKEY: this._monkeyAnimate(move, pct); break;
+        }
+    }
+
+    finishMove(move) {
+        this._setMeshMatrix();
+        this.parentMesh.position.add(move.deltaPos);
+    }
+
+    _pivotAnimate(move, pct) {
         let trans1 = new THREE.Matrix4().makeTranslation(move.preTrans);
         let rotate = new THREE.Matrix4().makeRotationAxis(move.rotAxis, move.maxAngle * pct);
         let trans2 = new THREE.Matrix4().makeTranslation(move.postTrans);

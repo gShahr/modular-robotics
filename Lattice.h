@@ -19,6 +19,11 @@
  */
 #define LATTICE_VERBOSE LAT_LOG_NONE
 
+/* Edge Check Configuration
+ * Set this to true to check for all edges of a rhombic dodecahedron instead of a cube
+ */
+#define LATTICE_RD_EDGECHECK false
+
 class Lattice {
 private:
     // Vector that holds the IDs of adjacent modules, indexed by ID
@@ -60,10 +65,10 @@ public:
     static void MoveModule(Module& mod, const std::valarray<int>& offset);
 
     // Adjacency Check
-    static void EdgeCheck(const Module& mod, bool bothWays = true);
+    static void EdgeCheck(const Module& mod);
 
     // Rhombic Dodecahedra Adjacency Check
-    static void RDEdgeCheck(const Module& mod, bool bothWays = true);
+    static void RDEdgeCheck(const Module& mod);
 
     // Update adjacency lists for two adjacent modules
     static void AddEdge(int modA, int modB);

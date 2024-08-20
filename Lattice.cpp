@@ -45,7 +45,11 @@ void Lattice::AddModule(const Module& mod) {
     stateTensor[mod.coords] = true;
     coordTensor[mod.coords] = mod.id;
     // Adjacency check
-    EdgeCheck(mod, true);
+#if LATTICE_RD_EDGECHECK
+    RDEdgeCheck(mod);
+#else
+    EdgeCheck(mod);
+#endif
     moduleCount++;
     adjList.resize(moduleCount + 1);
 }
@@ -57,13 +61,17 @@ void Lattice::MoveModule(Module &mod, const std::valarray<int>& offset) {
     mod.coords += offset;
     coordTensor[mod.coords] = mod.id;
     stateTensor[mod.coords] = true;
+#if LATTICE_RD_EDGECHECK
+    RDEdgeCheck(mod);
+#else
     EdgeCheck(mod);
+#endif
     if (!ignoreProperties) {
         mod.properties.UpdateProperties(offset);
     }
 }
 
-void Lattice::EdgeCheck(const Module& mod, bool bothWays) {
+void Lattice::EdgeCheck(const Module& mod) {
     // Copy module coordinates to adjCoords
     auto adjCoords = mod.coords;
     for (int i = 0; i < order; i++) {
@@ -77,7 +85,7 @@ void Lattice::EdgeCheck(const Module& mod, bool bothWays) {
             AddEdge(mod.id, coordTensor[adjCoords]);
         }
         // Don't want to check both ways if it can be avoided, also don't want to check index beyond max value
-        if (!bothWays || adjCoords[i] + 2 == axisSize) {
+        if (adjCoords[i] + 2 == axisSize) {
             adjCoords[i]++;
             continue;
         }
@@ -92,7 +100,7 @@ void Lattice::EdgeCheck(const Module& mod, bool bothWays) {
     }
 }
 
-void Lattice::RDEdgeCheck(const Module& mod, bool bothWays) {
+void Lattice::RDEdgeCheck(const Module& mod) {
     auto adjCoords = mod.coords;
     if (adjCoords[1] != 0) {
         // offset: 0, -1, 0
@@ -397,7 +405,11 @@ void Lattice::UpdateFromModuleInfo(const std::set<ModuleBasic>& moduleInfo) {
         Lattice::coordTensor[mod.coords] = -1;
         mod.coords = destinations.front()->coords;
         ClearAdjacencies(id);
-        EdgeCheck(mod, true);
+#if LATTICE_RD_EDGECHECK
+        RDEdgeCheck(mod);
+#else
+        EdgeCheck(mod);
+#endif
         Lattice::coordTensor[mod.coords] = mod.id;
         mod.properties = destinations.front()->properties;
         destinations.pop();
