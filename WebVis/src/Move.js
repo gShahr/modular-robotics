@@ -34,6 +34,13 @@ export class Move{
     }
 
     reverse() {
-        return move.clone();
+        let newMove;
+        let newDeltaPos = this.deltaPos.clone().negate();
+        let newAnchorDir = this.anchorDir.clone();
+        let testVec = new THREE.Vector3(1.0, 1.0, 1.0);
+        if (newDeltaPos.abs().clone().dot(testVec) > 1.0) { // If corner move, calculate new anchor dir
+            newAnchorDir = testVec.sub(this.anchorDir.abs()).multiply(newDeltaPos);
+        }
+        return new Move(this.id, newAnchorDir, newDeltaPos, this.moveType);
     }
 }

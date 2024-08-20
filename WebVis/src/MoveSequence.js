@@ -23,7 +23,7 @@ export class MoveSequence {
     }
 
     undo() {
-        if (this.remainingMoves == 0) {
+        if (this.currentMove == 0) {
             return;
         }
 
@@ -34,6 +34,6 @@ export class MoveSequence {
 
         this.moves.unshift(move);
 
-        return move;
+        return move.reverse();
     }
 }
