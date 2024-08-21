@@ -64,14 +64,15 @@ function window_resize_callback() {
     gRenderer.setSize(width, height);
 }
 
-function keyboard_input_callback(event) {
+function keydown_input_callback(event) {
     let key = event.key;
     switch (key) {
         case 'p': gUser.toggleCameraStyle(); break;
+        case 'r': gUser.resetCamera(); break;
         default: break;
     }
 }
 
 window.addEventListener('resize', window_resize_callback);
-window.addEventListener('keydown', keyboard_input_callback);
+window.addEventListener('keydown', keydown_input_callback);
 

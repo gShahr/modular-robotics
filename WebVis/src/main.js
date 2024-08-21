@@ -4,6 +4,7 @@ import { User } from "./User.js";
 import { ModuleType, MoveType } from "./utils.js";
 import { Move } from "./Move.js";
 import { MoveSequence } from "./MoveSequence.js";
+import { gGui } from "./GUI.js";
 
 // Extends THREE Vector3 type with new component-wise abs() method
 // TODO put this in a better place?
@@ -22,6 +23,7 @@ gRenderer.setSize( window.innerWidth, window.innerHeight );
 gRenderer.shadowMap.enabled = true;
 gRenderer.setAnimationLoop( animate );
 
+window.gAnimSpeed = 1.0; // Moves per second
 
 /* --- objects --- */
 export const gModules = {};
@@ -77,7 +79,6 @@ let moves = [
 let moveSequence = new MoveSequence(moves);
 let move;
 let gDeltaTime;
-let gAnimSpeed = 1.0; // Moves per second
 let readyForNewAnimation = true;
 let nextAnimationRequested = true;
 
