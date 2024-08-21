@@ -2,11 +2,12 @@ import * as THREE from 'three';
 import { MoveType } from './utils.js';
 
 export class Move{
-    constructor(id, anchorDir, deltaPos, moveType) { 
+    constructor(id, anchorDir, deltaPos, moveType, checkpoint) { 
         this.id = id;
         this.anchorDir = anchorDir;
         this.deltaPos = deltaPos;
         this.moveType = moveType;
+        this.checkpoint = checkpoint;
 
         this.maxAngle = 0;
         this.preTrans = 0;
@@ -41,6 +42,6 @@ export class Move{
         if (newDeltaPos.abs().clone().dot(testVec) > 1.0) { // If corner move, calculate new anchor dir
             newAnchorDir = testVec.sub(this.anchorDir.abs()).multiply(newDeltaPos);
         }
-        return new Move(this.id, newAnchorDir, newDeltaPos, this.moveType);
+        return new Move(this.id, newAnchorDir, newDeltaPos, this.moveType, this.checkpoint);
     }
 }

@@ -16,3 +16,8 @@ export const MoveType = Object.freeze({
     SLIDING: 1,
     MONKEY: 2,
 });
+
+export const CameraType = Object.freeze({
+    PERSPECTIVE: 0,
+    ORTHOGRAPHIC: 1,
+});

@@ -16,32 +16,38 @@ export const gCanvas = document.getElementById("scene");
 export const gRenderer = new THREE.WebGLRenderer({canvas: gCanvas});
 export const gScene = new THREE.Scene();
 export const gUser = new User();
+export let gForward = true;
 export const gTexLoader = new THREE.TextureLoader();
 gRenderer.setSize( window.innerWidth, window.innerHeight );
 gRenderer.shadowMap.enabled = true;
 gRenderer.setAnimationLoop( animate );
 
+
 /* --- objects --- */
 export const gModules = {};
 [
-    [123, -2.0, 0.0, 0.0],
-    [124, -3.0, 0.0, 0.0],
+    [123, 0.0, 0.0, 0.0],
+    [124, -1.0, 0.0, 0.0],
 ].map( ([id, x, y, z]) => new Module(ModuleType.CUBE, id, new THREE.Vector3(x, y, z), 0x808080, 0.9))
 
-const rhombicDodecahedron = new Module(ModuleType.RHOMBIC_DODECAHEDRON, 0, new THREE.Vector3(0.0, 1.0, -1.0));
+const rhombicDodecahedron = new Module(ModuleType.RHOMBIC_DODECAHEDRON, 0, new THREE.Vector3(3.0, -1.0, -3.0));
 
 /* --- lights --- */
-const light0 = new THREE.AmbientLight(0xFFFFFF, 0.05);
-const light1 = new THREE.PointLight(0x50C0FF, 500.0, 7.0);
-light1.position.set(5.0, 3.0, 2.0);
+const light0 = new THREE.AmbientLight(0xFFFFFF, 0.10);
+const light1 = new THREE.PointLight(0x50C0FF, 100.0, 30.0);
+const light2 = new THREE.PointLight(0xFFC050, 100.0, 30.0);
 light1.castShadow = true;
+light2.castShadow = true;
 gScene.add(light0);
 gScene.add(light1);
-const helper = new THREE.PointLightHelper(light1, 0.25);
-gScene.add(helper);
+gScene.add(light2);
+const helper1 = new THREE.PointLightHelper(light1, 0.25);
+const helper2 = new THREE.PointLightHelper(light2, 0.25);
+gScene.add(helper1);
+gScene.add(helper2);
 
 /* --- floor --- */
-const planeSize = 20;
+const planeSize = 100;
 const texture = gTexLoader.load('resources/textures/ground.png');
 texture.wrapS = THREE.RepeatWrapping;
 texture.wrapT = THREE.RepeatWrapping;
@@ -62,9 +68,9 @@ gScene.add(planeMesh);
 
 let currentAnimProgress = 0.0; // 0.0-1.0
 let moves = [
-    new Move(123, new THREE.Vector3(-1.0, 0.0, 0.0), new THREE.Vector3(-1.0, 1.0, 0.0), MoveType.PIVOT),
-    new Move(123, new THREE.Vector3(0.0, -1.0, 0.0), new THREE.Vector3(-1.0, -1.0, 0.0), MoveType.PIVOT),
-    new Move(123, new THREE.Vector3(1.0, 0.0, 0.0), new THREE.Vector3(1.0, 0.0, 1.0), MoveType.PIVOT),
+    new Move(123, new THREE.Vector3(-1.0, 0.0, 0.0), new THREE.Vector3(-1.0, 1.0, 0.0), MoveType.PIVOT, true),
+    new Move(123, new THREE.Vector3(0.0, -1.0, 0.0), new THREE.Vector3(-1.0, -1.0, 0.0), MoveType.PIVOT, false),
+    new Move(123, new THREE.Vector3(1.0, 0.0, 0.0), new THREE.Vector3(1.0, 0.0, 1.0), MoveType.PIVOT, true),
 ]
 
 // TODO Put all this in a better place
@@ -74,7 +80,6 @@ let gDeltaTime;
 let gAnimSpeed = 1.0; // Moves per second
 let readyForNewAnimation = true;
 let nextAnimationRequested = true;
-let forward = true;
 
 let lastFrameTime = 0;
 function animate(time) {
@@ -82,7 +87,8 @@ function animate(time) {
     lastFrameTime = time;
 
     rhombicDodecahedron.mesh.rotation.x += 0.0015;
-    light1.position.set(Math.cos(time / 3000.0) * 3.0, 3.0, Math.sin(time / 3000.0) * 3.0);
+    light1.position.set(Math.cos(time / 3000.0) * 1.5, 3.0, Math.sin(time / 3000.0) * 1.5);
+    light2.position.set(Math.cos(time / 3000.0 - 3.14) * 1.5, 3.0, Math.sin(time / 3000.0 - 3.14) * 1.5);
 
     if (currentAnimProgress > 1.0) { // Wrap up current animation if needed
         gModules[move.id].finishMove(move);
@@ -93,11 +99,11 @@ function animate(time) {
     if (readyForNewAnimation && nextAnimationRequested) { // Fetch and start new animation if needed
         readyForNewAnimation = false;
         if (
-            (forward && (moveSequence.remainingMoves == 0)) || 
-            (!forward && (moveSequence.currentMove == 0))) { 
-                forward = !forward;
+            (gForward && (moveSequence.remainingMoves == 0)) || 
+            (!gForward && (moveSequence.currentMove == 0))) { 
+                gForward = !gForward;
         }
-        move = forward ? moveSequence.pop() : moveSequence.undo();
+        move = gForward ? moveSequence.pop() : moveSequence.undo();
     }
 
     if (move) { // Perform animation (if there's one active)
@@ -105,6 +111,5 @@ function animate(time) {
         currentAnimProgress += gDeltaTime * gAnimSpeed / 1000.0;
     }
 
-    gUser.controls.update();
 	gRenderer.render( gScene, gUser.camera );
 }
