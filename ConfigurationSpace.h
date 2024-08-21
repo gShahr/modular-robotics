@@ -33,6 +33,7 @@ public:
 class HashedState {
 private:
     size_t seed;
+    std::set<ModuleBasic> moduleData;
 public:
     HashedState();
 
@@ -44,6 +45,9 @@ public:
 
     [[nodiscard]]
     size_t GetSeed() const;
+
+    [[nodiscard]]
+    const std::set<ModuleBasic>& GetState() const;
 
     bool operator==(const HashedState& other) const;
 

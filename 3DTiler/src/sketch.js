@@ -15,6 +15,7 @@ importBlocks = [];
 historyStack = [];
 redoStack = [];
 rgbColor = [255, 255, 255];
+boundaryBox = [[-1, -1], [-1, -1]];
 
 function triggerFileInput() {
     document.getElementById('fileInput').click();
@@ -60,15 +61,24 @@ function exportToJson() {
     var jsonOutput = "{\n";
     var sameZ = true;
     var firstZ = blocks.length > 0 ? blocks[0].z : null;
+    let axisSize = 0;
     for (var i = 0; i < blocks.length; i++) {
         var current_block = blocks[i];
         if (current_block.z !== firstZ) {
             sameZ = false;
         }
     }
+    for (let i = 0; i < blocks.length; i++) {
+        for (let j = 0; j < blocks.length; j++) {
+            let diffX = Math.abs(blocks[i].x - blocks[j].x);
+            let diffY = Math.abs(blocks[i].y - blocks[j].y);
+            let diffZ = Math.abs(blocks[i].z - blocks[j].z);
+            axisSize = Math.max(axisSize, diffX, diffY, diffZ);
+        }
+    }
     var order = sameZ ? 2 : 3;
     jsonOutput += "    \"order\": " + order + ",\n";
-    jsonOutput += "    \"axisSize\": " + (sameZ ? blocks.length : blocks.length + 1) + ",\n";
+    jsonOutput += "    \"axisSize\": " + (axisSize + 1) + ",\n";
     jsonOutput += "    \"modules\": [";
     for (var i = 0; i < blocks.length; i++) {
         var current_block = blocks[i];
@@ -437,6 +447,30 @@ var sketch1 = function (sketch) {
             handleMouseAction(false);
         }
     };
+
+    sketch.keyPressed = function() {
+        x = Math.floor(sketch.mouseX / twoDtileSize);
+        y = Math.floor(sketch.mouseY / twoDtileSize);
+        if (sketch.key === '1') {
+            boundaryBox[0] = [x, y];
+        } else if (sketch.key === '2') {
+            boundaryBox[1] = [x, y];
+        } else if (sketch.key === '3') {
+            for (let i = boundaryBox[0][0]; i <= boundaryBox[1][0]; i++) {
+                for (let j = boundaryBox[0][1]; j <= boundaryBox[1][1]; j++) {
+                    if (blocks.some(block => block.x === i && block.y === j)) {
+                        handleAddShape(x + i - boundaryBox[0][0], y + j - boundaryBox[0][1]);
+                    }
+                }
+            }
+        } else if (sketch.key === '4') {
+            for (let i = boundaryBox[0][0]; i <= boundaryBox[1][0]; i++) {
+                for (let j = boundaryBox[0][1]; j <= boundaryBox[1][1]; j++) {
+                    screen.removeCube(i, j, layer);
+                }
+            }
+        }
+    }
 }
 
 var sketch2 = function (sketch) {
