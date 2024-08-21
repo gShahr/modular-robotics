@@ -15,6 +15,7 @@ importBlocks = [];
 historyStack = [];
 redoStack = [];
 rgbColor = [255, 255, 255];
+boundaryBox = [[0, 0], [0, 0]];
 
 function triggerFileInput() {
     document.getElementById('fileInput').click();
@@ -446,6 +447,25 @@ var sketch1 = function (sketch) {
             handleMouseAction(false);
         }
     };
+
+    sketch.keyPressed = function() {
+        x = Math.floor(sketch.mouseX / twoDtileSize);
+        y = Math.floor(sketch.mouseY / twoDtileSize);
+        if (sketch.key === '1') {
+            boundaryBox[0] = [x, y];
+        } else if (sketch.key === '2') {
+            boundaryBox[1] = [x, y];
+        } else if (sketch.key === '3') {
+            console.log(blocks);
+            for (let i = boundaryBox[0][0]; i <= boundaryBox[1][0]; i++) {
+                for (let j = boundaryBox[0][1]; j <= boundaryBox[1][1]; j++) {
+                    if (blocks.some(block => block.x === i && block.y === j)) {
+                        handleAddShape(x + i - boundaryBox[0][0], y + j - boundaryBox[0][1]);
+                    }
+                }
+            }
+        }
+    }
 }
 
 var sketch2 = function (sketch) {
