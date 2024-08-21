@@ -23,12 +23,12 @@ export class User {
         switch (this.cameraStyle) {
             case CameraType.PERSPECTIVE: newCamera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000.0 ); break;
             case CameraType.ORTHOGRAPHIC: {
-                let width = window.innerWidth / 100;
-                let height = window.innerHeight / 100;
+                let width = window.innerWidth / 200;
+                let height = window.innerHeight / 200;
                 newCamera = new THREE.OrthographicCamera( -width, width, height, -height, 0.1, 1000.0 ); break;
             }
         }
-        newCamera.position.z = 5;
+        newCamera.position.z = 5.0;
         this.controls = new OrbitControls(newCamera, gCanvas);
         this.camera = newCamera;
     }
@@ -66,9 +66,12 @@ function window_resize_callback() {
 
 function keydown_input_callback(event) {
     let key = event.key;
+    console.log(key);
     switch (key) {
         case 'p': gUser.toggleCameraStyle(); break;
         case 'r': gUser.resetCamera(); break;
+        case 'ArrowRight': window.gwNextAnimationRequested = true; window.gwForward = true; break;
+        case 'ArrowLeft': window.gwNextAnimationRequested = true; window.gwForward = false; break;
         default: break;
     }
 }

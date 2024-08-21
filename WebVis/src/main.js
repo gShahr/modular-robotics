@@ -17,13 +17,17 @@ export const gCanvas = document.getElementById("scene");
 export const gRenderer = new THREE.WebGLRenderer({canvas: gCanvas});
 export const gScene = new THREE.Scene();
 export const gUser = new User();
-export let gForward = true;
 export const gTexLoader = new THREE.TextureLoader();
 gRenderer.setSize( window.innerWidth, window.innerHeight );
 gRenderer.shadowMap.enabled = true;
 gRenderer.setAnimationLoop( animate );
 
-window.gAnimSpeed = 1.0; // Moves per second
+// Following are global attributes set directly to the window object
+//  This allows them to be added to the GUI,
+//  or directly modified by other scripts
+window.gwForward = true;
+window.gwNextAnimationRequested = false;
+window.gwAnimSpeed = 1.0;
 
 /* --- objects --- */
 export const gModules = {};
@@ -49,7 +53,7 @@ gScene.add(helper1);
 gScene.add(helper2);
 
 /* --- floor --- */
-const planeSize = 100;
+const planeSize = 1000;
 const texture = gTexLoader.load('resources/textures/ground.png');
 texture.wrapS = THREE.RepeatWrapping;
 texture.wrapT = THREE.RepeatWrapping;
@@ -80,7 +84,6 @@ let moveSequence = new MoveSequence(moves);
 let move;
 let gDeltaTime;
 let readyForNewAnimation = true;
-let nextAnimationRequested = true;
 
 let lastFrameTime = 0;
 function animate(time) {
@@ -97,14 +100,9 @@ function animate(time) {
         currentAnimProgress = 0.0;
     }
 
-    if (readyForNewAnimation && nextAnimationRequested) { // Fetch and start new animation if needed
-        readyForNewAnimation = false;
-        if (
-            (gForward && (moveSequence.remainingMoves == 0)) || 
-            (!gForward && (moveSequence.currentMove == 0))) { 
-                gForward = !gForward;
-        }
-        move = gForward ? moveSequence.pop() : moveSequence.undo();
+    if (readyForNewAnimation && window.gwNextAnimationRequested) { // Fetch and start new animation if needed
+        move = window.gwForward ? moveSequence.pop() : moveSequence.undo();
+        if (move) { readyForNewAnimation = false; }
     }
 
     if (move) { // Perform animation (if there's one active)
