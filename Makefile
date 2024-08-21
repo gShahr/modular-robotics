@@ -39,8 +39,8 @@ benchmarks: tests/benchmarks/benchmarks.cpp $(SOURCES2)
 gui: gui/gui.cpp
 	$(CXX) $(CXXFLAGS) -I. -o gui gui/gui.cpp
 
-astar2: tests/proprety-based-checking/astar2.cpp $(SOURCES2)
-	$(CXX) $(LDFLAGS) $(CXXFLAGS) -I. -o astar2 tests/proprety-based-checking/astar2.cpp $(SOURCES2)
+astar: tests/proprety-based-checking/astar.cpp $(SOURCES2)
+	$(CXX) $(LDFLAGS) $(CXXFLAGS) -I. -o astar tests/proprety-based-checking/astar.cpp $(SOURCES2)
 
 clean:
 	rm -f $(OBJECTS) $(EXECUTABLE)

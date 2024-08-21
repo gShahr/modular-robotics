@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="">
+<html lang="en">
 
 <head>
   <meta charset="utf-8">
@@ -9,38 +9,56 @@
     body {
       padding: 0;
       margin: 0;
+      display: flex;
+      height: 100vh;
     }
-    header{
-      font-size:40px;
-      margin:auto;
-      width:60%; /* should just be pixels based on canvas size */
+
+    header {
+      font-size: 40px;
+      margin: auto;
+      width: 60%; /* should just be pixels based on canvas size */
     }
+
     .active {
       background-color: yellow;
     }
+
+    #sidebar {
+      width: 150px;
+      overflow-y: auto;
+      padding: 10px;
+      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    }
+
     #canvas-container {
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            position: relative;
-        }
-        canvas {
-            display: block;
-        }
-    </style>
+      flex-grow: 1;
+      overflow: auto;
+      position: relative;
+      height: 100%;
+    }
+
+    canvas {
+      display: block;
+    }
+
+    .controls button,
+    .controls p,
+    .controls input {
+      display: block;
+      margin-bottom: 10px;
+    }
+  </style>
   <!-- <header id="CH">Inital State</header> -->
   <script src="p5.js"></script>
   <script src="p5.easycam.js"></script>
   <!-- <script src="../addons/p5.sound.js"></script> -->
-  
-  <script src=https://cdnjs.cloudflare.com/ajax/libs/mathjs/3.3.0/math.min.js></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/3.3.0/math.min.js"></script>
   <script src="src/2dScreen.js"></script>
   <script src="src/3dScreen.js"></script>
   <script src="src/Cube.js"></script>
   <script src="src/hexagon.js"></script>
   <script src="src/rhomDod.js"></script>
-
-
   <!-- <input id="blockInput"></input>
   <button type="button" onclick="loadFromTxt()">Load</button>
   <button type="button" onclick="saveAsTxt()">Save Current</button>
@@ -48,32 +66,39 @@
   <button type="button" onclick="saveAsPNG()">Save a PNG</button> -->
   <!-- <button type="button" onclick="clearGrid()">Clear</button> -->
 </head>
-<div style="padding-top:4px;">
-<button id="zUp" onclick="upLayer()">+1 Layer</button>
-<button id="zDown" onclick="downLayer()">-1 Layer</button>
 
-<button id="highlight" onclick="highlightLayer()">Highlight Layer</button>
-<button id="undo">Undo</button>
-<button id="redo">Redo</button>
-<button id ="clear">Clear</button>
-<button id="switch-shape">Switch to Hexagon</button>
-<button id="importFromJson" onclick="triggerFileInput()">Import from JSON</button>
-<input type="file" id="fileInput" accept=".json" style="display: none;" onchange="importFromJson(event)">
-<button id="exportToJson" onclick="exportToJson()">Export to JSON</button>
-<button id="exportToObj" onclick="exportToObj()">Export to OBJ</button>
-<button id="static" onclick="toggleStatic()">Static</button>
-<button id ="red" onclick="changeColor([255, 0, 0])">Red</button>
-<button id ="green" onclick="changeColor([0, 255, 0])">Green</button>
-<button id ="blue" onclick="changeColor([0, 0, 255])">Blue</button>
-<p id="curLayer" style="width:10em;display:inline">Current Layer = 0</p>
-<button id="coordinates">Tile Coordinates: x=0, y=0</button>
-<span id="checkConnectivity">Connected: </span>
-<script src="src/sketch.js"></script>
-
-</div>
 <body>
+<div id="sidebar" class="controls">
+    <button id="zUp" onclick="upLayer()">+1 Layer</button>
+    <button id="zDown" onclick="downLayer()">-1 Layer</button>
+    <button id="highlight" onclick="highlightLayer()">Highlight Layer</button>
+    <button id="undo">Undo</button>
+    <button id="redo">Redo</button>
+    <button id="clear">Clear</button>
+    <button id="switch-shape">Switch to Dodecahedron</button>
+    <button id="importFromJson" onclick="triggerFileInput()">Import from JSON</button>
+    <input type="file" id="fileInput" accept=".json" style="display: none;" onchange="importFromJson(event)">
+    <button id="exportToJson" onclick="exportToJson()">Export to JSON</button>
+    <button id="exportToObj" onclick="exportToObj()">Export to OBJ</button>
+    <button id="static" onclick="toggleStatic()">Static</button>
+    <button id="red" onclick="changeColor([255, 0, 0])">Red</button>
+    <button id="green" onclick="changeColor([0, 255, 0])">Green</button>
+    <button id="blue" onclick="changeColor([0, 0, 255])">Blue</button>
+    <button id="yellow" onclick="changeColor([255, 255, 0])">Yellow</button>
+    <button id="cyan" onclick="changeColor([0, 255, 255])">Cyan</button>
+    <button id="magenta" onclick="changeColor([255, 0, 255])">Magenta</button>
+    <button id="black" onclick="changeColor([0, 0, 0])">Black</button>
+    <button id="white" onclick="changeColor([255, 255, 255])">White</button>
+    <p id="curLayer" style="width: 10em;">Current Layer = 0</p>
+    <button id="coordinates">Tile Coordinates: x=0, y=0</button>
+    <button id="increaseTileSize" onclick="increaseTileSize()">Increase Tile Size</button>
+    <button id="decreaseTileSize" onclick="decreaseTileSize()">Decrease Tile Size</button>
+    <!-- <button id="highlightCurrentTile" onclick="highlightCurrentTile()">Highlight Current Tile</button> -->
+    <!-- <span id="checkConnectivity">Connected: </span> -->
+  </div>
+  <script src="src/sketch.js"></script>
   <main>
-    <div id="canvas-container" style="overflow: auto; width: 100%; height: 80vh;">
+    <div id="canvas-container" style="width: 100%; height: 100%;">
       <div id="2d-canvas-container" style="position: relative; width: 200%; height: 200%;"></div>
     </div>
   </main>

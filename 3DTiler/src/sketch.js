@@ -1,10 +1,13 @@
 document.oncontextmenu = () => { return false; }
 canvasW = window.screen.width * 1;
 canvasH = window.screen.height * .8;
+canvasPosition = [200, 0]
 canvasZ = 75;
 twoDtileSize = canvasW / (2 * 30);
+twoDtileSizeDelta = twoDtileSize * .1;
 layer = 0;
 highlight = false;
+highlightCoords = [-1, -1, -1];
 mStatic = false;
 objects = [];
 blocks = [];
@@ -25,7 +28,6 @@ function importFromJson(event) {
             try {
                 const jsonContent = JSON.parse(e.target.result);
                 processJson(jsonContent);
-                // console.log(jsonContent);
             } catch (error) {
                 console.error("Error parsing JSON:", error);
             }
@@ -58,15 +60,24 @@ function exportToJson() {
     var jsonOutput = "{\n";
     var sameZ = true;
     var firstZ = blocks.length > 0 ? blocks[0].z : null;
+    let axisSize = 0;
     for (var i = 0; i < blocks.length; i++) {
         var current_block = blocks[i];
         if (current_block.z !== firstZ) {
             sameZ = false;
         }
     }
+    for (let i = 0; i < blocks.length; i++) {
+        for (let j = 0; j < blocks.length; j++) {
+            let diffX = Math.abs(blocks[i].x - blocks[j].x);
+            let diffY = Math.abs(blocks[i].y - blocks[j].y);
+            let diffZ = Math.abs(blocks[i].z - blocks[j].z);
+            axisSize = Math.max(axisSize, diffX, diffY, diffZ);
+        }
+    }
     var order = sameZ ? 2 : 3;
     jsonOutput += "    \"order\": " + order + ",\n";
-    jsonOutput += "    \"axisSize\": " + (sameZ ? blocks.length : blocks.length + 1) + ",\n";
+    jsonOutput += "    \"axisSize\": " + (axisSize + 1) + ",\n";
     jsonOutput += "    \"modules\": [";
     for (var i = 0; i < blocks.length; i++) {
         var current_block = blocks[i];
@@ -104,48 +115,6 @@ function exportToScen() {
 }
 
 function exportToObj() {
-    let objData = '';
-    let vertexOffset = 1;
-    // let objects = [
-    //     {
-    //         vertices: [
-    //             { x: 0, y: 0, z: 0 }, // Vertex 0
-    //             { x: 1, y: 0, z: 0 }, // Vertex 1
-    //             { x: 1, y: 1, z: 0 }, // Vertex 2
-    //             { x: 0, y: 1, z: 0 }, // Vertex 3
-    //             { x: 0, y: 0, z: 1 }, // Vertex 4
-    //             { x: 1, y: 0, z: 1 }, // Vertex 5
-    //             { x: 1, y: 1, z: 1 }, // Vertex 6
-    //             { x: 0, y: 1, z: 1 }  // Vertex 7
-    //         ],
-    //         faces: [
-    //             { a: 0, b: 1, c: 2 }, { a: 0, b: 2, c: 3 }, // Front face
-    //             { a: 1, b: 5, c: 6 }, { a: 1, b: 6, c: 2 }, // Right face
-    //             { a: 5, b: 4, c: 7 }, { a: 5, b: 7, c: 6 }, // Back face
-    //             { a: 4, b: 0, c: 3 }, { a: 4, b: 3, c: 7 }, // Left face
-    //             { a: 3, b: 2, c: 6 }, { a: 3, b: 6, c: 7 }, // Top face
-    //             { a: 4, b: 5, c: 1 }, { a: 4, b: 1, c: 0 }  // Bottom face
-    //         ]
-    //     }
-    // ];
-
-    // Assuming you have an array of 3D objects, each with vertices and faces
-    // objects.forEach(object => {
-    //     object.vertices.forEach(vertex => {
-    //         objData += `v ${vertex.x} ${vertex.y} ${vertex.z}\n`;
-    //     });
-
-    //     object.faces.forEach(face => {
-    //         objData += `f ${face.a + vertexOffset} ${face.b + vertexOffset} ${face.c + vertexOffset}\n`;
-    //     });
-
-    //     vertexOffset += object.vertices.length;
-    // });
-
-    downloadObj(objects);
-}
-
-function downloadObj(data) {
     const blob = new Blob([data], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -195,6 +164,16 @@ function toggleStatic() {
     mStatic = !mStatic;
 }
 
+function increaseTileSize() {
+    twoDtileSize += twoDtileSizeDelta;
+}
+
+function decreaseTileSize() {
+    if (twoDtileSize > twoDtileSizeDelta) {
+        twoDtileSize -= twoDtileSizeDelta;
+    }
+}
+
 var sketch1 = function (sketch) {
     let undoPressed = false;
     let redoPressed = false;
@@ -203,8 +182,7 @@ var sketch1 = function (sketch) {
 
     sketch.setup = function () {
         canv1 = sketch.createCanvas(canvasW / 2, canvasH);
-        canv1.position(0, 30);
-        //canv1.parent('2d-canvas-container');
+        canv1.position(canvasPosition[0], canvasPosition[1]);
         screen = new twoDScreen(canvasW / 2, canvasH, twoDtileSize);
         prevLayer = layer;
         let undoButton = document.getElementById('undo');
@@ -231,6 +209,30 @@ var sketch1 = function (sketch) {
                 switchShapePressed ^= true;
             });
         }
+        let increaseTileSizeButton = document.getElementById('increaseTileSize');
+        if (increaseTileSizeButton) {
+            increaseTileSizeButton.addEventListener('click', function () {
+                increaseTileSize();
+                console.log("Tile Size Increased");
+                updateCanvas();
+            });
+        }
+        let decreaseTileSizeButton = document.getElementById('decreaseTileSize');
+        if (decreaseTileSizeButton) {
+            decreaseTileSizeButton.addEventListener('click', function () {
+                decreaseTileSize();
+                console.log("Tile Size Decreased");
+                updateCanvas();
+            });
+        }
+    }
+
+    function updateCanvas() {
+        let existingCubes = screen ? screen.cubes : [];
+        canv1 = sketch.createCanvas(canvasW / 2, canvasH);
+        canv1.position(canvasPosition[0], canvasPosition[1]);
+        screen = new twoDScreen(canvasW / 2, canvasH, twoDtileSize);
+        screen.cubes = existingCubes;
     }
 
     sketch.draw = function () {
@@ -244,7 +246,7 @@ var sketch1 = function (sketch) {
             screen.downLayer();
         }
         sketch.background(0, 255, 0);
-        screen.draw(sketch);
+        screen.draw(sketch, highlightCoords);
         prevLayer = layer;
         switch (screen.shape) {
             case 'hexagon':
@@ -285,7 +287,7 @@ var sketch1 = function (sketch) {
                 let lastMove = redoStack.pop();
                 historyStack.push(lastMove);
                 if (lastMove.action === 'add') {
-                    screen.addCube(new Cube(lastMove.x, lastMove.y, lastMove.z, lastMove.color, lastMOve.mStatic));
+                    screen.addCube(new Cube(lastMove.x, lastMove.y, lastMove.z, lastMove.color, lastMove.mStatic));
                     threeScreen.addCube(new Cube(lastMove.x, lastMove.y, lastMove.z, lastMove.color, lastMove.mStatic));
                 } else {
                     screen.removeCube(lastMove.x, lastMove.y, lastMove.z);
@@ -302,14 +304,14 @@ var sketch1 = function (sketch) {
         }
         if (switchShapePressed) {
             if (document.getElementById("switch-shape").innerText === "Switch to Hexagon") {
-                document.getElementById("switch-shape").innerText = "Switch to Rhombic Dodecahedron";
+                document.getElementById("switch-shape").innerText = "Switch to Dodecahedron";
                 screen.setShape("hexagon");
                 threeScreen.setShape("hexagon");
             } else if (document.getElementById("switch-shape").innerText === "Switch to Cube") {
-                document.getElementById("switch-shape").innerText = "Switch to Hexagon";
+                document.getElementById("switch-shape").innerText = "Switch to Dodecahedron";
                 screen.setShape("cube");
                 threeScreen.setShape("cube");
-            } else if (document.getElementById("switch-shape").innerText === "Switch to Rhombic Dodecahedron") {
+            } else if (document.getElementById("switch-shape").innerText === "Switch to Dodecahedron") {
                 document.getElementById("switch-shape").innerText = "Switch to Cube";
                 screen.setShape("rhombicDodecahedron");
                 threeScreen.setShape("rhombicDodecahedron");
@@ -354,99 +356,102 @@ var sketch1 = function (sketch) {
         // document.getElementById("checkConnectivity").innerText = "Connected: " + message;    
     }
 
-    sketch.mousePressed = function () {
-        if (sketch.mouseButton === sketch.LEFT) {
-            if (!(sketch.mouseX < canvasW / 2 && sketch.mouseY < canvasH && sketch.mouseY > 0)) return;
-            if (screen.shape === "cube") {
-                x = Math.floor(sketch.mouseX / twoDtileSize);
-                y = Math.floor(sketch.mouseY / twoDtileSize);
-                if (screen.hasCube(x, y, screen.layer)) return;
-                screen.addCube(new Cube(x, y, screen.layer, rgbColor, mStatic));
-                threeScreen.addCube(new Cube(x, y, screen.layer, rgbColor, mStatic));
-            } else if (screen.shape == "hexagon") {
-                let [x, y] = pixelToHex(sketch.mouseX, sketch.mouseY, twoDtileSize);
-                screen.addHexagon(new Hexagon(x, y, screen.layer, rgbColor, mStatic));
-                threeScreen.addHexagon(new Hexagon(x, y, screen.layer, rgbColor, mStatic));
-            } else if (screen.shape = "rhombicDodecahedron") {
-                x = Math.floor(sketch.mouseX / twoDtileSize);
-                y = Math.floor(sketch.mouseY / twoDtileSize);
-                screen.addRhomdod(new RhomDod(x, y, screen.layer, rgbColor, mStatic));
-                threeScreen.addRhomdod(new RhomDod(x, y, screen.layer, rgbColor, mStatic));
-            }
+    function handleAddShape(x, y) {
+        if (screen.shape === "cube") {
+            if (screen.hasCube(x, y, screen.layer)) return;
+            screen.addCube(new Cube(x, y, screen.layer, rgbColor, mStatic));
+            threeScreen.addCube(new Cube(x, y, screen.layer, rgbColor, mStatic));
+            historyStack.push({ action: 'add', x: x, y: y, z: screen.layer, color: rgbColor, mStatic: mStatic });
+        } else if (screen.shape === "hexagon") {
+            screen.addHexagon(new Hexagon(x, y, screen.layer, rgbColor, mStatic));
+            threeScreen.addHexagon(new Hexagon(x, y, screen.layer, rgbColor, mStatic));
+        } else if (screen.shape === "rhombicDodecahedron") {
+            screen.addRhomdod(new RhomDod(x, y, screen.layer, rgbColor, mStatic));
+            threeScreen.addRhomdod(new RhomDod(x, y, screen.layer, rgbColor, mStatic));
+        }
+    }
+    
+    function handleRemoveShape(x, y) {
+        if (screen.shape === "cube") {
+            screen.removeCube(x, y, screen.layer);
+            threeScreen.removeCube(x, y, screen.layer);
+            historyStack.push({ action: 'remove', x: x, y: y, z: screen.layer });
+        } else if (screen.shape === "hexagon") {
+            screen.removeHexagon(x, y, screen.layer);
+            threeScreen.removeHexagon(x, y, screen.layer);
+        } else if (screen.shape === "rhombicDodecahedron") {
+            screen.removeRhomdod(x, y, screen.layer);
+            threeScreen.removeRhomdod(x, y, screen.layer);
+        }
+    }
+    
+    function handleMouseAction(isAdding) {
+        let x, y, yM;
+        if (screen.shape === "cube" || screen.shape === "rhombicDodecahedron") {
+            x = Math.floor(sketch.mouseX / twoDtileSize);
             y = Math.floor(sketch.mouseY / twoDtileSize);
+            xM = Math.floor((canvasW / 2) / twoDtileSize);
             yM = Math.floor(canvasH / twoDtileSize);
-            if (y >= yM - 1) {
-                canvasH *= 2;
-                canv1 = sketch.createCanvas(canvasW / 2, canvasH);
-                canv1.position(0, 30);     
-                screen.width = canvasW / 2;
-                screen.height = canvasH;  
-            }
+            console.log(x, xM);
+            // if (x >= xM - 1) {
+            //     canvasW *= 2;
+            //     canv1 = sketch.createCanvas(canvasW / 2, canvasH);
+            //     canv1.position(canvasPosition[0], canvasPosition[1]);
+            //     screen.width = canvasW / 2;
+            // }
+            // if (y >= yM - 1) {
+            //     canvasH *= 2;
+            //     canv1 = sketch.createCanvas(canvasW / 2, canvasH);
+            //     canv1.position(canvasPosition[0], canvasPosition[1]);
+            //     screen.height = canvasH;
+            // }
+        } else if (screen.shape === "hexagon") {
+            [x, y] = pixelToHex(sketch.mouseX, sketch.mouseY, twoDtileSize);
+        }
+        if (isAdding) {
+            handleAddShape(x, y);
         } else {
-            if (!(sketch.mouseX < canvasW / 2 && sketch.mouseY < canvasH && sketch.mouseY > 0)) return;
-            if (screen.shape === "cube") {
-                x = Math.floor(sketch.mouseX / twoDtileSize);
-                y = Math.floor(sketch.mouseY / twoDtileSize);
-                console.log("remove cube: " + x + ", " + y);
-                screen.removeCube(x, y, screen.layer);
-                threeScreen.removeCube(x, y, screen.layer);
-            } else if (screen.shape == "hexagon") {
-                let [x, y] = pixelToHex(sketch.mouseX, sketch.mouseY, twoDtileSize);
-                screen.removeHexagon(x, y, screen.layer);
-                threeScreen.removeHexagon(x, y, screen.layer);
-            } else if (screen.shape == "rhombicDodecahedron") {
-                x = Math.floor(sketch.mouseX / twoDtileSize);
-                y = Math.floor(sketch.mouseY / twoDtileSize);
-                screen.removeRhomdod(x, y, screen.layer);
-                threeScreen.removeRhomdod(x, y, screen.layer);
-            }
+            handleRemoveShape(x, y);
         }
     }
 
-    sketch.mouseDragged = function () {
-        if (sketch.mouseButton === sketch.LEFT) {
-            if (!(sketch.mouseX < canvasW / 2 && sketch.mouseY < canvasH && sketch.mouseY > 0)) return;
-            if (screen.shape === "cube") {
-                x = Math.floor(sketch.mouseX / twoDtileSize);
-                y = Math.floor(sketch.mouseY / twoDtileSize);
-                if (screen.hasCube(x, y, screen.layer)) return;
-                screen.addCube(new Cube(x, y, screen.layer, rgbColor, mStatic));
-                threeScreen.addCube(new Cube(x, y, screen.layer, rgbColor, mStatic));
-            } else if (screen.shape == "hexagon") {
-                let [x, y] = pixelToHex(sketch.mouseX, sketch.mouseY, twoDtileSize);
-                screen.addHexagon(new Hexagon(x, y, screen.layer, rgbColor, mStatic));
-                threeScreen.addHexagon(new Hexagon(x, y, screen.layer, rgbColor, mStatic));
-            } else if (screen.shape = "rhombicDodecahedron") {
-                x = Math.floor(sketch.mouseX / twoDtileSize);
-                y = Math.floor(sketch.mouseY / twoDtileSize);
-                screen.addRhomdod(new RhomDod(x, y, screen.layer, rgbColor, mStatic));
-                threeScreen.addRhomdod(new RhomDod(x, y, screen.layer, rgbColor, mStatic));
-            }    
-        } else {
-            if (!(sketch.mouseX < canvasW / 2 && sketch.mouseY < canvasH && sketch.mouseY > 0)) return;
-            if (screen.shape === "cube") {
-                x = Math.floor(sketch.mouseX / twoDtileSize);
-                y = Math.floor(sketch.mouseY / twoDtileSize);
-                screen.removeCube(x, y, screen.layer);
-                threeScreen.removeCube(x, y, screen.layer);
-            } else if (screen.shape == "hexagon") {
-                let [x, y] = pixelToHex(sketch.mouseX, sketch.mouseY, twoDtileSize);
-                screen.removeHexagon(x, y, screen.layer);
-                threeScreen.removeHexagon(x, y, screen.layer);
-            } else if (screen.shape == "rhombicDodecahedron") {
-                x = Math.floor(sketch.mouseX / twoDtileSize);
-                y = Math.floor(sketch.mouseY / twoDtileSize);
-                screen.removeRhomdod(x, y, screen.layer);
-                threeScreen.removeRhomdod(x, y, screen.layer);
-            }
-        }
+    function highlightTile() {
+        x = Math.floor(sketch.mouseX / twoDtileSize);
+        y = Math.floor(sketch.mouseY / twoDtileSize);
+        highlightCoords = [x, y, layer];
     }
+
+    function inBorder() {
+        return sketch.mouseX < canvasW / 2
+            && sketch.mouseX > 0
+            && sketch.mouseY < canvasH
+            && sketch.mouseY > 0;
+    }
+    
+    sketch.mousePressed = function () {
+        if (!inBorder()) return;
+        if (sketch.mouseButton === sketch.LEFT) {
+            handleMouseAction(true);
+            highlightTile();
+        } else {
+            handleMouseAction(false);
+        }
+    };
+    
+    sketch.mouseDragged = function () {
+        if (!inBorder()) return;
+        if (sketch.mouseButton === sketch.LEFT) {
+            handleMouseAction(true);
+        } else {
+            handleMouseAction(false);
+        }
+    };
 }
 
 var sketch2 = function (sketch) {
     sketch.setup = function () {
         canv2 = sketch.createCanvas(canvasW / 2, canvasH, sketch.WEBGL);
-        canv2.position(canvasW / 2, 30);
+        canv2.position(canvasW / 2 + canvasPosition[0], canvasPosition[1]);
         threeScreen = new threeDScreen(canvasW / 2, canvasH, twoDtileSize / 5);
         sketch._center = [0, 0, 0];
         sketch.createEasyCam();
@@ -454,7 +459,7 @@ var sketch2 = function (sketch) {
 
     sketch.draw = function () {
         sketch.background(205, 102, 94);
-        threeScreen.draw(sketch, highlight, layer);
+        threeScreen.draw(sketch, highlight, highlightCoords, layer);
     }
 }
 
@@ -558,8 +563,8 @@ document.addEventListener('mousemove', function(event) {
 });
 
 function getTileCoordinates(mouseX, mouseY) {
-    const tileX = Math.floor(mouseX / twoDtileSize);
-    const tileY = Math.floor(mouseY / twoDtileSize);
+    const tileX = Math.floor((mouseX-canvasPosition[0]) / twoDtileSize);
+    const tileY = Math.floor((mouseY-canvasPosition[1]) / twoDtileSize);
     return { x: tileX, y: tileY };
 }
 
