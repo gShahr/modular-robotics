@@ -25,6 +25,7 @@ gRenderer.setAnimationLoop( animate );
 // Following are global attributes set directly to the window object
 //  This allows them to be added to the GUI,
 //  or directly modified by other scripts
+window.gwAutoAnimate = false;
 window.gwForward = true;
 window.gwNextAnimationRequested = false;
 window.gwAnimSpeed = 1.0;
@@ -84,6 +85,7 @@ let moveSequence = new MoveSequence(moves);
 let move;
 let gDeltaTime;
 let readyForNewAnimation = true;
+let bChain;
 
 let lastFrameTime = 0;
 function animate(time) {
@@ -95,9 +97,23 @@ function animate(time) {
     light2.position.set(Math.cos(time / 3000.0 - 3.14) * 1.5, 3.0, Math.sin(time / 3000.0 - 3.14) * 1.5);
 
     if (currentAnimProgress > 1.0) { // Wrap up current animation if needed
-        gModules[move.id].finishMove(move);
-        readyForNewAnimation = true;
+        gModules[move.id].finishMove(move); // Offset the module
+        readyForNewAnimation = true; // Flag that we can handle starting a new anim
+
+        // If we're auto-animating, flag that we want another anim
+        //  Otherwise, handle checkpoint moves:
+        //      If we're animating forwards, and the next move is a checkpoint move,
+        //      OR if we're animating backwards and the just-finished move was a checkpoint move,
+        //          then set bChain to false -- don't request another animation.
+        if (window.gwAutoAnimate) {
+            window.gwNextAnimationRequested = true;
+        } else {
+            let _move = window.gwForward ? moveSequence.moves[0] : move;
+            window.gwNextAnimationRequested = _move ? _move.checkpoint : false;
+        }
+
         currentAnimProgress = 0.0;
+        move = null;
     }
 
     if (readyForNewAnimation && window.gwNextAnimationRequested) { // Fetch and start new animation if needed
@@ -107,7 +123,7 @@ function animate(time) {
 
     if (move) { // Perform animation (if there's one active)
         gModules[move.id].animateMove(move, currentAnimProgress);
-        currentAnimProgress += gDeltaTime * gAnimSpeed / 1000.0;
+        currentAnimProgress += gDeltaTime * window.gwAnimSpeed / 1000.0;
     }
 
 	gRenderer.render( gScene, gUser.camera );
