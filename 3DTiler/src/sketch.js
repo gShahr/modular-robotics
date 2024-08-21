@@ -15,7 +15,7 @@ importBlocks = [];
 historyStack = [];
 redoStack = [];
 rgbColor = [255, 255, 255];
-boundaryBox = [[0, 0], [0, 0]];
+boundaryBox = [[-1, -1], [-1, -1]];
 
 function triggerFileInput() {
     document.getElementById('fileInput').click();
