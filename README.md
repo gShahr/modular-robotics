@@ -24,6 +24,8 @@
 
 [Documentation](https://github.com/gShahr/modular-robotics/wiki/Visualization-Tool)
 
+[Live Demo](https://gshahr.github.io/modular-robotics/WebVis/index.html)
+
 ## Examples
 
 ## License
