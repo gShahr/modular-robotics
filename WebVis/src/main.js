@@ -6,10 +6,13 @@ import { Move } from "./Move.js";
 import { MoveSequence } from "./MoveSequence.js";
 import { gGui } from "./GUI.js";
 
-// Extends THREE Vector3 type with new component-wise abs() method
+// Extends THREE Vector3 type with new component-wise abs() and sum() methods
 // TODO put this in a better place?
 THREE.Vector3.prototype.abs = function() {
     return new THREE.Vector3(Math.abs(this.x), Math.abs(this.y), Math.abs(this.z));
+}
+THREE.Vector3.prototype.sum = function() {
+    return (this.x + this.y + this.z);
 }
 
 /* --- setup --- */
@@ -35,6 +38,7 @@ export const gModules = {};
 [
     [123, 0.0, 0.0, 0.0],
     [124, -1.0, 0.0, 0.0],
+    [125, -1.0, 0.0, -1.0],
 ].map( ([id, x, y, z]) => new Module(ModuleType.CUBE, id, new THREE.Vector3(x, y, z), 0x808080, 0.9))
 
 const rhombicDodecahedron = new Module(ModuleType.RHOMBIC_DODECAHEDRON, 0, new THREE.Vector3(3.0, -1.0, -3.0));
@@ -78,6 +82,8 @@ let moves = [
     new Move(123, new THREE.Vector3(-1.0, 0.0, 0.0), new THREE.Vector3(-1.0, 1.0, 0.0), MoveType.PIVOT, true),
     new Move(123, new THREE.Vector3(0.0, -1.0, 0.0), new THREE.Vector3(-1.0, -1.0, 0.0), MoveType.PIVOT, false),
     new Move(123, new THREE.Vector3(1.0, 0.0, 0.0), new THREE.Vector3(1.0, 0.0, 1.0), MoveType.PIVOT, true),
+    new Move(123, new THREE.Vector3(0.0, 1.0, 0.0), new THREE.Vector3(0.0, -1.0, -1.0), MoveType.SLIDING, false),
+    new Move(123, new THREE.Vector3(0.0, 0.0, 0.0), new THREE.Vector3(0.0, 0.0, -1.0), MoveType.SLIDING, false),
 ]
 
 // TODO Put all this in a better place

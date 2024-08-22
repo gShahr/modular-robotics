@@ -25,7 +25,7 @@ export class Move{
                 this.maxAngle = THREE.MathUtils.degToRad(deltaPos.toArray().reduce((p,a)=>p+Math.abs(a), 0.0) * 90.0);
                 break;
                 } 
-            case MoveType.SLIDING: {
+            case MoveType.SLIDING: { // No additional attributes required
                 break;
             }
             case MoveType.MONKEY: {

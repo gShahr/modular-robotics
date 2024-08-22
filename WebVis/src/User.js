@@ -66,7 +66,6 @@ function window_resize_callback() {
 
 function keydown_input_callback(event) {
     let key = event.key;
-    console.log(key);
     switch (key) {
         case 'p': gUser.toggleCameraStyle(); break;
         case 'r': gUser.resetCamera(); break;
