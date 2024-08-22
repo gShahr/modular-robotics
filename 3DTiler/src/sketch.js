@@ -116,7 +116,7 @@ function exportToScen() {
 }
 
 function exportToObj() {
-    const blob = new Blob([data], { type: 'text/plain' });
+    const blob = new Blob([objects], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
