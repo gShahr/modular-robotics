@@ -35,6 +35,14 @@ class twoDScreen {
         this._hexagons = hexagons;
     }
 
+    get getRhomdods() {
+        return this.rhomdod;
+    }
+
+    set setRhomdods(rhomdod) {
+        this._rhomdod = rhomdod;
+    }
+
     get getShape() {
         return this.shape;
     }
