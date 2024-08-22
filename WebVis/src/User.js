@@ -69,10 +69,20 @@ function keydown_input_callback(event) {
     switch (key) {
         case 'p': gUser.toggleCameraStyle(); break;
         case 'r': gUser.resetCamera(); break;
-        case 'ArrowRight': window.gwNextAnimationRequested = true; window.gwForward = true; break;
-        case 'ArrowLeft': window.gwNextAnimationRequested = true; window.gwForward = false; break;
+        case 'ArrowRight': _requestForwardAnim(); break;
+        case 'ArrowLeft': _requestBackwardAnim(); break;
         default: break;
     }
+}
+
+// effectively making these functions global
+window._requestForwardAnim = function () {
+    window.gwNextAnimationRequested = true; 
+    window.gwForward = true;
+}
+window._requestBackwardAnim = function () {
+    window.gwNextAnimationRequested = true; 
+    window.gwForward = false;
 }
 
 window.addEventListener('resize', window_resize_callback);

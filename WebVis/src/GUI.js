@@ -29,6 +29,10 @@ class GuiGlobalsHelper {
 
 export const gGui = new GUI();
 
-gGui.add(new GuiGlobalsHelper('gwAnimSpeed', 1.0, SliderType.QUADRATIC), 'value', 0.0, 5.0, 0.1).name("Anim Speed");
-gGui.add(new GuiGlobalsHelper('gwAutoAnimate', false), 'value').name("Auto Animate");
-
+document.addEventListener("DOMContentLoaded", function () {
+    gGui.add(new GuiGlobalsHelper('gwAnimSpeed', 1.0, SliderType.QUADRATIC), 'value', 0.0, 5.0, 0.1).name("Anim Speed");
+    gGui.add(new GuiGlobalsHelper('gwAutoAnimate', false), 'value').name("Auto Animate");
+    gGui.add(window.gwUser, 'toggleCameraStyle').name("Toggle Camera Style");
+    gGui.add(window, '_requestForwardAnim').name("Step Forward");
+    gGui.add(window, '_requestBackwardAnim').name("Step Backward");
+});

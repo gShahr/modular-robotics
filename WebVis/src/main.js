@@ -26,12 +26,13 @@ gRenderer.shadowMap.enabled = true;
 gRenderer.setAnimationLoop( animate );
 
 // Following are global attributes set directly to the window object
-//  This allows them to be added to the GUI,
+//  This allows them to (more easily) be added to the GUI,
 //  or directly modified by other scripts
 window.gwAutoAnimate = false;
 window.gwForward = true;
 window.gwNextAnimationRequested = false;
 window.gwAnimSpeed = 1.0;
+window.gwUser = gUser;
 
 /* --- objects --- */
 export const gModules = {};
