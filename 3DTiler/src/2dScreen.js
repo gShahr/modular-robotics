@@ -339,7 +339,6 @@ class twoDScreen {
                         this.tileSize, 
                         this.tileSize
                     );
-                    console.log(this.rhomdod[i]);
                     if (this.rhomdod[i].mStatic) {
                         sketch.fill(255);
                         sketch.textAlign(sketch.CENTER, sketch.CENTER);
