@@ -211,6 +211,15 @@ class twoDScreen {
         return false; 
     }
 
+    hasRhombicDodec(x, y, z) {
+        for (let i = 0; i < this.rhomdod.length; i++) {
+            if (this.rhomdod[i].x === x && this.rhomdod[i].y === y && this.rhomdod[i].z === z) {
+                return true;
+            }
+        }
+        return false; 
+    }
+
     hexagon = (sketch, centerX, centerY, radius) => {
         const angle = Math.PI / 3;
         sketch.beginShape();

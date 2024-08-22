@@ -367,6 +367,7 @@ var sketch1 = function (sketch) {
             screen.addHexagon(new Hexagon(x, y, screen.layer, rgbColor, mStatic));
             threeScreen.addHexagon(new Hexagon(x, y, screen.layer, rgbColor, mStatic));
         } else if (screen.shape === "rhombicDodecahedron") {
+            if (screen.hasRhombicDodec(x, y, screen.layer)) return;
             const newRhomDod = new RhomDod(x, y, screen.layer, rgbColor, mStatic);
             if (!screen.invalidRhomdod.some(rhmdod => rhmdod[0] == x && rhmdod[1] == y && rhmdod[2] == screen.layer)) {
                 screen.addRhomdod(newRhomDod);
