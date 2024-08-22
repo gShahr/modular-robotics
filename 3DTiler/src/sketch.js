@@ -367,8 +367,11 @@ var sketch1 = function (sketch) {
             screen.addHexagon(new Hexagon(x, y, screen.layer, rgbColor, mStatic));
             threeScreen.addHexagon(new Hexagon(x, y, screen.layer, rgbColor, mStatic));
         } else if (screen.shape === "rhombicDodecahedron") {
-            screen.addRhomdod(new RhomDod(x, y, screen.layer, rgbColor, mStatic));
-            threeScreen.addRhomdod(new RhomDod(x, y, screen.layer, rgbColor, mStatic));
+            const newRhomDod = new RhomDod(x, y, screen.layer, rgbColor, mStatic);
+            if (!screen.invalidRhomdod.some(rhmdod => rhmdod[0] == x && rhmdod[1] == y && rhmdod[2] == screen.layer)) {
+                screen.addRhomdod(newRhomDod);
+                threeScreen.addRhomdod(newRhomDod);
+            }
         }
     }
     
