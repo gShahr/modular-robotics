@@ -15,7 +15,7 @@ importBlocks = [];
 historyStack = [];
 redoStack = [];
 rgbColor = [255, 255, 255];
-boundaryBox = [[-1, -1], [-1, -1]];
+boundaryBox = [[-1, -1, -1], [-1, -1, -1]];
 
 function triggerFileInput() {
     document.getElementById('fileInput').click();
@@ -357,19 +357,19 @@ var sketch1 = function (sketch) {
         // document.getElementById("checkConnectivity").innerText = "Connected: " + message;    
     }
 
-    function handleAddShape(x, y) {
+    function handleAddShape(x, y, z = screen.layer) {
         if (screen.shape === "cube") {
-            if (screen.hasCube(x, y, screen.layer)) return;
-            screen.addCube(new Cube(x, y, screen.layer, rgbColor, mStatic));
-            threeScreen.addCube(new Cube(x, y, screen.layer, rgbColor, mStatic));
-            historyStack.push({ action: 'add', x: x, y: y, z: screen.layer, color: rgbColor, mStatic: mStatic });
+            if (screen.hasCube(x, y, z)) return;
+            screen.addCube(new Cube(x, y, z, rgbColor, mStatic));
+            threeScreen.addCube(new Cube(x, y, z, rgbColor, mStatic));
+            historyStack.push({ action: 'add', x: x, y: y, z: z, color: rgbColor, mStatic: mStatic });
         } else if (screen.shape === "hexagon") {
-            screen.addHexagon(new Hexagon(x, y, screen.layer, rgbColor, mStatic));
-            threeScreen.addHexagon(new Hexagon(x, y, screen.layer, rgbColor, mStatic));
+            screen.addHexagon(new Hexagon(x, y, z, rgbColor, mStatic));
+            threeScreen.addHexagon(new Hexagon(x, y, z, rgbColor, mStatic));
         } else if (screen.shape === "rhombicDodecahedron") {
-            if (screen.hasRhombicDodec(x, y, screen.layer)) return;
-            const newRhomDod = new RhomDod(x, y, screen.layer, rgbColor, mStatic);
-            if (!screen.invalidRhomdod.some(rhmdod => rhmdod[0] == x && rhmdod[1] == y && rhmdod[2] == screen.layer)) {
+            if (screen.hasRhombicDodec(x, y, z)) return;
+            const newRhomDod = new RhomDod(x, y, z, rgbColor, mStatic);
+            if (!screen.invalidRhomdod.some(rhmdod => rhmdod[0] == x && rhmdod[1] == y && rhmdod[2] == z)) {
                 screen.addRhomdod(newRhomDod);
                 threeScreen.addRhomdod(newRhomDod);
             }
@@ -456,21 +456,26 @@ var sketch1 = function (sketch) {
         x = Math.floor(sketch.mouseX / twoDtileSize);
         y = Math.floor(sketch.mouseY / twoDtileSize);
         if (sketch.key === '1') {
-            boundaryBox[0] = [x, y];
+            boundaryBox[0] = [x, y, screen.layer];
         } else if (sketch.key === '2') {
-            boundaryBox[1] = [x, y];
+            boundaryBox[1] = [x, y, screen.layer];
         } else if (sketch.key === '3') {
             for (let i = boundaryBox[0][0]; i <= boundaryBox[1][0]; i++) {
                 for (let j = boundaryBox[0][1]; j <= boundaryBox[1][1]; j++) {
-                    if (blocks.some(block => block.x === i && block.y === j)) {
-                        handleAddShape(x + i - boundaryBox[0][0], y + j - boundaryBox[0][1]);
+                    for (let k = boundaryBox[0][2]; k <= boundaryBox[1][2]; k++) {
+                        if (screen.hasCube(i, j, k)) {
+                            handleAddShape(x + i - boundaryBox[0][0], y + j - boundaryBox[0][1], screen.layer + k - boundaryBox[0][2]);
+                        }
                     }
                 }
             }
         } else if (sketch.key === '4') {
             for (let i = boundaryBox[0][0]; i <= boundaryBox[1][0]; i++) {
                 for (let j = boundaryBox[0][1]; j <= boundaryBox[1][1]; j++) {
-                    screen.removeCube(i, j, layer);
+                    for (let k = boundaryBox[0][2]; k <= boundaryBox[1][2]; k++) {
+                        screen.removeCube(i, j, k);
+                        threeScreen.removeCube(i, j, k);
+                    }
                 }
             }
         }
