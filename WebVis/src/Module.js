@@ -63,4 +63,21 @@ export class Module {
         let transform = new THREE.Matrix4().premultiply(trans2).premultiply(rotate).premultiply(trans1);
         this._setMeshMatrix(transform);
     }
+
+    _slidingAnimate(move, pct) {
+        let translate = new THREE.Vector3(0.0, 0.0, 0.0);
+        if ((move.deltaPos.abs().sum() > 1.0) && (move.anchorDir.abs().sum() > 0.1)) {
+            let _pct1, _pct2;
+            let testVec = new THREE.Vector3(1.0, 1.0, 1.0);
+            _pct1 = Math.min(pct * 2.0, 1.0);
+            _pct2 = 1.0 - Math.min(2.0 * (1.0 - pct), 1.0);
+            translate.add(move.deltaPos.clone().multiply(move.anchorDir).multiplyScalar(_pct1));
+            translate.add(move.deltaPos.clone().multiply(testVec.sub(move.anchorDir)).multiplyScalar(_pct2));
+        } else {
+            translate = move.deltaPos.clone().multiplyScalar(pct);
+        }
+
+        let transform = new THREE.Matrix4().makeTranslation(translate);
+        this._setMeshMatrix(transform);
+    }
 }

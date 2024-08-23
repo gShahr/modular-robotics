@@ -35,6 +35,14 @@ class twoDScreen {
         this._hexagons = hexagons;
     }
 
+    get getRhomdods() {
+        return this.rhomdod;
+    }
+
+    set setRhomdods(rhomdod) {
+        this._rhomdod = rhomdod;
+    }
+
     get getShape() {
         return this.shape;
     }
@@ -203,6 +211,15 @@ class twoDScreen {
         return false; 
     }
 
+    hasRhombicDodec(x, y, z) {
+        for (let i = 0; i < this.rhomdod.length; i++) {
+            if (this.rhomdod[i].x === x && this.rhomdod[i].y === y && this.rhomdod[i].z === z) {
+                return true;
+            }
+        }
+        return false; 
+    }
+
     hexagon = (sketch, centerX, centerY, radius) => {
         const angle = Math.PI / 3;
         sketch.beginShape();
@@ -339,7 +356,6 @@ class twoDScreen {
                         this.tileSize, 
                         this.tileSize
                     );
-                    console.log(this.rhomdod[i]);
                     if (this.rhomdod[i].mStatic) {
                         sketch.fill(255);
                         sketch.textAlign(sketch.CENTER, sketch.CENTER);
