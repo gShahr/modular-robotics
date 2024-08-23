@@ -38,6 +38,12 @@ export class Module {
         gModules[id] = this;
     }
 
+    destroy() {
+        gScene.remove(this.parentMesh);
+        this.mesh.geometry.dispose();
+        this.mesh.material.dispose();
+    }
+
     _setMeshMatrix(optionalPreTransform = new THREE.Matrix4()) {
         let transform = new THREE.Matrix4().makeScale(this.scale, this.scale, this.scale).premultiply(optionalPreTransform);
         this.mesh.matrix.copy(transform);

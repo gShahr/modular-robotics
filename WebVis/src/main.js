@@ -5,6 +5,7 @@ import { ModuleType, MoveType } from "./utils.js";
 import { Move } from "./Move.js";
 import { MoveSequence } from "./MoveSequence.js";
 import { gGui } from "./GUI.js";
+import { Scenario } from "./Scenario.js";
 
 // Extends THREE Vector3 type with new component-wise abs() and sum() methods
 // TODO put this in a better place?
@@ -33,30 +34,14 @@ window.gwForward = true;
 window.gwNextAnimationRequested = false;
 window.gwAnimSpeed = 1.0;
 window.gwUser = gUser;
+window.gwMoveSequence = null;
 
 /* --- objects --- */
-export const gModules = {};
-[
-    [123, 0.0, 0.0, 0.0],
-    [124, -1.0, 0.0, 0.0],
-    [125, -1.0, 0.0, -1.0],
-].map( ([id, x, y, z]) => new Module(ModuleType.CUBE, id, new THREE.Vector3(x, y, z), 0x808080, 0.9))
-
-const rhombicDodecahedron = new Module(ModuleType.RHOMBIC_DODECAHEDRON, 0, new THREE.Vector3(3.0, -1.0, -3.0));
+export const gModules = {}; // Module constructor automatically adds modules to this
 
 /* --- lights --- */
-const light0 = new THREE.AmbientLight(0xFFFFFF, 0.10);
-const light1 = new THREE.PointLight(0x50C0FF, 100.0, 30.0);
-const light2 = new THREE.PointLight(0xFFC050, 100.0, 30.0);
-light1.castShadow = true;
-light2.castShadow = true;
+const light0 = new THREE.AmbientLight(0xFFFFFF, 1.0);
 gScene.add(light0);
-gScene.add(light1);
-gScene.add(light2);
-const helper1 = new THREE.PointLightHelper(light1, 0.25);
-const helper2 = new THREE.PointLightHelper(light2, 0.25);
-gScene.add(helper1);
-gScene.add(helper2);
 
 /* --- floor --- */
 const planeSize = 1000;
@@ -78,30 +63,16 @@ planeMesh.position.y = -3.0;
 planeMesh.receiveShadow = true;
 gScene.add(planeMesh); 
 
-let currentAnimProgress = 0.0; // 0.0-1.0
-let moves = [
-    new Move(123, new THREE.Vector3(-1.0, 0.0, 0.0), new THREE.Vector3(-1.0, 1.0, 0.0), MoveType.PIVOT, true),
-    new Move(123, new THREE.Vector3(0.0, -1.0, 0.0), new THREE.Vector3(-1.0, -1.0, 0.0), MoveType.PIVOT, false),
-    new Move(123, new THREE.Vector3(1.0, 0.0, 0.0), new THREE.Vector3(1.0, 0.0, 1.0), MoveType.PIVOT, true),
-    new Move(123, new THREE.Vector3(0.0, 1.0, 0.0), new THREE.Vector3(0.0, -1.0, -1.0), MoveType.SLIDING, false),
-    new Move(123, new THREE.Vector3(0.0, 0.0, 0.0), new THREE.Vector3(0.0, 0.0, -1.0), MoveType.SLIDING, false),
-]
-
-// TODO Put all this in a better place
-let moveSequence = new MoveSequence(moves);
+// TODO Put all this in a better place?
 let move;
+let lastFrameTime = 0;
 let gDeltaTime;
 let readyForNewAnimation = true;
-let bChain;
+let currentAnimProgress = 0.0; // 0.0-1.0
 
-let lastFrameTime = 0;
 function animate(time) {
     gDeltaTime = time - lastFrameTime;
     lastFrameTime = time;
-
-    rhombicDodecahedron.mesh.rotation.x += 0.0015;
-    light1.position.set(Math.cos(time / 3000.0) * 1.5, 3.0, Math.sin(time / 3000.0) * 1.5);
-    light2.position.set(Math.cos(time / 3000.0 - 3.14) * 1.5, 3.0, Math.sin(time / 3000.0 - 3.14) * 1.5);
 
     if (currentAnimProgress > 1.0) { // Wrap up current animation if needed
         gModules[move.id].finishMove(move); // Offset the module
@@ -111,11 +82,11 @@ function animate(time) {
         //  Otherwise, handle checkpoint moves:
         //      If we're animating forwards, and the next move is a checkpoint move,
         //      OR if we're animating backwards and the just-finished move was a checkpoint move,
-        //          then set bChain to false -- don't request another animation.
+        //          don't request another animation.
         if (window.gwAutoAnimate) {
             window.gwNextAnimationRequested = true;
         } else {
-            let _move = window.gwForward ? moveSequence.moves[0] : move;
+            let _move = window.gwForward ? window.gwMoveSequence.moves[0] : move;
             window.gwNextAnimationRequested = _move ? _move.checkpoint : false;
         }
 
@@ -124,7 +95,7 @@ function animate(time) {
     }
 
     if (readyForNewAnimation && window.gwNextAnimationRequested) { // Fetch and start new animation if needed
-        move = window.gwForward ? moveSequence.pop() : moveSequence.undo();
+        move = window.gwForward ? window.gwMoveSequence.pop() : window.gwMoveSequence.undo();
         if (move) { readyForNewAnimation = false; }
     }
 
