@@ -1,5 +1,5 @@
 #include <vector>
-#include "Lattice.h"
+#include "../lattice/Lattice.h"
 
 #ifndef MODULAR_ROBOTICS_CONFIGURATIONSPACE_H
 #define MODULAR_ROBOTICS_CONFIGURATIONSPACE_H

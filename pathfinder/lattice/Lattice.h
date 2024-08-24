@@ -1,7 +1,7 @@
 #include <set>
 #include <boost/functional/hash.hpp>
-#include "ModuleManager.h"
-#include "CoordTensor.h"
+#include "../modules/ModuleManager.h"
+#include "../coordtensor/CoordTensor.h"
 
 #ifndef MODULAR_ROBOTICS_LATTICE_H
 #define MODULAR_ROBOTICS_LATTICE_H

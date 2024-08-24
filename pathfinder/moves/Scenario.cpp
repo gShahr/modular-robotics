@@ -1,9 +1,9 @@
 #include "Scenario.h"
 #include <iostream>
 #include <boost/format.hpp>
-#include "ModuleManager.h"
+#include "../modules/ModuleManager.h"
 #include "MoveManager.h"
-#include "Colors.h"
+#include "../modules/Colors.h"
 
 namespace Scenario {
     /*void exportStateTensorToJson(int id, const CoordTensor<bool>& stateTensor, const std::string& filename) {

@@ -7,9 +7,9 @@
 #include <iostream>
 #include <valarray>
 #include "Lattice.h"
-#include "CoordTensor.h"
-#include "ConfigurationSpace.h"
-#include "Metamodule.h"
+#include "../coordtensor/CoordTensor.h"
+#include "../search/ConfigurationSpace.h"
+#include "../modules/Metamodule.h"
 #include <nlohmann/json.hpp>
 
 namespace LatticeSetup {

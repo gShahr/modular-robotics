@@ -5,7 +5,7 @@
 #include <set>
 #include <utility>
 #include <omp.h>
-#include "MoveManager.h"
+#include "../moves/MoveManager.h"
 #include "ConfigurationSpace.h"
 #include "SearchAnalysis.h"
 

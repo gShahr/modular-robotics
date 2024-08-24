@@ -8,7 +8,7 @@ CXXFLAGS = -w -std=c++17 -I $(VCPKG_ROOT)/installed/x64-windows/include
 LDFLAGS = -L $(VCPKG_ROOT)/installed/x64-windows/lib -lgmock -lgtest -lbenchmark -lpthread -fopenmp
 
 # Source files
-SOURCES = main.cpp ConfigurationSpace.cpp Lattice.cpp ModuleManager.cpp MoveManager.cpp Metamodule.cpp LatticeSetup.cpp Scenario.cpp Isometry.cpp Colors.cpp SearchAnalysis.cpp
+SOURCES = lattice/Lattice.cpp lattice/LatticeSetup.cpp modules/Colors.cpp modules/Metamodule.cpp modules/ModuleManager.cpp moves/Isometry.cpp moves/MoveManager.cpp moves/Scenario.cpp search/ConfigurationSpace.cpp search/SearchAnalysis.cpp main.cpp
 
 # Source files without main
 SOURCES2 = ConfigurationSpace.cpp Lattice.cpp ModuleManager.cpp MoveManager.cpp Metamodule.cpp LatticeSetup.cpp Scenario.cpp Isometry.cpp Colors.cpp SearchAnalysis.cpp

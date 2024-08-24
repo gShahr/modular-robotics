@@ -1,6 +1,6 @@
 #include <set>
-#include "Lattice.h"
-#include "debug_util.h"
+#include "../lattice/Lattice.h"
+#include "../coordtensor/debug_util.h"
 #include "ModuleManager.h"
 
 IModuleProperty* PropertyInitializer::GetProperty(const nlohmann::basic_json<> &propertyDef) {
