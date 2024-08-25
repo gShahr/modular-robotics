@@ -18,7 +18,7 @@ HashedState::HashedState(const std::set<ModuleBasic>& modData) {
     moduleData = modData;
 }
 
-HashedState::HashedState(const HashedState& other) : seed(other.GetSeed()) {}
+HashedState::HashedState(const HashedState& other) : seed(other.GetSeed()), moduleData(other.GetState()) {}
 
 size_t HashedState::GetSeed() const {
     return seed;
