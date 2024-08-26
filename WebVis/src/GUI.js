@@ -31,11 +31,11 @@ class GuiGlobalsHelper {
 export const gGui = new GUI();
 
 window._loadExampleScenario1 = async () => {
-    const scen = await fetch('../Scenarios/3d2rMeta.scen').then(response => response.text());
+    const scen = await fetch('./Scenarios/3d2rMeta.scen').then(response => response.text());
     new Scenario(scen);
 }
 window._loadExampleScenario2 = async () => {
-    const scen = await fetch('../Scenarios/820.scen').then(response => response.text());
+    const scen = await fetch('./Scenarios/820.scen').then(response => response.text());
     new Scenario(scen);
 }
 document.addEventListener("DOMContentLoaded", function () {
