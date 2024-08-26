@@ -34,7 +34,7 @@ window.gwForward = true;
 window.gwNextAnimationRequested = false;
 window.gwAnimSpeed = 1.0;
 window.gwUser = gUser;
-window.gwMoveSequence = null;
+window.gwMoveSequence = new MoveSequence();
 
 /* --- objects --- */
 // Module constructor automatically adds modules to this global
