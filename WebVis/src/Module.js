@@ -11,8 +11,8 @@ import { gScene, gModules, gRenderer } from "./main.js";
 import { Move } from "./Move.js"
 
 const gTexLoader = new THREE.TextureLoader();
-let cubeTexture = gTexLoader.load('../resources/textures/cube_face.png');
-let rdTexture = gTexLoader.load('../resources/textures/cube_face.png');
+let cubeTexture = gTexLoader.load('./resources/textures/cube_face.png');
+let rdTexture = gTexLoader.load('./resources/textures/cube_face.png');
 
 function _createModuleMesh(moduleType, color = 0x808080, scale = 1.0) {
     let geometry = ModuleGeometries.get(moduleType);
