@@ -3,8 +3,8 @@
 #include <sstream>
 #include <string>
 #include <map>
-#include "debug_util.h"
-#include "Colors.h"
+#include "../coordtensor/debug_util.h"
+#include "../modules/Colors.h"
 #include "Lattice.h"
 
 std::vector<std::vector<int>> Lattice::adjList;

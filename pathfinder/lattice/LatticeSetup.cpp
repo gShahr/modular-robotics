@@ -1,7 +1,7 @@
 #include "LatticeSetup.h"
-#include "ConfigurationSpace.h"
-#include "Metamodule.h"
-#include "Colors.h"
+#include "../search/ConfigurationSpace.h"
+#include "../modules/Metamodule.h"
+#include "../modules/Colors.h"
 #include <set>
 
 namespace LatticeSetup {

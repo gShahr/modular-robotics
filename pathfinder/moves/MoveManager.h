@@ -2,7 +2,7 @@
 #include <unordered_map>
 #include <valarray>
 #include <nlohmann/json.hpp>
-#include "Lattice.h"
+#include "../lattice/Lattice.h"
 #include "Isometry.h"
 
 #ifndef MODULAR_ROBOTICS_MOVEMANAGER_H

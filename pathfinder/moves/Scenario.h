@@ -3,9 +3,9 @@
 
 #include <string>
 #include <vector>
-#include "CoordTensor.h"
-#include "ConfigurationSpace.h"
-#include "Lattice.h"
+#include "../coordtensor/CoordTensor.h"
+#include "../search/ConfigurationSpace.h"
+#include "../lattice/Lattice.h"
 #include "nlohmann/json.hpp"
 #include <fstream>
 

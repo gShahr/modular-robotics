@@ -8,8 +8,8 @@
 #include <iostream>
 #include <valarray>
 #include <nlohmann/json.hpp>
-#include "Isometry.h"
-#include "CoordTensor.h"
+#include "../moves/Isometry.h"
+#include "../coordtensor/CoordTensor.h"
 #include "Colors.h"
 
 class MetaModule : public ITransformable {

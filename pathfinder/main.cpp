@@ -3,18 +3,18 @@
 #include <getopt.h>
 #include <set>
 #include <string>
-#include "MoveManager.h"
-#include "ConfigurationSpace.h"
-#include "debug_util.h"
+#include "moves/MoveManager.h"
+#include "search/ConfigurationSpace.h"
+#include "coordtensor/debug_util.h"
 #include <boost/functional/hash.hpp>
 #include <boost/format.hpp>
 #include <queue>
 #include <unordered_set>
 #include <nlohmann/json.hpp>
-#include "Metamodule.h"
-#include "LatticeSetup.h"
-#include "Scenario.h"
-#include "SearchAnalysis.h"
+#include "modules/Metamodule.h"
+#include "lattice/LatticeSetup.h"
+#include "moves/Scenario.h"
+#include "search/SearchAnalysis.h"
 
 #define GENERATE_FINAL_STATE false
 

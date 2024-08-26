@@ -1,5 +1,5 @@
 #include <vector>
-#include "Lattice.h"
+#include "../lattice/Lattice.h"
 
 #ifndef MODULAR_ROBOTICS_CONFIGURATIONSPACE_H
 #define MODULAR_ROBOTICS_CONFIGURATIONSPACE_H
@@ -35,9 +35,7 @@ private:
     size_t seed;
     std::set<ModuleBasic> moduleData;
 public:
-    HashedState();
-
-    explicit HashedState(size_t seed);
+    HashedState() = delete;
 
     explicit HashedState(const std::set<ModuleBasic>& modData);
 
