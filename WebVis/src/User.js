@@ -41,7 +41,6 @@ export class User {
         }
         this.cameraStyle = newCameraStyle;
         this.resetCamera();
-        console.log(newCameraStyle);
     }
 }
 
