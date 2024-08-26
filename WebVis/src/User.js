@@ -17,7 +17,6 @@ export class User {
         this.cameraStyle = CameraType.PERSPECTIVE;
         this.headlamp = new THREE.PointLight(0xFFFFFF, 25.0);
         this.headlamp.position.set(0.0, 0.0, 0.0);
-        console.log(this.headlamp);
         this.resetCamera();
     }
 
