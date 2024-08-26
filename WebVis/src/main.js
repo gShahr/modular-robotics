@@ -75,7 +75,7 @@ function animate(time) {
             window.gwNextAnimationRequested = true;
         } else {
             let _move = window.gwForward ? window.gwMoveSequence.moves[0] : move;
-            window.gwNextAnimationRequested = _move ? _move.checkpoint : false;
+            window.gwNextAnimationRequested = _move ? !_move.checkpoint : false;
         }
 
         currentAnimProgress = 0.0;
