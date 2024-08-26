@@ -81,6 +81,8 @@ export class Module {
         this.color = color;
         this.scale = scale;
 
+        this.cumulativeRotationMatrix = new THREE.Matrix4();
+
         this.mesh = _createModuleMesh(moduleType, color, scale);
         this._setMeshMatrix();
         this.parentMesh = new THREE.Object3D(); // Parent object will never rotate
@@ -110,7 +112,9 @@ export class Module {
     }
 
     finishMove(move) {
-        this._setMeshMatrix();
+        let rotate = new THREE.Matrix4().makeRotationAxis(move.rotAxis, move.maxAngle);
+        this.cumulativeRotationMatrix = this.cumulativeRotationMatrix.premultiply(rotate);
+        this._setMeshMatrix(this.cumulativeRotationMatrix);
         this.parentMesh.position.add(move.deltaPos);
     }
 
@@ -119,7 +123,7 @@ export class Module {
         let rotate = new THREE.Matrix4().makeRotationAxis(move.rotAxis, move.maxAngle * pct);
         let trans2 = new THREE.Matrix4().makeTranslation(move.postTrans);
         let transform = new THREE.Matrix4().premultiply(trans2).premultiply(rotate).premultiply(trans1);
-        this._setMeshMatrix(transform);
+        this._setMeshMatrix(transform.multiply(this.cumulativeRotationMatrix));
     }
 
     _slidingAnimate(move, pct) {
