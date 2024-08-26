@@ -24,7 +24,7 @@ export const gUser = new User();
 gRenderer.setSize( window.innerWidth, window.innerHeight );
 gRenderer.shadowMap.enabled = true;
 gRenderer.setAnimationLoop( animate );
-gScene.background = new THREE.Color(0x303030);
+gScene.background = new THREE.Color(0x334D4D);
 
 // Following are global attributes set directly to the window object
 //  This allows them to (more easily) be added to the GUI,
@@ -94,6 +94,8 @@ function animate(time) {
         gModules[move.id].animateMove(move, currentAnimProgress);
         currentAnimProgress += gDeltaTime * window.gwAnimSpeed / 1000.0;
     }
+
+    gUser.controls.update();
 
 	gRenderer.render( gScene, gUser.camera );
 
