@@ -63,12 +63,20 @@ function exportToJson() {
     var sameZ = true;
     var firstZ = blocks.length > 0 ? blocks[0].z : null;
     let axisSize = 0;
+    let minX = Infinity, minY = Infinity, minZ = Infinity;
+
+    // Determine if all blocks are on the same Z level and find the minimum coordinates
     for (var i = 0; i < blocks.length; i++) {
         var current_block = blocks[i];
         if (current_block.z !== firstZ) {
             sameZ = false;
         }
+        minX = Math.min(minX, current_block.x);
+        minY = Math.min(minY, current_block.y);
+        minZ = Math.min(minZ, current_block.z);
     }
+
+    // Calculate the axis size
     for (let i = 0; i < blocks.length; i++) {
         for (let j = 0; j < blocks.length; j++) {
             let diffX = Math.abs(blocks[i].x - blocks[j].x);
@@ -77,16 +85,19 @@ function exportToJson() {
             axisSize = Math.max(axisSize, diffX, diffY, diffZ);
         }
     }
+
     var order = sameZ ? 2 : 3;
     jsonOutput += "    \"order\": " + order + ",\n";
     jsonOutput += "    \"axisSize\": " + (axisSize + 1) + ",\n";
     jsonOutput += "    \"modules\": [";
+
+    // Adjust coordinates to start at origin
     for (var i = 0; i < blocks.length; i++) {
         var current_block = blocks[i];
         var staticV = current_block.mStatic !== undefined ? current_block.mStatic : false;
-        jsonOutput += "\n\t{\n\t\t\"position\": [" + current_block.x + ", " + current_block.y;
+        jsonOutput += "\n\t{\n\t\t\"position\": [" + (current_block.x - minX) + ", " + (current_block.y - minY);
         if (!sameZ) {
-            jsonOutput += ", " + current_block.z;
+            jsonOutput += ", " + (current_block.z - minZ);
         }
         jsonOutput += "],\n";
         jsonOutput += "\t\t\"static\": " + staticV + ",\n";
