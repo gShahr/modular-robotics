@@ -9,12 +9,14 @@
 
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { gCanvas, gUser, gRenderer } from "./main.js";
+import { gScene, gCanvas, gUser, gRenderer } from "./main.js";
 import { CameraType } from "./utils.js";
 
 export class User {
     constructor() {
         this.cameraStyle = CameraType.PERSPECTIVE;
+        this.headlamp = new THREE.PointLight(0xFFFFFF, 12.0);
+        this.headlamp.position.set(0.0, 0.0, 0.0);
         this.resetCamera();
     }
 
@@ -31,6 +33,8 @@ export class User {
         newCamera.position.z = 5.0;
         this.controls = new OrbitControls(newCamera, gCanvas);
         this.camera = newCamera;
+        this.camera.add(this.headlamp);
+        gScene.add(this.camera);
     }
 
     toggleCameraStyle() {
@@ -41,7 +45,6 @@ export class User {
         }
         this.cameraStyle = newCameraStyle;
         this.resetCamera();
-        console.log(newCameraStyle);
     }
 }
 

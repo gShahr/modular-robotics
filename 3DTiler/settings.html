@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        form {
+            max-width: 400px;
+            margin: auto;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Settings</h1>
+    <form id="settingsForm">
+        <label for="tileSize">Tile Size:</label>
+        <input type="number" id="tileSize" name="tileSize" min="1" value="20">
+        <label for="rotationAngle">Rotation Angle:</label>
+        <input type="number" id="rotationAngle" name="rotationAngle" min="0" max="360" value="90">
+        <button type="submit">Save Settings</button>
+    </form>
+    <script>
+        document.getElementById('settingsForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const tileSize = document.getElementById('tileSize').value;
+            const rotationAngle = document.getElementById('rotationAngle').value;
+            localStorage.setItem('tileSize', tileSize);
+            localStorage.setItem('rotationAngle', rotationAngle);
+            alert('Settings saved!');
+        });
+
+        // Load settings on page load
+        window.onload = function() {
+            const tileSize = localStorage.getItem('tileSize');
+            const rotationAngle = localStorage.getItem('rotationAngle');
+            if (tileSize) document.getElementById('tileSize').value = tileSize;
+            if (rotationAngle) document.getElementById('rotationAngle').value = rotationAngle;
+        };
+    </script>
+</body>
+</html>

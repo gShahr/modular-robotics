@@ -7,12 +7,64 @@
 import * as THREE from 'three';
 import { ModuleType, MoveType } from "./utils.js";
 import { ModuleGeometries } from "./ModuleGeometries.js";
-import { gScene, gModules } from "./main.js";
+import { gScene, gModules, gRenderer } from "./main.js";
 import { Move } from "./Move.js"
+
+const gTexLoader = new THREE.TextureLoader();
+let cubeTexture = gTexLoader.load('./resources/textures/cube_face.png');
+let rdTexture = gTexLoader.load('./resources/textures/cube_face.png');
 
 function _createModuleMesh(moduleType, color = 0x808080, scale = 1.0) {
     let geometry = ModuleGeometries.get(moduleType);
-    let material = new THREE.MeshPhongMaterial({flatShading: true, color: color});
+    let material = new THREE.MeshPhongMaterial({
+        flatShading: true,
+        map: cubeTexture,
+        color: color,
+        onBeforeCompile: shader => { // Manually update the existing material shader to add borders to modules
+            // Extract the index of the start of main
+            //  We will declare some helper functions right before main()
+            let beginningOfMain = shader.fragmentShader.indexOf('void main() {');
+
+            // Extract the index of the closing curly brace, hack-ily
+            //  We will inject code to the end of main
+            let endOfMain = shader.fragmentShader.lastIndexOf('}');
+
+            // We will inject a uniform variable at the head of the shader source file
+            let uniformsToInject = 
+`uniform vec4 borderAttrs;
+`           // Hook up these uniforms to a variable TODO: add actual variability
+            shader.uniforms.borderAttrs = { value: new THREE.Vector4(0.0, 0.0, 0.0, 0.02) }; // R,G,B,width
+            
+            // We will inject some helper functions
+            let helperFunctions =
+`float Between(float low, float high, float val) {
+	return step(low, val) - step(high, val);
+}
+float Rectangle(vec2 orig, vec2 wh, vec2 st) {
+	float x = Between(orig.x, orig.x + wh.x, st.x);
+	float y = Between(orig.y, orig.y + wh.y, st.y);
+	return x*y;
+}
+`;          // We will inject code at the end of main()
+            let codeToInjectToMain =
+`float borderMask = 1.0 - Rectangle(vec2(borderAttrs.w), vec2(1.0 - 2.0*borderAttrs.w), vMapUv);
+float interiorMask = 1.0 - borderMask;
+vec3 borderColor = borderAttrs.xyz;
+vec3 border = borderMask * borderColor;
+
+vec3 interior = gl_FragColor.xyz * interiorMask;
+gl_FragColor = vec4(interior + border, 1.0);
+`;          // Perform the injection
+            shader.fragmentShader = 
+                uniformsToInject
+                + shader.fragmentShader.substring(0, beginningOfMain)
+                + helperFunctions
+                + shader.fragmentShader.substring(beginningOfMain, endOfMain)
+                + codeToInjectToMain
+                + shader.fragmentShader.substring(endOfMain);
+        }
+    });
+
     let mesh = new THREE.Mesh(geometry, material);
     mesh.scale.set(scale, scale, scale);
     mesh.castShadow = true;
@@ -28,6 +80,8 @@ export class Module {
         this.pos = pos;
         this.color = color;
         this.scale = scale;
+
+        this.cumulativeRotationMatrix = new THREE.Matrix4();
 
         this.mesh = _createModuleMesh(moduleType, color, scale);
         this._setMeshMatrix();
@@ -58,7 +112,9 @@ export class Module {
     }
 
     finishMove(move) {
-        this._setMeshMatrix();
+        let rotate = new THREE.Matrix4().makeRotationAxis(move.rotAxis, move.maxAngle);
+        this.cumulativeRotationMatrix = this.cumulativeRotationMatrix.premultiply(rotate);
+        this._setMeshMatrix(this.cumulativeRotationMatrix);
         this.parentMesh.position.add(move.deltaPos);
     }
 
@@ -67,7 +123,7 @@ export class Module {
         let rotate = new THREE.Matrix4().makeRotationAxis(move.rotAxis, move.maxAngle * pct);
         let trans2 = new THREE.Matrix4().makeTranslation(move.postTrans);
         let transform = new THREE.Matrix4().premultiply(trans2).premultiply(rotate).premultiply(trans1);
-        this._setMeshMatrix(transform);
+        this._setMeshMatrix(transform.multiply(this.cumulativeRotationMatrix));
     }
 
     _slidingAnimate(move, pct) {
