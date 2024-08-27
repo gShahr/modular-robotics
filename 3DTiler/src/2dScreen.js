@@ -284,13 +284,6 @@ class twoDScreen {
             sketch.line(i*this.tileSize, 0, i*this.tileSize, this.height);
         }
         for (let i = 0; i < this.cubes.length; i++) {
-            if (this.cubes[i].x == highlightCoords[0] && this.cubes[i].y == highlightCoords[1] && this.cubes[i].z == highlightCoords[2]) {
-                sketch.stroke(255, 204, 0);
-                sketch.noFill();
-                sketch.rect(x * twoDtileSize, y * twoDtileSize, twoDtileSize, twoDtileSize);
-            } else {
-                sketch.stroke(0);
-            }
             switch(this.cubes[i].z) {
                 case this.layer:
                     sketch.fill(60);
@@ -323,6 +316,23 @@ class twoDScreen {
                             this.cubes[i].y*this.tileSize + this.tileSize/2);
                     }
                     sketch.fill(255);
+            }
+        }
+        for (let i = 0; i < this.cubes.length; i++) {
+            if (
+                this.cubes[i].x == highlightCoords[0] &&
+                this.cubes[i].y == highlightCoords[1] &&
+                this.cubes[i].z == highlightCoords[2]
+            ) {
+                sketch.stroke(255, 204, 0);
+                sketch.noFill();
+                sketch.rect(
+                    this.cubes[i].x * this.tileSize,
+                    this.cubes[i].y * this.tileSize,
+                    this.tileSize,
+                    this.tileSize
+                );
+                break;
             }
         }
     }
