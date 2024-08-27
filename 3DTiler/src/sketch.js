@@ -178,11 +178,13 @@ function toggleStatic() {
 }
 
 function increaseTileSize() {
-    twoDtileSize += twoDtileSizeDelta;
+    if (twoDtileSize <= 50) {
+        twoDtileSize += twoDtileSizeDelta;
+    }
 }
 
 function decreaseTileSize() {
-    if (twoDtileSize > twoDtileSizeDelta) {
+    if (twoDtileSize > 10) {
         twoDtileSize -= twoDtileSizeDelta;
     }
 }
