@@ -13,16 +13,12 @@ const char * BFSExcept::what() const noexcept {
     return "BFS exhausted without finding a path!";
 }
 
-HashedState::HashedState() : seed(0) {}
-
-HashedState::HashedState(size_t seed) : seed(seed) {}
-
 HashedState::HashedState(const std::set<ModuleBasic>& modData) {
     seed = boost::hash_range(modData.begin(), modData.end());
     moduleData = modData;
 }
 
-HashedState::HashedState(const HashedState& other) : seed(other.GetSeed()) {}
+HashedState::HashedState(const HashedState& other) : seed(other.GetSeed()), moduleData(other.GetState()) {}
 
 size_t HashedState::GetSeed() const {
     return seed;
@@ -45,9 +41,7 @@ size_t std::hash<HashedState>::operator()(const HashedState& state) const {
     //return state.GetSeed();
 }
 
-Configuration::Configuration(const std::set<ModuleBasic>& modData) : _nonStatModData(modData) {
-    hash = HashedState(modData);
-}
+Configuration::Configuration(const std::set<ModuleBasic>& modData) : _nonStatModData(modData), hash(HashedState(modData)) {}
 
 Configuration::~Configuration() {
     for (auto i = next.rbegin(); i != next.rend(); i++) {

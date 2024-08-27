@@ -67,7 +67,7 @@ export class Scenario {
                         case 3: anchorDir = new THREE.Vector3( 0.0,  0.0,  1.0); break; // +z
                         case 4: anchorDir = new THREE.Vector3(-1.0,  0.0,  0.0); break; // -x
                         case 5: anchorDir = new THREE.Vector3( 0.0, -1.0,  0.0); break; // -y
-                        case 6: anchorDir = new THREE.Vector3( 0.0,  0.0,  0.0); break; // -z
+                        case 6: anchorDir = new THREE.Vector3( 0.0,  0.0, -1.0); break; // -z
                     }
                     moves.push(new Move(moverId, anchorDir, deltaPos, moveType, checkpointMove));
                     if (checkpointMove) { checkpointMove = false; }

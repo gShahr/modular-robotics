@@ -35,9 +35,7 @@ private:
     size_t seed;
     std::set<ModuleBasic> moduleData;
 public:
-    HashedState();
-
-    explicit HashedState(size_t seed);
+    HashedState() = delete;
 
     explicit HashedState(const std::set<ModuleBasic>& modData);
 

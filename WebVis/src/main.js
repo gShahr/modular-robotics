@@ -21,10 +21,10 @@ export const gCanvas = document.getElementById("scene");
 export const gRenderer = new THREE.WebGLRenderer({canvas: gCanvas});
 export const gScene = new THREE.Scene();
 export const gUser = new User();
-export const gTexLoader = new THREE.TextureLoader();
 gRenderer.setSize( window.innerWidth, window.innerHeight );
 gRenderer.shadowMap.enabled = true;
 gRenderer.setAnimationLoop( animate );
+gScene.background = new THREE.Color(0x334D4D);
 
 // Following are global attributes set directly to the window object
 //  This allows them to (more easily) be added to the GUI,
@@ -34,34 +34,20 @@ window.gwForward = true;
 window.gwNextAnimationRequested = false;
 window.gwAnimSpeed = 1.0;
 window.gwUser = gUser;
-window.gwMoveSequence = null;
+window.gwMoveSequence = new MoveSequence();
 
 /* --- objects --- */
-export const gModules = {}; // Module constructor automatically adds modules to this
+// Module constructor automatically adds modules to this global
+// Initialize it with one cube so that the user doesn't feel lost
+export const gModules = {}
+new Module(ModuleType.CUBE, 0, new THREE.Vector3(0.0, 0.0, 0.0), 0x808080, 1.0);
 
 /* --- lights --- */
-const light0 = new THREE.AmbientLight(0xFFFFFF, 1.0);
-gScene.add(light0);
-
-/* --- floor --- */
-const planeSize = 1000;
-const texture = gTexLoader.load('resources/textures/ground.png');
-texture.wrapS = THREE.RepeatWrapping;
-texture.wrapT = THREE.RepeatWrapping;
-texture.magFilter = THREE.NearestFilter;
-texture.colorSpace = THREE.SRGBColorSpace;
-texture.repeat.set(planeSize/2, planeSize/2);
-const planeGeo = new THREE.PlaneGeometry(planeSize, planeSize);
-const planeMat = new THREE.MeshPhongMaterial({
-  map: texture,
-  emissive: 0x440000,
-  side: THREE.DoubleSide,
-});
-const planeMesh = new THREE.Mesh(planeGeo, planeMat);
-planeMesh.rotation.x = Math.PI * -.5;
-planeMesh.position.y = -3.0;
-planeMesh.receiveShadow = true;
-gScene.add(planeMesh); 
+const lightAmbient = new THREE.AmbientLight(0xFFFFFF, 0.60);
+const lightDirectional = new THREE.DirectionalLight(0xFFFFFF, 0.4);
+lightDirectional.position.set(1, 1, 1);
+gScene.add(lightAmbient);
+gScene.add(lightDirectional);
 
 // TODO Put all this in a better place?
 let move;
@@ -69,6 +55,8 @@ let lastFrameTime = 0;
 let gDeltaTime;
 let readyForNewAnimation = true;
 let currentAnimProgress = 0.0; // 0.0-1.0
+
+let debugCount = 2;
 
 function animate(time) {
     gDeltaTime = time - lastFrameTime;
@@ -87,7 +75,7 @@ function animate(time) {
             window.gwNextAnimationRequested = true;
         } else {
             let _move = window.gwForward ? window.gwMoveSequence.moves[0] : move;
-            window.gwNextAnimationRequested = _move ? _move.checkpoint : false;
+            window.gwNextAnimationRequested = _move ? !_move.checkpoint : false;
         }
 
         currentAnimProgress = 0.0;
@@ -96,6 +84,9 @@ function animate(time) {
 
     if (readyForNewAnimation && window.gwNextAnimationRequested) { // Fetch and start new animation if needed
         move = window.gwForward ? window.gwMoveSequence.pop() : window.gwMoveSequence.undo();
+        // TODO could add some effects to show which cube is moving --
+        //  e.g. attaching a light to the mover,
+        //  changing its material, etc
         if (move) { readyForNewAnimation = false; }
     }
 
@@ -104,5 +95,11 @@ function animate(time) {
         currentAnimProgress += gDeltaTime * window.gwAnimSpeed / 1000.0;
     }
 
+    gUser.controls.update();
+
 	gRenderer.render( gScene, gUser.camera );
+
+    if (debugCount > 0) {
+        debugCount--;
+    }
 }

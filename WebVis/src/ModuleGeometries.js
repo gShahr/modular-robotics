@@ -5,6 +5,7 @@ import { ModuleType } from "./utils.js";
 
 const _cubeGeometry = new THREE.BoxGeometry( 1, 1, 1 );
 
+// TODO add uv
 const _rhombicDodecahedronGeometryVertices = new Float32Array([
    -1.0, -1.0, -1.0, //  0 | A -- Obtuse vertices / Cube
    -1.0, -1.0,  1.0, //  1 | B
