@@ -31,16 +31,6 @@ ModuleProperties::ModuleProperties(const ModuleProperties& other) {
     }
 }
 
-ModuleProperties* ModuleProperties::MakeCopy() const {
-    auto copy = new ModuleProperties();
-    for (const auto& property : _properties) {
-        // Don't want to slice derived classes
-        copy->_properties.insert(property->MakeCopy());
-    }
-
-    return copy;
-}
-
 void ModuleProperties::InitProperties(const nlohmann::basic_json<> &propertyDefs) {
     for (const auto& key : PropertyKeys()) {
         if (propertyDefs.contains(key)) {
@@ -115,6 +105,12 @@ IModuleProperty* ModuleProperties::Find(const std::string& key) const {
     return nullptr;
 }
 
+ModuleProperties::~ModuleProperties() {
+    for (const auto property : _properties) {
+        delete property;
+    }
+}
+
 PropertyInitializer::PropertyInitializer(const std::string& name, IModuleProperty* (*constructor)(const nlohmann::basic_json<>&)) {
     DEBUG("Adding " << name << " constructor to property constructor map." << std::endl);
     ModuleProperties::PropertyKeys().push_back(name);
@@ -177,7 +173,7 @@ std::size_t boost::hash<ModuleProperties>::operator()(const ModuleProperties& mo
 Module::Module(Module&& mod) noexcept {
     coords = mod.coords;
     moduleStatic = mod.moduleStatic;
-    properties = *mod.properties.MakeCopy();
+    properties = mod.properties;
     id = mod.id;
 }
 
