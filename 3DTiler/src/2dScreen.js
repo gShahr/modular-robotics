@@ -318,23 +318,14 @@ class twoDScreen {
                     sketch.fill(255);
             }
         }
-        for (let i = 0; i < this.cubes.length; i++) {
-            if (
-                this.cubes[i].x == highlightCoords[0] &&
-                this.cubes[i].y == highlightCoords[1] &&
-                this.cubes[i].z == highlightCoords[2]
-            ) {
-                sketch.stroke(255, 204, 0);
-                sketch.noFill();
-                sketch.rect(
-                    this.cubes[i].x * this.tileSize,
-                    this.cubes[i].y * this.tileSize,
-                    this.tileSize,
-                    this.tileSize
-                );
-                break;
-            }
-        }
+        sketch.stroke(255, 204, 0);
+        sketch.noFill();
+        sketch.rect(
+            highlightCoords[0] * this.tileSize,
+            highlightCoords[1] * this.tileSize,
+            this.tileSize,
+            this.tileSize
+        );
     }
 
     drawHexagons(sketch) {
