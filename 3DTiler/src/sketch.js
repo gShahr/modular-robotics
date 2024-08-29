@@ -472,6 +472,7 @@ var sketch1 = function (sketch) {
         if (sketch.key === '1') {
             boundaryBox[0] = [x, y, screen.layer];
         } else if (sketch.key === '2') {
+            copyBlocks = [];
             boundaryBox[1] = [x, y, screen.layer];
             for (let i = boundaryBox[0][0]; i <= boundaryBox[1][0]; i++) {
                 for (let j = boundaryBox[0][1]; j <= boundaryBox[1][1]; j++) {
