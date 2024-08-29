@@ -488,6 +488,7 @@ var sketch1 = function (sketch) {
                 handleAddShape(x + block.x - boundaryBox[0][0], y + block.y - boundaryBox[0][1], screen.layer + block.z - boundaryBox[0][2]);
             }
         } else if (sketch.key === '4') {
+            copyBlocks = [];
             for (let i = boundaryBox[0][0]; i <= boundaryBox[1][0]; i++) {
                 for (let j = boundaryBox[0][1]; j <= boundaryBox[1][1]; j++) {
                     for (let k = boundaryBox[0][2]; k <= boundaryBox[1][2]; k++) {
