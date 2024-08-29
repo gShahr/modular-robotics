@@ -275,6 +275,16 @@ class threeDScreen {
             }
             sketch.pop();
         }
+        for (let block of copyBlocks) {
+            const x = block.x * this.tileSize - halfWidth;
+            const y = block.y * this.tileSize - halfHeight;
+            const z = block.z * this.tileSize;
+            sketch.push();
+            sketch.translate(x, y, z);
+            sketch.fill(128, 0, 128);
+            sketch.box(this.tileSize);
+            sketch.pop();
+        }
     }
 
     drawHexagons(sketch) {
