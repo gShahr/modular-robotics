@@ -267,6 +267,12 @@ class threeDScreen {
                 sketch.noFill();
                 sketch.box(this.tileSize * 1.1);
             }
+            const isMatching = (box, cube) => box[0] == cube.x && box[1] == cube.y && box[2] == cube.z;
+            if ([boundaryBox[0], boundaryBox[1]].some(box => isMatching(box, this.cubes[i]))) {
+                sketch.stroke(128, 0, 128);
+                sketch.noFill();
+                sketch.box(this.tileSize * 1.1);
+            }
             sketch.pop();
         }
     }
