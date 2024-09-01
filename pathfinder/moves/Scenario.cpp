@@ -36,7 +36,7 @@ namespace Scenario {
             file << "1, 255, 255, 255, 85\n\n";
         } else {
             for (auto color : ColorProperty::Palette()) {
-                Colors::RGB rgb(color);
+                Colors::ColorsRGB rgb(color);
                 file << color << ", " << rgb.red << ", " << rgb.green << ", " << rgb.blue << ", 85\n";
             }
             file << "\n";
