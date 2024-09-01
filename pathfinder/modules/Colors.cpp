@@ -1,15 +1,15 @@
 #include "Colors.h"
 
 namespace Colors {
-    RGB::RGB(int r, int g, int b) : red(r), green(g), blue(b) {}
+    ColorsRGB::ColorsRGB(int r, int g, int b) : red(r), green(g), blue(b) {}
 
-    RGB::RGB(int rgbInt) {
+    ColorsRGB::ColorsRGB(int rgbInt) {
         red = rgbInt & 0xFF0000;
         green = rgbInt & 0x00FF00;
         blue = rgbInt & 0x0000FF;
     }
 
-    std::map<std::string, RGB> colorToRGB = {
+    std::map<std::string, ColorsRGB> colorToRGB = {
             {"red", {255, 0, 0}},
             {"green", {0, 255, 0}},
             {"blue", {0, 0, 255}},
@@ -27,12 +27,12 @@ namespace Colors {
             {"magenta", {255, 0, 255}}
     };
 
-    RGB convertColorNameToRGB(const std::string& colorName) {
+    ColorsRGB convertColorNameToRGB(const std::string& colorName) {
         auto it = colorToRGB.find(colorName);
         if (it != colorToRGB.end()) {
             return it->second;
         } else {
-            return RGB(0);
+            return ColorsRGB(0);
         }
     }
 

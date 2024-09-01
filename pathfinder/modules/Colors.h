@@ -11,19 +11,19 @@
 #define COLOR "color"
 
 namespace Colors {
-    struct RGB {
+    struct ColorsRGB {
         int red;
         int green;
         int blue;
 
-        RGB(int r, int g, int b);
+        ColorsRGB(int r, int g, int b);
 
-        explicit RGB(int rgbInt);
+        explicit ColorsRGB(int rgbInt);
     };
 
-    extern std::map<std::string, RGB> colorToRGB;
+    extern std::map<std::string, ColorsRGB> colorToRGB;
 
-    RGB convertColorNameToRGB(const std::string& colorName);
+    ColorsRGB convertColorNameToRGB(const std::string& colorName);
 
     extern std::map<std::string, int> colorToInt;
 
