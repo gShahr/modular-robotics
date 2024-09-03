@@ -444,8 +444,12 @@ std::string Lattice::ToString() {
     for (int i = 0; i < coordTensor.GetArrayInternal().size(); i++) {
         auto id = coordTensor.GetElementDirect(i);
         if (id >= 0 && !ignoreProperties) {
-            auto colorProp = dynamic_cast<ColorProperty*>(ModuleIdManager::Modules()[id].properties.Find(COLOR_PROP_NAME));
-            out << Colors::intToColor[colorProp->GetColorInt()][0];
+            if (ModuleIdManager::GetModule(id).moduleStatic) {
+                out << '#';
+            } else {
+                auto colorProp = dynamic_cast<ColorProperty*>(ModuleIdManager::Modules()[id].properties.Find(COLOR_PROP_NAME));
+                out << Colors::intToColor[colorProp->GetColorInt()][0];
+            }
         } else if (id >= 0) {
             out << '#';
         } else {
