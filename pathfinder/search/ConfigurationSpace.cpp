@@ -37,8 +37,7 @@ bool HashedState::operator!=(const HashedState& other) const {
 }
 
 size_t std::hash<HashedState>::operator()(const HashedState& state) const {
-    return std::hash<size_t>()(state.GetSeed());
-    //return state.GetSeed();
+    return state.GetSeed();
 }
 
 Configuration::Configuration(const std::set<ModuleBasic>& modData) : hash(HashedState(modData)) {}
