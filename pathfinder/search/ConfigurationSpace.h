@@ -64,7 +64,6 @@ class Configuration {
 private:
     Configuration* parent = nullptr;
     std::vector<Configuration*> next;
-    std::set<ModuleBasic> _nonStatModData;
     HashedState hash;
     int cost;
 public:
