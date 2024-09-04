@@ -112,8 +112,10 @@ export class Module {
     }
 
     finishMove(move) {
-        let rotate = new THREE.Matrix4().makeRotationAxis(move.rotAxis, move.maxAngle);
-        this.cumulativeRotationMatrix = this.cumulativeRotationMatrix.premultiply(rotate);
+        if (move.moveType !== MoveType.SLIDING) {
+            let rotate = new THREE.Matrix4().makeRotationAxis(move.rotAxis, move.maxAngle);
+            this.cumulativeRotationMatrix = this.cumulativeRotationMatrix.premultiply(rotate);
+        }
         this._setMeshMatrix(this.cumulativeRotationMatrix);
         this.parentMesh.position.add(move.deltaPos);
     }
