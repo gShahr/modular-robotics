@@ -20,8 +20,8 @@
 
 int main(int argc, char* argv[]) {
     bool ignoreColors = false;
-    std::string initialFile = "docs/examples/zigzag_initial.json";
-    std::string finalFile = "docs/examples/zigzag_final.json";
+    std::string initialFile = "../docs/examples/moves/move_zigzag/zigzag_initial.json";
+    std::string finalFile = "../docs/examples/moves/move_zigzag/zigzag_final.json";
     std::string exportFile = initialFile.substr(0, initialFile.find_last_of('.')) + ".scen";
     std::string analysisFile = initialFile.substr(0, initialFile.find_last_of('.')) + "_analysis.json";
     std::size_t trimPos;
@@ -71,7 +71,7 @@ int main(int argc, char* argv[]) {
     
     // Set up moves
     MoveManager::InitMoveManager(Lattice::Order(), Lattice::AxisSize());
-    MoveManager::RegisterAllMoves();
+    MoveManager::RegisterAllMoves("../Moves");
     
     // BFS
     std::cout << "BFS Testing:\n";

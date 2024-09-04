@@ -11,6 +11,7 @@ highlightCoords = [-1, -1, -1];
 mStatic = false;
 objects = [];
 blocks = [];
+copyBlocks = [];
 importBlocks = [];
 historyStack = [];
 redoStack = [];
@@ -62,12 +63,20 @@ function exportToJson() {
     var sameZ = true;
     var firstZ = blocks.length > 0 ? blocks[0].z : null;
     let axisSize = 0;
+    let minX = Infinity, minY = Infinity, minZ = Infinity;
+
+    // Determine if all blocks are on the same Z level and find the minimum coordinates
     for (var i = 0; i < blocks.length; i++) {
         var current_block = blocks[i];
         if (current_block.z !== firstZ) {
             sameZ = false;
         }
+        minX = Math.min(minX, current_block.x);
+        minY = Math.min(minY, current_block.y);
+        minZ = Math.min(minZ, current_block.z);
     }
+
+    // Calculate the axis size
     for (let i = 0; i < blocks.length; i++) {
         for (let j = 0; j < blocks.length; j++) {
             let diffX = Math.abs(blocks[i].x - blocks[j].x);
@@ -76,16 +85,19 @@ function exportToJson() {
             axisSize = Math.max(axisSize, diffX, diffY, diffZ);
         }
     }
+
     var order = sameZ ? 2 : 3;
     jsonOutput += "    \"order\": " + order + ",\n";
     jsonOutput += "    \"axisSize\": " + (axisSize + 1) + ",\n";
     jsonOutput += "    \"modules\": [";
+
+    // Adjust coordinates to start at origin
     for (var i = 0; i < blocks.length; i++) {
         var current_block = blocks[i];
         var staticV = current_block.mStatic !== undefined ? current_block.mStatic : false;
-        jsonOutput += "\n\t{\n\t\t\"position\": [" + current_block.x + ", " + current_block.y;
+        jsonOutput += "\n\t{\n\t\t\"position\": [" + (current_block.x - minX) + ", " + (current_block.y - minY);
         if (!sameZ) {
-            jsonOutput += ", " + current_block.z;
+            jsonOutput += ", " + (current_block.z - minZ);
         }
         jsonOutput += "],\n";
         jsonOutput += "\t\t\"static\": " + staticV + ",\n";
@@ -166,11 +178,13 @@ function toggleStatic() {
 }
 
 function increaseTileSize() {
-    twoDtileSize += twoDtileSizeDelta;
+    if (twoDtileSize <= 50) {
+        twoDtileSize += twoDtileSizeDelta;
+    }
 }
 
 function decreaseTileSize() {
-    if (twoDtileSize > twoDtileSizeDelta) {
+    if (twoDtileSize > 10) {
         twoDtileSize -= twoDtileSizeDelta;
     }
 }
@@ -458,18 +472,23 @@ var sketch1 = function (sketch) {
         if (sketch.key === '1') {
             boundaryBox[0] = [x, y, screen.layer];
         } else if (sketch.key === '2') {
+            copyBlocks = [];
             boundaryBox[1] = [x, y, screen.layer];
-        } else if (sketch.key === '3') {
             for (let i = boundaryBox[0][0]; i <= boundaryBox[1][0]; i++) {
                 for (let j = boundaryBox[0][1]; j <= boundaryBox[1][1]; j++) {
                     for (let k = boundaryBox[0][2]; k <= boundaryBox[1][2]; k++) {
                         if (screen.hasCube(i, j, k)) {
-                            handleAddShape(x + i - boundaryBox[0][0], y + j - boundaryBox[0][1], screen.layer + k - boundaryBox[0][2]);
+                            copyBlocks.push({ x: i, y: j, z: k });
                         }
                     }
                 }
             }
+        } else if (sketch.key === '3') {
+            for (let block of copyBlocks) {
+                handleAddShape(x + block.x - boundaryBox[0][0], y + block.y - boundaryBox[0][1], screen.layer + block.z - boundaryBox[0][2]);
+            }
         } else if (sketch.key === '4') {
+            copyBlocks = [];
             for (let i = boundaryBox[0][0]; i <= boundaryBox[1][0]; i++) {
                 for (let j = boundaryBox[0][1]; j <= boundaryBox[1][1]; j++) {
                     for (let k = boundaryBox[0][2]; k <= boundaryBox[1][2]; k++) {

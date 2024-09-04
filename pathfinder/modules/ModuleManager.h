@@ -59,9 +59,6 @@ public:
     //ModuleProperties(const ModuleProperties&) = delete;
     ModuleProperties(const ModuleProperties& other);
 
-    [[nodiscard]]
-    ModuleProperties* MakeCopy() const;
-
     void InitProperties(const nlohmann::basic_json<>& propertyDefs);
 
     void UpdateProperties(const std::valarray<int>& moveInfo);
@@ -73,6 +70,8 @@ public:
     ModuleProperties& operator=(const ModuleProperties& right);
 
     IModuleProperty* Find(const std::string& key) const;
+
+    ~ModuleProperties();
 
     friend class IModuleProperty;
     friend class PropertyInitializer;
