@@ -250,7 +250,7 @@ std::size_t boost::hash<ModuleData>::operator()(const ModuleData &modData) const
 }
 
 
-std::size_t std::hash<ModuleBasic>::operator()(ModuleBasic& modData) const {
+std::size_t std::hash<ModuleBasic>::operator()(ModuleBasic& modData) const noexcept {
     if (!modData.hashCacheValid) {
         boost::hash<ModuleBasic> hasher;
         modData.hash = hasher(modData);
@@ -259,7 +259,7 @@ std::size_t std::hash<ModuleBasic>::operator()(ModuleBasic& modData) const {
     return modData.hash;
 }
 
-std::size_t boost::hash<ModuleBasic>::operator()(const ModuleBasic& modData) const {
+std::size_t boost::hash<ModuleBasic>::operator()(const ModuleBasic& modData) const noexcept {
     auto coordHash = boost::hash_range(begin(modData.Coords()), end(modData.Coords()));
     if (!Lattice::ignoreProperties) {
         boost::hash<ModuleProperties> propertyHasher;
@@ -269,7 +269,7 @@ std::size_t boost::hash<ModuleBasic>::operator()(const ModuleBasic& modData) con
     return coordHash;
 }
 
-std::size_t boost::hash<ModuleProperties>::operator()(const ModuleProperties& moduleProperties) {
+std::size_t boost::hash<ModuleProperties>::operator()(const ModuleProperties& moduleProperties) const noexcept {
     //std::size_t prev = 0;
     auto cmp = [](int a, int b) { return a < b; };
     std::set<std::size_t, decltype(cmp)> hashes(cmp);

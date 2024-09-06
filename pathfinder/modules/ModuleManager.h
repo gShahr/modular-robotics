@@ -206,17 +206,17 @@ struct boost::hash<ModuleData> {
 
 template<>
 struct std::hash<ModuleBasic> {
-    std::size_t operator()(ModuleBasic& modData) const;
+    std::size_t operator()(ModuleBasic& modData) const noexcept;
 };
 
 template<>
 struct boost::hash<ModuleBasic> {
-    std::size_t operator()(const ModuleBasic& modData) const;
+    std::size_t operator()(const ModuleBasic& modData) const noexcept;
 };
 
 template<>
 struct boost::hash<ModuleProperties> {
-    std::size_t operator()(const ModuleProperties& moduleProperties);
+    std::size_t operator()(const ModuleProperties& moduleProperties) const noexcept;
 };
 
 // Class used to hold info about each module
