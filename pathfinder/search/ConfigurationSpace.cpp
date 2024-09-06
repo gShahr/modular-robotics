@@ -74,7 +74,9 @@ std::vector<std::set<ModuleData>> Configuration::MakeAllMovesForAllVertices() co
         auto legalMoves = MoveManager::CheckAllMoves(Lattice::coordTensor, *module);
         for (const auto move: legalMoves) {
             Lattice::MoveModule(*module, move->MoveOffset());
-            result.emplace_back(Lattice::GetModuleInfo());
+            if (Lattice::checkConnected) {
+                result.emplace_back(Lattice::GetModuleInfo());
+            }
             Lattice::MoveModule(*module, -move->MoveOffset());
         }
     }
