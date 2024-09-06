@@ -106,7 +106,7 @@ public:
     friend class MoveManager;
 };
 
-class Move2d : public MoveBase {
+class Move2d final : public MoveBase {
 public:
     Move2d();
     [[nodiscard]]
@@ -116,7 +116,7 @@ public:
     bool MoveCheck(CoordTensor<int>& tensor, const Module& mod) override;
 };
 
-class Move3d : public MoveBase {
+class Move3d final : public MoveBase {
 public:
     Move3d();
     [[nodiscard]]

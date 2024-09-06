@@ -123,7 +123,7 @@ public:
 };
 
 // Class holding a pointer to a class implementing IModuleBasic, exists purely for convenience
-class ModuleData : public IModuleBasic {
+class ModuleData final : public IModuleBasic {
 private:
     std::unique_ptr<IModuleBasic> module;
 
@@ -146,7 +146,7 @@ public:
 };
 
 // Class used to hold bare minimum representation of a module, for use in Configuration class
-class ModuleBasic : public IModuleBasic {
+class ModuleBasic final : public IModuleBasic {
 private:
     std::size_t hash = -1;
 
@@ -175,7 +175,7 @@ public:
 // Class used to represent a module as a single 64-bit integer. Conditions for proper functionality:
 // - Modules coordinates must fall within (inclusive) range (0, 0, 0) to (255, 255, 255)
 // - Modules may only have a single property, which must be able to be represented flawlessly using <= 40 bits
-class ModuleInt64 : public IModuleBasic {
+class ModuleInt64 final : public IModuleBasic {
 private:
     std::uint_fast64_t modInt;
 

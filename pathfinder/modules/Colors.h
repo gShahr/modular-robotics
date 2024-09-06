@@ -30,7 +30,7 @@ namespace Colors {
     extern std::map<int, std::string> intToColor;
 }
 
-class ColorProperty : public IModuleProperty {
+class ColorProperty final : public IModuleProperty {
 private:
     // Every (non-abstract) property needs this to ensure constructor is in the constructor map
     static PropertyInitializer initializer;
