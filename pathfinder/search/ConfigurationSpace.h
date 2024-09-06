@@ -73,7 +73,7 @@ public:
 
     std::vector<std::set<ModuleData>> MakeAllMoves();
 
-    std::vector<std::set<ModuleBasic>> MakeAllMovesForAllVertices();
+    std::vector<std::set<ModuleData>> MakeAllMovesForAllVertices();
 
     void AddEdge(Configuration* configuration);
 
