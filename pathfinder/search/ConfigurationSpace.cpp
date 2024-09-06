@@ -259,7 +259,7 @@ void Configuration::SetCost(const int cost) {
 }
 
 template <typename Heuristic>
-auto CompareConfiguration(const Configuration* final, Heuristic heuristic) {
+auto Configuration::CompareConfiguration(const Configuration* final, Heuristic heuristic) {
     return [final, heuristic](Configuration* c1, Configuration* c2) {
         const int cost1 = c1->GetCost() + (c1->*heuristic)(final);
         const int cost2 = c2->GetCost() + (c2->*heuristic)(final);
@@ -347,7 +347,7 @@ std::vector<Configuration*> ConfigurationSpace::AStar(Configuration* start, cons
     SearchAnalysis::StartClock();
 #endif
     int dupesAvoided = 0;
-    auto compare = CompareConfiguration(final, &Configuration::ManhattanDistance);
+    auto compare = Configuration::CompareConfiguration(final, &Configuration::ManhattanDistance);
     using CompareType = decltype(compare);
     std::priority_queue<Configuration*, std::vector<Configuration*>, CompareType> pq(compare);
     std::unordered_set<HashedState> visited;

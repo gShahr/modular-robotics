@@ -100,7 +100,7 @@ public:
     void SetCost(int cost);
 
     template <typename Heuristic>
-    auto CompareConfiguration(const Configuration* final, Heuristic heuristic);
+    static auto CompareConfiguration(const Configuration* final, Heuristic heuristic);
 
     struct ValarrayComparator {
         bool operator()(const std::valarray<int>& lhs, const std::valarray<int>& rhs) const;
