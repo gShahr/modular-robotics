@@ -168,7 +168,9 @@ ModuleInt64::ModuleInt64(const std::valarray<int> &coords, const ModulePropertie
         modInt += coords[i] << (i * 8);
     }
     modInt += properties.AsInt() << 24;
-    propertyMap[modInt & propertyMask] = properties;
+    if (propertyMap.count(modInt & propertyMask) == 0) {
+        propertyMap[modInt & propertyMask] = properties;
+    }
 }
 
 const std::valarray<int>& ModuleInt64::Coords() const {
