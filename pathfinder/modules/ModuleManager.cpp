@@ -159,6 +159,42 @@ bool ModuleBasic::operator<(const IModuleBasic& right) const {
     return hash < r.hash;
 }
 
+std::unordered_map<std::uint_fast64_t, ModuleProperties> ModuleInt64::propertyMap;
+
+ModuleInt64::ModuleInt64(const std::valarray<int> &coords, const ModuleProperties &properties) {
+    constexpr std::uint_fast64_t propertyMask = 0xFFFFFFFFFF000000;
+    modInt = 0;
+    for (int i = 0; i < coords.size(); i++) {
+        modInt += coords[i] << (i * 8);
+    }
+    modInt += properties.AsInt() << 24;
+    propertyMap[modInt & propertyMask] = properties;
+}
+
+const std::valarray<int>& ModuleInt64::Coords() const {
+    constexpr std::uint_fast64_t coordMask = 0xFF;
+    static std::valarray<int> result(0, Lattice::Order());
+    for (int i = 0; i < result.size(); i++) {
+        result[i] = (modInt >> (i * 8)) & coordMask; // NOLINT(*-narrowing-conversions) (Mask should handle it)
+    }
+    return result;
+}
+
+const ModuleProperties& ModuleInt64::Properties() const {
+    constexpr std::uint_fast64_t propertyMask = 0xFFFFFFFFFF000000;
+    return propertyMap[modInt & propertyMask];
+}
+
+bool ModuleInt64::operator==(const IModuleBasic& right) const {
+    const auto r = reinterpret_cast<const ModuleInt64&>(right);
+    return modInt == r.modInt;
+}
+
+bool ModuleInt64::operator<(const IModuleBasic& right) const {
+    const auto r = reinterpret_cast<const ModuleInt64&>(right);
+    return modInt < r.modInt;
+}
+
 std::size_t std::hash<ModuleBasic>::operator()(ModuleBasic& modData) const {
     if (!modData.hashCacheValid) {
         boost::hash<ModuleBasic> hasher;

@@ -138,6 +138,26 @@ public:
     friend class std::hash<ModuleBasic>;
 };
 
+// Class used to represent a module as a single 64-bit integer. Conditions for proper functionality:
+// - Modules coordinates must fall within (inclusive) range (0, 0, 0) to (255, 255, 255)
+// - Modules may only have a single property, which must be able to be represented flawlessly using <= 40 bits
+class ModuleInt64 : public IModuleBasic {
+private:
+    std::uint_fast64_t modInt;
+
+    static std::unordered_map<std::uint_fast64_t, ModuleProperties> propertyMap;
+public:
+    ModuleInt64(const std::valarray<int>& coords, const ModuleProperties& properties);
+
+    const std::valarray<int>& Coords() const override;
+
+    const ModuleProperties& Properties() const override;
+
+    bool operator==(const IModuleBasic& right) const override;
+
+    bool operator<(const IModuleBasic& right) const override;
+};
+
 template<>
 struct std::hash<ModuleBasic> {
     std::size_t operator()(ModuleBasic& modData) const;
