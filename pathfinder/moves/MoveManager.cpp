@@ -368,6 +368,46 @@ std::vector<MoveBase*> MoveManager::CheckAllMoves(CoordTensor<int> &tensor, Modu
     return legalMoves;
 }
 
+#define MOVEMANAGER_CHECK_BY_OFFSET true
+std::vector<MoveBase*> MoveManager::CheckAllMovesAndConnectivity(CoordTensor<int> &tensor, Module &mod) {
+    std::vector<MoveBase*> legalMoves = {};
+#if MOVEMANAGER_CHECK_BY_OFFSET
+    for (const auto& moveOffset : _offsets) {
+        for (auto move : _movesByOffset[moveOffset]) {
+            if (move->MoveCheck(tensor, mod) && checkConnected(tensor, mod, move)) {
+#if MOVEMANAGER_VERBOSE == MM_LOG_MOVE_CHECKS
+                DEBUG("passed!\n");
+#endif
+                legalMoves.push_back(move);
+                break;
+#if MOVEMANAGER_VERBOSE == MM_LOG_MOVE_CHECKS
+            } else {
+                DEBUG("failed!\n");
+#endif
+            }
+        }
+    }
+#else
+    for (auto move : _moves) {
+        if (move->MoveCheck(tensor, mod)) {
+#if MOVEMANAGER_VERBOSE == MM_LOG_MOVE_CHECKS
+            DEBUG("passed!\n");
+#endif
+            legalMoves.push_back(move);
+#if MOVEMANAGER_VERBOSE == MM_LOG_MOVE_CHECKS
+        } else {
+            DEBUG("failed!\n");
+#endif
+        }
+    }
+#endif
+    return legalMoves;
+}
+
+bool checkConnected(const CoordTensor<int>& tensor, const Module& mod, const MoveBase* move) {
+
+}
+
 std::pair<Module*, MoveBase*> MoveManager::FindMoveToState(const std::set<ModuleData>& modData) {
     Module* modToMove = nullptr;
     std::valarray<int> destination;

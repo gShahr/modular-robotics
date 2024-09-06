@@ -155,6 +155,10 @@ public:
     // Get what moves can be made by a module
     static std::vector<MoveBase*> CheckAllMoves(CoordTensor<int>& tensor, Module& mod);
 
+    static std::vector<MoveBase*> CheckAllMovesAndConnectivity(CoordTensor<int>& tensor, Module& mod);
+
+    static bool checkConnected(const CoordTensor<int>& tensor, const Module& mod, const MoveBase* move);
+
     // Get a pair containing which module has to make what move in order to reach an adjacent state
     static std::pair<Module*, MoveBase*> FindMoveToState(const std::set<ModuleData>& modData);
 };
