@@ -47,12 +47,12 @@ void MoveBase::Rotate(const int a, const int b) {
     std::swap(initPos[a], initPos[b]);
     std::swap(finalPos[a], finalPos[b]);
     std::swap(bounds[a], bounds[b]);
-    for (auto& move : moves) {
-        std::swap(move.first[a], move.first[b]);
+    for (auto&[offset, check] : moves) {
+        std::swap(offset[a], offset[b]);
     }
-    for (auto& anim : animSequence) {
-        std::swap(anim.second[a], anim.second[b]);
-        Move::RotateAnim(anim.first, a, b);
+    for (auto&[type, offset] : animSequence) {
+        std::swap(offset[a], offset[b]);
+        Move::RotateAnim(type, a, b);
     }
 }
 
@@ -60,12 +60,12 @@ void MoveBase::Reflect(const int index) {
     initPos[index] *= -1;
     finalPos[index] *= -1;
     std::swap(bounds[index].first, bounds[index].second);
-    for (auto& move : moves) {
-        move.first[index] *= -1;
+    for (auto&[offset, check] : moves) {
+        offset[index] *= -1;
     }
-    for (auto& anim : animSequence) {
-        anim.first = Move::AnimReflectionMap.at(anim.first)[index];
-        anim.second[index] *= -1;
+    for (auto&[type, offset] : animSequence) {
+        type = Move::AnimReflectionMap.at(type)[index];
+        offset[index] *= -1;
     }
 }
 
@@ -123,10 +123,10 @@ void Move2d::InitMove(const nlohmann::basic_json<>& moveDef) {
         x = 0;
         y++;
     }
-    for (auto& move : moves) {
-        move.first -= initPos;
+    for (auto&[offset, check] : moves) {
+        offset -= initPos;
 #if MOVEMANAGER_VERBOSE > MM_LOG_NONE
-        DEBUG("Check Offset: " << move.first[0] << ", " << move.first[1] << (move.second ? " Static" : " Empty") << std::endl);
+        DEBUG("Check Offset: " << offset[0] << ", " << offset[1] << (check ? " Static" : " Empty") << std::endl);
 #endif
     }
     finalPos -= initPos;
@@ -158,8 +158,8 @@ bool Move2d::MoveCheck(CoordTensor<int> &tensor, const Module &mod) {
         }
     }
     // Move Check
-    for (const auto& move : moves) {
-        if ((tensor[mod.coords + move.first] < 0) == move.second) {
+    for (const auto&[offset, check] : moves) {
+        if ((tensor[mod.coords + offset] < 0) == check) {
             return false;
         }
     }
@@ -221,10 +221,10 @@ void Move3d::InitMove(const nlohmann::basic_json<>& moveDef) {
         y = 0;
         z++;
     }
-    for (auto& move : moves) {
-        move.first -= initPos;
+    for (auto&[offset, check] : moves) {
+        offset -= initPos;
 #if MOVEMANAGER_VERBOSE > MM_LOG_NONE
-        DEBUG("Check Offset: " << move.first[0] << ", " << move.first[1] << ", " << move.first[2] << (move.second ? " Static" : " Empty") << std::endl);
+        DEBUG("Check Offset: " << offset[0] << ", " << offset[1] << ", " << offset[2] << (check ? " Static" : " Empty") << std::endl);
 #endif
     }
     finalPos -= initPos;
@@ -259,8 +259,8 @@ bool Move3d::MoveCheck(CoordTensor<int> &tensor, const Module &mod) {
         }
     }
     // Move Check
-    for (const auto& move : moves) {
-        if ((tensor[mod.coords + move.first] < 0) == move.second) {
+    for (const auto&[offset, check] : moves) {
+        if ((tensor[mod.coords + offset] < 0) == check) {
             return false;
         }
     }

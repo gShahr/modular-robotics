@@ -52,17 +52,17 @@ void MetaModule::readFromJson(const std::string& filename) {
 }
 
 void MetaModule::Rotate(const int a, const int b) {
-    for (auto& coord : coords) {
-        std::swap(coord.second[a], coord.second[b]);
+    for (auto&[first, second] : coords) {
+        std::swap(second[a], second[b]);
     }
 }
 
 void MetaModule::Reflect(const int index) {
-    for (auto& coord : coords) {
-        coord.second[index] *= -1;
+    for (auto&[first, second] : coords) {
+        second[index] *= -1;
         // Ternary needs testing
         //coord[index] += size - 1;
-        coord.second[index] += size - size % 2;
+        second[index] += size - size % 2;
     }
 }
 

@@ -314,8 +314,8 @@ void ModuleIdManager::RegisterModule(const std::valarray<int>& coords, bool isSt
 }
 
 void ModuleIdManager::DeferredRegistration() {
-    for (const auto& args : _deferredInitMods) {
-        RegisterModule(args.coords, args.isStatic, args.propertyDefs, true);
+    for (const auto&[coords, isStatic, propertyDefs] : _deferredInitMods) {
+        RegisterModule(coords, isStatic, propertyDefs, true);
     }
 }
 
