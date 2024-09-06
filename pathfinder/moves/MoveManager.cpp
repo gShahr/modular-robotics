@@ -1,6 +1,7 @@
 #include <string>
 #include <fstream>
 #include <filesystem>
+#include <execution>
 #include "MoveManager.h"
 
 void Move::RotateAnim(Move::AnimType& anim, const int a, const int b) {
@@ -150,20 +151,20 @@ void Move2d::InitMove(const nlohmann::basic_json<>& moveDef) {
     }
 }
 
-bool Move2d::MoveCheck(CoordTensor<int> &tensor, const Module &mod) {
+bool Move2d::MoveCheck(const CoordTensor<int>& tensor, const Module& mod) {
     // Bounds checking
     for (int i = 0; i < order; i++) {
-        if (mod.coords[i] - bounds[i].first < 0 || mod.coords[i] + bounds[i].second >= tensor.AxisSize()) {
+        if (mod.coords[i] - bounds[i].first < 0 || mod.coords[i] + bounds[i].second >= Lattice::AxisSize()) {
             return false;
         }
     }
     // Move Check
-    for (const auto&[offset, check] : moves) {
-        if ((tensor[mod.coords + offset] < 0) == check) {
+    return std::all_of(std::execution::par_unseq, moves.begin(), moves.end(), [&mod = std::as_const(mod), &tensor = std::as_const(tensor)](auto& move) {
+        if ((tensor[mod.coords + move.first] < 0) == move.second) {
             return false;
         }
-    }
-    return true;
+        return true;
+    });
 }
 
 Move3d::Move3d() {
@@ -251,7 +252,7 @@ void Move3d::InitMove(const nlohmann::basic_json<>& moveDef) {
     }
 }
 
-bool Move3d::MoveCheck(CoordTensor<int> &tensor, const Module &mod) {
+bool Move3d::MoveCheck(const CoordTensor<int> &tensor, const Module &mod) {
     // Bounds checking
     for (int i = 0; i < order; i++) {
         if (mod.coords[i] - bounds[i].first < 0 || mod.coords[i] + bounds[i].second >= tensor.AxisSize()) {
@@ -259,12 +260,12 @@ bool Move3d::MoveCheck(CoordTensor<int> &tensor, const Module &mod) {
         }
     }
     // Move Check
-    for (const auto&[offset, check] : moves) {
-        if ((tensor[mod.coords + offset] < 0) == check) {
+    return std::all_of(std::execution::par_unseq, moves.begin(), moves.end(), [&mod = std::as_const(mod), &tensor = std::as_const(tensor)](auto& move) {
+        if ((tensor[mod.coords + move.first] < 0) == move.second) {
             return false;
         }
-    }
-    return true;
+        return true;
+    });
 }
 
 std::vector<MoveBase*> MoveManager::_moves;

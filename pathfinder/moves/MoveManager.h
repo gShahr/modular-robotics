@@ -88,7 +88,7 @@ public:
     // virtual void InitMove(std::ifstream& moveFile) = 0;
     virtual void InitMove(const nlohmann::basic_json<>& moveDef) = 0;
     // Check to see if move is possible for a given module
-    virtual bool MoveCheck(CoordTensor<int>& tensor, const Module& mod) = 0;
+    virtual bool MoveCheck(const CoordTensor<int>& tensor, const Module& mod) = 0;
 
     [[nodiscard]]
     MoveBase* MakeCopy() const override = 0;
@@ -113,7 +113,7 @@ public:
     MoveBase* MakeCopy() const override;
     //void InitMove(std::ifstream& moveFile) override;
     void InitMove(const nlohmann::basic_json<>& moveDef) override;
-    bool MoveCheck(CoordTensor<int>& tensor, const Module& mod) override;
+    bool MoveCheck(const CoordTensor<int>& tensor, const Module& mod) override;
 };
 
 class Move3d final : public MoveBase {
@@ -123,7 +123,7 @@ public:
     MoveBase* MakeCopy() const override;
     //void InitMove(std::ifstream& moveFile) override;
     void InitMove(const nlohmann::basic_json<>& moveDef) override;
-    bool MoveCheck(CoordTensor<int>& tensor, const Module& mod) override;
+    bool MoveCheck(const CoordTensor<int>& tensor, const Module& mod) override;
 };
 
 class MoveManager {
