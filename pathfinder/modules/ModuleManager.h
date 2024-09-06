@@ -90,25 +90,44 @@ struct PropertyInitializer {
     static IModuleProperty* GetProperty(const nlohmann::basic_json<>& propertyDef);
 };
 
+class IModuleBasic {
+public:
+    [[nodiscard]]
+    virtual const std::valarray<int>& Coords() const = 0;
+
+    [[nodiscard]]
+    virtual const ModuleProperties& Properties() const = 0;
+
+    virtual bool operator==(const IModuleBasic& right) const = 0;
+
+    virtual bool operator<(const IModuleBasic& right) const = 0;
+
+    virtual ~IModuleBasic() = default;
+};
+
 // Class used to hold bare minimum representation of a module, for use in Configuration class
-class ModuleBasic {
+class ModuleBasic : public IModuleBasic {
 private:
     std::size_t hash = -1;
 
     bool hashCacheValid = false;
 
-public:
     std::valarray<int> coords;
 
     ModuleProperties properties;
 
+public:
     ModuleBasic() = default;
 
     ModuleBasic(const std::valarray<int>& coords, const ModuleProperties& properties);
 
-    bool operator==(const ModuleBasic& right) const;
+    const std::valarray<int>& Coords() const override;
 
-    bool operator<(const ModuleBasic& right) const;
+    const ModuleProperties& Properties() const override;
+
+    bool operator==(const IModuleBasic& right) const override;
+
+    bool operator<(const IModuleBasic& right) const override;
 
     friend class std::hash<ModuleBasic>;
 };

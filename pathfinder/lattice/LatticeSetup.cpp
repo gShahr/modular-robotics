@@ -41,7 +41,6 @@ namespace LatticeSetup {
     }
 
     Configuration setupFinalFromJson(const std::string& filename) {
-        std::hash<ModuleBasic> hasher;
         std::ifstream file(filename);
         if (!file) {
             std::cerr << "Unable to open file " << filename << std::endl;
@@ -58,15 +57,13 @@ namespace LatticeSetup {
             std::transform(position.begin(), position.end(), position.begin(),
                         [](int coord) { return coord; });
             std::valarray<int> coords(position.data(), position.size());
-            ModuleBasic mod;
-            mod.coords = coords;
             //desiredState[coords] = true;
+            ModuleProperties props;
             if (!Lattice::ignoreProperties && module.contains("properties")) {
-                mod.properties.InitProperties(module["properties"]);
+                props.InitProperties(module["properties"]);
                 //desiredColors[coords] = Colors::colorToInt[module["color"]];
             }
-            hasher(mod);
-            desiredState.insert(mod);
+            desiredState.insert({coords, props});
         }
         //return {desiredState, desiredColors};
         //TODO: add property stuff here

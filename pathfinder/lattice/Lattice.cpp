@@ -385,12 +385,12 @@ void Lattice::UpdateFromModuleInfo(const std::set<ModuleBasic>& moduleInfo) {
         modsToMove.insert(id);
     }
     for (const auto& info : moduleInfo) {
-        auto id = coordTensor[info.coords];
+        auto id = coordTensor[info.Coords()];
         auto& mod = ModuleIdManager::GetModule(id);
         if (id >= 0) {
             modsToMove.erase(id);
-            if (mod.properties != info.properties) {
-                mod.properties = info.properties;
+            if (mod.properties != info.Properties()) {
+                mod.properties = info.Properties();
             }
         } else {
             destinations.push(&info);
@@ -403,7 +403,7 @@ void Lattice::UpdateFromModuleInfo(const std::set<ModuleBasic>& moduleInfo) {
     for (auto id : modsToMove) {
         auto& mod = ModuleIdManager::GetModule(id);
         Lattice::coordTensor[mod.coords] = -1;
-        mod.coords = destinations.front()->coords;
+        mod.coords = destinations.front()->Coords();
         ClearAdjacencies(id);
 #if LATTICE_RD_EDGECHECK
         RDEdgeCheck(mod);
@@ -411,7 +411,7 @@ void Lattice::UpdateFromModuleInfo(const std::set<ModuleBasic>& moduleInfo) {
         EdgeCheck(mod);
 #endif
         Lattice::coordTensor[mod.coords] = mod.id;
-        mod.properties = destinations.front()->properties;
+        mod.properties = destinations.front()->Properties();
         destinations.pop();
     }
 }

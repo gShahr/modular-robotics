@@ -267,7 +267,7 @@ float Configuration::ManhattanDistance(Configuration* final) {
     while (currentIt != currentData.end() && finalIt != finalData.end()) {
         const auto& currentModule = *currentIt;
         const auto& finalModule = *finalIt;
-        std::valarray<int> diff = currentModule.coords - finalModule.coords;
+        std::valarray<int> diff = currentModule.Coords() - finalModule.Coords();
         for (auto& val : diff) {
             h += std::abs(val);
         }
@@ -288,8 +288,8 @@ int Configuration::SymmetricDifferenceHeuristic(Configuration* final) {
     while (currentIt != currentData.end() && finalIt != finalData.end()) {
         const auto& currentModule = *currentIt;
         const auto& finalModule = *finalIt;
-        unionCoords.insert(currentModule.coords);
-        unionCoords.insert(finalModule.coords);
+        unionCoords.insert(currentModule.Coords());
+        unionCoords.insert(finalModule.Coords());
         currentIt++;
         finalIt++;
     }
@@ -306,7 +306,7 @@ int Configuration::ChebyshevDistance(Configuration* final) {
     while (currentIt != currentData.end() && finalIt != finalData.end()) {
         const auto& currentModule = *currentIt;
         const auto& finalModule = *finalIt;
-        std::valarray<int> diff = currentModule.coords - finalModule.coords;
+        std::valarray<int> diff = currentModule.Coords() - finalModule.Coords();
         int maxDiff = 0;
         for (auto& val : diff) {
             maxDiff = std::max(maxDiff, std::abs(val));

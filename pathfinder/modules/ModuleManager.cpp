@@ -122,20 +122,30 @@ ModuleBasic::ModuleBasic(const std::valarray<int>& coords, const ModulePropertie
     hasher(*this);
 }
 
-bool ModuleBasic::operator==(const ModuleBasic& right) const {
-    if (coords.size() != right.coords.size()) {
+const std::valarray<int>& ModuleBasic::Coords() const {
+    return coords;
+}
+
+const ModuleProperties& ModuleBasic::Properties() const {
+    return properties;
+}
+
+bool ModuleBasic::operator==(const IModuleBasic& right) const {
+    const auto r = reinterpret_cast<const ModuleBasic&>(right);
+    if (coords.size() != r.coords.size()) {
         return false;
     }
     for (int i = 0; i < coords.size(); i++) {
-        if (coords[i] != right.coords[i]) {
+        if (coords[i] != r.coords[i]) {
             return false;
         }
     }
-    return properties == right.properties;
+    return properties == r.properties;
 }
 
-bool ModuleBasic::operator<(const ModuleBasic& right) const {
-    return hash < right.hash;
+bool ModuleBasic::operator<(const IModuleBasic& right) const {
+    const auto r = reinterpret_cast<const ModuleBasic&>(right);
+    return hash < r.hash;
 }
 
 std::size_t std::hash<ModuleBasic>::operator()(ModuleBasic& modData) const {
@@ -148,10 +158,10 @@ std::size_t std::hash<ModuleBasic>::operator()(ModuleBasic& modData) const {
 }
 
 std::size_t boost::hash<ModuleBasic>::operator()(const ModuleBasic& modData) const {
-    auto coordHash = boost::hash_range(begin(modData.coords), end(modData.coords));
+    auto coordHash = boost::hash_range(begin(modData.Coords()), end(modData.Coords()));
     if (!Lattice::ignoreProperties) {
         boost::hash<ModuleProperties> propertyHasher;
-        auto propertyHash = propertyHasher(modData.properties);
+        auto propertyHash = propertyHasher(modData.Properties());
         boost::hash_combine(coordHash, propertyHash);
     }
     return coordHash;
