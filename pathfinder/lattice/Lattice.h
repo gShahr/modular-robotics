@@ -2,7 +2,6 @@
 #define MODULAR_ROBOTICS_LATTICE_H
 
 #include <set>
-#include <boost/functional/hash.hpp>
 #include "../modules/ModuleManager.h"
 #include "../coordtensor/CoordTensor.h"
 

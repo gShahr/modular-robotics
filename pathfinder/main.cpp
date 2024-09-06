@@ -5,7 +5,6 @@
 #include <string>
 #include "moves/MoveManager.h"
 #include "search/ConfigurationSpace.h"
-#include "coordtensor/debug_util.h"
 #include <boost/functional/hash.hpp>
 #include <boost/format.hpp>
 #include <queue>

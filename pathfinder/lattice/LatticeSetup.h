@@ -2,12 +2,6 @@
 #define LATTICESETUP_H
 
 #include <string>
-#include <vector>
-#include <fstream>
-#include <iostream>
-#include <valarray>
-#include "Lattice.h"
-#include "../coordtensor/CoordTensor.h"
 #include "../search/ConfigurationSpace.h"
 #include "../modules/Metamodule.h"
 #include <nlohmann/json.hpp>

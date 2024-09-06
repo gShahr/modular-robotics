@@ -1,8 +1,13 @@
 #include "LatticeSetup.h"
+#include <set>
+#include <vector>
+#include <fstream>
+#include <iostream>
+#include <valarray>
+#include "Lattice.h"
 #include "../search/ConfigurationSpace.h"
 #include "../modules/Metamodule.h"
 #include "../modules/Colors.h"
-#include <set>
 
 namespace LatticeSetup {
     void setupFromJson(const std::string& filename) {

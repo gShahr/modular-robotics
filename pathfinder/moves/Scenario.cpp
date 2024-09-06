@@ -1,8 +1,11 @@
 #include "Scenario.h"
 #include <iostream>
+#include <fstream>
 #include <boost/format.hpp>
 #include "../modules/ModuleManager.h"
 #include "MoveManager.h"
+#include "../coordtensor/CoordTensor.h"
+#include "../lattice/Lattice.h"
 #include "../modules/Colors.h"
 
 namespace Scenario {
