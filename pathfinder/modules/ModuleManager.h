@@ -80,7 +80,7 @@ public:
     ~ModuleProperties();
 
     friend class IModuleProperty;
-    friend class PropertyInitializer;
+    friend struct PropertyInitializer;
     friend class boost::hash<ModuleProperties>;
 };
 
