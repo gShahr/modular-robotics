@@ -100,27 +100,27 @@ public:
     void SetCost(int cost);
 
     template <typename Heuristic>
-    auto CompareConfiguration(Configuration* final, Heuristic heuristic);
+    auto CompareConfiguration(const Configuration* final, Heuristic heuristic);
 
     struct ValarrayComparator {
         bool operator()(const std::valarray<int>& lhs, const std::valarray<int>& rhs) const;
     };
 
-    float ManhattanDistance(Configuration* final) const;
+    float ManhattanDistance(const Configuration* final) const;
 
-    int SymmetricDifferenceHeuristic(Configuration* final) const;
+    int SymmetricDifferenceHeuristic(const Configuration* final) const;
 
-    int ChebyshevDistance(Configuration* final) const;
+    int ChebyshevDistance(const Configuration* final) const;
 };
 
 namespace ConfigurationSpace {
     extern int depth;
 
-    std::vector<Configuration*> BFS(Configuration* start, Configuration* final);
+    std::vector<Configuration*> BFS(Configuration* start, const Configuration* final);
 
-    std::vector<Configuration*> BFSParallelized(Configuration* start, Configuration* final);
+    std::vector<Configuration*> BFSParallelized(Configuration* start, const Configuration* final);
 
-    std::vector<Configuration*> AStar(Configuration* start, Configuration* final);
+    std::vector<Configuration*> AStar(Configuration* start, const Configuration* final);
 
     std::vector<Configuration*> FindPath(Configuration* start, Configuration* final);
 

@@ -117,7 +117,7 @@ std::ostream& operator<<(std::ostream& out, const Configuration& config) {
 
 int ConfigurationSpace::depth = -1;
 
-std::vector<Configuration*> ConfigurationSpace::BFS(Configuration* start, Configuration* final) {
+std::vector<Configuration*> ConfigurationSpace::BFS(Configuration* start, const Configuration* final) {
 #if CONFIG_OUTPUT_JSON
     SearchAnalysis::EnterGraph("BFSDepthOverTime");
     SearchAnalysis::LabelGraph("BFS Depth over Time");
@@ -200,7 +200,7 @@ std::vector<Configuration*> ConfigurationSpace::BFS(Configuration* start, Config
     throw BFSExcept();
 }
 
-std::vector<Configuration*> ConfigurationSpace::BFSParallelized(Configuration* start, Configuration* final) {
+std::vector<Configuration*> ConfigurationSpace::BFSParallelized(Configuration* start, const Configuration* final) {
     std::queue<Configuration*> q;
     std::unordered_set<HashedState> visited;
     q.push(start);
@@ -260,7 +260,7 @@ void Configuration::SetCost(const int cost) {
 }
 
 template <typename Heuristic>
-auto CompareConfiguration(Configuration* final, Heuristic heuristic) {
+auto CompareConfiguration(const Configuration* final, Heuristic heuristic) {
     return [final, heuristic](Configuration* c1, Configuration* c2) {
         const int cost1 = c1->GetCost() + (c1->*heuristic)(final);
         const int cost2 = c2->GetCost() + (c2->*heuristic)(final);
@@ -276,7 +276,7 @@ bool Configuration::ValarrayComparator::operator()(const std::valarray<int>& lhs
     return lhs.size() < rhs.size();
 }
 
-float Configuration::ManhattanDistance(Configuration* final) const {
+float Configuration::ManhattanDistance(const Configuration* final) const {
     auto currentData = this->GetModData();
     auto finalData = final->GetModData();
     auto currentIt = currentData.begin();
@@ -296,7 +296,7 @@ float Configuration::ManhattanDistance(Configuration* final) const {
     return h / 3;
 }
 
-int Configuration::SymmetricDifferenceHeuristic(Configuration* final) const {
+int Configuration::SymmetricDifferenceHeuristic(const Configuration* final) const {
     auto currentData = this->GetModData();
     auto finalData = final->GetModData();
     auto currentIt = currentData.begin();
@@ -315,7 +315,7 @@ int Configuration::SymmetricDifferenceHeuristic(Configuration* final) const {
     return symDifference / 2;
 }
 
-int Configuration::ChebyshevDistance(Configuration* final) const {
+int Configuration::ChebyshevDistance(const Configuration* final) const {
     auto currentData = this->GetModData();
     auto finalData = final->GetModData();
     auto currentIt = currentData.begin();
@@ -336,7 +336,7 @@ int Configuration::ChebyshevDistance(Configuration* final) const {
     return h;
 }
 
-std::vector<Configuration*> ConfigurationSpace::AStar(Configuration* start, Configuration* final) {
+std::vector<Configuration*> ConfigurationSpace::AStar(Configuration* start, const Configuration* final) {
 #if CONFIG_OUTPUT_JSON
     SearchAnalysis::EnterGraph("AStarDepthOverTime");
     SearchAnalysis::LabelGraph("A* Depth over Time");
