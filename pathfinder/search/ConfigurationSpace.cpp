@@ -65,7 +65,7 @@ std::vector<std::set<ModuleBasic>> Configuration::MakeAllMoves() {
 
 std::vector<std::set<ModuleBasic>> Configuration::MakeAllMovesForAllVertices() {
     std::vector<std::set<ModuleBasic>> result;
-    Lattice::UpdateFromModuleInfo(_nonStatModData);
+    Lattice::UpdateFromModuleInfo(GetModData());
     std::vector<Module*> movableModules;
     for (int id = 0; id < Lattice::AxisSize() * Lattice::Order(); id++) {
         movableModules.push_back(&ModuleIdManager::GetModule(id));
