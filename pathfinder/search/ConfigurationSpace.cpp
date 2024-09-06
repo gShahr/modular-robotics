@@ -64,6 +64,24 @@ std::vector<std::set<ModuleBasic>> Configuration::MakeAllMoves() {
     return result;
 }
 
+std::vector<std::set<ModuleBasic>> Configuration::MakeAllMovesForAllVertices() {
+    std::vector<std::set<ModuleBasic>> result;
+    Lattice::UpdateFromModuleInfo(_nonStatModData);
+    std::vector<Module*> movableModules;
+    for (int id = 0; id < Lattice::AxisSize() * Lattice::Order(); id++) {
+        movableModules.push_back(&ModuleIdManager::GetModule(id));
+    }
+    for (auto module: movableModules) {
+        auto legalMoves = MoveManager::CheckAllMoves(Lattice::coordTensor, *module);
+        for (auto move: legalMoves) {
+            Lattice::MoveModule(*module, move->MoveOffset());
+            result.emplace_back(Lattice::GetModuleInfo());
+            Lattice::MoveModule(*module, -move->MoveOffset());
+        }
+    }
+    return result;
+}
+
 void Configuration::AddEdge(Configuration* configuration) {
     next.push_back(configuration);
 }

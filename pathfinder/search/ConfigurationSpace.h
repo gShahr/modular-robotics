@@ -76,6 +76,8 @@ public:
 
     std::vector<std::set<ModuleBasic>> MakeAllMoves();
 
+    std::vector<std::set<ModuleBasic>> MakeAllMovesForAllVertices();
+
     void AddEdge(Configuration* configuration);
 
     Configuration* GetParent();
