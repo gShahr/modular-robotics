@@ -61,24 +61,27 @@ bool ModuleProperties::operator==(const ModuleProperties& right) const {
         return false;
     }
 
-    std::unordered_set<IModuleProperty*> leftProps = _properties;
-    for (auto rProp : right._properties) {
-        auto lProp = Find(rProp->key);
-        if (lProp != nullptr && lProp->CompareProperty(*rProp)) {
-            leftProps.erase(lProp);
-        } else {
+    for (const auto rProp : right._properties) {
+        if (auto lProp = Find(rProp->key); lProp == nullptr || !lProp->CompareProperty(*rProp)) {
             return false;
         }
     }
 
-    return leftProps.empty();
+    return true;
 }
 
 bool ModuleProperties::operator!=(const ModuleProperties& right) const {
     if (_properties.size() != right._properties.size()) {
         return true;
     }
-    return _properties != right._properties;
+
+    for (const auto rProp : right._properties) {
+        if (const auto lProp = Find(rProp->key); lProp == nullptr || !lProp->CompareProperty(*rProp)) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 ModuleProperties& ModuleProperties::operator=(const ModuleProperties& right) {
