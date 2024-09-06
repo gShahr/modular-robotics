@@ -48,7 +48,7 @@ Configuration::~Configuration() {
     }
 }
 
-std::vector<std::set<ModuleData>> Configuration::MakeAllMoves() {
+std::vector<std::set<ModuleData>> Configuration::MakeAllMoves() const {
     std::vector<std::set<ModuleData>> result;
     Lattice::UpdateFromModuleInfo(GetModData());
     std::vector<Module*> movableModules = Lattice::MovableModules();
@@ -63,7 +63,7 @@ std::vector<std::set<ModuleData>> Configuration::MakeAllMoves() {
     return result;
 }
 
-std::vector<std::set<ModuleData>> Configuration::MakeAllMovesForAllVertices() {
+std::vector<std::set<ModuleData>> Configuration::MakeAllMovesForAllVertices() const {
     std::vector<std::set<ModuleData>> result;
     Lattice::UpdateFromModuleInfo(GetModData());
     std::vector<Module*> movableModules;

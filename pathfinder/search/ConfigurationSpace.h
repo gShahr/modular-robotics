@@ -71,9 +71,11 @@ public:
 
     ~Configuration();
 
-    std::vector<std::set<ModuleData>> MakeAllMoves();
+    [[nodiscard]]
+    std::vector<std::set<ModuleData>> MakeAllMoves() const;
 
-    std::vector<std::set<ModuleData>> MakeAllMovesForAllVertices();
+    [[nodiscard]]
+    std::vector<std::set<ModuleData>> MakeAllMovesForAllVertices() const;
 
     void AddEdge(Configuration* configuration);
 
