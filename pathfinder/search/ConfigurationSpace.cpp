@@ -36,7 +36,7 @@ bool HashedState::operator!=(const HashedState& other) const {
     return seed != other.GetSeed();
 }
 
-size_t std::hash<HashedState>::operator()(const HashedState& state) const {
+size_t std::hash<HashedState>::operator()(const HashedState& state) const noexcept {
     return state.GetSeed();
 }
 

@@ -54,7 +54,7 @@ public:
 
 template<>
 struct std::hash<HashedState> {
-    size_t operator()(const HashedState& state) const;
+    size_t operator()(const HashedState& state) const noexcept;
 };
 
 // For tracking the state of a lattice
