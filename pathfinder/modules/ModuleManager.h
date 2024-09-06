@@ -75,7 +75,7 @@ public:
 
     void InitProperties(const nlohmann::basic_json<>& propertyDefs);
 
-    void UpdateProperties(const std::valarray<int>& moveInfo);
+    void UpdateProperties(const std::valarray<int>& moveInfo) const;
 
     bool operator==(const ModuleProperties& right) const;
 

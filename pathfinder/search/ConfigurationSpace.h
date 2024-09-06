@@ -79,9 +79,11 @@ public:
 
     void AddEdge(Configuration* configuration);
 
-    Configuration* GetParent();
+    [[nodiscard]]
+    Configuration* GetParent() const;
 
-    std::vector<Configuration*> GetNext();
+    [[nodiscard]]
+    std::vector<Configuration*> GetNext() const;
 
     [[nodiscard]]
     const HashedState& GetHash() const;
@@ -93,7 +95,7 @@ public:
 
     friend std::ostream& operator<<(std::ostream& out, const Configuration& config);
 
-    int GetCost();
+    int GetCost() const;
 
     void SetCost(int cost);
 
@@ -104,11 +106,11 @@ public:
         bool operator()(const std::valarray<int>& lhs, const std::valarray<int>& rhs) const;
     };
 
-    float ManhattanDistance(Configuration* final);
+    float ManhattanDistance(Configuration* final) const;
 
-    int SymmetricDifferenceHeuristic(Configuration* final);
+    int SymmetricDifferenceHeuristic(Configuration* final) const;
 
-    int ChebyshevDistance(Configuration* final);
+    int ChebyshevDistance(Configuration* final) const;
 };
 
 namespace ConfigurationSpace {

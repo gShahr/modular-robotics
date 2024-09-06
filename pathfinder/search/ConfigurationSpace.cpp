@@ -85,11 +85,11 @@ void Configuration::AddEdge(Configuration* configuration) {
     next.push_back(configuration);
 }
 
-Configuration* Configuration::GetParent() {
+Configuration* Configuration::GetParent() const {
     return parent;
 }
 
-std::vector<Configuration*> Configuration::GetNext() {
+std::vector<Configuration*> Configuration::GetNext() const {
     return next;
 }
 
@@ -251,7 +251,7 @@ std::vector<Configuration*> ConfigurationSpace::BFSParallelized(Configuration* s
     throw BFSExcept();
 }
 
-int Configuration::GetCost() {
+int Configuration::GetCost() const {
     return cost;
 }
 
@@ -276,7 +276,7 @@ bool Configuration::ValarrayComparator::operator()(const std::valarray<int>& lhs
     return lhs.size() < rhs.size();
 }
 
-float Configuration::ManhattanDistance(Configuration* final) {
+float Configuration::ManhattanDistance(Configuration* final) const {
     auto currentData = this->GetModData();
     auto finalData = final->GetModData();
     auto currentIt = currentData.begin();
@@ -296,7 +296,7 @@ float Configuration::ManhattanDistance(Configuration* final) {
     return h / 3;
 }
 
-int Configuration::SymmetricDifferenceHeuristic(Configuration* final) {
+int Configuration::SymmetricDifferenceHeuristic(Configuration* final) const {
     auto currentData = this->GetModData();
     auto finalData = final->GetModData();
     auto currentIt = currentData.begin();
@@ -315,7 +315,7 @@ int Configuration::SymmetricDifferenceHeuristic(Configuration* final) {
     return symDifference / 2;
 }
 
-int Configuration::ChebyshevDistance(Configuration* final) {
+int Configuration::ChebyshevDistance(Configuration* final) const {
     auto currentData = this->GetModData();
     auto finalData = final->GetModData();
     auto currentIt = currentData.begin();

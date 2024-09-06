@@ -50,7 +50,7 @@ void ModuleProperties::InitProperties(const nlohmann::basic_json<> &propertyDefs
     }
 }
 
-void ModuleProperties::UpdateProperties(const std::valarray<int>& moveInfo) {
+void ModuleProperties::UpdateProperties(const std::valarray<int>& moveInfo) const {
     for (const auto property : _dynamicProperties) {
         property->UpdateProperty(moveInfo);
     }
