@@ -28,12 +28,10 @@ namespace Colors {
     };
 
     ColorsRGB convertColorNameToRGB(const std::string& colorName) {
-        auto it = colorToRGB.find(colorName);
-        if (it != colorToRGB.end()) {
+        if (const auto it = colorToRGB.find(colorName); it != colorToRGB.end()) {
             return it->second;
-        } else {
-            return ColorsRGB(0);
         }
+        return ColorsRGB(0);
     }
 
     std::map<std::string, int> colorToInt = {
