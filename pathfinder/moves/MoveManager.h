@@ -1,12 +1,12 @@
+#ifndef MODULAR_ROBOTICS_MOVEMANAGER_H
+#define MODULAR_ROBOTICS_MOVEMANAGER_H
+
 #include <vector>
 #include <unordered_map>
 #include <valarray>
 #include <nlohmann/json.hpp>
 #include "../lattice/Lattice.h"
 #include "Isometry.h"
-
-#ifndef MODULAR_ROBOTICS_MOVEMANAGER_H
-#define MODULAR_ROBOTICS_MOVEMANAGER_H
 
 // Verbosity Constants (Don't change these)
 #define MM_LOG_NONE 0

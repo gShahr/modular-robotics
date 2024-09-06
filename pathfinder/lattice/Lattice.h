@@ -1,10 +1,10 @@
+#ifndef MODULAR_ROBOTICS_LATTICE_H
+#define MODULAR_ROBOTICS_LATTICE_H
+
 #include <set>
 #include <boost/functional/hash.hpp>
 #include "../modules/ModuleManager.h"
 #include "../coordtensor/CoordTensor.h"
-
-#ifndef MODULAR_ROBOTICS_LATTICE_H
-#define MODULAR_ROBOTICS_LATTICE_H
 
 // Verbosity Constants (Don't change these)
 #define LAT_LOG_NONE 0

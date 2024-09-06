@@ -1,7 +1,7 @@
-#include <vector>
-
 #ifndef MODULAR_ROBOTICS_ISOMETRY_H
 #define MODULAR_ROBOTICS_ISOMETRY_H
+
+#include <vector>
 
 class ITransformable {
 protected:

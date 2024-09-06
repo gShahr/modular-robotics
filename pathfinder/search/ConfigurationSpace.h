@@ -1,8 +1,8 @@
-#include <vector>
-#include "../lattice/Lattice.h"
-
 #ifndef MODULAR_ROBOTICS_CONFIGURATIONSPACE_H
 #define MODULAR_ROBOTICS_CONFIGURATIONSPACE_H
+
+#include <vector>
+#include "../lattice/Lattice.h"
 
 // Verbosity Constants (Don't change these)
 #define CS_LOG_NONE 0
