@@ -72,14 +72,24 @@ void Lattice::MoveModule(Module &mod, const std::valarray<int>& offset) {
 }
 
 bool Lattice::checkConnected() {
-    bool connected = true;
-    for (int i = 0; i < Lattice::moduleCount; i++) {
-        if (Lattice::adjList[i].empty()) {
-            connected = false;
-            break;
+    if (moduleCount == 0) return true;
+    std::vector<bool> visited(moduleCount, false);
+    std::stack<int> stack;
+    int visitedCount = 0;
+    stack.push(0);
+    visited[0] = true;
+    while (!stack.empty()) {
+        int node = stack.top();
+        stack.pop();
+        visitedCount++;
+        for (int neighbor: adjList[node]) {
+            if (!visited[neighbor]) {
+                visited[neighbor] = true;
+                stack.push(neighbor);
+            }
         }
     }
-    return connected;
+    return visitedCount == moduleCount;
 }
 
 void Lattice::EdgeCheck(const Module& mod) {
