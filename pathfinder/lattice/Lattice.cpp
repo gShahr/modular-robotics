@@ -418,7 +418,7 @@ void Lattice::UpdateFromModuleInfo(const std::set<ModuleData>& moduleInfo) {
 std::set<ModuleData> Lattice::GetModuleInfo() {
     std::set<ModuleData> modInfo;
     for (int id = 0; id < ModuleIdManager::MinStaticID(); id++) {
-        auto& mod = ModuleIdManager::GetModule(id);
+        const auto& mod = ModuleIdManager::GetModule(id);
         modInfo.insert({mod.coords, mod.properties});
     }
     return modInfo;
