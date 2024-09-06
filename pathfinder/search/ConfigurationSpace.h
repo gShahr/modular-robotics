@@ -52,19 +52,16 @@ public:
     bool operator!=(const HashedState& other) const;
 };
 
-namespace std {
-    template<>
-    struct hash<HashedState> {
-        size_t operator()(const HashedState& state) const;
-    };
-}
+template<>
+struct std::hash<HashedState> {
+    size_t operator()(const HashedState& state) const;
+};
 
 // For tracking the state of a lattice
 class Configuration {
 private:
     Configuration* parent = nullptr;
     std::vector<Configuration*> next;
-    std::set<ModuleBasic> _nonStatModData;
     HashedState hash;
     int cost;
 public:

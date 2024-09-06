@@ -37,11 +37,10 @@ bool HashedState::operator!=(const HashedState& other) const {
 }
 
 size_t std::hash<HashedState>::operator()(const HashedState& state) const {
-    return std::hash<size_t>()(state.GetSeed());
-    //return state.GetSeed();
+    return state.GetSeed();
 }
 
-Configuration::Configuration(const std::set<ModuleBasic>& modData) : _nonStatModData(modData), hash(HashedState(modData)) {}
+Configuration::Configuration(const std::set<ModuleBasic>& modData) : hash(HashedState(modData)) {}
 
 Configuration::~Configuration() {
     for (auto i = next.rbegin(); i != next.rend(); i++) {
@@ -51,7 +50,7 @@ Configuration::~Configuration() {
 
 std::vector<std::set<ModuleBasic>> Configuration::MakeAllMoves() {
     std::vector<std::set<ModuleBasic>> result;
-    Lattice::UpdateFromModuleInfo(_nonStatModData);
+    Lattice::UpdateFromModuleInfo(GetModData());
     std::vector<Module*> movableModules = Lattice::MovableModules();
     for (auto module: movableModules) {
         auto legalMoves = MoveManager::CheckAllMoves(Lattice::coordTensor, *module);
@@ -99,7 +98,7 @@ const HashedState& Configuration::GetHash() const {
 }
 
 const std::set<ModuleBasic>& Configuration::GetModData() const {
-    return _nonStatModData;
+    return hash.GetState();
 }
 
 /*void Configuration::SetStateAndHash(const std::vector<ModuleBasic>& modData) {
