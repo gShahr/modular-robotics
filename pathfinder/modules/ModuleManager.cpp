@@ -289,7 +289,7 @@ Module::Module(Module&& mod) noexcept {
     id = mod.id;
 }
 
-Module::Module(const std::valarray<int>& coords, bool isStatic, const nlohmann::basic_json<>& propertyDefs) : id(ModuleIdManager::GetNextId()), coords(coords), moduleStatic(isStatic) {
+Module::Module(const std::valarray<int>& coords, bool isStatic, const nlohmann::basic_json<>& propertyDefs) : coords(coords), moduleStatic(isStatic), id(ModuleIdManager::GetNextId()) {
     properties.InitProperties(propertyDefs);
 }
 
