@@ -71,6 +71,17 @@ void Lattice::MoveModule(Module &mod, const std::valarray<int>& offset) {
     }
 }
 
+bool Lattice::checkConnected() {
+    bool connected = true;
+    for (int i = 0; i < Lattice::moduleCount; i++) {
+        if (Lattice::adjList[i].empty()) {
+            connected = false;
+            break;
+        }
+    }
+    return connected;
+}
+
 void Lattice::EdgeCheck(const Module& mod) {
     // Copy module coordinates to adjCoords
     auto adjCoords = mod.coords;
