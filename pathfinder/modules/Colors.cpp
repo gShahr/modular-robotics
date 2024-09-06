@@ -86,6 +86,10 @@ IModuleProperty* ColorProperty::MakeCopy() const {
     return new ColorProperty(*this);
 }
 
+std::uint_fast64_t ColorProperty::AsInt() const {
+    return color;
+}
+
 std::size_t ColorProperty::GetHash() {
     boost::hash<int> hash;
     return hash(color);

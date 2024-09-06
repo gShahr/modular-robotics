@@ -105,6 +105,17 @@ IModuleProperty* ModuleProperties::Find(const std::string& key) const {
     return nullptr;
 }
 
+std::uint_fast64_t ModuleProperties::AsInt() const {
+    if (_properties.empty()) {
+        return 0;
+    }
+    if (_properties.size() == 1) {
+        return (*_properties.begin())->AsInt();
+    }
+    std::cerr << "Representing multiple properties as an integer is not supported." << std::endl;
+    exit(1);
+}
+
 ModuleProperties::~ModuleProperties() {
     for (const auto property : _properties) {
         delete property;

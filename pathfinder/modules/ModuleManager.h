@@ -19,6 +19,9 @@ protected:
     [[nodiscard]]
     virtual IModuleProperty* MakeCopy() const = 0;
 
+    [[nodiscard]]
+    virtual std::uint_fast64_t AsInt() const = 0;
+
 public:
     virtual std::size_t GetHash() = 0;
 
@@ -70,6 +73,9 @@ public:
     ModuleProperties& operator=(const ModuleProperties& right);
 
     IModuleProperty* Find(const std::string& key) const;
+
+    [[nodiscard]]
+    std::uint_fast64_t AsInt() const;
 
     ~ModuleProperties();
 

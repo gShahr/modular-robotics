@@ -45,6 +45,9 @@ protected:
     [[nodiscard]]
     IModuleProperty* MakeCopy() const override;
 
+    [[nodiscard]]
+    std::uint_fast64_t AsInt() const override;
+
 public:
     // Need a GetHash function
     std::size_t GetHash() override;
