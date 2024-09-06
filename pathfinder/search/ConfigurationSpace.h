@@ -77,7 +77,7 @@ public:
     [[nodiscard]]
     std::vector<std::set<ModuleData>> MakeAllMovesForAllVertices() const;
 
-    void AddEdge(Configuration* configuration);
+    Configuration* AddEdge(const std::set<ModuleData>& modData);
 
     [[nodiscard]]
     Configuration* GetParent() const;

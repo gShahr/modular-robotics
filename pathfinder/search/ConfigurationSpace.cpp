@@ -81,8 +81,9 @@ std::vector<std::set<ModuleData>> Configuration::MakeAllMovesForAllVertices() co
     return result;
 }
 
-void Configuration::AddEdge(Configuration* configuration) {
-    next.push_back(configuration);
+Configuration* Configuration::AddEdge(const std::set<ModuleData>& modData) {
+    next.push_back(new Configuration(modData));
+    return next.back();
 }
 
 Configuration* Configuration::GetParent() const {
@@ -185,11 +186,10 @@ std::vector<Configuration*> ConfigurationSpace::BFS(Configuration* start, const 
         auto adjList = current->MakeAllMoves();
         for (const auto& moduleInfo : adjList) {
             if (visited.find(HashedState(moduleInfo)) == visited.end()) {
-                auto nextConfiguration = new Configuration(moduleInfo);
+                auto nextConfiguration = current->AddEdge(moduleInfo);
                 nextConfiguration->SetParent(current);
                 //nextConfiguration->SetStateAndHash(moduleInfo);
                 q.push(nextConfiguration);
-                current->AddEdge(nextConfiguration);
                 nextConfiguration->depth = current->depth + 1;
                 visited.insert(HashedState(moduleInfo));
             } else {
@@ -236,13 +236,12 @@ std::vector<Configuration*> ConfigurationSpace::BFSParallelized(Configuration* s
                 isVisited = (visited.find(hashedState) != visited.end());
             }
             if (!isVisited) {
-                auto nextConfiguration = new Configuration(moduleInfo);
+                auto nextConfiguration = current->AddEdge(moduleInfo);
                 nextConfiguration->SetParent(current);
                 #pragma omp critical
                 {
                     q.push(nextConfiguration);
                 }
-                current->AddEdge(nextConfiguration);
                 nextConfiguration->depth = current->depth + 1;
                 visited.insert(HashedState(moduleInfo));
             }
@@ -405,11 +404,10 @@ std::vector<Configuration*> ConfigurationSpace::AStar(Configuration* start, cons
         auto adjList = current->MakeAllMoves();
         for (const auto& moduleInfo : adjList) {
             if (HashedState hashedState(moduleInfo); visited.find(hashedState) == visited.end()) {
-                auto nextConfiguration = new Configuration(moduleInfo);
+                auto nextConfiguration = current->AddEdge(moduleInfo);
                 nextConfiguration->SetParent(current);
                 nextConfiguration->SetCost(current->GetCost() + 1);
                 pq.push(nextConfiguration);
-                current->AddEdge(nextConfiguration);
                 nextConfiguration->depth = current->depth + 1;
                 visited.insert(hashedState);
             } else {
