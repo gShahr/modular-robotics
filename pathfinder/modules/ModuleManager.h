@@ -1,12 +1,12 @@
+#ifndef MODULAR_ROBOTICS_MODULEMANAGER_H
+#define MODULAR_ROBOTICS_MODULEMANAGER_H
+
 #include <iostream>
 #include <vector>
 #include <unordered_set>
 #include <boost/functional/hash.hpp>
 #include <valarray>
 #include <nlohmann/json.hpp>
-
-#ifndef MODULAR_ROBOTICS_MODULEMANAGER_H
-#define MODULAR_ROBOTICS_MODULEMANAGER_H
 
 // Module Data Storage Constants (Don't change these)
 #define MM_DATA_FULL 0
@@ -183,8 +183,10 @@ private:
 public:
     ModuleInt64(const std::valarray<int>& coords, const ModuleProperties& properties);
 
+    [[nodiscard]]
     const std::valarray<int>& Coords() const override;
 
+    [[nodiscard]]
     const ModuleProperties& Properties() const override;
 
     bool operator==(const IModuleBasic& right) const override;
