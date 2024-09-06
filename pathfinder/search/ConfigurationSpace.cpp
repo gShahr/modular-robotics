@@ -43,7 +43,7 @@ size_t std::hash<HashedState>::operator()(const HashedState& state) const {
 Configuration::Configuration(const std::set<ModuleData>& modData) : hash(HashedState(modData)) {}
 
 Configuration::~Configuration() {
-    for (auto i = next.rbegin(); i != next.rend(); i++) {
+    for (auto i = next.rbegin(); i != next.rend(); ++i) {
         delete *i;
     }
 }
@@ -289,8 +289,8 @@ float Configuration::ManhattanDistance(const Configuration* final) const {
         for (auto& val : diff) {
             h += std::abs(val);
         }
-        currentIt++;
-        finalIt++;
+        ++currentIt;
+        ++finalIt;
     }
     //TODO: find out what the right number is
     return h / 3;
@@ -308,8 +308,8 @@ int Configuration::SymmetricDifferenceHeuristic(const Configuration* final) cons
         const auto& finalModule = *finalIt;
         unionCoords.insert(currentModule.Coords());
         unionCoords.insert(finalModule.Coords());
-        currentIt++;
-        finalIt++;
+        ++currentIt;
+        ++finalIt;
     }
     const int symDifference = 2 * unionCoords.size() - (currentData.size() + finalData.size());
     return symDifference / 2;
@@ -330,8 +330,8 @@ int Configuration::ChebyshevDistance(const Configuration* final) const {
             maxDiff = std::max(maxDiff, std::abs(val));
         }
         h += maxDiff;
-        currentIt++;
-        finalIt++;
+        ++currentIt;
+        ++finalIt;
     }
     return h;
 }

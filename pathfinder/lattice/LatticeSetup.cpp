@@ -131,8 +131,8 @@ namespace LatticeSetup {
 
     void setUpMetamodule(MetaModule* metamodule) {
         Lattice::InitLattice(metamodule->order, metamodule->size);
-        for (const auto &coord: metamodule->coords) {
-            ModuleIdManager::RegisterModule(coord.second, coord.first);
+        for (const auto &[first, second]: metamodule->coords) {
+            ModuleIdManager::RegisterModule(second, first);
         }
         ModuleIdManager::DeferredRegistration();
         for (const auto& mod : ModuleIdManager::Modules()) {
@@ -145,14 +145,14 @@ namespace LatticeSetup {
         for (int i = 0; i < MetaModuleManager::axisSize / MetaModuleManager::metamodules[0]->size; i++) {
             for (int j = 0; j < MetaModuleManager::axisSize / MetaModuleManager::metamodules[0]->size; j++) {
                 if ((i%2==0 && j&1) || (i&1 && j%2 == 0)) {
-                    for (const auto &coord: MetaModuleManager::metamodules[5]->coords) {
+                    for (const auto &[first, second]: MetaModuleManager::metamodules[5]->coords) {
                         std::valarray<int> newCoord = {MetaModuleManager::metamodules[5]->size * i, MetaModuleManager::metamodules[5]->size * j};
-                        ModuleIdManager::RegisterModule(coord.second + newCoord, coord.first);
+                        ModuleIdManager::RegisterModule(second + newCoord, first);
                     }
                 } else {
-                    for (const auto &coord: MetaModuleManager::metamodules[0]->coords) {
+                    for (const auto &[first, second]: MetaModuleManager::metamodules[0]->coords) {
                         std::valarray<int> newCoord = {MetaModuleManager::metamodules[0]->size * i, MetaModuleManager::metamodules[0]->size * j};
-                        ModuleIdManager::RegisterModule(coord.second + newCoord, coord.first);
+                        ModuleIdManager::RegisterModule(second + newCoord, first);
                     }
                 }
             }
@@ -202,9 +202,9 @@ namespace LatticeSetup {
             // Pick the correct metamodule
             // Replace coord.first with something more descriptive
             MetaModule* currentMetamodule = MetaModuleManager::metamodules[0];
-            for (const auto &coord: currentMetamodule->coords) {
-                std::valarray<int> newCoord = coord.second + position * currentMetamodule->size;
-                ModuleIdManager::RegisterModule(coord.second + newCoord, coord.first);
+            for (const auto &[first, second]: currentMetamodule->coords) {
+                std::valarray<int> newCoord = second + position * currentMetamodule->size;
+                ModuleIdManager::RegisterModule(second + newCoord, first);
             }
         }
         Lattice::InitLattice(MetaModuleManager::order, MetaModuleManager::axisSize);
