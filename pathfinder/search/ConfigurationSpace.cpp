@@ -67,7 +67,7 @@ std::vector<std::set<ModuleData>> Configuration::MakeAllMovesForAllVertices() {
     std::vector<std::set<ModuleData>> result;
     Lattice::UpdateFromModuleInfo(GetModData());
     std::vector<Module*> movableModules;
-    for (int id = 0; id < Lattice::AxisSize() * Lattice::Order(); id++) {
+    for (int id = 0; id < ModuleIdManager::MinStaticID(); id++) {
         movableModules.push_back(&ModuleIdManager::GetModule(id));
     }
     for (auto module: movableModules) {
