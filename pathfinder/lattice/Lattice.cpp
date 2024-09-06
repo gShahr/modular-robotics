@@ -17,7 +17,7 @@ std::vector<Module*> Lattice::movableModules;
 CoordTensor<bool> Lattice::stateTensor(1, 1, false);
 CoordTensor<int> Lattice::coordTensor(1, 1, -1);
 
-void Lattice::ClearAdjacencies(int moduleId) {
+void Lattice::ClearAdjacencies(const int moduleId) {
     for (const int id : adjList[moduleId]) {
         for (int i = 0; i < adjList[id].size(); i++) {
             if (adjList[id][i] == moduleId) {
@@ -29,14 +29,14 @@ void Lattice::ClearAdjacencies(int moduleId) {
     adjList[moduleId].clear();
 }
 
-void Lattice::InitLattice(int _order, int _axisSize) {
+void Lattice::InitLattice(const int _order, const int _axisSize) {
     order = _order;
     axisSize = _axisSize;
     stateTensor = CoordTensor<bool>(order, axisSize, false);
     coordTensor = CoordTensor<int>(order, axisSize, -1);
 }
 
-void Lattice::setFlags(bool _ignoreColors) {
+void Lattice::setFlags(const bool _ignoreColors) {
     ignoreProperties = _ignoreColors;
 }
 
@@ -240,12 +240,12 @@ void Lattice::RDEdgeCheck(const Module& mod) {
     }
 }
 
-void Lattice::AddEdge(int modA, int modB) {
+void Lattice::AddEdge(const int modA, const int modB) {
     adjList[modA].push_back(modB);
     adjList[modB].push_back(modA);
 }
 
-void Lattice::APUtil(int u, std::vector<bool> &visited, std::vector<bool> &ap, std::vector<int> &parent,
+void Lattice::APUtil(const int u, std::vector<bool> &visited, std::vector<bool> &ap, std::vector<int> &parent,
                      std::vector<int> &low, std::vector<int> &disc) {
     int children = 0;
     visited[u] = true;

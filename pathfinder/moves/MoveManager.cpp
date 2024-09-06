@@ -3,7 +3,7 @@
 #include <filesystem>
 #include "MoveManager.h"
 
-void Move::RotateAnim(Move::AnimType& anim, int a, int b) {
+void Move::RotateAnim(Move::AnimType& anim, const int a, const int b) {
     // For easily rotating move types
     static std::unordered_map<AnimType, std::vector<int>> AnimToOffset = {
             {Z_SLIDE, {0, 0, 1}},
@@ -43,7 +43,7 @@ void Move::RotateAnim(Move::AnimType& anim, int a, int b) {
     }
 }
 
-void MoveBase::Rotate(int a, int b) {
+void MoveBase::Rotate(const int a, const int b) {
     std::swap(initPos[a], initPos[b]);
     std::swap(finalPos[a], finalPos[b]);
     std::swap(bounds[a], bounds[b]);
@@ -56,7 +56,7 @@ void MoveBase::Rotate(int a, int b) {
     }
 }
 
-void MoveBase::Reflect(int index) {
+void MoveBase::Reflect(const int index) {
     initPos[index] *= -1;
     finalPos[index] *= -1;
     std::swap(bounds[index].first, bounds[index].second);
@@ -271,7 +271,7 @@ std::vector<MoveBase*> MoveManager::_moves;
 CoordTensor<std::vector<MoveBase*>> MoveManager::_movesByOffset(1, 1, {});
 std::vector<std::valarray<int>> MoveManager::_offsets;
 
-void MoveManager::InitMoveManager(int order, int maxDistance) {
+void MoveManager::InitMoveManager(const int order, const int maxDistance) {
     _movesByOffset = std::move(CoordTensor<std::vector<MoveBase*>>(order, 2 * maxDistance,
             {}, std::valarray<int>(maxDistance, order)));
 }

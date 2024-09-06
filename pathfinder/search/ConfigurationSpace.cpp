@@ -255,7 +255,7 @@ int Configuration::GetCost() const {
     return cost;
 }
 
-void Configuration::SetCost(int cost) {
+void Configuration::SetCost(const int cost) {
     this->cost = cost;
 }
 
@@ -434,7 +434,7 @@ std::vector<Configuration*> ConfigurationSpace::FindPath(Configuration* start, C
     return path;
 }
 
-Configuration ConfigurationSpace::GenerateRandomFinal(int targetMoves) {
+Configuration ConfigurationSpace::GenerateRandomFinal(const int targetMoves) {
     std::unordered_set<HashedState> visited;
     const std::set<ModuleData> initialState = Lattice::GetModuleInfo();
     std::set<ModuleData> nextState;

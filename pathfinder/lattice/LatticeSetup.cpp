@@ -18,7 +18,7 @@ namespace LatticeSetup {
         for (const auto& module : j["modules"]) {
             std::vector<int> position = module["position"];
             std::transform(position.begin(), position.end(), position.begin(),
-                        [](int coord) { return coord; });
+                        [](const int coord) { return coord; });
             std::valarray<int> coords(position.data(), position.size());
             if (!Lattice::ignoreProperties && module.contains("properties")) {
                 ModuleIdManager::RegisterModule(coords, module["static"], module["properties"]);
@@ -55,7 +55,7 @@ namespace LatticeSetup {
             if (module["static"] == true) continue;
             std::vector<int> position = module["position"];
             std::transform(position.begin(), position.end(), position.begin(),
-                        [](int coord) { return coord; });
+                        [](const int coord) { return coord; });
             std::valarray<int> coords(position.data(), position.size());
             //desiredState[coords] = true;
             ModuleProperties props;

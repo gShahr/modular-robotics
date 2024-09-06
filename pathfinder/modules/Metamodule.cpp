@@ -1,6 +1,6 @@
 #include "Metamodule.h"
 
-MetaModule::MetaModule(const std::string& filename, int order, int size) : order(order), size(size) {
+MetaModule::MetaModule(const std::string& filename, const int order, const int size) : order(order), size(size) {
     readFromJson(filename);
 }
 
@@ -41,7 +41,7 @@ void MetaModule::readFromJson(const std::string& filename) {
     for (const auto& module : j["modules"]) {
         std::vector<int> position = module["position"];
         std::transform(position.begin(), position.end(), position.begin(),
-                    [](int coord) { return coord; });
+                    [](const int coord) { return coord; });
         std::valarray<int> coords(position.data(), position.size());
         if (module.contains("color")) {
             this->coords.emplace_back(Colors::colorToInt[module["color"]], coords);
@@ -51,13 +51,13 @@ void MetaModule::readFromJson(const std::string& filename) {
     }
 }
 
-void MetaModule::Rotate(int a, int b) {
+void MetaModule::Rotate(const int a, const int b) {
     for (auto& coord : coords) {
         std::swap(coord.second[a], coord.second[b]);
     }
 }
 
-void MetaModule::Reflect(int index) {
+void MetaModule::Reflect(const int index) {
     for (auto& coord : coords) {
         coord.second[index] *= -1;
         // Ternary needs testing
@@ -103,7 +103,7 @@ std::vector<MetaModule*> MetaModuleManager::metamodules = {};
 int MetaModuleManager::order = 0;
 int MetaModuleManager::axisSize = 0;
 
-void MetaModuleManager::InitMetaModuleManager(int _order, int _axisSize) {
+void MetaModuleManager::InitMetaModuleManager(const int _order, const int _axisSize) {
     order = _order;
     axisSize = _axisSize;
 }

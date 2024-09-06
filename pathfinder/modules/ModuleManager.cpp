@@ -271,7 +271,7 @@ std::size_t boost::hash<ModuleBasic>::operator()(const ModuleBasic& modData) con
 
 std::size_t boost::hash<ModuleProperties>::operator()(const ModuleProperties& moduleProperties) const noexcept {
     //std::size_t prev = 0;
-    auto cmp = [](int a, int b) { return a < b; };
+    auto cmp = [](const int a, const int b) { return a < b; };
     std::set<std::size_t, decltype(cmp)> hashes(cmp);
     for (const auto property : moduleProperties._properties) {
         //auto current = property->GetHash();
@@ -289,7 +289,7 @@ Module::Module(Module&& mod) noexcept {
     id = mod.id;
 }
 
-Module::Module(const std::valarray<int>& coords, bool isStatic, const nlohmann::basic_json<>& propertyDefs) : coords(coords), moduleStatic(isStatic), id(ModuleIdManager::GetNextId()) {
+Module::Module(const std::valarray<int>& coords, const bool isStatic, const nlohmann::basic_json<>& propertyDefs) : coords(coords), moduleStatic(isStatic), id(ModuleIdManager::GetNextId()) {
     properties.InitProperties(propertyDefs);
 }
 
@@ -298,7 +298,7 @@ std::vector<DeferredModCnstrArgs> ModuleIdManager::_deferredInitMods;
 std::vector<Module> ModuleIdManager::_modules;
 int ModuleIdManager::_staticStart = 0;
 
-void ModuleIdManager::RegisterModule(const std::valarray<int>& coords, bool isStatic, const nlohmann::basic_json<>& propertyDefs, bool deferred) {
+void ModuleIdManager::RegisterModule(const std::valarray<int>& coords, bool isStatic, const nlohmann::basic_json<>& propertyDefs, const bool deferred) {
     if (!deferred && isStatic) {
         DeferredModCnstrArgs args;
         args.coords = coords;
@@ -327,7 +327,7 @@ std::vector<Module>& ModuleIdManager::Modules() {
     return _modules;
 }
 
-Module& ModuleIdManager::GetModule(int id) {
+Module& ModuleIdManager::GetModule(const int id) {
     return _modules[id];
 }
 
