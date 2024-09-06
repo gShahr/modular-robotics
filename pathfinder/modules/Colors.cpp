@@ -91,7 +91,7 @@ std::uint_fast64_t ColorProperty::AsInt() const {
 }
 
 std::size_t ColorProperty::GetHash() {
-    boost::hash<int> hash;
+    constexpr boost::hash<int> hash;
     return hash(color);
 }
 
@@ -101,7 +101,7 @@ ColorProperty::ColorProperty(const nlohmann::basic_json<>& propertyDef) {
         if (std::all_of(propertyDef[COLOR].begin(), propertyDef[COLOR].end(),
                         [](const nlohmann::basic_json<>& i){return i.is_number_integer();})) {
             color = 0;
-            for (int channel : propertyDef[COLOR]) {
+            for (const int channel : propertyDef[COLOR]) {
                 color += channel;
             }
         }

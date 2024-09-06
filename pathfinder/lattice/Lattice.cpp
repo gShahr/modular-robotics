@@ -18,7 +18,7 @@ CoordTensor<bool> Lattice::stateTensor(1, 1, false);
 CoordTensor<int> Lattice::coordTensor(1, 1, -1);
 
 void Lattice::ClearAdjacencies(int moduleId) {
-    for (int id : adjList[moduleId]) {
+    for (const int id : adjList[moduleId]) {
         for (int i = 0; i < adjList[id].size(); i++) {
             if (adjList[id][i] == moduleId) {
                 adjList[id].erase(adjList[id].begin() + i);
@@ -253,7 +253,7 @@ void Lattice::APUtil(int u, std::vector<bool> &visited, std::vector<bool> &ap, s
     low[u] = time;
     time++;
 
-    for (int v : adjList[u]) {
+    for (const int v : adjList[u]) {
         if (!visited[v]) {
             parent[v] = u;
             children++;
@@ -400,7 +400,7 @@ void Lattice::UpdateFromModuleInfo(const std::set<ModuleData>& moduleInfo) {
         std::cerr << "Update partially completed due to state error, program likely non-functional!" << std::endl;
         return;
     }
-    for (auto id : modsToMove) {
+    for (const auto id : modsToMove) {
         auto& mod = ModuleIdManager::GetModule(id);
         Lattice::coordTensor[mod.coords] = -1;
         mod.coords = destinations.front()->Coords();
@@ -446,7 +446,7 @@ std::string Lattice::ToString() {
             if (ModuleIdManager::GetModule(id).moduleStatic) {
                 out << '#';
             } else {
-                auto colorProp = dynamic_cast<ColorProperty*>(ModuleIdManager::Modules()[id].properties.Find(COLOR_PROP_NAME));
+                const auto colorProp = dynamic_cast<ColorProperty*>(ModuleIdManager::Modules()[id].properties.Find(COLOR_PROP_NAME));
                 out << Colors::intToColor[colorProp->GetColorInt()][0];
             }
         } else if (id >= 0) {

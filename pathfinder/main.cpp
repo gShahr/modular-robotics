@@ -83,10 +83,10 @@ int main(int argc, char* argv[]) {
 #endif
     std::vector<Configuration*> path;
     try {
-        auto timeBegin = std::chrono::high_resolution_clock::now();
-        path = ConfigurationSpace::AStar(&start, &end);
-        auto timeEnd = std::chrono::high_resolution_clock::now();
-        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(timeEnd - timeBegin);
+        const auto timeBegin = std::chrono::high_resolution_clock::now();
+        path = ConfigurationSpace::BFS(&start, &end);
+        const auto timeEnd = std::chrono::high_resolution_clock::now();
+        const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(timeEnd - timeBegin);
         std::cout << "Search completed in " << duration.count() << " ms" << std::endl;
 #if CONFIG_OUTPUT_JSON
         SearchAnalysis::ExportData(analysisFile);
@@ -96,7 +96,7 @@ int main(int argc, char* argv[]) {
     }
     
     std::cout << "Path:\n";
-    for (auto config : path) {
+    for (const auto config : path) {
         Lattice::UpdateFromModuleInfo(config->GetModData());
         std::cout << Lattice::ToString();
     }

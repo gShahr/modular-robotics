@@ -83,7 +83,7 @@ Move2d::Move2d() {
 }
 
 MoveBase* Move2d::MakeCopy() const {
-    auto copy = new Move2d();
+    const auto copy = new Move2d();
     *copy = *this;
     return copy;
 }
@@ -92,7 +92,7 @@ void Move2d::InitMove(const nlohmann::basic_json<>& moveDef) {
     int x = 0, y = 0;
     std::valarray<int> maxBounds = {0, 0};
     for (const std::string line : moveDef["def"][0]) {
-        for (char c : line) {
+        for (const char c : line) {
             switch (c) {
                 default:
                     DEBUG("Unrecognized Move: " << c << std::endl);
@@ -172,7 +172,7 @@ Move3d::Move3d() {
 }
 
 MoveBase* Move3d::MakeCopy() const {
-    auto copy = new Move3d();
+    const auto copy = new Move3d();
     *copy = *this;
     return copy;
 }
@@ -182,7 +182,7 @@ void Move3d::InitMove(const nlohmann::basic_json<>& moveDef) {
     std::valarray<int> maxBounds = {0, 0, 0};
     for (const std::vector<std::string> slice : moveDef["def"]) {
         for (const auto& line : slice) {
-            for (auto c: line) {
+            for (const auto c: line) {
                 switch (c) {
                     default:
                         DEBUG("Unrecognized Move: " << c << std::endl);
@@ -278,7 +278,7 @@ void MoveManager::InitMoveManager(int order, int maxDistance) {
 
 void MoveManager::GenerateMovesFrom(MoveBase* origMove) {
     auto list = Isometry::GenerateTransforms(origMove);
-    for (auto move: list) {
+    for (const auto move: list) {
         _moves.push_back(dynamic_cast<MoveBase*>(move));
     }
     // Add move to offset map
@@ -318,11 +318,11 @@ void MoveManager::RegisterAllMoves(const std::string& movePath) {
                 std::cout << "Attempted to create move of order != 2 or 3, moveDef at: " << moveFile.path() << std::endl;
             }
             if (Lattice::order == 2) {
-                auto move = new Move2d();
+                const auto move = new Move2d();
                 Isometry::transformsToFree.push_back(move);
                 move->InitMove(moveDef);
             } else if (Lattice::order == 3) {
-                auto move = new Move3d();
+                const auto move = new Move3d();
                 Isometry::transformsToFree.push_back(move);
                 move->InitMove(moveDef);
             }
@@ -389,7 +389,7 @@ std::pair<Module*, MoveBase*> MoveManager::FindMoveToState(const std::set<Module
     if (modToMove == nullptr) {
         return {nullptr, nullptr};
     }
-    auto offset = destination - modToMove->coords;
+    const auto offset = destination - modToMove->coords;
     for (auto move : _movesByOffset[offset]) {
         if (move->MoveCheck(Lattice::coordTensor, *modToMove)) {
             return {modToMove, move};

@@ -51,7 +51,7 @@ void ModuleProperties::InitProperties(const nlohmann::basic_json<> &propertyDefs
 }
 
 void ModuleProperties::UpdateProperties(const std::valarray<int>& moveInfo) {
-    for (auto property : _dynamicProperties) {
+    for (const auto property : _dynamicProperties) {
         property->UpdateProperty(moveInfo);
     }
 }
@@ -62,7 +62,7 @@ bool ModuleProperties::operator==(const ModuleProperties& right) const {
     }
 
     for (const auto rProp : right._properties) {
-        if (auto lProp = Find(rProp->key); lProp == nullptr || !lProp->CompareProperty(*rProp)) {
+        if (const auto lProp = Find(rProp->key); lProp == nullptr || !lProp->CompareProperty(*rProp)) {
             return false;
         }
     }
@@ -86,21 +86,21 @@ bool ModuleProperties::operator!=(const ModuleProperties& right) const {
 
 ModuleProperties& ModuleProperties::operator=(const ModuleProperties& right) {
     _properties.clear();
-    for (auto property : right._properties) {
+    for (const auto property : right._properties) {
         _properties.insert(property->MakeCopy());
     }
     _dynamicProperties.clear();
     if (right._dynamicProperties.empty()) {
         return *this;
     }
-    for (auto dynamicProperty : right._dynamicProperties) {
+    for (const auto dynamicProperty : right._dynamicProperties) {
         _dynamicProperties.insert(dynamicProperty->MakeCopy());
     }
     return *this;
 }
 
 IModuleProperty* ModuleProperties::Find(const std::string& key) const {
-    for (auto property : _properties) {
+    for (const auto property : _properties) {
         if (property->key == key) {
             return property;
         }
@@ -132,7 +132,7 @@ PropertyInitializer::PropertyInitializer(const std::string& name, IModulePropert
 }
 
 ModuleBasic::ModuleBasic(const std::valarray<int>& coords, const ModuleProperties& properties) : coords(coords), properties(properties) {
-    std::hash<ModuleBasic> hasher;
+    constexpr std::hash<ModuleBasic> hasher;
     hasher(*this);
 }
 
@@ -252,7 +252,7 @@ std::size_t boost::hash<ModuleData>::operator()(const ModuleData &modData) const
 
 std::size_t std::hash<ModuleBasic>::operator()(ModuleBasic& modData) const noexcept {
     if (!modData.hashCacheValid) {
-        boost::hash<ModuleBasic> hasher;
+        constexpr boost::hash<ModuleBasic> hasher;
         modData.hash = hasher(modData);
         modData.hashCacheValid = true;
     }
@@ -262,8 +262,8 @@ std::size_t std::hash<ModuleBasic>::operator()(ModuleBasic& modData) const noexc
 std::size_t boost::hash<ModuleBasic>::operator()(const ModuleBasic& modData) const noexcept {
     auto coordHash = boost::hash_range(begin(modData.Coords()), end(modData.Coords()));
     if (!Lattice::ignoreProperties) {
-        boost::hash<ModuleProperties> propertyHasher;
-        auto propertyHash = propertyHasher(modData.Properties());
+        constexpr boost::hash<ModuleProperties> propertyHasher;
+        const auto propertyHash = propertyHasher(modData.Properties());
         boost::hash_combine(coordHash, propertyHash);
     }
     return coordHash;
@@ -273,7 +273,7 @@ std::size_t boost::hash<ModuleProperties>::operator()(const ModuleProperties& mo
     //std::size_t prev = 0;
     auto cmp = [](int a, int b) { return a < b; };
     std::set<std::size_t, decltype(cmp)> hashes(cmp);
-    for (auto property : moduleProperties._properties) {
+    for (const auto property : moduleProperties._properties) {
         //auto current = property->GetHash();
         hashes.insert(property->GetHash());
         //boost::hash_combine(prev, current);
@@ -338,7 +338,7 @@ int ModuleIdManager::MinStaticID() {
 std::ostream& operator<<(std::ostream& out, const Module& mod) {
     out << "Module with ID " << mod.id << " at ";
     std::string sep = "(";
-    for (auto coord : mod.coords) {
+    for (const auto coord : mod.coords) {
         out << sep << coord;
         sep = ", ";
     }

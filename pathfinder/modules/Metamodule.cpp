@@ -5,7 +5,7 @@ MetaModule::MetaModule(const std::string& filename, int order, int size) : order
 }
 
 MetaModule* MetaModule::MakeCopy() const {
-    auto copy = new MetaModule(*this);
+    const auto copy = new MetaModule(*this);
     return copy;
 }
 
@@ -18,7 +18,7 @@ void MetaModule::readFromTxt2d(const std::string& filename) {
     }
     std::string line;
     while (std::getline(file, line)) {
-        for (char c : line) {
+        for (const char c : line) {
             if (c == '#') {
                 coords.emplace_back(-1, std::valarray<int>(x, y));
             }

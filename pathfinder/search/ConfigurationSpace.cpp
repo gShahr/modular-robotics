@@ -52,9 +52,9 @@ std::vector<std::set<ModuleData>> Configuration::MakeAllMoves() const {
     std::vector<std::set<ModuleData>> result;
     Lattice::UpdateFromModuleInfo(GetModData());
     std::vector<Module*> movableModules = Lattice::MovableModules();
-    for (auto module: movableModules) {
+    for (const auto module: movableModules) {
         auto legalMoves = MoveManager::CheckAllMoves(Lattice::coordTensor, *module);
-        for (auto move : legalMoves) {
+        for (const auto move : legalMoves) {
             Lattice::MoveModule(*module, move->MoveOffset());
             result.emplace_back(Lattice::GetModuleInfo());
             Lattice::MoveModule(*module, -move->MoveOffset());
@@ -70,9 +70,9 @@ std::vector<std::set<ModuleData>> Configuration::MakeAllMovesForAllVertices() co
     for (int id = 0; id < ModuleIdManager::MinStaticID(); id++) {
         movableModules.push_back(&ModuleIdManager::GetModule(id));
     }
-    for (auto module: movableModules) {
+    for (const auto module: movableModules) {
         auto legalMoves = MoveManager::CheckAllMoves(Lattice::coordTensor, *module);
-        for (auto move: legalMoves) {
+        for (const auto move: legalMoves) {
             Lattice::MoveModule(*module, move->MoveOffset());
             result.emplace_back(Lattice::GetModuleInfo());
             Lattice::MoveModule(*module, -move->MoveOffset());
@@ -227,7 +227,7 @@ std::vector<Configuration*> ConfigurationSpace::BFSParallelized(Configuration* s
         auto adjList = current->MakeAllMoves();
         #pragma omp parallel for
         for (const auto& moduleInfo : adjList) {
-            int thread_id = omp_get_thread_num();
+            const int thread_id = omp_get_thread_num();
             std::cout << "Thread " << thread_id << " is processing moduleInfo." << std::endl;
             HashedState hashedState(moduleInfo);
             bool isVisited = false;
@@ -262,8 +262,8 @@ void Configuration::SetCost(int cost) {
 template <typename Heuristic>
 auto CompareConfiguration(Configuration* final, Heuristic heuristic) {
     return [final, heuristic](Configuration* c1, Configuration* c2) {
-        int cost1 = c1->GetCost() + (c1->*heuristic)(final);
-        int cost2 = c2->GetCost() + (c2->*heuristic)(final);
+        const int cost1 = c1->GetCost() + (c1->*heuristic)(final);
+        const int cost2 = c2->GetCost() + (c2->*heuristic)(final);
         return (cost1 == cost2) ? c1->GetCost() > c2->GetCost() : cost1 > cost2;
     };
 }
@@ -311,7 +311,7 @@ int Configuration::SymmetricDifferenceHeuristic(Configuration* final) {
         currentIt++;
         finalIt++;
     }
-    int symDifference = 2 * unionCoords.size() - (currentData.size() + finalData.size());
+    const int symDifference = 2 * unionCoords.size() - (currentData.size() + finalData.size());
     return symDifference / 2;
 }
 
@@ -436,7 +436,7 @@ std::vector<Configuration*> ConfigurationSpace::FindPath(Configuration* start, C
 
 Configuration ConfigurationSpace::GenerateRandomFinal(int targetMoves) {
     std::unordered_set<HashedState> visited;
-    std::set<ModuleData> initialState = Lattice::GetModuleInfo();
+    const std::set<ModuleData> initialState = Lattice::GetModuleInfo();
     std::set<ModuleData> nextState;
 
     for (int i = 0; i < targetMoves; i++) {

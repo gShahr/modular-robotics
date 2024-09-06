@@ -10,7 +10,7 @@ std::vector<ITransformable*> Isometry::GenerateTransforms(ITransformable* initia
     for (int i = 0; i < initial->order - 1; i++) {
         auto forms = transforms;
         for (int j = i + 1; j < initial->order; j++) {
-            for (auto form : forms) {
+            for (const auto form : forms) {
                 auto rotated = form->MakeCopy();
                 rotated->Rotate(i, j);
                 transforms.push_back(rotated);
@@ -21,7 +21,7 @@ std::vector<ITransformable*> Isometry::GenerateTransforms(ITransformable* initia
     // Reflections
     for (int i = 0; i < initial->order; i++) {
         auto forms = transforms;
-        for (auto form : forms) {
+        for (const auto form : forms) {
             auto reflected = form->MakeCopy();
             reflected->Reflect(i);
             transforms.push_back(reflected);
@@ -33,7 +33,7 @@ std::vector<ITransformable*> Isometry::GenerateTransforms(ITransformable* initia
 }
 
 void Isometry::CleanupTransforms() {
-    for (auto transform : transformsToFree) {
+    for (const auto transform : transformsToFree) {
         delete transform;
     }
 }
