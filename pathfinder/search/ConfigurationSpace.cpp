@@ -301,7 +301,6 @@ int Configuration::SymmetricDifferenceHeuristic(const Configuration* final) cons
     auto finalData = final->GetModData();
     auto currentIt = currentData.begin();
     auto finalIt = finalData.begin();
-    int h = 0;
     std::set<std::valarray<int>, ValarrayComparator> unionCoords;
     while (currentIt != currentData.end() && finalIt != finalData.end()) {
         const auto& currentModule = *currentIt;
