@@ -323,8 +323,7 @@ void Lattice::BuildMovableModulesNonRec() {
         stack.emplace(id, id, adjList[id].cbegin());
 
         while (!stack.empty()) {
-            auto [grandparent, parent, children] = stack.top();
-            if (children != adjList[parent].cend()) {
+            if (auto [grandparent, parent, children] = stack.top(); children != adjList[parent].cend()) {
                 int child = *children;
                 ++std::get<std::vector<int>::const_iterator>(stack.top());
                 //++children;
@@ -441,8 +440,7 @@ std::string Lattice::ToString() {
     }
     out << "Lattice State:\n";
     for (int i = 0; i < coordTensor.GetArrayInternal().size(); i++) {
-        auto id = coordTensor.GetElementDirect(i);
-        if (id >= 0 && !ignoreProperties) {
+        if (const auto id = coordTensor.GetElementDirect(i); id >= 0 && !ignoreProperties) {
             if (ModuleIdManager::GetModule(id).moduleStatic) {
                 out << '#';
             } else {

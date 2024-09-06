@@ -37,8 +37,7 @@ void ModuleProperties::InitProperties(const nlohmann::basic_json<> &propertyDefs
             auto property = Constructors()[key](propertyDefs[key]);
             _properties.insert(property);
             if (propertyDefs[key].contains("static") && propertyDefs[key]["static"] == false) {
-                auto dynamicProperty = dynamic_cast<IModuleDynamicProperty*>(property);
-                if (dynamicProperty == nullptr) {
+                if (auto dynamicProperty = dynamic_cast<IModuleDynamicProperty*>(property); dynamicProperty == nullptr) {
                     std::cerr << "Property definition for " << key
                     << " is marked as non-static but implementation class does not inherit from IModuleDynamicProperty."
                     << std::endl;

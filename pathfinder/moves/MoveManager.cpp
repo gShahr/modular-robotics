@@ -375,8 +375,7 @@ std::pair<Module*, MoveBase*> MoveManager::FindMoveToState(const std::set<Module
         candidates.insert(id);
     }
     for (const auto& info : modData) {
-        auto id = Lattice::coordTensor[info.Coords()];
-        if (id >= 0) {
+        if (auto id = Lattice::coordTensor[info.Coords()]; id >= 0) {
             candidates.erase(id);
         } else {
             destination = info.Coords();

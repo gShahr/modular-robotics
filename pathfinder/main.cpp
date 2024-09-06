@@ -34,11 +34,11 @@ int main(int argc, char* argv[]) {
 
     // Define the long options
     static struct option long_options[] = {
-        {"ignore-colors", no_argument, 0, 'i'},
-        {"initial-file", required_argument, 0, 'I'},
-        {"final-file", required_argument, 0, 'F'},
-        {"export-file", required_argument, 0, 'e'},
-        {0, 0, 0, 0}
+        {"ignore-colors", no_argument, nullptr, 'i'},
+        {"initial-file", required_argument, nullptr, 'I'},
+        {"final-file", required_argument, nullptr, 'F'},
+        {"export-file", required_argument, nullptr, 'e'},
+        {nullptr, 0, nullptr, 0}
     };
 
     int option_index = 0;

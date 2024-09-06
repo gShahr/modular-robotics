@@ -405,8 +405,7 @@ std::vector<Configuration*> ConfigurationSpace::AStar(Configuration* start, cons
         }
         auto adjList = current->MakeAllMoves();
         for (const auto& moduleInfo : adjList) {
-            HashedState hashedState(moduleInfo);
-            if (visited.find(hashedState) == visited.end()) {
+            if (HashedState hashedState(moduleInfo); visited.find(hashedState) == visited.end()) {
                 auto nextConfiguration = new Configuration(moduleInfo);
                 nextConfiguration->SetParent(current);
                 nextConfiguration->SetCost(current->GetCost() + 1);
