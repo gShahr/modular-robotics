@@ -13,7 +13,7 @@ const char * BFSExcept::what() const noexcept {
     return "BFS exhausted without finding a path!";
 }
 
-HashedState::HashedState(const std::set<ModuleBasic>& modData) {
+HashedState::HashedState(const std::set<ModuleData>& modData) {
     seed = boost::hash_range(modData.begin(), modData.end());
     moduleData = modData;
 }
@@ -24,7 +24,7 @@ size_t HashedState::GetSeed() const {
     return seed;
 }
 
-const std::set<ModuleBasic>& HashedState::GetState() const {
+const std::set<ModuleData>& HashedState::GetState() const {
     return moduleData;
 }
 
@@ -40,7 +40,7 @@ size_t std::hash<HashedState>::operator()(const HashedState& state) const {
     return state.GetSeed();
 }
 
-Configuration::Configuration(const std::set<ModuleBasic>& modData) : hash(HashedState(modData)) {}
+Configuration::Configuration(const std::set<ModuleData>& modData) : hash(HashedState(modData)) {}
 
 Configuration::~Configuration() {
     for (auto i = next.rbegin(); i != next.rend(); i++) {
@@ -48,8 +48,8 @@ Configuration::~Configuration() {
     }
 }
 
-std::vector<std::set<ModuleBasic>> Configuration::MakeAllMoves() {
-    std::vector<std::set<ModuleBasic>> result;
+std::vector<std::set<ModuleData>> Configuration::MakeAllMoves() {
+    std::vector<std::set<ModuleData>> result;
     Lattice::UpdateFromModuleInfo(GetModData());
     std::vector<Module*> movableModules = Lattice::MovableModules();
     for (auto module: movableModules) {
@@ -79,7 +79,7 @@ const HashedState& Configuration::GetHash() const {
     return hash;
 }
 
-const std::set<ModuleBasic>& Configuration::GetModData() const {
+const std::set<ModuleData>& Configuration::GetModData() const {
     return hash.GetState();
 }
 
@@ -418,8 +418,8 @@ std::vector<Configuration*> ConfigurationSpace::FindPath(Configuration* start, C
 
 Configuration ConfigurationSpace::GenerateRandomFinal(int targetMoves) {
     std::unordered_set<HashedState> visited;
-    std::set<ModuleBasic> initialState = Lattice::GetModuleInfo();
-    std::set<ModuleBasic> nextState;
+    std::set<ModuleData> initialState = Lattice::GetModuleInfo();
+    std::set<ModuleData> nextState;
 
     for (int i = 0; i < targetMoves; i++) {
         // Get current configuration

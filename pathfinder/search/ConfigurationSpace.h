@@ -33,11 +33,11 @@ public:
 class HashedState {
 private:
     size_t seed;
-    std::set<ModuleBasic> moduleData;
+    std::set<ModuleData> moduleData;
 public:
     HashedState() = delete;
 
-    explicit HashedState(const std::set<ModuleBasic>& modData);
+    explicit HashedState(const std::set<ModuleData>& modData);
 
     HashedState(const HashedState& other);
 
@@ -45,7 +45,7 @@ public:
     size_t GetSeed() const;
 
     [[nodiscard]]
-    const std::set<ModuleBasic>& GetState() const;
+    const std::set<ModuleData>& GetState() const;
 
     bool operator==(const HashedState& other) const;
 
@@ -67,11 +67,11 @@ private:
 public:
     int depth = 0;
 
-    explicit Configuration(const std::set<ModuleBasic>& modData);
+    explicit Configuration(const std::set<ModuleData>& modData);
 
     ~Configuration();
 
-    std::vector<std::set<ModuleBasic>> MakeAllMoves();
+    std::vector<std::set<ModuleData>> MakeAllMoves();
 
     void AddEdge(Configuration* configuration);
 
@@ -83,7 +83,7 @@ public:
     const HashedState& GetHash() const;
 
     [[nodiscard]]
-    const std::set<ModuleBasic>& GetModData() const;
+    const std::set<ModuleData>& GetModData() const;
 
     void SetParent(Configuration* configuration);
 

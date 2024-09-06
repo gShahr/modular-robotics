@@ -367,7 +367,7 @@ std::vector<MoveBase*> MoveManager::CheckAllMoves(CoordTensor<int> &tensor, Modu
     return legalMoves;
 }
 
-std::pair<Module*, MoveBase*> MoveManager::FindMoveToState(const std::set<ModuleBasic>& modData) {
+std::pair<Module*, MoveBase*> MoveManager::FindMoveToState(const std::set<ModuleData>& modData) {
     Module* modToMove = nullptr;
     std::valarray<int> destination;
     std::unordered_set<int> candidates;

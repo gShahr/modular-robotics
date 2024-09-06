@@ -8,6 +8,17 @@
 #ifndef MODULAR_ROBOTICS_MODULEMANAGER_H
 #define MODULAR_ROBOTICS_MODULEMANAGER_H
 
+// Module Data Storage Constants (Don't change these)
+#define MM_DATA_FULL 0
+#define MM_DATA_INT64 1
+/* Module Data Storage Configuration
+ * FULL: Data stored as ModuleBasic, contains a complete copy of coordinates and properties.
+ * INT64: Data stored as ModuleInt64, much more memory efficient but has limitations:
+ *  - Module coordinates must fall within inclusive range of (0, 0, 0) to (255, 255, 255)
+ *  - Modules may only have up to one property.
+ */
+#define CONFIG_MOD_DATA_STORAGE MM_DATA_INT64
+
 // An interface for properties that a module might have, ex: Color, Direction, etc.
 // This
 class IModuleProperty {
@@ -111,6 +122,29 @@ public:
     virtual ~IModuleBasic() = default;
 };
 
+// Class holding a pointer to a class implementing IModuleBasic, exists purely for convenience
+class ModuleData : public IModuleBasic {
+private:
+    std::unique_ptr<IModuleBasic> module;
+
+public:
+    ModuleData(const ModuleData& modData);
+
+    ModuleData(const std::valarray<int>& coords, const ModuleProperties& properties);
+
+    [[nodiscard]]
+    const std::valarray<int>& Coords() const override;
+
+    [[nodiscard]]
+    const ModuleProperties& Properties() const override;
+
+    bool operator==(const IModuleBasic& right) const override;
+
+    bool operator<(const IModuleBasic& right) const override;
+
+    friend class std::hash<ModuleData>;
+};
+
 // Class used to hold bare minimum representation of a module, for use in Configuration class
 class ModuleBasic : public IModuleBasic {
 private:
@@ -156,6 +190,18 @@ public:
     bool operator==(const IModuleBasic& right) const override;
 
     bool operator<(const IModuleBasic& right) const override;
+
+    friend class std::hash<ModuleData>;
+};
+
+template<>
+struct std::hash<ModuleData> {
+    std::size_t operator()(const ModuleData& modData) const noexcept;
+};
+
+template<>
+struct boost::hash<ModuleData> {
+    std::size_t operator()(const ModuleData& modData) const noexcept;
 };
 
 template<>

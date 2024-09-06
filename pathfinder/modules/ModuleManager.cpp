@@ -195,6 +195,56 @@ bool ModuleInt64::operator<(const IModuleBasic& right) const {
     return modInt < r.modInt;
 }
 
+ModuleData::ModuleData(const ModuleData &modData) {
+#if CONFIG_MOD_DATA_STORAGE == MM_DATA_FULL
+    module = std::make_unique<ModuleBasic>(modData.Coords(), modData.Properties());
+#else
+    module = std::make_unique<ModuleInt64>(modData.Coords(), modData.Properties());
+#endif
+}
+
+
+ModuleData::ModuleData(const std::valarray<int> &coords, const ModuleProperties &properties) {
+#if CONFIG_MOD_DATA_STORAGE == MM_DATA_FULL
+    module = std::make_unique<ModuleBasic>(coords, properties);
+#else
+    module = std::make_unique<ModuleInt64>(coords, properties);
+#endif
+}
+
+const std::valarray<int>& ModuleData::Coords() const {
+    return module->Coords();
+}
+
+const ModuleProperties& ModuleData::Properties() const {
+    return module->Properties();
+}
+
+bool ModuleData::operator==(const IModuleBasic& right) const {
+    return *module == *reinterpret_cast<const ModuleData&>(right).module;
+}
+
+bool ModuleData::operator<(const IModuleBasic& right) const {
+    return *module < *reinterpret_cast<const ModuleData&>(right).module;
+}
+
+std::size_t std::hash<ModuleData>::operator()(const ModuleData& modData) const noexcept {
+#if CONFIG_MOD_DATA_STORAGE == MM_DATA_FULL
+    auto m = reinterpret_cast<const ModuleBasic&>(*modData.module);
+    constexpr std::hash<ModuleBasic> hasher;
+    return hasher(m);
+#else
+    auto m = reinterpret_cast<const ModuleInt64&>(*modData.module);
+    return m.modInt;
+#endif
+}
+
+std::size_t boost::hash<ModuleData>::operator()(const ModuleData &modData) const noexcept {
+    constexpr std::hash<ModuleData> hasher;
+    return hasher(modData);
+}
+
+
 std::size_t std::hash<ModuleBasic>::operator()(ModuleBasic& modData) const {
     if (!modData.hashCacheValid) {
         boost::hash<ModuleBasic> hasher;
