@@ -611,8 +611,15 @@ function pixelToHex(x, y, size) {
 
 document.addEventListener('mousemove', function(event) {
     const coordinates = getTileCoordinates(event.clientX, event.clientY);
-    document.getElementById('coordinates').innerText = `Tile Coordinates: x=${coordinates.x}, y=${coordinates.y}`;
-    // console.log(`Tile Coordinates: x=${coordinates.x}, y=${coordinates.y}`);
+    let displayX = coordinates.x;
+    let displayY = coordinates.y;
+    const gridWidth = Math.floor(canvasW / twoDtileSize / 2);
+    const gridHeight = Math.floor(canvasH / twoDtileSize);
+    if (coordinates.x < 0 || coordinates.y < 0 || coordinates.x >= gridWidth || coordinates.y >= gridHeight) {
+        displayX = '-';
+        displayY = '-';
+    }
+    document.getElementById('coordinates').innerText = `Tile Coordinates: x=${displayX}, y=${displayY}`;
 });
 
 function getTileCoordinates(mouseX, mouseY) {
