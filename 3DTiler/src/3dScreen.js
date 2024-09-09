@@ -275,7 +275,7 @@ class threeDScreen {
             }
             sketch.pop();
         }
-        for (let block of copyBlocks) {
+        for (let block of coloredBlocks) {
             const x = block.x * this.tileSize - halfWidth;
             const y = block.y * this.tileSize - halfHeight;
             const z = block.z * this.tileSize;

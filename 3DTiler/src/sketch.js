@@ -12,6 +12,7 @@ mStatic = false;
 objects = [];
 blocks = [];
 copyBlocks = [];
+coloredBlocks = [];
 importBlocks = [];
 historyStack = [];
 redoStack = [];
@@ -473,12 +474,14 @@ var sketch1 = function (sketch) {
             boundaryBox[0] = [x, y, screen.layer];
         } else if (sketch.key === '2') {
             copyBlocks = [];
+            coloredBlocks = [];
             boundaryBox[1] = [x, y, screen.layer];
             for (let i = boundaryBox[0][0]; i <= boundaryBox[1][0]; i++) {
                 for (let j = boundaryBox[0][1]; j <= boundaryBox[1][1]; j++) {
                     for (let k = boundaryBox[0][2]; k <= boundaryBox[1][2]; k++) {
                         if (screen.hasCube(i, j, k)) {
                             copyBlocks.push({ x: i, y: j, z: k });
+                            coloredBlocks.push({x: i, y: j, z: k});
                         }
                     }
                 }
@@ -488,7 +491,7 @@ var sketch1 = function (sketch) {
                 handleAddShape(x + block.x - boundaryBox[0][0], y + block.y - boundaryBox[0][1], screen.layer + block.z - boundaryBox[0][2]);
             }
         } else if (sketch.key === '4') {
-            copyBlocks = [];
+            coloredBlocks = [];
             for (let i = boundaryBox[0][0]; i <= boundaryBox[1][0]; i++) {
                 for (let j = boundaryBox[0][1]; j <= boundaryBox[1][1]; j++) {
                     for (let k = boundaryBox[0][2]; k <= boundaryBox[1][2]; k++) {
