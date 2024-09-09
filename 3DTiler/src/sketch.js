@@ -1,5 +1,5 @@
 document.oncontextmenu = () => { return false; }
-canvasW = window.screen.width * 1;
+canvasW = window.screen.width * 1 - 200;
 canvasH = window.screen.height * .8;
 canvasPosition = [200, 0]
 canvasZ = 75;
