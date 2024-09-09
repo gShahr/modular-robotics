@@ -10,13 +10,13 @@
 #include <boost/functional/hash.hpp>
 #include <boost/format.hpp>
 #include <nlohmann/json.hpp>
-#include "../pathfinder/lattice/LatticeSetup.h"
-#include "../pathfinder/moves/Scenario.h"
-#include "../pathfinder/moves/MoveManager.h"
-#include "../pathfinder/lattice/LatticeSetup.h"
-#include "../pathfinder/search/ConfigurationSpace.h"
-#include "../pathfinder/coordtensor/debug_util.h"
-#include "../pathfinder/modules/Metamodule.h"
+#include "../../../pathfinder/lattice/LatticeSetup.h"
+#include "../../../pathfinder/moves/Scenario.h"
+#include "../../../pathfinder/moves/MoveManager.h"
+#include "../../../pathfinder/lattice/LatticeSetup.h"
+#include "../../../pathfinder/search/ConfigurationSpace.h"
+#include "../../../pathfinder/coordtensor/debug_util.h"
+#include "../../../pathfinder/modules/Metamodule.h"
 #include <boost/test/tools/interface.hpp>
 
 // set --log_level=all to see boost output
