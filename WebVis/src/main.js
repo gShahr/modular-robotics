@@ -40,7 +40,7 @@ window.gwMoveSequence = new MoveSequence();
 // Module constructor automatically adds modules to this global
 // Initialize it with one cube so that the user doesn't feel lost
 export const gModules = {}
-new Module(ModuleType.CUBE, 0, new THREE.Vector3(0.0, 0.0, 0.0), 0x808080, 1.0);
+new Module(ModuleType.RHOMBIC_DODECAHEDRON, 0, new THREE.Vector3(0.0, 0.0, 0.0), 0x808080, 1.0);
 
 /* --- lights --- */
 const lightAmbient = new THREE.AmbientLight(0xFFFFFF, 0.60);
