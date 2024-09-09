@@ -3,7 +3,7 @@
 import * as THREE from 'three';
 import { ModuleType } from "./utils.js";
 
-function _constructCubeMaterial(texture, color) {
+function _constructGenericMaterial(texture, color) {
     return new THREE.MeshPhongMaterial({
         flatShading: true,
         map: texture,
@@ -19,30 +19,30 @@ function _constructCubeMaterial(texture, color) {
 
             // We will inject a uniform variable at the head of the shader source file
             let uniformsToInject = 
-    `uniform vec4 borderAttrs;
-    `           // Hook up these uniforms to a variable TODO: add actual variability
+`uniform vec4 borderAttrs;
+`           // Hook up these uniforms to a variable TODO: add actual variability
             shader.uniforms.borderAttrs = { value: new THREE.Vector4(0.0, 0.0, 0.0, 0.02) }; // R,G,B,width
             
             // We will inject some helper functions
             let helperFunctions =
-    `float Between(float low, float high, float val) {
-    return step(low, val) - step(high, val);
-    }
-    float Rectangle(vec2 orig, vec2 wh, vec2 st) {
-    float x = Between(orig.x, orig.x + wh.x, st.x);
-    float y = Between(orig.y, orig.y + wh.y, st.y);
-    return x*y;
-    }
-    `;          // We will inject code at the end of main()
+`float Between(float low, float high, float val) {
+return step(low, val) - step(high, val);
+}
+float Rectangle(vec2 orig, vec2 wh, vec2 st) {
+float x = Between(orig.x, orig.x + wh.x, st.x);
+float y = Between(orig.y, orig.y + wh.y, st.y);
+return x*y;
+}
+`;          // We will inject code at the end of main()
             let codeToInjectToMain =
-    `float borderMask = 1.0 - Rectangle(vec2(borderAttrs.w), vec2(1.0 - 2.0*borderAttrs.w), vMapUv);
-    float interiorMask = 1.0 - borderMask;
-    vec3 borderColor = borderAttrs.xyz;
-    vec3 border = borderMask * borderColor;
+`float borderMask = 1.0 - Rectangle(vec2(borderAttrs.w), vec2(1.0 - 2.0*borderAttrs.w), vMapUv);
+float interiorMask = 1.0 - borderMask;
+vec3 borderColor = borderAttrs.xyz;
+vec3 border = borderMask * borderColor;
 
-    vec3 interior = gl_FragColor.xyz * interiorMask;
-    gl_FragColor = vec4(interior + border, 1.0);
-    `;          // Perform the injection
+vec3 interior = gl_FragColor.xyz * interiorMask;
+gl_FragColor = vec4(interior + border, 1.0);
+`;          // Perform the injection
             shader.fragmentShader = 
                 uniformsToInject
                 + shader.fragmentShader.substring(0, beginningOfMain)
@@ -54,7 +54,7 @@ function _constructCubeMaterial(texture, color) {
     });
 }
 
-function _constructRdMaterial(texture, color) {
+function _constructBasicMaterial(texture, color) {
     return new THREE.MeshPhongMaterial({
         flatShading: true,
         map: texture,
@@ -63,6 +63,6 @@ function _constructRdMaterial(texture, color) {
 }
 
 export const ModuleMaterialConstructors = new Map([
-    [ModuleType.CUBE, _constructCubeMaterial],
-    [ModuleType.RHOMBIC_DODECAHEDRON, _constructRdMaterial],
+    [ModuleType.CUBE, _constructGenericMaterial],
+    [ModuleType.RHOMBIC_DODECAHEDRON, _constructGenericMaterial],
 ]);

@@ -5,47 +5,121 @@ import { ModuleType } from "./utils.js";
 
 const _cubeGeometry = new THREE.BoxGeometry( 1, 1, 1 );
 
-// TODO add uv
-const _rhombicDodecahedronGeometryVertices = new Float32Array([
-   -1.0, -1.0, -1.0, //  0 | A -- Obtuse vertices / Cube
-   -1.0, -1.0,  1.0, //  1 | B
-    1.0, -1.0,  1.0, //  2 | C
-    1.0, -1.0, -1.0, //  3 | D
-   -1.0,  1.0, -1.0, //  4 | E
-   -1.0,  1.0,  1.0, //  5 | F
-    1.0,  1.0,  1.0, //  6 | G
-    1.0,  1.0, -1.0, //  7 | H
+const _rhombicDodecahedronGeometryVertices = [
+   // -1.0, -1.0, -1.0, //  0 | A -- Obtuse vertices / Cube
+   // -1.0, -1.0,  1.0, //  1 | B
+   //  1.0, -1.0,  1.0, //  2 | C
+   //  1.0, -1.0, -1.0, //  3 | D
+   // -1.0,  1.0, -1.0, //  4 | E
+   // -1.0,  1.0,  1.0, //  5 | F
+   //  1.0,  1.0,  1.0, //  6 | G
+   //  1.0,  1.0, -1.0, //  7 | H
 
-    0.0,  0.0,  2.0, //  8 | J -- Acute vertices // pyramid tips
-   -2.0,  0.0,  0.0, //  9 | K
-    2.0,  0.0,  0.0, // 10 | L
-    0.0, -2.0,  0.0, // 11 | M
-    0.0,  2.0,  0.0, // 12 | N
-    0.0,  0.0, -2.0, // 13 | O
-].map((x) => x / 2.0));
+   //  0.0,  0.0,  2.0, //  8 | J -- Acute vertices // pyramid tips
+   // -2.0,  0.0,  0.0, //  9 | K
+   //  2.0,  0.0,  0.0, // 10 | L
+   //  0.0, -2.0,  0.0, // 11 | M
 
-// faces - in counterclockwise winding order - important!
-const _rhombicDodecahedronGeometryIndices = [
-    12,  4,  5,   5,  4,  9, // NEKF -- NEF / FEK
-    12,  5,  6,   6,  5,  8, // NFJG -- NFG / GFJ
-    12,  6,  7,   7,  6, 10, // NGLH -- NGH / HGL
-    12,  7,  4,   4,  7, 13, // NHOE -- NHE / EHO
-    11,  1,  0,   0,  1,  9, // MAKB -- MBA / ABK
-    11,  2,  1,   1,  2,  8, // MBJC -- MCB / BCJ
-    11,  3,  2,   2,  3, 10, // MCLD -- MDC / CDL
-    11,  0,  3,   3,  0, 13, // MDOA -- MAD / DAO
+   { pos: [ 0.0,  2.0,  0.0], uv: [0.0, 0.0] }, // 0  | N
+   { pos: [-1.0,  1.0, -1.0], uv: [0.0, 1.0] }, // 1  | E
+   { pos: [-1.0,  1.0,  1.0], uv: [1.0, 0.0] }, // 2  | F
+   { pos: [-1.0,  1.0,  1.0], uv: [1.0, 0.0] }, // 3  | F
+   { pos: [-1.0,  1.0, -1.0], uv: [0.0, 1.0] }, // 4  | E
+   { pos: [-2.0,  0.0,  0.0], uv: [1.0, 1.0] }, // 5  | K
 
-     5,  9,  8,   8,  9,  1, // FKBJ -- FKJ / JKB
-     6,  8, 10,  10,  8,  2, // GJCL -- GJL / LJC
-     7, 10, 13,  13, 10,  3, // HLDO -- HLO / OLD
-     4, 13,  9,   9, 13,  0  // EKAO -- EKO / OKA
+   { pos: [ 0.0,  2.0,  0.0], uv: [0.0, 0.0] }, // 6  | N
+   { pos: [-1.0,  1.0,  1.0], uv: [0.0, 1.0] }, // 7  | F
+   { pos: [ 1.0,  1.0,  1.0], uv: [1.0, 0.0] }, // 8  | G
+   { pos: [ 1.0,  1.0,  1.0], uv: [1.0, 0.0] }, // 9 | G
+   { pos: [-1.0,  1.0,  1.0], uv: [0.0, 1.0] }, // 10 | F
+   { pos: [ 0.0,  0.0,  2.0], uv: [1.0, 1.0] }, // 11 | J
+
+   { pos: [ 0.0,  2.0,  0.0], uv: [0.0, 0.0] }, // 12 | N
+   { pos: [ 1.0,  1.0,  1.0], uv: [0.0, 1.0] }, // 13 | G
+   { pos: [ 1.0,  1.0, -1.0], uv: [1.0, 0.0] }, // 14 | H
+   { pos: [ 1.0,  1.0, -1.0], uv: [1.0, 0.0] }, // 15 | H
+   { pos: [ 1.0,  1.0,  1.0], uv: [0.0, 1.0] }, // 16 | G
+   { pos: [ 2.0,  0.0,  0.0], uv: [1.0, 1.0] }, // 17 | L
+
+   { pos: [ 0.0,  2.0,  0.0], uv: [0.0, 0.0] }, // 18 | N
+   { pos: [ 1.0,  1.0, -1.0], uv: [0.0, 1.0] }, // 19 | H
+   { pos: [-1.0,  1.0, -1.0], uv: [1.0, 0.0] }, // 20 | E
+   { pos: [-1.0,  1.0, -1.0], uv: [1.0, 0.0] }, // 21 | E
+   { pos: [ 1.0,  1.0, -1.0], uv: [0.0, 1.0] }, // 22 | H
+   { pos: [ 0.0,  0.0, -2.0], uv: [1.0, 1.0] }, // 23 | O
+
+   { pos: [ 0.0, -2.0,  0.0], uv: [0.0, 0.0] }, // 24 | M
+   { pos: [-1.0, -1.0,  1.0], uv: [0.0, 1.0] }, // 25 | B
+   { pos: [-1.0, -1.0, -1.0], uv: [1.0, 0.0] }, // 26 | A
+   { pos: [-1.0, -1.0, -1.0], uv: [1.0, 0.0] }, // 27 | A
+   { pos: [-1.0, -1.0,  1.0], uv: [0.0, 1.0] }, // 28 | B
+   { pos: [-2.0,  0.0,  0.0], uv: [1.0, 1.0] }, // 29 | K
+
+   { pos: [ 0.0, -2.0,  0.0], uv: [0.0, 0.0] }, // 30 | M
+   { pos: [ 1.0, -1.0,  1.0], uv: [0.0, 1.0] }, // 31 | C
+   { pos: [-1.0, -1.0,  1.0], uv: [1.0, 0.0] }, // 32 | B
+   { pos: [-1.0, -1.0,  1.0], uv: [1.0, 0.0] }, // 33 | B
+   { pos: [ 1.0, -1.0,  1.0], uv: [0.0, 1.0] }, // 34 | C
+   { pos: [ 0.0,  0.0,  2.0], uv: [1.0, 1.0] }, // 35 | J
+
+   { pos: [ 0.0, -2.0,  0.0], uv: [0.0, 0.0] }, // 36 | M
+   { pos: [ 1.0, -1.0, -1.0], uv: [0.0, 1.0] }, // 37 | D
+   { pos: [ 1.0, -1.0,  1.0], uv: [1.0, 0.0] }, // 38 | C
+   { pos: [ 1.0, -1.0,  1.0], uv: [1.0, 0.0] }, // 39 | C
+   { pos: [ 1.0, -1.0, -1.0], uv: [0.0, 1.0] }, // 40 | D
+   { pos: [ 2.0,  0.0,  0.0], uv: [1.0, 1.0] }, // 41 | L
+
+   { pos: [ 0.0, -2.0,  0.0], uv: [0.0, 0.0] }, // 42 | M
+   { pos: [-1.0, -1.0, -1.0], uv: [0.0, 1.0] }, // 43 | A
+   { pos: [ 1.0, -1.0, -1.0], uv: [1.0, 0.0] }, // 44 | D
+   { pos: [ 1.0, -1.0, -1.0], uv: [1.0, 0.0] }, // 45 | D
+   { pos: [-1.0, -1.0, -1.0], uv: [0.0, 1.0] }, // 46 | A
+   { pos: [ 0.0,  0.0, -2.0], uv: [1.0, 1.0] }, // 47 | O
+
+   { pos: [-1.0,  1.0,  1.0], uv: [0.0, 0.0] }, // 48 | F
+   { pos: [-2.0,  0.0,  0.0], uv: [0.0, 1.0] }, // 49 | K
+   { pos: [ 0.0,  0.0,  2.0], uv: [1.0, 0.0] }, // 50 | J
+   { pos: [ 0.0,  0.0,  2.0], uv: [1.0, 0.0] }, // 51 | J
+   { pos: [-2.0,  0.0,  0.0], uv: [0.0, 1.0] }, // 52 | K
+   { pos: [-1.0, -1.0,  1.0], uv: [1.0, 1.0] }, // 53 | B
+
+   { pos: [ 1.0,  1.0,  1.0], uv: [0.0, 0.0] }, // 54 | G
+   { pos: [ 0.0,  0.0,  2.0], uv: [0.0, 1.0] }, // 55 | J
+   { pos: [ 2.0,  0.0,  0.0], uv: [1.0, 0.0] }, // 56 | L
+   { pos: [ 2.0,  0.0,  0.0], uv: [1.0, 0.0] }, // 57 | L
+   { pos: [ 0.0,  0.0,  2.0], uv: [0.0, 1.0] }, // 58 | J
+   { pos: [ 1.0, -1.0,  1.0], uv: [1.0, 1.0] }, // 59 | C
+
+   { pos: [ 1.0,  1.0, -1.0], uv: [0.0, 0.0] }, // 60 | H
+   { pos: [ 2.0,  0.0,  0.0], uv: [0.0, 1.0] }, // 61 | L
+   { pos: [ 0.0,  0.0, -2.0], uv: [1.0, 0.0] }, // 62 | O
+   { pos: [ 0.0,  0.0, -2.0], uv: [1.0, 0.0] }, // 63 | O
+   { pos: [ 2.0,  0.0,  0.0], uv: [0.0, 1.0] }, // 64 | L
+   { pos: [ 1.0, -1.0, -1.0], uv: [1.0, 1.0] }, // 65 | D
+
+   { pos: [-1.0,  1.0, -1.0], uv: [0.0, 0.0] }, // 66 | E
+   { pos: [ 0.0,  0.0, -2.0], uv: [0.0, 1.0] }, // 67 | O
+   { pos: [-2.0,  0.0,  0.0], uv: [1.0, 0.0] }, // 68 | K
+   { pos: [-2.0,  0.0,  0.0], uv: [1.0, 0.0] }, // 69 | K
+   { pos: [ 0.0,  0.0, -2.0], uv: [0.0, 1.0] }, // 70 | O
+   { pos: [-1.0, -1.0, -1.0], uv: [1.0, 1.0] }, // 71 | A
 ];
+
+let _rhombicDodecahedronVertexPositions = [];
+let _rhombicDodecahedronVertexUvs = [];
+for (const vertex of _rhombicDodecahedronGeometryVertices) {
+    _rhombicDodecahedronVertexPositions.push(...vertex.pos);
+    _rhombicDodecahedronVertexUvs.push(...vertex.uv);
+}
+
 const _rhombicDodecahedronGeometry = new THREE.BufferGeometry();
-_rhombicDodecahedronGeometry.setIndex(_rhombicDodecahedronGeometryIndices);
-_rhombicDodecahedronGeometry.setAttribute('position', new THREE.BufferAttribute(_rhombicDodecahedronGeometryVertices, 3));
+_rhombicDodecahedronGeometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(_rhombicDodecahedronVertexPositions), 3));
+_rhombicDodecahedronGeometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(_rhombicDodecahedronVertexUvs), 2));
 _rhombicDodecahedronGeometry.computeVertexNormals();
 
 export const ModuleGeometries = new Map([
     [ModuleType.CUBE, _cubeGeometry],
     [ModuleType.RHOMBIC_DODECAHEDRON, _rhombicDodecahedronGeometry]
 ]);
+
+console.log(ModuleGeometries);
