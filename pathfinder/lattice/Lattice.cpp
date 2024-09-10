@@ -32,7 +32,6 @@ void Lattice::ClearAdjacencies(const int moduleId) {
 void Lattice::InitLattice(const int _order, const int _axisSize) {
     order = _order;
     axisSize = _axisSize;
-    stateTensor = CoordTensor<bool>(order, axisSize, false);
     coordTensor = CoordTensor<int>(order, axisSize, -1);
 }
 
@@ -41,8 +40,7 @@ void Lattice::setFlags(const bool _ignoreColors) {
 }
 
 void Lattice::AddModule(const Module& mod) {
-    // Update state and coord tensor
-    stateTensor[mod.coords] = true;
+    // Update coord tensor
     coordTensor[mod.coords] = mod.id;
     // Adjacency check
 #if LATTICE_RD_EDGECHECK
@@ -57,10 +55,8 @@ void Lattice::AddModule(const Module& mod) {
 void Lattice::MoveModule(Module &mod, const std::valarray<int>& offset) {
     ClearAdjacencies(mod.id);
     coordTensor[mod.coords] = -1;
-    stateTensor[mod.coords] = false;
     mod.coords += offset;
     coordTensor[mod.coords] = mod.id;
-    stateTensor[mod.coords] = true;
 #if LATTICE_RD_EDGECHECK
     RDEdgeCheck(mod);
 #else
