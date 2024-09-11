@@ -465,7 +465,7 @@ std::string Lattice::ToString() {
                 out << Colors::intToColor[colorProp->GetColorInt()][0];
             }
         } else if (id >= 0) {
-            out << '#';
+            out << (ModuleIdManager::GetModule(id).moduleStatic ? '#' : '@');
         } else {
             out << '-';
         }
