@@ -402,8 +402,8 @@ void Lattice::UpdateFromModuleInfo(const std::set<ModuleData>& moduleInfo) {
     }
     for (const auto& info : moduleInfo) {
         auto id = coordTensor[info.Coords()];
-        auto& mod = ModuleIdManager::GetModule(id);
         if (id >= 0) {
+            auto& mod = ModuleIdManager::GetModule(id);
             modsToMove.erase(id);
             if (mod.properties != info.Properties()) {
                 mod.properties = info.Properties();
