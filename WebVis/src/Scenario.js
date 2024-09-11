@@ -61,14 +61,36 @@ export class Scenario {
                     let moveType = anchorDirCode > 0 ? MoveType.PIVOT : MoveType.SLIDING;
                     let anchorDir;
                     switch (Math.abs(anchorDirCode)) {
-                        case 0: anchorDir = new THREE.Vector3( 0.0,  0.0,  0.0); break; // generic slide
-                        case 1: anchorDir = new THREE.Vector3( 1.0,  0.0,  0.0); break; // +x
-                        case 2: anchorDir = new THREE.Vector3( 0.0,  1.0,  0.0); break; // +y
-                        case 3: anchorDir = new THREE.Vector3( 0.0,  0.0,  1.0); break; // +z
-                        case 4: anchorDir = new THREE.Vector3(-1.0,  0.0,  0.0); break; // -x
-                        case 5: anchorDir = new THREE.Vector3( 0.0, -1.0,  0.0); break; // -y
-                        case 6: anchorDir = new THREE.Vector3( 0.0,  0.0, -1.0); break; // -z
+                        // Generic sliding move
+                        case 0:   anchorDir = new THREE.Vector3( 0.0,  0.0,  0.0 ); break; // generic slide
+
+                        // Cube pivots
+                        case 1:   anchorDir = new THREE.Vector3( 1.0,  0.0,  0.0 ); break; // +x
+                        case 2:   anchorDir = new THREE.Vector3( 0.0,  1.0,  0.0 ); break; // +y
+                        case 3:   anchorDir = new THREE.Vector3( 0.0,  0.0,  1.0 ); break; // +z
+                        case 4:   anchorDir = new THREE.Vector3(-1.0,  0.0,  0.0 ); break; // -x
+                        case 5:   anchorDir = new THREE.Vector3( 0.0, -1.0,  0.0 ); break; // -y
+                        case 6:   anchorDir = new THREE.Vector3( 0.0,  0.0, -1.0 ); break; // -z
+
+                        // Rhombic dodecahedron: pivots away from faces which have normals in the xy plane
+                        case 12:  anchorDir = new THREE.Vector3( 1.0,  1.0,  0.0 ); break; // +x +y
+                        case 15:  anchorDir = new THREE.Vector3( 1.0, -1.0,  0.0 ); break; // +x -y
+                        case 42:  anchorDir = new THREE.Vector3(-1.0,  1.0,  0.0 ); break; // -x +y
+                        case 45:  anchorDir = new THREE.Vector3(-1.0, -1.0,  0.0 ); break; // -x -y
+
+                        // Rhombic dodecahedron: pivots away from faces which have normals in an octant of xyz space
+                        case 123: anchorDir = new THREE.Vector3( 1.0,  1.0,  1.0 ); break; // +x +y +z
+                        case 126: anchorDir = new THREE.Vector3( 1.0,  1.0, -1.0 ); break; // +x +y -z
+                        case 153: anchorDir = new THREE.Vector3( 1.0, -1.0,  1.0 ); break; // +x -y +z
+                        case 156: anchorDir = new THREE.Vector3( 1.0, -1.0, -1.0 ); break; // +x -y -z
+                        case 423: anchorDir = new THREE.Vector3(-1.0,  1.0,  1.0 ); break; // -x +y +z
+                        case 426: anchorDir = new THREE.Vector3(-1.0,  1.0, -1.0 ); break; // -x +y -z
+                        case 453: anchorDir = new THREE.Vector3(-1.0, -1.0,  1.0 ); break; // -x -y +z
+                        case 456: anchorDir = new THREE.Vector3(-1.0, -1.0, -1.0 ); break; // -x -y -z
+
+                        default:  anchorDir = new THREE.Vector3( 0.0,  0.0,  0.0 ); console.log("Unknown rotation code ", anchorDirCode, " -- treating as sliding move"); break;
                     }
+                    anchorDir.normalize();
                     moves.push(new Move(moverId, anchorDir, deltaPos, moveType, checkpointMove));
                     if (checkpointMove) { checkpointMove = false; }
                     break;
