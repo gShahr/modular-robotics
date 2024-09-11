@@ -113,7 +113,7 @@ for (const vertex of _rhombicDodecahedronGeometryVertices) {
 }
 
 const _rhombicDodecahedronGeometry = new THREE.BufferGeometry();
-_rhombicDodecahedronGeometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(_rhombicDodecahedronVertexPositions), 3));
+_rhombicDodecahedronGeometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(_rhombicDodecahedronVertexPositions.map((x) => x / 2.0)), 3));
 _rhombicDodecahedronGeometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(_rhombicDodecahedronVertexUvs), 2));
 _rhombicDodecahedronGeometry.computeVertexNormals();
 
