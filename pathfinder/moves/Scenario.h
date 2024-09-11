@@ -3,11 +3,8 @@
 
 #include <string>
 #include <vector>
-#include "../coordtensor/CoordTensor.h"
 #include "../search/ConfigurationSpace.h"
-#include "../lattice/Lattice.h"
 #include "nlohmann/json.hpp"
-#include <fstream>
 
 namespace Scenario {
     //void exportStateTensorToJson(int id, const CoordTensor<bool>& stateTensor, const std::string& filename);

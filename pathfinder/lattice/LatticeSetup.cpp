@@ -1,8 +1,13 @@
 #include "LatticeSetup.h"
+#include <set>
+#include <vector>
+#include <fstream>
+#include <iostream>
+#include <valarray>
+#include "Lattice.h"
 #include "../search/ConfigurationSpace.h"
 #include "../modules/Metamodule.h"
 #include "../modules/Colors.h"
-#include <set>
 
 namespace LatticeSetup {
     void setupFromJson(const std::string& filename) {
@@ -18,7 +23,7 @@ namespace LatticeSetup {
         for (const auto& module : j["modules"]) {
             std::vector<int> position = module["position"];
             std::transform(position.begin(), position.end(), position.begin(),
-                        [](int coord) { return coord; });
+                        [](const int coord) { return coord; });
             std::valarray<int> coords(position.data(), position.size());
             if (!Lattice::ignoreProperties && module.contains("properties")) {
                 ModuleIdManager::RegisterModule(coords, module["static"], module["properties"]);
@@ -41,7 +46,6 @@ namespace LatticeSetup {
     }
 
     Configuration setupFinalFromJson(const std::string& filename) {
-        std::hash<ModuleBasic> hasher;
         std::ifstream file(filename);
         if (!file) {
             std::cerr << "Unable to open file " << filename << std::endl;
@@ -51,22 +55,20 @@ namespace LatticeSetup {
         file >> j;
         //CoordTensor<bool> desiredState(Lattice::Order(), Lattice::AxisSize(), false);
         //CoordTensor<int> desiredColors(Lattice::Order(), Lattice::AxisSize(), -1);
-        std::set<ModuleBasic> desiredState;
+        std::set<ModuleData> desiredState;
         for (const auto& module : j["modules"]) {
             if (module["static"] == true) continue;
             std::vector<int> position = module["position"];
             std::transform(position.begin(), position.end(), position.begin(),
-                        [](int coord) { return coord; });
+                        [](const int coord) { return coord; });
             std::valarray<int> coords(position.data(), position.size());
-            ModuleBasic mod;
-            mod.coords = coords;
             //desiredState[coords] = true;
+            ModuleProperties props;
             if (!Lattice::ignoreProperties && module.contains("properties")) {
-                mod.properties.InitProperties(module["properties"]);
+                props.InitProperties(module["properties"]);
                 //desiredColors[coords] = Colors::colorToInt[module["color"]];
             }
-            hasher(mod);
-            desiredState.insert(mod);
+            desiredState.insert({coords, props});
         }
         //return {desiredState, desiredColors};
         //TODO: add property stuff here
@@ -134,8 +136,8 @@ namespace LatticeSetup {
 
     void setUpMetamodule(MetaModule* metamodule) {
         Lattice::InitLattice(metamodule->order, metamodule->size);
-        for (const auto &coord: metamodule->coords) {
-            ModuleIdManager::RegisterModule(coord.second, coord.first);
+        for (const auto &[first, second]: metamodule->coords) {
+            ModuleIdManager::RegisterModule(second, first);
         }
         ModuleIdManager::DeferredRegistration();
         for (const auto& mod : ModuleIdManager::Modules()) {
@@ -148,14 +150,14 @@ namespace LatticeSetup {
         for (int i = 0; i < MetaModuleManager::axisSize / MetaModuleManager::metamodules[0]->size; i++) {
             for (int j = 0; j < MetaModuleManager::axisSize / MetaModuleManager::metamodules[0]->size; j++) {
                 if ((i%2==0 && j&1) || (i&1 && j%2 == 0)) {
-                    for (const auto &coord: MetaModuleManager::metamodules[5]->coords) {
+                    for (const auto &[first, second]: MetaModuleManager::metamodules[5]->coords) {
                         std::valarray<int> newCoord = {MetaModuleManager::metamodules[5]->size * i, MetaModuleManager::metamodules[5]->size * j};
-                        ModuleIdManager::RegisterModule(coord.second + newCoord, coord.first);
+                        ModuleIdManager::RegisterModule(second + newCoord, first);
                     }
                 } else {
-                    for (const auto &coord: MetaModuleManager::metamodules[0]->coords) {
+                    for (const auto &[first, second]: MetaModuleManager::metamodules[0]->coords) {
                         std::valarray<int> newCoord = {MetaModuleManager::metamodules[0]->size * i, MetaModuleManager::metamodules[0]->size * j};
-                        ModuleIdManager::RegisterModule(coord.second + newCoord, coord.first);
+                        ModuleIdManager::RegisterModule(second + newCoord, first);
                     }
                 }
             }
@@ -205,9 +207,9 @@ namespace LatticeSetup {
             // Pick the correct metamodule
             // Replace coord.first with something more descriptive
             MetaModule* currentMetamodule = MetaModuleManager::metamodules[0];
-            for (const auto &coord: currentMetamodule->coords) {
-                std::valarray<int> newCoord = coord.second + position * currentMetamodule->size;
-                ModuleIdManager::RegisterModule(coord.second + newCoord, coord.first);
+            for (const auto &[first, second]: currentMetamodule->coords) {
+                std::valarray<int> newCoord = second + position * currentMetamodule->size;
+                ModuleIdManager::RegisterModule(second + newCoord, first);
             }
         }
         Lattice::InitLattice(MetaModuleManager::order, MetaModuleManager::axisSize);

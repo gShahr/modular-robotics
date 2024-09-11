@@ -1,9 +1,9 @@
 #include "Colors.h"
 
 namespace Colors {
-    ColorsRGB::ColorsRGB(int r, int g, int b) : red(r), green(g), blue(b) {}
+    ColorsRGB::ColorsRGB(const int r, const int g, const int b) : red(r), green(g), blue(b) {}
 
-    ColorsRGB::ColorsRGB(int rgbInt) {
+    ColorsRGB::ColorsRGB(const int rgbInt) {
         red = rgbInt & 0xFF0000;
         green = rgbInt & 0x00FF00;
         blue = rgbInt & 0x0000FF;
@@ -28,12 +28,10 @@ namespace Colors {
     };
 
     ColorsRGB convertColorNameToRGB(const std::string& colorName) {
-        auto it = colorToRGB.find(colorName);
-        if (it != colorToRGB.end()) {
+        if (const auto it = colorToRGB.find(colorName); it != colorToRGB.end()) {
             return it->second;
-        } else {
-            return ColorsRGB(0);
         }
+        return ColorsRGB(0);
     }
 
     std::map<std::string, int> colorToInt = {
@@ -86,8 +84,12 @@ IModuleProperty* ColorProperty::MakeCopy() const {
     return new ColorProperty(*this);
 }
 
+std::uint_fast64_t ColorProperty::AsInt() const {
+    return color;
+}
+
 std::size_t ColorProperty::GetHash() {
-    boost::hash<int> hash;
+    constexpr boost::hash<int> hash;
     return hash(color);
 }
 
@@ -97,7 +99,7 @@ ColorProperty::ColorProperty(const nlohmann::basic_json<>& propertyDef) {
         if (std::all_of(propertyDef[COLOR].begin(), propertyDef[COLOR].end(),
                         [](const nlohmann::basic_json<>& i){return i.is_number_integer();})) {
             color = 0;
-            for (int channel : propertyDef[COLOR]) {
+            for (const int channel : propertyDef[COLOR]) {
                 color += channel;
             }
         }

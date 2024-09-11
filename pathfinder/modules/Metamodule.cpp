@@ -1,11 +1,11 @@
 #include "Metamodule.h"
 
-MetaModule::MetaModule(const std::string& filename, int order, int size) : order(order), size(size) {
+MetaModule::MetaModule(const std::string& filename, const int order, const int size) : order(order), size(size) {
     readFromJson(filename);
 }
 
 MetaModule* MetaModule::MakeCopy() const {
-    auto copy = new MetaModule(*this);
+    const auto copy = new MetaModule(*this);
     return copy;
 }
 
@@ -18,7 +18,7 @@ void MetaModule::readFromTxt2d(const std::string& filename) {
     }
     std::string line;
     while (std::getline(file, line)) {
-        for (char c : line) {
+        for (const char c : line) {
             if (c == '#') {
                 coords.emplace_back(-1, std::valarray<int>(x, y));
             }
@@ -41,7 +41,7 @@ void MetaModule::readFromJson(const std::string& filename) {
     for (const auto& module : j["modules"]) {
         std::vector<int> position = module["position"];
         std::transform(position.begin(), position.end(), position.begin(),
-                    [](int coord) { return coord; });
+                    [](const int coord) { return coord; });
         std::valarray<int> coords(position.data(), position.size());
         if (module.contains("color")) {
             this->coords.emplace_back(Colors::colorToInt[module["color"]], coords);
@@ -51,18 +51,18 @@ void MetaModule::readFromJson(const std::string& filename) {
     }
 }
 
-void MetaModule::Rotate(int a, int b) {
-    for (auto& coord : coords) {
-        std::swap(coord.second[a], coord.second[b]);
+void MetaModule::Rotate(const int a, const int b) {
+    for (auto&[first, second] : coords) {
+        std::swap(second[a], second[b]);
     }
 }
 
-void MetaModule::Reflect(int index) {
-    for (auto& coord : coords) {
-        coord.second[index] *= -1;
+void MetaModule::Reflect(const int index) {
+    for (auto&[first, second] : coords) {
+        second[index] *= -1;
         // Ternary needs testing
         //coord[index] += size - 1;
-        coord.second[index] += size - size % 2;
+        second[index] += size - size % 2;
     }
 }
 
@@ -103,7 +103,7 @@ std::vector<MetaModule*> MetaModuleManager::metamodules = {};
 int MetaModuleManager::order = 0;
 int MetaModuleManager::axisSize = 0;
 
-void MetaModuleManager::InitMetaModuleManager(int _order, int _axisSize) {
+void MetaModuleManager::InitMetaModuleManager(const int _order, const int _axisSize) {
     order = _order;
     axisSize = _axisSize;
 }

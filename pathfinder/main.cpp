@@ -5,7 +5,6 @@
 #include <string>
 #include "moves/MoveManager.h"
 #include "search/ConfigurationSpace.h"
-#include "coordtensor/debug_util.h"
 #include <boost/functional/hash.hpp>
 #include <boost/format.hpp>
 #include <queue>
@@ -34,11 +33,11 @@ int main(int argc, char* argv[]) {
 
     // Define the long options
     static struct option long_options[] = {
-        {"ignore-colors", no_argument, 0, 'i'},
-        {"initial-file", required_argument, 0, 'I'},
-        {"final-file", required_argument, 0, 'F'},
-        {"export-file", required_argument, 0, 'e'},
-        {0, 0, 0, 0}
+        {"ignore-colors", no_argument, nullptr, 'i'},
+        {"initial-file", required_argument, nullptr, 'I'},
+        {"final-file", required_argument, nullptr, 'F'},
+        {"export-file", required_argument, nullptr, 'e'},
+        {nullptr, 0, nullptr, 0}
     };
 
     int option_index = 0;
@@ -83,10 +82,10 @@ int main(int argc, char* argv[]) {
 #endif
     std::vector<Configuration*> path;
     try {
-        auto timeBegin = std::chrono::high_resolution_clock::now();
-        path = ConfigurationSpace::AStar(&start, &end);
-        auto timeEnd = std::chrono::high_resolution_clock::now();
-        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(timeEnd - timeBegin);
+        const auto timeBegin = std::chrono::high_resolution_clock::now();
+        path = ConfigurationSpace::BFS(&start, &end);
+        const auto timeEnd = std::chrono::high_resolution_clock::now();
+        const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(timeEnd - timeBegin);
         std::cout << "Search completed in " << duration.count() << " ms" << std::endl;
 #if CONFIG_OUTPUT_JSON
         SearchAnalysis::ExportData(analysisFile);
@@ -96,7 +95,7 @@ int main(int argc, char* argv[]) {
     }
     
     std::cout << "Path:\n";
-    for (auto config : path) {
+    for (const auto config : path) {
         Lattice::UpdateFromModuleInfo(config->GetModData());
         std::cout << Lattice::ToString();
     }

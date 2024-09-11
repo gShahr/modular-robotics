@@ -1,9 +1,10 @@
 #include <string>
 #include <fstream>
 #include <filesystem>
+#include <execution>
 #include "MoveManager.h"
 
-void Move::RotateAnim(Move::AnimType& anim, int a, int b) {
+void Move::RotateAnim(Move::AnimType& anim, const int a, const int b) {
     // For easily rotating move types
     static std::unordered_map<AnimType, std::vector<int>> AnimToOffset = {
             {Z_SLIDE, {0, 0, 1}},
@@ -43,29 +44,29 @@ void Move::RotateAnim(Move::AnimType& anim, int a, int b) {
     }
 }
 
-void MoveBase::Rotate(int a, int b) {
+void MoveBase::Rotate(const int a, const int b) {
     std::swap(initPos[a], initPos[b]);
     std::swap(finalPos[a], finalPos[b]);
     std::swap(bounds[a], bounds[b]);
-    for (auto& move : moves) {
-        std::swap(move.first[a], move.first[b]);
+    for (auto&[offset, check] : moves) {
+        std::swap(offset[a], offset[b]);
     }
-    for (auto& anim : animSequence) {
-        std::swap(anim.second[a], anim.second[b]);
-        Move::RotateAnim(anim.first, a, b);
+    for (auto&[type, offset] : animSequence) {
+        std::swap(offset[a], offset[b]);
+        Move::RotateAnim(type, a, b);
     }
 }
 
-void MoveBase::Reflect(int index) {
+void MoveBase::Reflect(const int index) {
     initPos[index] *= -1;
     finalPos[index] *= -1;
     std::swap(bounds[index].first, bounds[index].second);
-    for (auto& move : moves) {
-        move.first[index] *= -1;
+    for (auto&[offset, check] : moves) {
+        offset[index] *= -1;
     }
-    for (auto& anim : animSequence) {
-        anim.first = Move::AnimReflectionMap.at(anim.first)[index];
-        anim.second[index] *= -1;
+    for (auto&[type, offset] : animSequence) {
+        type = Move::AnimReflectionMap.at(type)[index];
+        offset[index] *= -1;
     }
 }
 
@@ -83,7 +84,7 @@ Move2d::Move2d() {
 }
 
 MoveBase* Move2d::MakeCopy() const {
-    auto copy = new Move2d();
+    const auto copy = new Move2d();
     *copy = *this;
     return copy;
 }
@@ -92,7 +93,7 @@ void Move2d::InitMove(const nlohmann::basic_json<>& moveDef) {
     int x = 0, y = 0;
     std::valarray<int> maxBounds = {0, 0};
     for (const std::string line : moveDef["def"][0]) {
-        for (char c : line) {
+        for (const char c : line) {
             switch (c) {
                 default:
                     DEBUG("Unrecognized Move: " << c << std::endl);
@@ -123,10 +124,10 @@ void Move2d::InitMove(const nlohmann::basic_json<>& moveDef) {
         x = 0;
         y++;
     }
-    for (auto& move : moves) {
-        move.first -= initPos;
+    for (auto&[offset, check] : moves) {
+        offset -= initPos;
 #if MOVEMANAGER_VERBOSE > MM_LOG_NONE
-        DEBUG("Check Offset: " << move.first[0] << ", " << move.first[1] << (move.second ? " Static" : " Empty") << std::endl);
+        DEBUG("Check Offset: " << offset[0] << ", " << offset[1] << (check ? " Static" : " Empty") << std::endl);
 #endif
     }
     finalPos -= initPos;
@@ -150,20 +151,20 @@ void Move2d::InitMove(const nlohmann::basic_json<>& moveDef) {
     }
 }
 
-bool Move2d::MoveCheck(CoordTensor<int> &tensor, const Module &mod) {
+bool Move2d::MoveCheck(const CoordTensor<int>& tensor, const Module& mod) {
     // Bounds checking
     for (int i = 0; i < order; i++) {
-        if (mod.coords[i] - bounds[i].first < 0 || mod.coords[i] + bounds[i].second >= tensor.AxisSize()) {
+        if (mod.coords[i] - bounds[i].first < 0 || mod.coords[i] + bounds[i].second >= Lattice::AxisSize()) {
             return false;
         }
     }
     // Move Check
-    for (const auto& move : moves) {
+    return std::all_of(std::execution::par_unseq, moves.begin(), moves.end(), [&mod = std::as_const(mod), &tensor = std::as_const(tensor)](auto& move) {
         if ((tensor[mod.coords + move.first] < 0) == move.second) {
             return false;
         }
-    }
-    return true;
+        return true;
+    });
 }
 
 Move3d::Move3d() {
@@ -172,7 +173,7 @@ Move3d::Move3d() {
 }
 
 MoveBase* Move3d::MakeCopy() const {
-    auto copy = new Move3d();
+    const auto copy = new Move3d();
     *copy = *this;
     return copy;
 }
@@ -182,7 +183,7 @@ void Move3d::InitMove(const nlohmann::basic_json<>& moveDef) {
     std::valarray<int> maxBounds = {0, 0, 0};
     for (const std::vector<std::string> slice : moveDef["def"]) {
         for (const auto& line : slice) {
-            for (auto c: line) {
+            for (const auto c: line) {
                 switch (c) {
                     default:
                         DEBUG("Unrecognized Move: " << c << std::endl);
@@ -221,10 +222,10 @@ void Move3d::InitMove(const nlohmann::basic_json<>& moveDef) {
         y = 0;
         z++;
     }
-    for (auto& move : moves) {
-        move.first -= initPos;
+    for (auto&[offset, check] : moves) {
+        offset -= initPos;
 #if MOVEMANAGER_VERBOSE > MM_LOG_NONE
-        DEBUG("Check Offset: " << move.first[0] << ", " << move.first[1] << ", " << move.first[2] << (move.second ? " Static" : " Empty") << std::endl);
+        DEBUG("Check Offset: " << offset[0] << ", " << offset[1] << ", " << offset[2] << (check ? " Static" : " Empty") << std::endl);
 #endif
     }
     finalPos -= initPos;
@@ -251,7 +252,7 @@ void Move3d::InitMove(const nlohmann::basic_json<>& moveDef) {
     }
 }
 
-bool Move3d::MoveCheck(CoordTensor<int> &tensor, const Module &mod) {
+bool Move3d::MoveCheck(const CoordTensor<int> &tensor, const Module &mod) {
     // Bounds checking
     for (int i = 0; i < order; i++) {
         if (mod.coords[i] - bounds[i].first < 0 || mod.coords[i] + bounds[i].second >= tensor.AxisSize()) {
@@ -259,26 +260,26 @@ bool Move3d::MoveCheck(CoordTensor<int> &tensor, const Module &mod) {
         }
     }
     // Move Check
-    for (const auto& move : moves) {
+    return std::all_of(std::execution::par_unseq, moves.begin(), moves.end(), [&mod = std::as_const(mod), &tensor = std::as_const(tensor)](auto& move) {
         if ((tensor[mod.coords + move.first] < 0) == move.second) {
             return false;
         }
-    }
-    return true;
+        return true;
+    });
 }
 
 std::vector<MoveBase*> MoveManager::_moves;
 CoordTensor<std::vector<MoveBase*>> MoveManager::_movesByOffset(1, 1, {});
 std::vector<std::valarray<int>> MoveManager::_offsets;
 
-void MoveManager::InitMoveManager(int order, int maxDistance) {
+void MoveManager::InitMoveManager(const int order, const int maxDistance) {
     _movesByOffset = std::move(CoordTensor<std::vector<MoveBase*>>(order, 2 * maxDistance,
             {}, std::valarray<int>(maxDistance, order)));
 }
 
 void MoveManager::GenerateMovesFrom(MoveBase* origMove) {
     auto list = Isometry::GenerateTransforms(origMove);
-    for (auto move: list) {
+    for (const auto move: list) {
         _moves.push_back(dynamic_cast<MoveBase*>(move));
     }
     // Add move to offset map
@@ -318,11 +319,11 @@ void MoveManager::RegisterAllMoves(const std::string& movePath) {
                 std::cout << "Attempted to create move of order != 2 or 3, moveDef at: " << moveFile.path() << std::endl;
             }
             if (Lattice::order == 2) {
-                auto move = new Move2d();
+                const auto move = new Move2d();
                 Isometry::transformsToFree.push_back(move);
                 move->InitMove(moveDef);
             } else if (Lattice::order == 3) {
-                auto move = new Move3d();
+                const auto move = new Move3d();
                 Isometry::transformsToFree.push_back(move);
                 move->InitMove(moveDef);
             }
@@ -367,7 +368,47 @@ std::vector<MoveBase*> MoveManager::CheckAllMoves(CoordTensor<int> &tensor, Modu
     return legalMoves;
 }
 
-std::pair<Module*, MoveBase*> MoveManager::FindMoveToState(const std::set<ModuleBasic>& modData) {
+#define MOVEMANAGER_CHECK_BY_OFFSET true
+std::vector<MoveBase*> MoveManager::CheckAllMovesAndConnectivity(CoordTensor<int> &tensor, Module &mod) {
+    std::vector<MoveBase*> legalMoves = {};
+#if MOVEMANAGER_CHECK_BY_OFFSET
+    for (const auto& moveOffset : _offsets) {
+        for (auto move : _movesByOffset[moveOffset]) {
+            if (move->MoveCheck(tensor, mod) && checkConnected(tensor, mod, move)) {
+#if MOVEMANAGER_VERBOSE == MM_LOG_MOVE_CHECKS
+                DEBUG("passed!\n");
+#endif
+                legalMoves.push_back(move);
+                break;
+#if MOVEMANAGER_VERBOSE == MM_LOG_MOVE_CHECKS
+            } else {
+                DEBUG("failed!\n");
+#endif
+            }
+        }
+    }
+#else
+    for (auto move : _moves) {
+        if (move->MoveCheck(tensor, mod)) {
+#if MOVEMANAGER_VERBOSE == MM_LOG_MOVE_CHECKS
+            DEBUG("passed!\n");
+#endif
+            legalMoves.push_back(move);
+#if MOVEMANAGER_VERBOSE == MM_LOG_MOVE_CHECKS
+        } else {
+            DEBUG("failed!\n");
+#endif
+        }
+    }
+#endif
+    return legalMoves;
+}
+
+bool checkConnected(const CoordTensor<int>& tensor, const Module& mod, const MoveBase* move) {
+
+}
+
+std::pair<Module*, MoveBase*> MoveManager::FindMoveToState(const std::set<ModuleData>& modData) {
     Module* modToMove = nullptr;
     std::valarray<int> destination;
     std::unordered_set<int> candidates;
@@ -375,11 +416,10 @@ std::pair<Module*, MoveBase*> MoveManager::FindMoveToState(const std::set<Module
         candidates.insert(id);
     }
     for (const auto& info : modData) {
-        auto id = Lattice::coordTensor[info.coords];
-        if (id >= 0) {
+        if (auto id = Lattice::coordTensor[info.Coords()]; id >= 0) {
             candidates.erase(id);
         } else {
-            destination = info.coords;
+            destination = info.Coords();
         }
     }
     if (candidates.size() != 1) {
@@ -389,7 +429,7 @@ std::pair<Module*, MoveBase*> MoveManager::FindMoveToState(const std::set<Module
     if (modToMove == nullptr) {
         return {nullptr, nullptr};
     }
-    auto offset = destination - modToMove->coords;
+    const auto offset = destination - modToMove->coords;
     for (auto move : _movesByOffset[offset]) {
         if (move->MoveCheck(Lattice::coordTensor, *modToMove)) {
             return {modToMove, move};

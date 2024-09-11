@@ -1,3 +1,6 @@
+#ifndef MODULAR_ROBOTICS_MODULEMANAGER_H
+#define MODULAR_ROBOTICS_MODULEMANAGER_H
+
 #include <iostream>
 #include <vector>
 #include <unordered_set>
@@ -5,8 +8,16 @@
 #include <valarray>
 #include <nlohmann/json.hpp>
 
-#ifndef MODULAR_ROBOTICS_MODULEMANAGER_H
-#define MODULAR_ROBOTICS_MODULEMANAGER_H
+// Module Data Storage Constants (Don't change these)
+#define MM_DATA_FULL 0
+#define MM_DATA_INT64 1
+/* Module Data Storage Configuration
+ * FULL: Data stored as ModuleBasic, contains a complete copy of coordinates and properties.
+ * INT64: Data stored as ModuleInt64, much more memory efficient but has limitations:
+ *  - Module coordinates must fall within inclusive range of (0, 0, 0) to (255, 255, 255)
+ *  - Modules may only have up to one property.
+ */
+#define CONFIG_MOD_DATA_STORAGE MM_DATA_FULL
 
 // An interface for properties that a module might have, ex: Color, Direction, etc.
 // This
@@ -18,6 +29,9 @@ protected:
 
     [[nodiscard]]
     virtual IModuleProperty* MakeCopy() const = 0;
+
+    [[nodiscard]]
+    virtual std::uint_fast64_t AsInt() const = 0;
 
 public:
     virtual std::size_t GetHash() = 0;
@@ -61,7 +75,7 @@ public:
 
     void InitProperties(const nlohmann::basic_json<>& propertyDefs);
 
-    void UpdateProperties(const std::valarray<int>& moveInfo);
+    void UpdateProperties(const std::valarray<int>& moveInfo) const;
 
     bool operator==(const ModuleProperties& right) const;
 
@@ -71,10 +85,13 @@ public:
 
     IModuleProperty* Find(const std::string& key) const;
 
+    [[nodiscard]]
+    std::uint_fast64_t AsInt() const;
+
     ~ModuleProperties();
 
     friend class IModuleProperty;
-    friend class PropertyInitializer;
+    friend struct PropertyInitializer;
     friend class boost::hash<ModuleProperties>;
 };
 
@@ -90,42 +107,118 @@ struct PropertyInitializer {
     static IModuleProperty* GetProperty(const nlohmann::basic_json<>& propertyDef);
 };
 
+class IModuleBasic {
+public:
+    [[nodiscard]]
+    virtual const std::valarray<int>& Coords() const = 0;
+
+    [[nodiscard]]
+    virtual const ModuleProperties& Properties() const = 0;
+
+    virtual bool operator==(const IModuleBasic& right) const = 0;
+
+    virtual bool operator<(const IModuleBasic& right) const = 0;
+
+    virtual ~IModuleBasic() = default;
+};
+
+// Class holding a pointer to a class implementing IModuleBasic, exists purely for convenience
+class ModuleData final : public IModuleBasic {
+private:
+    std::unique_ptr<IModuleBasic> module;
+
+public:
+    ModuleData(const ModuleData& modData);
+
+    ModuleData(const std::valarray<int>& coords, const ModuleProperties& properties);
+
+    [[nodiscard]]
+    const std::valarray<int>& Coords() const override;
+
+    [[nodiscard]]
+    const ModuleProperties& Properties() const override;
+
+    bool operator==(const IModuleBasic& right) const override;
+
+    bool operator<(const IModuleBasic& right) const override;
+
+    friend class std::hash<ModuleData>;
+};
+
 // Class used to hold bare minimum representation of a module, for use in Configuration class
-class ModuleBasic {
+class ModuleBasic final : public IModuleBasic {
 private:
     std::size_t hash = -1;
 
     bool hashCacheValid = false;
 
-public:
     std::valarray<int> coords;
 
     ModuleProperties properties;
 
+public:
     ModuleBasic() = default;
 
     ModuleBasic(const std::valarray<int>& coords, const ModuleProperties& properties);
 
-    bool operator==(const ModuleBasic& right) const;
+    const std::valarray<int>& Coords() const override;
 
-    bool operator<(const ModuleBasic& right) const;
+    const ModuleProperties& Properties() const override;
+
+    bool operator==(const IModuleBasic& right) const override;
+
+    bool operator<(const IModuleBasic& right) const override;
 
     friend class std::hash<ModuleBasic>;
 };
 
+// Class used to represent a module as a single 64-bit integer. Conditions for proper functionality:
+// - Modules coordinates must fall within (inclusive) range (0, 0, 0) to (255, 255, 255)
+// - Modules may only have a single property, which must be able to be represented flawlessly using <= 40 bits
+class ModuleInt64 final : public IModuleBasic {
+private:
+    std::uint_fast64_t modInt;
+
+    static std::unordered_map<std::uint_fast64_t, ModuleProperties> propertyMap;
+public:
+    ModuleInt64(const std::valarray<int>& coords, const ModuleProperties& properties);
+
+    [[nodiscard]]
+    const std::valarray<int>& Coords() const override;
+
+    [[nodiscard]]
+    const ModuleProperties& Properties() const override;
+
+    bool operator==(const IModuleBasic& right) const override;
+
+    bool operator<(const IModuleBasic& right) const override;
+
+    friend class std::hash<ModuleData>;
+};
+
+template<>
+struct std::hash<ModuleData> {
+    std::size_t operator()(const ModuleData& modData) const noexcept;
+};
+
+template<>
+struct boost::hash<ModuleData> {
+    std::size_t operator()(const ModuleData& modData) const noexcept;
+};
+
 template<>
 struct std::hash<ModuleBasic> {
-    std::size_t operator()(ModuleBasic& modData) const;
+    std::size_t operator()(ModuleBasic& modData) const noexcept;
 };
 
 template<>
 struct boost::hash<ModuleBasic> {
-    std::size_t operator()(const ModuleBasic& modData) const;
+    std::size_t operator()(const ModuleBasic& modData) const noexcept;
 };
 
 template<>
 struct boost::hash<ModuleProperties> {
-    std::size_t operator()(const ModuleProperties& moduleProperties);
+    std::size_t operator()(const ModuleProperties& moduleProperties) const noexcept;
 };
 
 // Class used to hold info about each module

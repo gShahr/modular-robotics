@@ -1,8 +1,11 @@
 #include "Scenario.h"
 #include <iostream>
+#include <fstream>
 #include <boost/format.hpp>
 #include "../modules/ModuleManager.h"
 #include "MoveManager.h"
+#include "../coordtensor/CoordTensor.h"
+#include "../lattice/Lattice.h"
 #include "../modules/Colors.h"
 
 namespace Scenario {
@@ -56,19 +59,19 @@ namespace Scenario {
         }
         file << std::endl;
         for (size_t i = 1; i < path.size(); i++) {
-            auto movePair = MoveManager::FindMoveToState(path[i]->GetModData());
-            if (movePair.second == nullptr) {
+            auto [movingModule, move] = MoveManager::FindMoveToState(path[i]->GetModData());
+            if (move == nullptr) {
                 std::cout << "Failed to generate scenario file, no move to next state found.\n";
                 file.close();
                 return;
             }
-            auto modToMove = movePair.first;
-            for (const auto& anim : movePair.second->AnimSequence()) {
-                modDef % modToMove->id % anim.first % anim.second[0] % anim.second[1] % anim.second[2];
+            auto modToMove = movingModule;
+            for (const auto&[type, offset] : move->AnimSequence()) {
+                modDef % modToMove->id % type % offset[0] % offset[1] % offset[2];
                 file << modDef.str() << std::endl;
             }
             file << std::endl;
-            Lattice::MoveModule(*modToMove, movePair.second->MoveOffset());
+            Lattice::MoveModule(*modToMove, move->MoveOffset());
         }
         file.close();
     }

@@ -12,7 +12,7 @@
 #include "../coordtensor/CoordTensor.h"
 #include "Colors.h"
 
-class MetaModule : public ITransformable {
+class MetaModule final : public ITransformable {
 private:
 public:
     // <color, coords>

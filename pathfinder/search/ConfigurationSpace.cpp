@@ -13,7 +13,7 @@ const char * BFSExcept::what() const noexcept {
     return "BFS exhausted without finding a path!";
 }
 
-HashedState::HashedState(const std::set<ModuleBasic>& modData) {
+HashedState::HashedState(const std::set<ModuleData>& modData) {
     seed = boost::hash_range(modData.begin(), modData.end());
     moduleData = modData;
 }
@@ -24,7 +24,7 @@ size_t HashedState::GetSeed() const {
     return seed;
 }
 
-const std::set<ModuleBasic>& HashedState::GetState() const {
+const std::set<ModuleData>& HashedState::GetState() const {
     return moduleData;
 }
 
@@ -36,25 +36,25 @@ bool HashedState::operator!=(const HashedState& other) const {
     return seed != other.GetSeed();
 }
 
-size_t std::hash<HashedState>::operator()(const HashedState& state) const {
+size_t std::hash<HashedState>::operator()(const HashedState& state) const noexcept {
     return state.GetSeed();
 }
 
-Configuration::Configuration(const std::set<ModuleBasic>& modData) : hash(HashedState(modData)) {}
+Configuration::Configuration(const std::set<ModuleData>& modData) : hash(HashedState(modData)) {}
 
 Configuration::~Configuration() {
-    for (auto i = next.rbegin(); i != next.rend(); i++) {
+    for (auto i = next.rbegin(); i != next.rend(); ++i) {
         delete *i;
     }
 }
 
-std::vector<std::set<ModuleBasic>> Configuration::MakeAllMoves() {
-    std::vector<std::set<ModuleBasic>> result;
+std::vector<std::set<ModuleData>> Configuration::MakeAllMoves() const {
+    std::vector<std::set<ModuleData>> result;
     Lattice::UpdateFromModuleInfo(GetModData());
     std::vector<Module*> movableModules = Lattice::MovableModules();
-    for (auto module: movableModules) {
+    for (const auto module: movableModules) {
         auto legalMoves = MoveManager::CheckAllMoves(Lattice::coordTensor, *module);
-        for (auto move : legalMoves) {
+        for (const auto move : legalMoves) {
             Lattice::MoveModule(*module, move->MoveOffset());
             result.emplace_back(Lattice::GetModuleInfo());
             Lattice::MoveModule(*module, -move->MoveOffset());
@@ -63,15 +63,36 @@ std::vector<std::set<ModuleBasic>> Configuration::MakeAllMoves() {
     return result;
 }
 
-void Configuration::AddEdge(Configuration* configuration) {
-    next.push_back(configuration);
+std::vector<std::set<ModuleData>> Configuration::MakeAllMovesForAllVertices() const {
+    std::vector<std::set<ModuleData>> result;
+    Lattice::UpdateFromModuleInfo(GetModData());
+    std::vector<Module*> movableModules;
+    for (int id = 0; id < ModuleIdManager::MinStaticID(); id++) {
+        movableModules.push_back(&ModuleIdManager::GetModule(id));
+    }
+    for (const auto module: movableModules) {
+        auto legalMoves = MoveManager::CheckAllMoves(Lattice::coordTensor, *module);
+        for (const auto move: legalMoves) {
+            Lattice::MoveModule(*module, move->MoveOffset());
+            if (Lattice::checkConnected) {
+                result.emplace_back(Lattice::GetModuleInfo());
+            }
+            Lattice::MoveModule(*module, -move->MoveOffset());
+        }
+    }
+    return result;
 }
 
-Configuration* Configuration::GetParent() {
+Configuration* Configuration::AddEdge(const std::set<ModuleData>& modData) {
+    next.push_back(new Configuration(modData));
+    return next.back();
+}
+
+Configuration* Configuration::GetParent() const {
     return parent;
 }
 
-std::vector<Configuration*> Configuration::GetNext() {
+std::vector<Configuration*> Configuration::GetNext() const {
     return next;
 }
 
@@ -79,7 +100,7 @@ const HashedState& Configuration::GetHash() const {
     return hash;
 }
 
-const std::set<ModuleBasic>& Configuration::GetModData() const {
+const std::set<ModuleData>& Configuration::GetModData() const {
     return hash.GetState();
 }
 
@@ -99,7 +120,7 @@ std::ostream& operator<<(std::ostream& out, const Configuration& config) {
 
 int ConfigurationSpace::depth = -1;
 
-std::vector<Configuration*> ConfigurationSpace::BFS(Configuration* start, Configuration* final) {
+std::vector<Configuration*> ConfigurationSpace::BFS(Configuration* start, const Configuration* final) {
 #if CONFIG_OUTPUT_JSON
     SearchAnalysis::EnterGraph("BFSDepthOverTime");
     SearchAnalysis::LabelGraph("BFS Depth over Time");
@@ -167,11 +188,10 @@ std::vector<Configuration*> ConfigurationSpace::BFS(Configuration* start, Config
         auto adjList = current->MakeAllMoves();
         for (const auto& moduleInfo : adjList) {
             if (visited.find(HashedState(moduleInfo)) == visited.end()) {
-                auto nextConfiguration = new Configuration(moduleInfo);
+                auto nextConfiguration = current->AddEdge(moduleInfo);
                 nextConfiguration->SetParent(current);
                 //nextConfiguration->SetStateAndHash(moduleInfo);
                 q.push(nextConfiguration);
-                current->AddEdge(nextConfiguration);
                 nextConfiguration->depth = current->depth + 1;
                 visited.insert(HashedState(moduleInfo));
             } else {
@@ -182,7 +202,7 @@ std::vector<Configuration*> ConfigurationSpace::BFS(Configuration* start, Config
     throw BFSExcept();
 }
 
-std::vector<Configuration*> ConfigurationSpace::BFSParallelized(Configuration* start, Configuration* final) {
+std::vector<Configuration*> ConfigurationSpace::BFSParallelized(Configuration* start, const Configuration* final) {
     std::queue<Configuration*> q;
     std::unordered_set<HashedState> visited;
     q.push(start);
@@ -209,7 +229,7 @@ std::vector<Configuration*> ConfigurationSpace::BFSParallelized(Configuration* s
         auto adjList = current->MakeAllMoves();
         #pragma omp parallel for
         for (const auto& moduleInfo : adjList) {
-            int thread_id = omp_get_thread_num();
+            const int thread_id = omp_get_thread_num();
             std::cout << "Thread " << thread_id << " is processing moduleInfo." << std::endl;
             HashedState hashedState(moduleInfo);
             bool isVisited = false;
@@ -218,13 +238,12 @@ std::vector<Configuration*> ConfigurationSpace::BFSParallelized(Configuration* s
                 isVisited = (visited.find(hashedState) != visited.end());
             }
             if (!isVisited) {
-                auto nextConfiguration = new Configuration(moduleInfo);
+                auto nextConfiguration = current->AddEdge(moduleInfo);
                 nextConfiguration->SetParent(current);
                 #pragma omp critical
                 {
                     q.push(nextConfiguration);
                 }
-                current->AddEdge(nextConfiguration);
                 nextConfiguration->depth = current->depth + 1;
                 visited.insert(HashedState(moduleInfo));
             }
@@ -233,19 +252,19 @@ std::vector<Configuration*> ConfigurationSpace::BFSParallelized(Configuration* s
     throw BFSExcept();
 }
 
-int Configuration::GetCost() {
+int Configuration::GetCost() const {
     return cost;
 }
 
-void Configuration::SetCost(int cost) {
+void Configuration::SetCost(const int cost) {
     this->cost = cost;
 }
 
 template <typename Heuristic>
-auto CompareConfiguration(Configuration* final, Heuristic heuristic) {
+auto Configuration::CompareConfiguration(const Configuration* final, Heuristic heuristic) {
     return [final, heuristic](Configuration* c1, Configuration* c2) {
-        int cost1 = c1->GetCost() + (c1->*heuristic)(final);
-        int cost2 = c2->GetCost() + (c2->*heuristic)(final);
+        const int cost1 = c1->GetCost() + (c1->*heuristic)(final);
+        const int cost2 = c2->GetCost() + (c2->*heuristic)(final);
         return (cost1 == cost2) ? c1->GetCost() > c2->GetCost() : cost1 > cost2;
     };
 }
@@ -258,7 +277,7 @@ bool Configuration::ValarrayComparator::operator()(const std::valarray<int>& lhs
     return lhs.size() < rhs.size();
 }
 
-float Configuration::ManhattanDistance(Configuration* final) {
+float Configuration::ManhattanDistance(const Configuration* final) const {
     auto currentData = this->GetModData();
     auto finalData = final->GetModData();
     auto currentIt = currentData.begin();
@@ -267,37 +286,36 @@ float Configuration::ManhattanDistance(Configuration* final) {
     while (currentIt != currentData.end() && finalIt != finalData.end()) {
         const auto& currentModule = *currentIt;
         const auto& finalModule = *finalIt;
-        std::valarray<int> diff = currentModule.coords - finalModule.coords;
+        std::valarray<int> diff = currentModule.Coords() - finalModule.Coords();
         for (auto& val : diff) {
             h += std::abs(val);
         }
-        currentIt++;
-        finalIt++;
+        ++currentIt;
+        ++finalIt;
     }
     //TODO: find out what the right number is
     return h / 3;
 }
 
-int Configuration::SymmetricDifferenceHeuristic(Configuration* final) {
+int Configuration::SymmetricDifferenceHeuristic(const Configuration* final) const {
     auto currentData = this->GetModData();
     auto finalData = final->GetModData();
     auto currentIt = currentData.begin();
     auto finalIt = finalData.begin();
-    int h = 0;
     std::set<std::valarray<int>, ValarrayComparator> unionCoords;
     while (currentIt != currentData.end() && finalIt != finalData.end()) {
         const auto& currentModule = *currentIt;
         const auto& finalModule = *finalIt;
-        unionCoords.insert(currentModule.coords);
-        unionCoords.insert(finalModule.coords);
-        currentIt++;
-        finalIt++;
+        unionCoords.insert(currentModule.Coords());
+        unionCoords.insert(finalModule.Coords());
+        ++currentIt;
+        ++finalIt;
     }
-    int symDifference = 2 * unionCoords.size() - (currentData.size() + finalData.size());
+    const int symDifference = 2 * unionCoords.size() - (currentData.size() + finalData.size());
     return symDifference / 2;
 }
 
-int Configuration::ChebyshevDistance(Configuration* final) {
+int Configuration::ChebyshevDistance(const Configuration* final) const {
     auto currentData = this->GetModData();
     auto finalData = final->GetModData();
     auto currentIt = currentData.begin();
@@ -306,19 +324,19 @@ int Configuration::ChebyshevDistance(Configuration* final) {
     while (currentIt != currentData.end() && finalIt != finalData.end()) {
         const auto& currentModule = *currentIt;
         const auto& finalModule = *finalIt;
-        std::valarray<int> diff = currentModule.coords - finalModule.coords;
+        std::valarray<int> diff = currentModule.Coords() - finalModule.Coords();
         int maxDiff = 0;
         for (auto& val : diff) {
             maxDiff = std::max(maxDiff, std::abs(val));
         }
         h += maxDiff;
-        currentIt++;
-        finalIt++;
+        ++currentIt;
+        ++finalIt;
     }
     return h;
 }
 
-std::vector<Configuration*> ConfigurationSpace::AStar(Configuration* start, Configuration* final) {
+std::vector<Configuration*> ConfigurationSpace::AStar(Configuration* start, const Configuration* final) {
 #if CONFIG_OUTPUT_JSON
     SearchAnalysis::EnterGraph("AStarDepthOverTime");
     SearchAnalysis::LabelGraph("A* Depth over Time");
@@ -331,7 +349,7 @@ std::vector<Configuration*> ConfigurationSpace::AStar(Configuration* start, Conf
     SearchAnalysis::StartClock();
 #endif
     int dupesAvoided = 0;
-    auto compare = CompareConfiguration(final, &Configuration::ManhattanDistance);
+    auto compare = Configuration::CompareConfiguration(final, &Configuration::ManhattanDistance);
     using CompareType = decltype(compare);
     std::priority_queue<Configuration*, std::vector<Configuration*>, CompareType> pq(compare);
     std::unordered_set<HashedState> visited;
@@ -387,13 +405,11 @@ std::vector<Configuration*> ConfigurationSpace::AStar(Configuration* start, Conf
         }
         auto adjList = current->MakeAllMoves();
         for (const auto& moduleInfo : adjList) {
-            HashedState hashedState(moduleInfo);
-            if (visited.find(hashedState) == visited.end()) {
-                auto nextConfiguration = new Configuration(moduleInfo);
+            if (HashedState hashedState(moduleInfo); visited.find(hashedState) == visited.end()) {
+                auto nextConfiguration = current->AddEdge(moduleInfo);
                 nextConfiguration->SetParent(current);
                 nextConfiguration->SetCost(current->GetCost() + 1);
                 pq.push(nextConfiguration);
-                current->AddEdge(nextConfiguration);
                 nextConfiguration->depth = current->depth + 1;
                 visited.insert(hashedState);
             } else {
@@ -416,10 +432,10 @@ std::vector<Configuration*> ConfigurationSpace::FindPath(Configuration* start, C
     return path;
 }
 
-Configuration ConfigurationSpace::GenerateRandomFinal(int targetMoves) {
+Configuration ConfigurationSpace::GenerateRandomFinal(const int targetMoves) {
     std::unordered_set<HashedState> visited;
-    std::set<ModuleBasic> initialState = Lattice::GetModuleInfo();
-    std::set<ModuleBasic> nextState;
+    const std::set<ModuleData> initialState = Lattice::GetModuleInfo();
+    std::set<ModuleData> nextState;
 
     for (int i = 0; i < targetMoves; i++) {
         // Get current configuration

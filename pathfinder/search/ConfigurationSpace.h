@@ -1,8 +1,8 @@
-#include <vector>
-#include "../lattice/Lattice.h"
-
 #ifndef MODULAR_ROBOTICS_CONFIGURATIONSPACE_H
 #define MODULAR_ROBOTICS_CONFIGURATIONSPACE_H
+
+#include <vector>
+#include "../lattice/Lattice.h"
 
 // Verbosity Constants (Don't change these)
 #define CS_LOG_NONE 0
@@ -23,7 +23,7 @@
 #define CONFIG_OUTPUT_JSON false
 #endif
 
-class BFSExcept : std::exception {
+class BFSExcept final : std::exception {
 public:
     [[nodiscard]]
     const char * what() const noexcept override;
@@ -33,11 +33,11 @@ public:
 class HashedState {
 private:
     size_t seed;
-    std::set<ModuleBasic> moduleData;
+    std::set<ModuleData> moduleData;
 public:
     HashedState() = delete;
 
-    explicit HashedState(const std::set<ModuleBasic>& modData);
+    explicit HashedState(const std::set<ModuleData>& modData);
 
     HashedState(const HashedState& other);
 
@@ -45,7 +45,7 @@ public:
     size_t GetSeed() const;
 
     [[nodiscard]]
-    const std::set<ModuleBasic>& GetState() const;
+    const std::set<ModuleData>& GetState() const;
 
     bool operator==(const HashedState& other) const;
 
@@ -54,7 +54,7 @@ public:
 
 template<>
 struct std::hash<HashedState> {
-    size_t operator()(const HashedState& state) const;
+    size_t operator()(const HashedState& state) const noexcept;
 };
 
 // For tracking the state of a lattice
@@ -67,54 +67,60 @@ private:
 public:
     int depth = 0;
 
-    explicit Configuration(const std::set<ModuleBasic>& modData);
+    explicit Configuration(const std::set<ModuleData>& modData);
 
     ~Configuration();
 
-    std::vector<std::set<ModuleBasic>> MakeAllMoves();
+    [[nodiscard]]
+    std::vector<std::set<ModuleData>> MakeAllMoves() const;
 
-    void AddEdge(Configuration* configuration);
+    [[nodiscard]]
+    std::vector<std::set<ModuleData>> MakeAllMovesForAllVertices() const;
 
-    Configuration* GetParent();
+    Configuration* AddEdge(const std::set<ModuleData>& modData);
 
-    std::vector<Configuration*> GetNext();
+    [[nodiscard]]
+    Configuration* GetParent() const;
+
+    [[nodiscard]]
+    std::vector<Configuration*> GetNext() const;
 
     [[nodiscard]]
     const HashedState& GetHash() const;
 
     [[nodiscard]]
-    const std::set<ModuleBasic>& GetModData() const;
+    const std::set<ModuleData>& GetModData() const;
 
     void SetParent(Configuration* configuration);
 
     friend std::ostream& operator<<(std::ostream& out, const Configuration& config);
 
-    int GetCost();
+    int GetCost() const;
 
     void SetCost(int cost);
 
     template <typename Heuristic>
-    auto CompareConfiguration(Configuration* final, Heuristic heuristic);
+    static auto CompareConfiguration(const Configuration* final, Heuristic heuristic);
 
     struct ValarrayComparator {
         bool operator()(const std::valarray<int>& lhs, const std::valarray<int>& rhs) const;
     };
 
-    float ManhattanDistance(Configuration* final);
+    float ManhattanDistance(const Configuration* final) const;
 
-    int SymmetricDifferenceHeuristic(Configuration* final);
+    int SymmetricDifferenceHeuristic(const Configuration* final) const;
 
-    int ChebyshevDistance(Configuration* final);
+    int ChebyshevDistance(const Configuration* final) const;
 };
 
 namespace ConfigurationSpace {
     extern int depth;
 
-    std::vector<Configuration*> BFS(Configuration* start, Configuration* final);
+    std::vector<Configuration*> BFS(Configuration* start, const Configuration* final);
 
-    std::vector<Configuration*> BFSParallelized(Configuration* start, Configuration* final);
+    std::vector<Configuration*> BFSParallelized(Configuration* start, const Configuration* final);
 
-    std::vector<Configuration*> AStar(Configuration* start, Configuration* final);
+    std::vector<Configuration*> AStar(Configuration* start, const Configuration* final);
 
     std::vector<Configuration*> FindPath(Configuration* start, Configuration* final);
 

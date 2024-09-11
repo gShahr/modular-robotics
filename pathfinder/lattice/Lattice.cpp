@@ -17,8 +17,8 @@ std::vector<Module*> Lattice::movableModules;
 CoordTensor<bool> Lattice::stateTensor(1, 1, false);
 CoordTensor<int> Lattice::coordTensor(1, 1, -1);
 
-void Lattice::ClearAdjacencies(int moduleId) {
-    for (int id : adjList[moduleId]) {
+void Lattice::ClearAdjacencies(const int moduleId) {
+    for (const int id : adjList[moduleId]) {
         for (int i = 0; i < adjList[id].size(); i++) {
             if (adjList[id][i] == moduleId) {
                 adjList[id].erase(adjList[id].begin() + i);
@@ -29,20 +29,18 @@ void Lattice::ClearAdjacencies(int moduleId) {
     adjList[moduleId].clear();
 }
 
-void Lattice::InitLattice(int _order, int _axisSize) {
+void Lattice::InitLattice(const int _order, const int _axisSize) {
     order = _order;
     axisSize = _axisSize;
-    stateTensor = CoordTensor<bool>(order, axisSize, false);
     coordTensor = CoordTensor<int>(order, axisSize, -1);
 }
 
-void Lattice::setFlags(bool _ignoreColors) {
+void Lattice::setFlags(const bool _ignoreColors) {
     ignoreProperties = _ignoreColors;
 }
 
 void Lattice::AddModule(const Module& mod) {
-    // Update state and coord tensor
-    stateTensor[mod.coords] = true;
+    // Update coord tensor
     coordTensor[mod.coords] = mod.id;
     // Adjacency check
 #if LATTICE_RD_EDGECHECK
@@ -57,10 +55,8 @@ void Lattice::AddModule(const Module& mod) {
 void Lattice::MoveModule(Module &mod, const std::valarray<int>& offset) {
     ClearAdjacencies(mod.id);
     coordTensor[mod.coords] = -1;
-    stateTensor[mod.coords] = false;
     mod.coords += offset;
     coordTensor[mod.coords] = mod.id;
-    stateTensor[mod.coords] = true;
 #if LATTICE_RD_EDGECHECK
     RDEdgeCheck(mod);
 #else
@@ -69,6 +65,27 @@ void Lattice::MoveModule(Module &mod, const std::valarray<int>& offset) {
     if (!ignoreProperties) {
         mod.properties.UpdateProperties(offset);
     }
+}
+
+bool Lattice::checkConnected() {
+    if (moduleCount == 0) return true;
+    std::vector<bool> visited(moduleCount, false);
+    std::stack<int> stack;
+    int visitedCount = 0;
+    stack.push(0);
+    visited[0] = true;
+    while (!stack.empty()) {
+        int node = stack.top();
+        stack.pop();
+        visitedCount++;
+        for (int neighbor: adjList[node]) {
+            if (!visited[neighbor]) {
+                visited[neighbor] = true;
+                stack.push(neighbor);
+            }
+        }
+    }
+    return visitedCount == moduleCount;
 }
 
 void Lattice::EdgeCheck(const Module& mod) {
@@ -240,12 +257,12 @@ void Lattice::RDEdgeCheck(const Module& mod) {
     }
 }
 
-void Lattice::AddEdge(int modA, int modB) {
+void Lattice::AddEdge(const int modA, const int modB) {
     adjList[modA].push_back(modB);
     adjList[modB].push_back(modA);
 }
 
-void Lattice::APUtil(int u, std::vector<bool> &visited, std::vector<bool> &ap, std::vector<int> &parent,
+void Lattice::APUtil(const int u, std::vector<bool> &visited, std::vector<bool> &ap, std::vector<int> &parent,
                      std::vector<int> &low, std::vector<int> &disc) {
     int children = 0;
     visited[u] = true;
@@ -253,7 +270,7 @@ void Lattice::APUtil(int u, std::vector<bool> &visited, std::vector<bool> &ap, s
     low[u] = time;
     time++;
 
-    for (int v : adjList[u]) {
+    for (const int v : adjList[u]) {
         if (!visited[v]) {
             parent[v] = u;
             children++;
@@ -323,8 +340,7 @@ void Lattice::BuildMovableModulesNonRec() {
         stack.emplace(id, id, adjList[id].cbegin());
 
         while (!stack.empty()) {
-            auto [grandparent, parent, children] = stack.top();
-            if (children != adjList[parent].cend()) {
+            if (auto [grandparent, parent, children] = stack.top(); children != adjList[parent].cend()) {
                 int child = *children;
                 ++std::get<std::vector<int>::const_iterator>(stack.top());
                 //++children;
@@ -378,19 +394,19 @@ const std::vector<Module*>& Lattice::MovableModules() {
     return movableModules;
 }
 
-void Lattice::UpdateFromModuleInfo(const std::set<ModuleBasic>& moduleInfo) {
-    std::queue<const ModuleBasic*> destinations;
+void Lattice::UpdateFromModuleInfo(const std::set<ModuleData>& moduleInfo) {
+    std::queue<const ModuleData*> destinations;
     std::unordered_set<int> modsToMove;
     for (int id = 0; id < ModuleIdManager::MinStaticID(); id++) {
         modsToMove.insert(id);
     }
     for (const auto& info : moduleInfo) {
-        auto id = coordTensor[info.coords];
-        auto& mod = ModuleIdManager::GetModule(id);
+        auto id = coordTensor[info.Coords()];
         if (id >= 0) {
+            auto& mod = ModuleIdManager::GetModule(id);
             modsToMove.erase(id);
-            if (mod.properties != info.properties) {
-                mod.properties = info.properties;
+            if (mod.properties != info.Properties()) {
+                mod.properties = info.Properties();
             }
         } else {
             destinations.push(&info);
@@ -400,10 +416,10 @@ void Lattice::UpdateFromModuleInfo(const std::set<ModuleBasic>& moduleInfo) {
         std::cerr << "Update partially completed due to state error, program likely non-functional!" << std::endl;
         return;
     }
-    for (auto id : modsToMove) {
+    for (const auto id : modsToMove) {
         auto& mod = ModuleIdManager::GetModule(id);
         Lattice::coordTensor[mod.coords] = -1;
-        mod.coords = destinations.front()->coords;
+        mod.coords = destinations.front()->Coords();
         ClearAdjacencies(id);
 #if LATTICE_RD_EDGECHECK
         RDEdgeCheck(mod);
@@ -411,17 +427,16 @@ void Lattice::UpdateFromModuleInfo(const std::set<ModuleBasic>& moduleInfo) {
         EdgeCheck(mod);
 #endif
         Lattice::coordTensor[mod.coords] = mod.id;
-        mod.properties = destinations.front()->properties;
+        mod.properties = destinations.front()->Properties();
         destinations.pop();
     }
 }
 
-std::set<ModuleBasic> Lattice::GetModuleInfo() {
-    std::set<ModuleBasic> modInfo;
+std::set<ModuleData> Lattice::GetModuleInfo() {
+    std::set<ModuleData> modInfo;
     for (int id = 0; id < ModuleIdManager::MinStaticID(); id++) {
-        auto& mod = ModuleIdManager::GetModule(id);
-        ModuleBasic modBasic = {mod.coords, mod.properties};
-        modInfo.insert(modBasic);
+        const auto& mod = ModuleIdManager::GetModule(id);
+        modInfo.insert({mod.coords, mod.properties});
     }
     return modInfo;
 }
@@ -442,16 +457,15 @@ std::string Lattice::ToString() {
     }
     out << "Lattice State:\n";
     for (int i = 0; i < coordTensor.GetArrayInternal().size(); i++) {
-        auto id = coordTensor.GetElementDirect(i);
-        if (id >= 0 && !ignoreProperties) {
+        if (const auto id = coordTensor.GetElementDirect(i); id >= 0 && !ignoreProperties) {
             if (ModuleIdManager::GetModule(id).moduleStatic) {
                 out << '#';
             } else {
-                auto colorProp = dynamic_cast<ColorProperty*>(ModuleIdManager::Modules()[id].properties.Find(COLOR_PROP_NAME));
+                const auto colorProp = dynamic_cast<ColorProperty*>(ModuleIdManager::Modules()[id].properties.Find(COLOR_PROP_NAME));
                 out << Colors::intToColor[colorProp->GetColorInt()][0];
             }
         } else if (id >= 0) {
-            out << '#';
+            out << (ModuleIdManager::GetModule(id).moduleStatic ? '#' : '@');
         } else {
             out << '-';
         }

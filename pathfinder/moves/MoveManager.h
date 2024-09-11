@@ -1,12 +1,12 @@
+#ifndef MODULAR_ROBOTICS_MOVEMANAGER_H
+#define MODULAR_ROBOTICS_MOVEMANAGER_H
+
 #include <vector>
 #include <unordered_map>
 #include <valarray>
 #include <nlohmann/json.hpp>
 #include "../lattice/Lattice.h"
 #include "Isometry.h"
-
-#ifndef MODULAR_ROBOTICS_MOVEMANAGER_H
-#define MODULAR_ROBOTICS_MOVEMANAGER_H
 
 // Verbosity Constants (Don't change these)
 #define MM_LOG_NONE 0
@@ -88,7 +88,7 @@ public:
     // virtual void InitMove(std::ifstream& moveFile) = 0;
     virtual void InitMove(const nlohmann::basic_json<>& moveDef) = 0;
     // Check to see if move is possible for a given module
-    virtual bool MoveCheck(CoordTensor<int>& tensor, const Module& mod) = 0;
+    virtual bool MoveCheck(const CoordTensor<int>& tensor, const Module& mod) = 0;
 
     [[nodiscard]]
     MoveBase* MakeCopy() const override = 0;
@@ -106,24 +106,24 @@ public:
     friend class MoveManager;
 };
 
-class Move2d : public MoveBase {
+class Move2d final : public MoveBase {
 public:
     Move2d();
     [[nodiscard]]
     MoveBase* MakeCopy() const override;
     //void InitMove(std::ifstream& moveFile) override;
     void InitMove(const nlohmann::basic_json<>& moveDef) override;
-    bool MoveCheck(CoordTensor<int>& tensor, const Module& mod) override;
+    bool MoveCheck(const CoordTensor<int>& tensor, const Module& mod) override;
 };
 
-class Move3d : public MoveBase {
+class Move3d final : public MoveBase {
 public:
     Move3d();
     [[nodiscard]]
     MoveBase* MakeCopy() const override;
     //void InitMove(std::ifstream& moveFile) override;
     void InitMove(const nlohmann::basic_json<>& moveDef) override;
-    bool MoveCheck(CoordTensor<int>& tensor, const Module& mod) override;
+    bool MoveCheck(const CoordTensor<int>& tensor, const Module& mod) override;
 };
 
 class MoveManager {
@@ -155,8 +155,12 @@ public:
     // Get what moves can be made by a module
     static std::vector<MoveBase*> CheckAllMoves(CoordTensor<int>& tensor, Module& mod);
 
+    static std::vector<MoveBase*> CheckAllMovesAndConnectivity(CoordTensor<int>& tensor, Module& mod);
+
+    static bool checkConnected(const CoordTensor<int>& tensor, const Module& mod, const MoveBase* move);
+
     // Get a pair containing which module has to make what move in order to reach an adjacent state
-    static std::pair<Module*, MoveBase*> FindMoveToState(const std::set<ModuleBasic>& modData);
+    static std::pair<Module*, MoveBase*> FindMoveToState(const std::set<ModuleData>& modData);
 };
 
 #endif //MODULAR_ROBOTICS_MOVEMANAGER_H

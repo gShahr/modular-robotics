@@ -1,10 +1,9 @@
-#include <set>
-#include <boost/functional/hash.hpp>
-#include "../modules/ModuleManager.h"
-#include "../coordtensor/CoordTensor.h"
-
 #ifndef MODULAR_ROBOTICS_LATTICE_H
 #define MODULAR_ROBOTICS_LATTICE_H
+
+#include <set>
+#include "../modules/ModuleManager.h"
+#include "../coordtensor/CoordTensor.h"
 
 // Verbosity Constants (Don't change these)
 #define LAT_LOG_NONE 0
@@ -64,6 +63,8 @@ public:
     // Move a module
     static void MoveModule(Module& mod, const std::valarray<int>& offset);
 
+    static bool checkConnected();
+
     // Adjacency Check
     static void EdgeCheck(const Module& mod);
 
@@ -85,10 +86,10 @@ public:
     static const std::vector<Module*>& MovableModules();
 
     // Update lattice using a vector of non-static module information
-    static void UpdateFromModuleInfo(const std::set<ModuleBasic>& moduleInfo);
+    static void UpdateFromModuleInfo(const std::set<ModuleData>& moduleInfo);
 
     // Get non-static module information
-    static std::set<ModuleBasic> GetModuleInfo();
+    static std::set<ModuleData> GetModuleInfo();
 
     // Assign from state tensor
     //static void UpdateFromState(const CoordTensor<bool>& state, const CoordTensor<int>& colors);

@@ -30,7 +30,7 @@ namespace Colors {
     extern std::map<int, std::string> intToColor;
 }
 
-class ColorProperty : public IModuleProperty {
+class ColorProperty final : public IModuleProperty {
 private:
     // Every (non-abstract) property needs this to ensure constructor is in the constructor map
     static PropertyInitializer initializer;
@@ -44,6 +44,9 @@ protected:
 
     [[nodiscard]]
     IModuleProperty* MakeCopy() const override;
+
+    [[nodiscard]]
+    std::uint_fast64_t AsInt() const override;
 
 public:
     // Need a GetHash function
