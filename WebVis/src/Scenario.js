@@ -17,15 +17,31 @@ export class Scenario {
     constructor(rawString) {
         for (let module in gModules) gModules[module].destroy();
 
+        // remove '\r' characters
+        rawString = rawString.replace(/\r/g, '');
+        let _dataStartIndex = rawString.indexOf('\n\n');
+        let metadataString = rawString.substring(0, _dataStartIndex);
+        let dataString = rawString.substring(_dataStartIndex + 2);
+
+        let metadataLines = metadataString.split('\n');
+        let scenarioName = metadataLines[0];
+        let scenarioDescription = metadataLines[1];
+        let scenarioModuleType;
+        switch (metadataLines[2]) {
+            case 'CUBE': scenarioModuleType = ModuleType.CUBE; break;
+            case 'RHOMBIC_DODECAHEDRON': scenarioModuleType = ModuleType.RHOMBIC_DODECAHEDRON; break;
+            default: console.log("Unknown module type ", metadataLines[2], " -- defaulting to CUBE"); scenarioModuleType = ModuleType.CUBE; break;
+        }
+
         let visgroups = {}; // key-value pairs of 'visgroupId: visgroup'
-        let lines = rawString.split('\n');
+        let dataLines = dataString.split('\n');
         let nBlock = 0;
         let checkpointMove = true;
         let moves = [];
-        for (let iLine = 0; iLine < lines.length; iLine++) {
+        for (let iLine = 0; iLine < dataLines.length; iLine++) {
 
-            // sanitize the line: remove spaces, \r characters, and comments
-            let line = lines[iLine].replace(/ /g, '').replace(/\r/g, '').split("//")[0];
+            // sanitize the line: remove spaces,, and comments
+            let line = dataLines[iLine].replace(/ /g, '').split("//")[0];
 
             // if the line is empty, skip it and increment our block counter
             //  also, flag the next move as a checkpoint move
@@ -50,7 +66,7 @@ export class Scenario {
                     let moduleId = lineVals[0];
                     let vg = visgroups[lineVals[1]];
                     let pos = new THREE.Vector3(lineVals[2], lineVals[3], lineVals[4]);
-                    new Module(ModuleType.CUBE, moduleId, pos, vg.color, vg.scale);
+                    new Module(scenarioModuleType, moduleId, pos, vg.color, vg.scale);
                     break;
                 }
                 default: { // Move definitions
@@ -101,7 +117,6 @@ export class Scenario {
         window.gwMoveSequence = new MoveSequence(moves);
     } // end Constructor
 }
-
 
 const scenarioUploadElement = document.getElementById("scenarioUploadButton");
 scenarioUploadElement.onchange = (e) => {

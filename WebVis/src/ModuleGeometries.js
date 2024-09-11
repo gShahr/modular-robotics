@@ -121,5 +121,3 @@ export const ModuleGeometries = new Map([
     [ModuleType.CUBE, _cubeGeometry],
     [ModuleType.RHOMBIC_DODECAHEDRON, _rhombicDodecahedronGeometry]
 ]);
-
-console.log(ModuleGeometries);
