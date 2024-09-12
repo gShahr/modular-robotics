@@ -36,7 +36,7 @@ int main(int argc, char* argv[]) {
 
     int option_index = 0;
     int c;
-    while ((c = getopt_long(argc, argv, "iI:F:e:", long_options, &option_index)) != -1) {
+    while ((c = getopt_long(argc, argv, "iI:F:e:a:", long_options, &option_index)) != -1) {
         switch (c) {
             case 'i':
                 ignoreColors = true;
