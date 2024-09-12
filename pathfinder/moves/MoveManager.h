@@ -39,7 +39,19 @@ namespace Move {
         PIVOT_PZ = 3,
         PIVOT_NX = 4,
         PIVOT_NY = 5,
-        PIVOT_NZ = 6
+        PIVOT_NZ = 6,
+        RD_PXPY = 12,
+        RD_PXNY = 15,
+        RD_NXPY = 42,
+        RD_NXNY = 45,
+        RD_PXPZ = 13,
+        RD_PXNZ = 16,
+        RD_NXPZ = 43,
+        RD_NXNZ = 46,
+        RD_PYPZ = 23,
+        RD_PYNZ = 26,
+        RD_NYPZ = 53,
+        RD_NYNZ = 56
     };
 
     // For easily converting from string to enum
@@ -53,7 +65,19 @@ namespace Move {
             {"pivot+z", PIVOT_PZ},
             {"pivot-x", PIVOT_NX},
             {"pivot-y", PIVOT_NY},
-            {"pivot-z", PIVOT_NZ}
+            {"pivot-z", PIVOT_NZ},
+            {"rd+x+y", RD_PXPY},
+            {"rd+x-y", RD_PXNY},
+            {"rd-x+y", RD_NXPY},
+            {"rd-x-y", RD_NXNY},
+            {"rd+x+z", RD_PXPZ},
+            {"rd+x-z", RD_PXNZ},
+            {"rd-x+z", RD_NXPZ},
+            {"rd-x-z", RD_NXNZ},
+            {"rd+y+z", RD_PYPZ},
+            {"rd+y-z", RD_PYNZ},
+            {"rd-y+z", RD_NYPZ},
+            {"rd-y-z", RD_NYNZ}
     };
 
 
@@ -71,7 +95,19 @@ namespace Move {
             {PIVOT_PZ, {PIVOT_PZ, PIVOT_PZ, PIVOT_NZ}},
             {PIVOT_NX, {PIVOT_PX, PIVOT_NX, PIVOT_NX}},
             {PIVOT_NY, {PIVOT_NY, PIVOT_PY, PIVOT_NY}},
-            {PIVOT_NZ, {PIVOT_NZ, PIVOT_NZ, PIVOT_PZ}}
+            {PIVOT_NZ, {PIVOT_NZ, PIVOT_NZ, PIVOT_PZ}},
+            {RD_PXPY, {RD_NXPY, RD_PXNY, RD_PXPY}},
+            {RD_PXNY, {RD_NXNY, RD_PXPY, RD_PXNY}},
+            {RD_NXPY, {RD_PXPY, RD_NXNY, RD_NXPY}},
+            {RD_NXNY, {RD_PXNY, RD_NXPY, RD_NXNY}},
+            {RD_PXPZ, {RD_NXPZ, RD_PXPZ, RD_PXNZ}},
+            {RD_PXNZ, {RD_NXNZ, RD_PXNZ, RD_PXPZ}},
+            {RD_NXPZ, {RD_PXPZ, RD_NXPZ, RD_NXNZ}},
+            {RD_NXNZ, {RD_PXNZ, RD_NXNZ, RD_NXPZ}},
+            {RD_PYPZ, {RD_PYPZ, RD_NYPZ, RD_PYNZ}},
+            {RD_PYNZ, {RD_PYNZ, RD_NYNZ, RD_PYPZ}},
+            {RD_NYPZ, {RD_NYPZ, RD_PYPZ, RD_NYNZ}},
+            {RD_NYNZ, {RD_NYNZ, RD_PYNZ, RD_NYPZ}}
     };
 }
 

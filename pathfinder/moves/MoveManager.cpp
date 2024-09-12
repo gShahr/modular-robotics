@@ -11,12 +11,24 @@ void Move::RotateAnim(Move::AnimType& anim, const int a, const int b) {
             {Y_SLIDE, {0, 1, 0}},
             {X_SLIDE, {1, 0, 0}},
             {GEN_SLIDE, {0, 0, 0}},
-            {PIVOT_PX, {1, 0, 0}},
-            {PIVOT_PY, {0, 1, 0}},
-            {PIVOT_PZ, {0, 0, 1}},
-            {PIVOT_NX, {-1, 0, 0}},
-            {PIVOT_NY, {0, -1, 0}},
-            {PIVOT_NZ, {0, 0, -1}}
+            {PIVOT_PX, { 1,  0,  0}},
+            {PIVOT_PY, { 0,  1,  0}},
+            {PIVOT_PZ, { 0,  0,  1}},
+            {PIVOT_NX, {-1,  0,  0}},
+            {PIVOT_NY, { 0, -1,  0}},
+            {PIVOT_NZ, { 0,  0, -1}},
+            {RD_PXPY, { 1,  1,  0}},
+            {RD_PXNY, { 1, -1,  0}},
+            {RD_NXPY, {-1,  1,  0}},
+            {RD_NXNY, {-1, -1,  0}},
+            {RD_PXPZ, { 1,  0,  1}},
+            {RD_PXNZ, { 1,  0, -1}},
+            {RD_NXPZ, {-1,  0,  1}},
+            {RD_NXNZ, {-1,  0, -1}},
+            {RD_PYPZ, { 0,  1,  1}},
+            {RD_PYNZ, { 0,  1, -1}},
+            {RD_NYPZ, { 0, -1,  1}},
+            {RD_NYNZ, { 0, -1, -1}}
     };
 
     static std::map<std::vector<int>, AnimType> OffsetToSlideAnim = {
@@ -27,12 +39,24 @@ void Move::RotateAnim(Move::AnimType& anim, const int a, const int b) {
     };
 
     static std::map<std::vector<int>, AnimType> OffsetToAnim = {
-            {{1, 0, 0}, PIVOT_PX},
-            {{0, 1, 0}, PIVOT_PY},
-            {{0, 0, 1}, PIVOT_PZ},
-            {{-1, 0, 0}, PIVOT_NX},
-            {{0, -1, 0}, PIVOT_NY},
-            {{0, 0, -1}, PIVOT_NZ}
+            {{ 1,  0,  0}, PIVOT_PX},
+            {{ 0,  1,  0}, PIVOT_PY},
+            {{ 0,  0,  1}, PIVOT_PZ},
+            {{-1,  0,  0}, PIVOT_NX},
+            {{ 0, -1,  0}, PIVOT_NY},
+            {{ 0,  0, -1}, PIVOT_NZ},
+            {{ 1,  1,  0}, RD_PXPY},
+            {{ 1, -1,  0}, RD_PXNY},
+            {{-1,  1,  0}, RD_NXPY},
+            {{-1, -1,  0}, RD_NXNY},
+            {{ 1,  0,  1}, RD_PXPZ},
+            {{ 1,  0, -1}, RD_PXNZ},
+            {{-1,  0,  1}, RD_NXPZ},
+            {{-1,  0, -1}, RD_NXNZ},
+            {{ 0,  1,  1}, RD_PYPZ},
+            {{ 0,  1, -1}, RD_PYNZ},
+            {{ 0, -1,  1}, RD_NYPZ},
+            {{ 0, -1, -1}, RD_NYNZ}
     };
 
     auto offset = AnimToOffset[anim];
@@ -404,7 +428,7 @@ std::vector<MoveBase*> MoveManager::CheckAllMovesAndConnectivity(CoordTensor<int
     return legalMoves;
 }
 
-bool checkConnected(const CoordTensor<int>& tensor, const Module& mod, const MoveBase* move) {
+bool MoveManager::checkConnected(const CoordTensor<int>& tensor, const Module& mod, const MoveBase* move) {
 
 }
 
