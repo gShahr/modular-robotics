@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.28)
-project(modular_robotics)
+project(Pathfinder)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
@@ -24,7 +24,7 @@ add_custom_target(copy_examples
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/docs/examples ${CMAKE_CURRENT_BINARY_DIR}/docs/examples
 )
 
-add_executable(modular_robotics
+add_executable(Pathfinder
         pathfinder/main.cpp
         pathfinder/coordtensor/debug_util.h
         pathfinder/modules/ModuleManager.h
@@ -48,4 +48,4 @@ add_executable(modular_robotics
         pathfinder/modules/Colors.h
         pathfinder/modules/Colors.cpp)
 
-add_dependencies(modular_robotics clear_moves copy_moves copy_examples)
+add_dependencies(Pathfinder clear_moves copy_moves copy_examples)
