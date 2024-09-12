@@ -37,6 +37,7 @@ int main(int argc, char* argv[]) {
         {"initial-file", required_argument, nullptr, 'I'},
         {"final-file", required_argument, nullptr, 'F'},
         {"export-file", required_argument, nullptr, 'e'},
+        {"analysis-file", required_argument, nullptr, 'a'},
         {nullptr, 0, nullptr, 0}
     };
 
@@ -55,6 +56,9 @@ int main(int argc, char* argv[]) {
                 break;
             case 'e':
                 exportFile = optarg;
+                break;
+            case 'a':
+                analysisFile = optarg;
                 break;
             case '?':
                 break;
