@@ -12,17 +12,21 @@ endif()
 
 find_package(nlohmann_json REQUIRED)
 
-add_custom_target(clear_moves
-        COMMAND rm -r "${CMAKE_CURRENT_BINARY_DIR}/Moves"
-)
+if(NOT "${CMAKE_CURRENT_BINARY_DIR}" STREQUAL "${CMAKE_CURRENT_LIST_DIR}")
+    if(EXISTS ${CMAKE_CURRENT_BINARY_DIR}/Moves)
+        add_custom_target(clear_moves
+                COMMAND rm -r "${CMAKE_CURRENT_BINARY_DIR}/Moves"
+        )
+    endif()
 
-add_custom_target(copy_moves
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/Moves ${CMAKE_CURRENT_BINARY_DIR}/Moves
-)
+    add_custom_target(copy_moves
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/Moves ${CMAKE_CURRENT_BINARY_DIR}/Moves
+    )
 
-add_custom_target(copy_examples
-        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/docs/examples ${CMAKE_CURRENT_BINARY_DIR}/docs/examples
-)
+    add_custom_target(copy_examples
+            COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/docs/examples ${CMAKE_CURRENT_BINARY_DIR}/docs/examples
+    )
+endif()
 
 add_executable(Pathfinder
         pathfinder/main.cpp
@@ -48,4 +52,9 @@ add_executable(Pathfinder
         pathfinder/modules/Colors.h
         pathfinder/modules/Colors.cpp)
 
-add_dependencies(Pathfinder clear_moves copy_moves copy_examples)
+if(NOT "${CMAKE_CURRENT_BINARY_DIR}" STREQUAL "${CMAKE_CURRENT_LIST_DIR}")
+    add_dependencies(Pathfinder copy_moves copy_examples)
+    if(EXISTS "${CMAKE_CURRENT_BINARY_DIR}/Moves")
+        add_dependencies(copy_moves clear_moves)
+    endif()
+endif()
