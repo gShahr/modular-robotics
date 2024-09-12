@@ -336,6 +336,26 @@ int Configuration::ChebyshevDistance(const Configuration* final) const {
     return h;
 }
 
+int Configuration::TrueChebyshevDistance(const Configuration *final) const {
+    auto currentData = this->GetModData();
+    auto finalData = final->GetModData();
+    auto currentIt = currentData.begin();
+    auto finalIt = finalData.begin();
+    std::valarray<int> dist(0, Lattice::Order());
+    float h = 0;
+    while (currentIt != currentData.end() && finalIt != finalData.end()) {
+        const auto& currentModule = *currentIt;
+        const auto& finalModule = *finalIt;
+        std::valarray<int> diff = currentModule.Coords() - finalModule.Coords();
+        for (int i = 0; i <= Lattice::Order(); ++i) {
+            dist[i] += std::abs(diff[i]);
+        }
+        ++currentIt;
+        ++finalIt;
+    }
+    return *std::max_element(begin(dist), end(dist));
+}
+
 std::vector<Configuration*> ConfigurationSpace::AStar(Configuration* start, const Configuration* final) {
 #if CONFIG_OUTPUT_JSON
     SearchAnalysis::EnterGraph("AStarDepthOverTime");

@@ -111,6 +111,8 @@ public:
     int SymmetricDifferenceHeuristic(const Configuration* final) const;
 
     int ChebyshevDistance(const Configuration* final) const;
+
+    int TrueChebyshevDistance(const Configuration* final) const;
 };
 
 namespace ConfigurationSpace {
