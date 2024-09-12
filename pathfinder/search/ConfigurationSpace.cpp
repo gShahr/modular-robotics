@@ -40,7 +40,7 @@ size_t std::hash<HashedState>::operator()(const HashedState& state) const noexce
     return state.GetSeed();
 }
 
-Configuration::Configuration(const std::set<ModuleData>& modData) : hash(HashedState(modData)) {}
+Configuration::Configuration(const std::set<ModuleData>& modData) : hash(modData) {}
 
 Configuration::~Configuration() {
     for (auto i = next.rbegin(); i != next.rend(); ++i) {
