@@ -101,13 +101,14 @@ int main(int argc, char* argv[]) {
     // Generate names for export and analysis files if they are not specified
     std::size_t trimPos;
     if (exportFile.empty()) {
-        exportFile = initialFile.substr(0, initialFile.find_last_of('.')) + ".scen";
+        exportFile = std::filesystem::path(initialFile).replace_extension(".scen");
         if ((trimPos = exportFile.find("_initial")) != std::string::npos) {
             exportFile.erase(trimPos, 8);
         }
     }
     if (analysisFile.empty()) {
-        analysisFile = initialFile.substr(0, initialFile.find_last_of('.')) + "_analysis.json";
+        auto initialFilePath = std::filesystem::path(initialFile);
+        analysisFile = initialFilePath.replace_filename(initialFilePath.stem().string() + "_analysis");
         if ((trimPos = analysisFile.find("_initial")) != std::string::npos) {
             analysisFile.erase(trimPos, 8);
         }
