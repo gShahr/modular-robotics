@@ -18,6 +18,11 @@
  * MOVE_CHECK: Output move def information and move check results
  */
 #define MOVEMANAGER_VERBOSE MM_LOG_MOVE_DEFS
+/* Bounds Checking Configuration
+ * true: Moves always check to ensure they won't look out-of-bounds
+ * false: Padding around the coordinate tensor is assumed to prevent any out-of-bounds checks from occuring
+ */
+#define MOVEMANAGER_BOUNDS_CHECKS false
 
 namespace Move {
     enum State {
