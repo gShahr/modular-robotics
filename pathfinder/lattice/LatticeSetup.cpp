@@ -39,8 +39,11 @@ namespace LatticeSetup {
         }
         // Register static modules after non-static modules
         ModuleIdManager::DeferredRegistration();
-        if (!Lattice::ignoreProperties && ColorProperty::Palette().size() <= 1) {
-            std::cout << "Less than two colors provided, recommend rerunning with -i flag to improve performance." << std::endl;
+        if (ColorProperty::Palette().empty()) {
+            Lattice::ignoreProperties = true;
+        }
+        if (!Lattice::ignoreProperties && ColorProperty::Palette().size() == 1) {
+            std::cout << "Only one color used, recommend rerunning with -i flag to improve performance." << std::endl;
         }
         for (const auto& mod : ModuleIdManager::Modules()) {
             Lattice::AddModule(mod);
