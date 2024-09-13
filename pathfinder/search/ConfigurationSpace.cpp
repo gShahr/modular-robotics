@@ -293,8 +293,8 @@ float Configuration::ManhattanDistance(const Configuration* final) const {
         ++currentIt;
         ++finalIt;
     }
-    //TODO: find out what the right number is
-    return h / 3;
+    //TODO: find out what the right number is (from testing it must be > 4)
+    return h / 5;
 }
 
 int Configuration::SymmetricDifferenceHeuristic(const Configuration* final) const {
@@ -336,7 +336,7 @@ int Configuration::ChebyshevDistance(const Configuration* final) const {
     return h;
 }
 
-int Configuration::TrueChebyshevDistance(const Configuration *final) const {
+float Configuration::TrueChebyshevDistance(const Configuration *final) const {
     auto currentData = this->GetModData();
     auto finalData = final->GetModData();
     auto currentIt = currentData.begin();
@@ -353,7 +353,8 @@ int Configuration::TrueChebyshevDistance(const Configuration *final) const {
         ++currentIt;
         ++finalIt;
     }
-    return *std::max_element(begin(dist), end(dist));
+    //TODO: find out what the right number is (from testing it must be > 2)
+    return static_cast<float>(*std::max_element(begin(dist), end(dist))) / 3;
 }
 
 std::vector<Configuration*> ConfigurationSpace::AStar(Configuration* start, const Configuration* final) {

@@ -112,7 +112,7 @@ public:
 
     int ChebyshevDistance(const Configuration* final) const;
 
-    int TrueChebyshevDistance(const Configuration* final) const;
+    float TrueChebyshevDistance(const Configuration* final) const;
 };
 
 namespace ConfigurationSpace {
