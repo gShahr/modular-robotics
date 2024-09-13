@@ -18,7 +18,11 @@ namespace LatticeSetup {
         }
         nlohmann::json j;
         file >> j;
-        Lattice::InitLattice(j["order"], j["axisSize"]);
+        if (j.contains("tensorPadding")) {
+            Lattice::InitLattice(j["order"], j["axisSize"], j["tensorPadding"]);
+        } else {
+            Lattice::InitLattice(j["order"], j["axisSize"]);
+        }
         std::set<int> colors;
         for (const auto& module : j["modules"]) {
             std::vector<int> position = module["position"];

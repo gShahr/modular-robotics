@@ -1,6 +1,7 @@
 {
   "order": 2,
   "axisSize": 11,
+  "tensorPadding": 3,
   "modules": [
     {
       "position": [1, 3],
