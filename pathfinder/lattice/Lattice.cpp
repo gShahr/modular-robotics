@@ -482,8 +482,10 @@ std::string Lattice::ToString() {
             }
         } else if (id >= 0) {
             out << (ModuleIdManager::GetModule(id).moduleStatic ? '#' : '@');
-        } else {
+        } else if (id == FREE_SPACE) {
             out << '-';
+        } else {
+            out << "⋅";
         }
         if ((i + 1) % axisSize == 0) {
             out << '\n';
