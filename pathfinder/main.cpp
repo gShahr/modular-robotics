@@ -16,6 +16,7 @@
 #include "search/SearchAnalysis.h"
 
 #define GENERATE_FINAL_STATE false
+#define PRINT_PATH false
 
 int main(int argc, char* argv[]) {
     bool ignoreColors = false;
@@ -144,12 +145,14 @@ int main(int argc, char* argv[]) {
     } catch(BFSExcept& bfsExcept) {
         std::cerr << bfsExcept.what() << std::endl;
     }
-    
+
+#if PRINT_PATH
     std::cout << "Path:\n";
     for (const auto config : path) {
         Lattice::UpdateFromModuleInfo(config->GetModData());
         std::cout << Lattice::ToString();
     }
+#endif
 
     Scenario::ScenInfo scenInfo;
     scenInfo.exportFile = exportFile;
