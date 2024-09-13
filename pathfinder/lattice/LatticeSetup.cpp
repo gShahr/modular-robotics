@@ -25,6 +25,7 @@ namespace LatticeSetup {
             std::transform(position.begin(), position.end(), position.begin(),
                         [](const int coord) { return coord; });
             std::valarray<int> coords(position.data(), position.size());
+            coords += Lattice::boundaryOffset;
             if (!Lattice::ignoreProperties && module.contains("properties")) {
                 ModuleIdManager::RegisterModule(coords, module["static"], module["properties"]);
                 //colors.insert(Colors::colorToInt[module["color"]]);
@@ -43,6 +44,18 @@ namespace LatticeSetup {
             Lattice::AddModule(mod);
         }
         Lattice::BuildMovableModules();
+        // Additional boundary setup
+        if (j.contains("boundaries")) {
+            for (const auto& bound : j["boundaries"]) {
+                std::valarray<int> coords = bound;
+                coords += Lattice::boundaryOffset;
+                if (Lattice::coordTensor[coords] < 0) {
+                    Lattice::AddBound(coords);
+                } else {
+                    std::cerr << "Attempted to add a boundary where a module is already present!" << std::endl;
+                }
+            }
+        }
     }
 
     Configuration setupFinalFromJson(const std::string& filename) {
@@ -62,6 +75,7 @@ namespace LatticeSetup {
             std::transform(position.begin(), position.end(), position.begin(),
                         [](const int coord) { return coord; });
             std::valarray<int> coords(position.data(), position.size());
+            coords += Lattice::boundaryOffset;
             //desiredState[coords] = true;
             ModuleProperties props;
             if (!Lattice::ignoreProperties && module.contains("properties")) {

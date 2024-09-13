@@ -162,5 +162,9 @@
       "position": [6, 4],
       "static": false
     }
+  ],
+  "boundaries": [
+    [10, 1],
+    [10, 7]
   ]
 }
