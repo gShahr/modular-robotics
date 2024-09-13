@@ -102,6 +102,31 @@ const std::vector<std::pair<Move::AnimType, std::valarray<int>>>& MoveBase::Anim
     return animSequence;
 }
 
+bool MoveBase::operator==(const MoveBase &rhs) const {
+    std::valarray valArrComparison = finalPos == rhs.finalPos;
+    for (const auto result : valArrComparison) {
+        if (!result) {
+            return false;
+        }
+    }
+    if (moves.size() != rhs.moves.size()) {
+        return false;
+    }
+    for (auto it = moves.begin(), it2 = rhs.moves.begin(); it != moves.end(); ++it, ++it2) {
+        valArrComparison = it->first == it2->first;
+        for (const auto result : valArrComparison) {
+            if (!result) {
+                return false;
+            }
+        }
+        if (it->second != it->second) {
+            return false;
+        }
+    }
+    return true;
+}
+
+
 Move2d::Move2d() {
     order = 2;
     bounds.resize(order, {0, 0});
@@ -307,9 +332,25 @@ void MoveManager::InitMoveManager(const int order, const int maxDistance) {
 
 void MoveManager::GenerateMovesFrom(MoveBase* origMove) {
     auto list = Isometry::GenerateTransforms(origMove);
+#if MOVEMANAGER_VERBOSE > MM_LOG_NONE
+    DEBUG("Generated " << list.size() << " moves from initial definition." << std::endl);
+    int dupesAvoided = 0;
+#endif
     for (const auto move: list) {
-        _moves.push_back(dynamic_cast<MoveBase*>(move));
+        if (std::none_of(_moves.begin(), _moves.end(), [&move](auto& existingMove) {
+            return *existingMove == *dynamic_cast<MoveBase*>(move);
+        })) {
+            _moves.push_back(dynamic_cast<MoveBase*>(move));
+        } else {
+#if MOVEMANAGER_VERBOSE > MM_LOG_NONE
+            dupesAvoided++;
+#endif
+        }
     }
+#if MOVEMANAGER_VERBOSE > MM_LOG_NONE
+    DEBUG("Registered " << list.size() - dupesAvoided << '/' << list.size() << " generated moves." << std::endl);
+    DEBUG("Duplicate moves avoided: " << dupesAvoided << std::endl);
+#endif
     // Add move to offset map
     for (auto move : _moves) {
         if (_movesByOffset[move->finalPos].empty()) {

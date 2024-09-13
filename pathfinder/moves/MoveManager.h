@@ -144,6 +144,8 @@ public:
     [[nodiscard]]
     const std::vector<std::pair<Move::AnimType, std::valarray<int>>>& AnimSequence() const;
 
+    virtual bool operator==(const MoveBase& rhs) const;
+
     friend class MoveManager;
 };
 
