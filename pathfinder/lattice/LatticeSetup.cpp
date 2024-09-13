@@ -39,10 +39,8 @@ namespace LatticeSetup {
         }
         // Register static modules after non-static modules
         ModuleIdManager::DeferredRegistration();
-        if (ColorProperty::Palette().size() <= 1) {
-            //Lattice::colorTensor = CoordTensor<int>(0, 0, 0);
-            //TODO: add property stuff here
-            Lattice::ignoreProperties = true;
+        if (!Lattice::ignoreProperties && ColorProperty::Palette().size() <= 1) {
+            std::cout << "Less than two colors provided, recommend rerunning with -i flag to improve performance." << std::endl;
         }
         for (const auto& mod : ModuleIdManager::Modules()) {
             Lattice::AddModule(mod);
