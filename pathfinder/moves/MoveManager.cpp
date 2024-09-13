@@ -365,6 +365,7 @@ std::vector<MoveBase*> MoveManager::CheckAllMoves(CoordTensor<int> &tensor, Modu
     std::vector<MoveBase*> legalMoves = {};
 #if MOVEMANAGER_CHECK_BY_OFFSET
     for (const auto& moveOffset : _offsets) {
+        if (const auto id = Lattice::coordTensor[mod.coords + moveOffset]; id == OUT_OF_BOUNDS || id >= 0) continue;
         for (auto move : _movesByOffset[moveOffset]) {
             if (move->MoveCheck(tensor, mod)) {
 #if MOVEMANAGER_VERBOSE == MM_LOG_MOVE_CHECKS
