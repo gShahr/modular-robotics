@@ -1,10 +1,12 @@
 cmake_minimum_required(VERSION 3.28)
 project(Pathfinder)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lboost_filesystem -lboost_system")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/Module Properties")
 
-find_package(Boost REQUIRED)
+find_package(Boost REQUIRED COMPONENTS filesystem system)
 if(Boost_FOUND)
     include_directories(${Boost_INCLUDE_DIR})
     add_definitions("-DHAS_BOOST")
@@ -20,13 +22,19 @@ if(NOT "${CMAKE_CURRENT_BINARY_DIR}" STREQUAL "${CMAKE_CURRENT_LIST_DIR}")
     endif()
 
     add_custom_target(copy_moves
-        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/Moves ${CMAKE_CURRENT_BINARY_DIR}/Moves
+            COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/Moves ${CMAKE_CURRENT_BINARY_DIR}/Moves
     )
 
     add_custom_target(copy_examples
             COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/docs/examples ${CMAKE_CURRENT_BINARY_DIR}/docs/examples
     )
+
+    add_custom_target(copy_properties
+            COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_LIST_DIR}/Module Properties" "${CMAKE_CURRENT_BINARY_DIR}/Module Properties"
+    )
 endif()
+
+add_library(ColorProperty SHARED pathfinder/properties/Colors.cpp pathfinder/modules/ModuleProperties.cpp pathfinder/utility/color_util.cpp)
 
 add_executable(Pathfinder
         pathfinder/main.cpp
@@ -49,18 +57,18 @@ add_executable(Pathfinder
         pathfinder/modules/Metamodule.cpp
         pathfinder/moves/Isometry.h
         pathfinder/moves/Isometry.cpp
-        pathfinder/properties/Colors.h
-        pathfinder/properties/Colors.cpp
         pathfinder/search/HeuristicCache.cpp
         pathfinder/search/HeuristicCache.h
         pathfinder/modules/ModuleProperties.cpp
-        pathfinder/modules/ModuleProperties.h)
         pathfinder/modules/ModuleProperties.h
         pathfinder/utility/color_util.cpp
         pathfinder/utility/color_util.h)
 
+target_link_libraries(Pathfinder Boost::system)
+target_link_libraries(Pathfinder Boost::filesystem)
+
 if(NOT "${CMAKE_CURRENT_BINARY_DIR}" STREQUAL "${CMAKE_CURRENT_LIST_DIR}")
-    add_dependencies(Pathfinder copy_moves copy_examples)
+    add_dependencies(Pathfinder copy_moves copy_examples copy_properties)
     if(EXISTS "${CMAKE_CURRENT_BINARY_DIR}/Moves")
         add_dependencies(copy_moves clear_moves)
     endif()
