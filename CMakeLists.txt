@@ -30,7 +30,7 @@ endif()
 
 add_executable(Pathfinder
         pathfinder/main.cpp
-        pathfinder/coordtensor/debug_util.h
+        pathfinder/utility/debug_util.h
         pathfinder/modules/ModuleManager.h
         pathfinder/modules/ModuleManager.cpp
         pathfinder/moves/MoveManager.h
@@ -55,6 +55,9 @@ add_executable(Pathfinder
         pathfinder/search/HeuristicCache.h
         pathfinder/modules/ModuleProperties.cpp
         pathfinder/modules/ModuleProperties.h)
+        pathfinder/modules/ModuleProperties.h
+        pathfinder/utility/color_util.cpp
+        pathfinder/utility/color_util.h)
 
 if(NOT "${CMAKE_CURRENT_BINARY_DIR}" STREQUAL "${CMAKE_CURRENT_LIST_DIR}")
     add_dependencies(Pathfinder copy_moves copy_examples)
