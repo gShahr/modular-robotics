@@ -1,6 +1,6 @@
 #include <set>
 #include "../lattice/Lattice.h"
-#include "../coordtensor/debug_util.h"
+#include "../utility/debug_util.h"
 #include "ModuleManager.h"
 
 

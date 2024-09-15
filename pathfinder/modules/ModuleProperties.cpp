@@ -2,6 +2,7 @@
 #include <set>
 #include "ModuleProperties.h"
 #include "../coordtensor/debug_util.h"
+#include "../utility/debug_util.h"
 
 IModuleProperty* PropertyInitializer::GetProperty(const nlohmann::basic_json<> &propertyDef) {
     return ModuleProperties::Constructors()[propertyDef["name"]](propertyDef);

@@ -5,6 +5,7 @@
 #include <map>
 #include "../coordtensor/debug_util.h"
 #include "../properties/Colors.h"
+#include "../utility/debug_util.h"
 #include "Lattice.h"
 
 std::vector<std::vector<int>> Lattice::adjList;
