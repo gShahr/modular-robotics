@@ -10,9 +10,20 @@ export class Move{
         this.checkpoint = checkpoint;
 
         this.moduleType = moduleType;
+        // TODO refactor this out to someplace it belongs
         switch (moduleType) {
-            case ModuleType.CUBE: this.dihedralAngle = 90.0; this.inscsphere = 0.5; this.midsphere = 0.7071; break;
-            case ModuleType.RHOMBIC_DODECAHEDRON: this.dihedralAngle = 60.0; this.inscsphere = 0.7071; this.midsphere = 0.8165; break;
+            case ModuleType.CUBE: 
+                this.dihedralAngle = 90.0;
+                this.inscsphere = 0.5;
+                this.midsphere = 0.7071;
+                this.doubleMove = deltaPos.abs().sum() > 1 ? true : false;
+                break;
+            case ModuleType.RHOMBIC_DODECAHEDRON: 
+                this.dihedralAngle = 60.0;
+                this.inscsphere = 0.7071;
+                this.midsphere = 0.8165;
+                this.doubleMove = false;
+                break;
         }
 
         this.maxAngle = 0;
@@ -45,18 +56,18 @@ export class Move{
                 // Rotation axis
                 this.rotAxis = this.deltaPos.clone().cross(this.anchorDir).normalize();
 
-                // Determine our start- and end-positions,
-                //  in the coordinate system centered at the origin of the "anchor" shape
-                //  (This happens to be neatly encoded in anchorDir;
-                //   we just need to re-scale it to appropriate length)
+                // Determine our start position in the coordinate system centered at the origin of the "anchor" shape
+                //  (This happens to be neatly encoded in anchorDir; we just need to re-scale it to appropriate length)
                 let _startPos = this.anchorDir.clone().multiplyScalar(this.inscsphere * 2);
 
-                // Determine the midpoint of the linear-translation
+                // Determine the midpoint of our start and end positions
                 let _linearTranslation = _startPos.clone().add(this.deltaPos);
 
-                let _translationDir = _linearTranslation.clone().normalize();
+                // SPECIAL CASE: for cube "double-moves" (180-degree pivots), this logic won't work;
+                //  just use the deltaPos as the linear translation value
+                if (this.doubleMove) { _linearTranslation = this.deltaPos.clone(); }
 
-                console.log({deltaPos, _startPos, _linearTranslation, _translationDir});
+                let _translationDir = _linearTranslation.clone().normalize();
 
                 // Scale to midsphere length
                 this.postTrans = _translationDir.clone().multiplyScalar(this.midsphere);
@@ -77,12 +88,19 @@ export class Move{
     reverse() {
         let newDeltaPos = this.deltaPos.clone().negate();
 
-        // In the coordinate system centered at the origin of the "anchor" shape,
-        //  take our position and subtract the delta-position of the move.
-        //  This results in the end-position of the move, which...
-        //  happens to correspond neatly the anchor direction in this coordinate system.
-        //      (Same property that allows us to identify our position in this coordinate system)
-        let newAnchorDir = this.anchorDir.clone().multiplyScalar(this.inscsphere * 2).sub(this.deltaPos).normalize();
+        //  For cube "double-move" pivots and RD pivots, we need to calculate a new anchor direction
+        //  For cube "single-move" pivots, we can just use the old anchor direction
+        let newAnchorDir;
+        if (this.deltaPos.abs().sum() > 1) {
+            // In the coordinate system centered at the origin of the "anchor" shape,
+            //  take our position and subtract the delta-position of the move.
+            //  This results in the end-position of the move, which...
+            //  happens to correspond neatly the anchor direction in this coordinate system.
+            //      (Same property that allows us to identify our position in this coordinate system)
+            newAnchorDir = this.anchorDir.clone().multiplyScalar(this.inscsphere * 2).sub(this.deltaPos).normalize();
+        } else {
+            newAnchorDir = this.anchorDir.clone();
+        }
 
         return new Move(this.id, newAnchorDir, newDeltaPos, this.moveType, this.checkpoint, this.moduleType);
     }

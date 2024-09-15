@@ -4,10 +4,6 @@ RHOMBIC_DODECAHEDRON
 
 1, 255,255,255, 90      // Group definition: Group ID, r, g, b, size (1-100)
 2, 255,  0,  0, 90      // red
-3,   0,255,  0,85      // green
-4,   0,  0,255,100      // blue
-5, 255,  0,255,100      // magenta
-6, 255,255,255, 50      // debug white
 
 01,  1,  0,  0,   0
 02,  2,  0,  1,   1
