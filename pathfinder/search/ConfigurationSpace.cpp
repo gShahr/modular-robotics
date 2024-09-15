@@ -7,6 +7,7 @@
 #include <omp.h>
 #include "../moves/MoveManager.h"
 #include "ConfigurationSpace.h"
+#include "HeuristicCache.h"
 #include "SearchAnalysis.h"
 
 const char * BFSExcept::what() const noexcept {
@@ -356,6 +357,17 @@ float Configuration::TrueChebyshevDistance(const Configuration *final) const {
     //TODO: find out what the right number is (from testing it must be > 2)
     return static_cast<float>(*std::max_element(begin(dist), end(dist))) / 3;
 }
+
+float Configuration::CacheChebyshevDistance(const Configuration *final) const {
+    constexpr int MAX_MOVE_DISTANCE = 2;
+    static ChebyshevHeuristicCache cache(final->GetModData());
+    float h = 0;
+    for (const auto& modData : hash.GetState()) {
+        h += cache[modData.Coords()];
+    }
+    return h / MAX_MOVE_DISTANCE;
+}
+
 
 std::vector<Configuration*> ConfigurationSpace::AStar(Configuration* start, const Configuration* final) {
 #if CONFIG_OUTPUT_JSON

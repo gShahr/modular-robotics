@@ -50,7 +50,9 @@ add_executable(Pathfinder
         pathfinder/moves/Isometry.h
         pathfinder/moves/Isometry.cpp
         pathfinder/modules/Colors.h
-        pathfinder/modules/Colors.cpp)
+        pathfinder/modules/Colors.cpp
+        pathfinder/search/HeuristicCache.cpp
+        pathfinder/search/HeuristicCache.h)
 
 if(NOT "${CMAKE_CURRENT_BINARY_DIR}" STREQUAL "${CMAKE_CURRENT_LIST_DIR}")
     add_dependencies(Pathfinder copy_moves copy_examples)
