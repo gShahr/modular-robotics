@@ -6,7 +6,7 @@
 #include "MoveManager.h"
 #include "../coordtensor/CoordTensor.h"
 #include "../lattice/Lattice.h"
-#include "../properties/Colors.h"
+#include "../utility/color_util.h"
 
 std::string Scenario::TryGetScenName(const std::string& initialFile) {
     std::ifstream stateFile(initialFile);
@@ -47,7 +47,8 @@ void Scenario::exportToScen(const std::vector<Configuration *> &path, const Scen
         file << "0, 244, 244, 0, 95\n";
         file << "1, 255, 255, 255, 85\n\n";
     } else {
-        for (auto color: ColorProperty::Palette()) {
+        ModuleProperties::CallFunction("Palette");
+        for (auto color: ResultHolder<std::unordered_set<int>>()) {
             Colors::ColorsRGB rgb(color);
             file << color << ", " << rgb.red << ", " << rgb.green << ", " << rgb.blue << ", 85\n";
         }
@@ -64,7 +65,8 @@ void Scenario::exportToScen(const std::vector<Configuration *> &path, const Scen
                     ? mod.coords[2]
                     : 0);
         } else {
-            modDef % id % dynamic_cast<ColorProperty *>(mod.properties.Find(COLOR_PROP_NAME))->GetColorInt() % mod.
+            (mod.properties.Find(COLOR_PROP_NAME))->CallFunction("GetColorInt");
+            modDef % id % ResultHolder<int>() % mod.
                     coords[0] % mod.coords[1] % (mod.coords.size() > 2 ? mod.coords[2] : 0);
         }
         file << modDef.str() << std::endl;

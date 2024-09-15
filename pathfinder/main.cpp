@@ -115,6 +115,9 @@ int main(int argc, char* argv[]) {
         }
     }
 
+    // Dynamically Link Properties
+    ModuleProperties::LinkProperties();
+
     // Set up Lattice
     Lattice::setFlags(ignoreColors);
     LatticeSetup::setupFromJson(initialFile);

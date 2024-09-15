@@ -10,7 +10,6 @@
 #include <nlohmann/json.hpp>
 #include "../moves/Isometry.h"
 #include "../coordtensor/CoordTensor.h"
-#include "../properties/Colors.h"
 
 class MetaModule final : public ITransformable {
 private:

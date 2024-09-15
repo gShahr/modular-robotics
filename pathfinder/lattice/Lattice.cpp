@@ -3,9 +3,8 @@
 #include <sstream>
 #include <string>
 #include <map>
-#include "../coordtensor/debug_util.h"
-#include "../properties/Colors.h"
 #include "../utility/debug_util.h"
+#include "../utility/color_util.h"
 #include "Lattice.h"
 
 std::vector<std::vector<int>> Lattice::adjList;
@@ -478,8 +477,9 @@ std::string Lattice::ToString() {
             if (ModuleIdManager::GetModule(id).moduleStatic) {
                 out << '#';
             } else {
-                const auto colorProp = dynamic_cast<ColorProperty*>(ModuleIdManager::Modules()[id].properties.Find(COLOR_PROP_NAME));
-                out << Colors::intToColor[colorProp->GetColorInt()][0];
+                const auto colorProp = (ModuleIdManager::Modules()[id].properties.Find(COLOR_PROP_NAME));
+                colorProp->CallFunction("GetColorInt");
+                out << Colors::intToColor[ResultHolder<int>()][0];
             }
         } else if (id >= 0) {
             out << (ModuleIdManager::GetModule(id).moduleStatic ? '#' : '@');

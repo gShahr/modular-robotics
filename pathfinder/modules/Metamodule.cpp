@@ -1,4 +1,5 @@
 #include "Metamodule.h"
+#include "../utility/color_util.h"
 
 MetaModule::MetaModule(const std::string& filename, const int order, const int size) : order(order), size(size) {
     readFromJson(filename);

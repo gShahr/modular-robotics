@@ -7,7 +7,6 @@
 #include "Lattice.h"
 #include "../search/ConfigurationSpace.h"
 #include "../modules/Metamodule.h"
-#include "../properties/Colors.h"
 
 namespace LatticeSetup {
     void setupFromJson(const std::string& filename) {
@@ -39,10 +38,11 @@ namespace LatticeSetup {
         }
         // Register static modules after non-static modules
         ModuleIdManager::DeferredRegistration();
-        if (ColorProperty::Palette().empty()) {
+        ModuleProperties::CallFunction("Palette");
+        if (ResultHolder<std::unordered_set<int>>().empty()) {
             Lattice::ignoreProperties = true;
         }
-        if (!Lattice::ignoreProperties && ColorProperty::Palette().size() == 1) {
+        if (!Lattice::ignoreProperties && ResultHolder<std::unordered_set<int>>().size() == 1) {
             std::cout << "Only one color used, recommend rerunning with -i flag to improve performance." << std::endl;
         }
         for (const auto& mod : ModuleIdManager::Modules()) {
