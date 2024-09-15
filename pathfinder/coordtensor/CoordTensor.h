@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <cmath>
-#include "debug_util.h"
+#include "../utility/debug_util.h"
 
 #ifndef TENSORFINAL_COORDTENSOR_H
 #define TENSORFINAL_COORDTENSOR_H
@@ -54,7 +54,7 @@ public:
 
     // Get a coordinate vector from an index
     [[nodiscard]]
-    std::valarray<int> CoordsFromIndex(int index) const;
+    const std::valarray<int>& CoordsFromIndex(int index) const;
 
     // Comparison Operators
     bool operator==(const CoordTensor<T>& right) const;
@@ -116,7 +116,7 @@ int CoordTensor<T>::AxisSize() const {
 }
 
 template<typename T>
-std::valarray<int> CoordTensor<T>::CoordsFromIndex(int index) const {
+const std::valarray<int>& CoordTensor<T>::CoordsFromIndex(int index) const {
     return _coordsInternal[index];
 }
 

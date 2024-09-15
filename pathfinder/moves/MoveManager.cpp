@@ -102,6 +102,31 @@ const std::vector<std::pair<Move::AnimType, std::valarray<int>>>& MoveBase::Anim
     return animSequence;
 }
 
+bool MoveBase::operator==(const MoveBase &rhs) const {
+    std::valarray valArrComparison = finalPos == rhs.finalPos;
+    for (const auto result : valArrComparison) {
+        if (!result) {
+            return false;
+        }
+    }
+    if (moves.size() != rhs.moves.size()) {
+        return false;
+    }
+    for (auto it = moves.begin(), it2 = rhs.moves.begin(); it != moves.end(); ++it, ++it2) {
+        valArrComparison = it->first == it2->first;
+        for (const auto result : valArrComparison) {
+            if (!result) {
+                return false;
+            }
+        }
+        if (it->second != it->second) {
+            return false;
+        }
+    }
+    return true;
+}
+
+
 Move2d::Move2d() {
     order = 2;
     bounds.resize(order, {0, 0});
@@ -177,11 +202,13 @@ void Move2d::InitMove(const nlohmann::basic_json<>& moveDef) {
 
 bool Move2d::MoveCheck(const CoordTensor<int>& tensor, const Module& mod) {
     // Bounds checking
+#if MOVEMANAGER_BOUNDS_CHECKS
     for (int i = 0; i < order; i++) {
         if (mod.coords[i] - bounds[i].first < 0 || mod.coords[i] + bounds[i].second >= Lattice::AxisSize()) {
             return false;
         }
     }
+#endif
     // Move Check
     return std::all_of(std::execution::par_unseq, moves.begin(), moves.end(), [&mod = std::as_const(mod), &tensor = std::as_const(tensor)](auto& move) {
         if ((tensor[mod.coords + move.first] < 0) == move.second) {
@@ -278,11 +305,13 @@ void Move3d::InitMove(const nlohmann::basic_json<>& moveDef) {
 
 bool Move3d::MoveCheck(const CoordTensor<int> &tensor, const Module &mod) {
     // Bounds checking
+#if MOVEMANAGER_BOUNDS_CHECKS
     for (int i = 0; i < order; i++) {
         if (mod.coords[i] - bounds[i].first < 0 || mod.coords[i] + bounds[i].second >= tensor.AxisSize()) {
             return false;
         }
     }
+#endif
     // Move Check
     return std::all_of(std::execution::par_unseq, moves.begin(), moves.end(), [&mod = std::as_const(mod), &tensor = std::as_const(tensor)](auto& move) {
         if ((tensor[mod.coords + move.first] < 0) == move.second) {
@@ -303,9 +332,25 @@ void MoveManager::InitMoveManager(const int order, const int maxDistance) {
 
 void MoveManager::GenerateMovesFrom(MoveBase* origMove) {
     auto list = Isometry::GenerateTransforms(origMove);
+#if MOVEMANAGER_VERBOSE > MM_LOG_NONE
+    DEBUG("Generated " << list.size() << " moves from initial definition." << std::endl);
+    int dupesAvoided = 0;
+#endif
     for (const auto move: list) {
-        _moves.push_back(dynamic_cast<MoveBase*>(move));
+        if (std::none_of(_moves.begin(), _moves.end(), [&move](auto& existingMove) {
+            return *existingMove == *dynamic_cast<MoveBase*>(move);
+        })) {
+            _moves.push_back(dynamic_cast<MoveBase*>(move));
+        } else {
+#if MOVEMANAGER_VERBOSE > MM_LOG_NONE
+            dupesAvoided++;
+#endif
+        }
     }
+#if MOVEMANAGER_VERBOSE > MM_LOG_NONE
+    DEBUG("Registered " << list.size() - dupesAvoided << '/' << list.size() << " generated moves." << std::endl);
+    DEBUG("Duplicate moves avoided: " << dupesAvoided << std::endl);
+#endif
     // Add move to offset map
     for (auto move : _moves) {
         if (_movesByOffset[move->finalPos].empty()) {
@@ -361,6 +406,7 @@ std::vector<MoveBase*> MoveManager::CheckAllMoves(CoordTensor<int> &tensor, Modu
     std::vector<MoveBase*> legalMoves = {};
 #if MOVEMANAGER_CHECK_BY_OFFSET
     for (const auto& moveOffset : _offsets) {
+        if (const auto id = Lattice::coordTensor[mod.coords + moveOffset]; id == OUT_OF_BOUNDS || id >= 0) continue;
         for (auto move : _movesByOffset[moveOffset]) {
             if (move->MoveCheck(tensor, mod)) {
 #if MOVEMANAGER_VERBOSE == MM_LOG_MOVE_CHECKS

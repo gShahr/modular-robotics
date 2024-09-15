@@ -7,7 +7,6 @@
 #include "Lattice.h"
 #include "../search/ConfigurationSpace.h"
 #include "../modules/Metamodule.h"
-#include "../modules/Colors.h"
 
 namespace LatticeSetup {
     void setupFromJson(const std::string& filename) {
@@ -18,13 +17,18 @@ namespace LatticeSetup {
         }
         nlohmann::json j;
         file >> j;
-        Lattice::InitLattice(j["order"], j["axisSize"]);
+        if (j.contains("tensorPadding")) {
+            Lattice::InitLattice(j["order"], j["axisSize"], j["tensorPadding"]);
+        } else {
+            Lattice::InitLattice(j["order"], j["axisSize"]);
+        }
         std::set<int> colors;
         for (const auto& module : j["modules"]) {
             std::vector<int> position = module["position"];
             std::transform(position.begin(), position.end(), position.begin(),
                         [](const int coord) { return coord; });
             std::valarray<int> coords(position.data(), position.size());
+            coords += Lattice::boundaryOffset;
             if (!Lattice::ignoreProperties && module.contains("properties")) {
                 ModuleIdManager::RegisterModule(coords, module["static"], module["properties"]);
                 //colors.insert(Colors::colorToInt[module["color"]]);
@@ -34,15 +38,29 @@ namespace LatticeSetup {
         }
         // Register static modules after non-static modules
         ModuleIdManager::DeferredRegistration();
-        if (ColorProperty::Palette().size() <= 1) {
-            //Lattice::colorTensor = CoordTensor<int>(0, 0, 0);
-            //TODO: add property stuff here
+        ModuleProperties::CallFunction("Palette");
+        if (ResultHolder<std::unordered_set<int>>().empty()) {
             Lattice::ignoreProperties = true;
+        }
+        if (!Lattice::ignoreProperties && ResultHolder<std::unordered_set<int>>().size() == 1) {
+            std::cout << "Only one color used, recommend rerunning with -i flag to improve performance." << std::endl;
         }
         for (const auto& mod : ModuleIdManager::Modules()) {
             Lattice::AddModule(mod);
         }
         Lattice::BuildMovableModules();
+        // Additional boundary setup
+        if (j.contains("boundaries")) {
+            for (const auto& bound : j["boundaries"]) {
+                std::valarray<int> coords = bound;
+                coords += Lattice::boundaryOffset;
+                if (Lattice::coordTensor[coords] < 0) {
+                    Lattice::AddBound(coords);
+                } else {
+                    std::cerr << "Attempted to add a boundary where a module is already present!" << std::endl;
+                }
+            }
+        }
     }
 
     Configuration setupFinalFromJson(const std::string& filename) {
@@ -62,6 +80,7 @@ namespace LatticeSetup {
             std::transform(position.begin(), position.end(), position.begin(),
                         [](const int coord) { return coord; });
             std::valarray<int> coords(position.data(), position.size());
+            coords += Lattice::boundaryOffset;
             //desiredState[coords] = true;
             ModuleProperties props;
             if (!Lattice::ignoreProperties && module.contains("properties")) {

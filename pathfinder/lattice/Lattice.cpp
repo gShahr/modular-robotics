@@ -3,16 +3,18 @@
 #include <sstream>
 #include <string>
 #include <map>
-#include "../coordtensor/debug_util.h"
-#include "../modules/Colors.h"
+#include "../utility/debug_util.h"
+#include "../utility/color_util.h"
 #include "Lattice.h"
 
 std::vector<std::vector<int>> Lattice::adjList;
 int Lattice::order;
 int Lattice::axisSize;
+int Lattice::boundarySize;
 int Lattice::time = 0;
 int Lattice::moduleCount = 0;
 bool Lattice::ignoreProperties = false;
+std::valarray<int> Lattice::boundaryOffset;
 std::vector<Module*> Lattice::movableModules;
 CoordTensor<bool> Lattice::stateTensor(1, 1, false);
 CoordTensor<int> Lattice::coordTensor(1, 1, -1);
@@ -29,10 +31,20 @@ void Lattice::ClearAdjacencies(const int moduleId) {
     adjList[moduleId].clear();
 }
 
-void Lattice::InitLattice(const int _order, const int _axisSize) {
+void Lattice::InitLattice(const int _order, const int _axisSize, const int _boundarySize) {
     order = _order;
-    axisSize = _axisSize;
-    coordTensor = CoordTensor<int>(order, axisSize, -1);
+    axisSize = _axisSize + 2 * _boundarySize;
+    boundarySize = _boundarySize;
+    boundaryOffset = std::valarray<int>(boundarySize, order);
+    coordTensor = CoordTensor<int>(order, axisSize, OUT_OF_BOUNDS);
+    for (int i = 0; i < coordTensor.GetArrayInternal().size(); i++) {
+        if (std::any_of(begin(coordTensor.CoordsFromIndex(i)), end(coordTensor.CoordsFromIndex(i)), [](const int coord) {
+            return coord < boundarySize || coord >= (axisSize - boundarySize);
+        })) {
+            continue;
+        }
+        coordTensor.GetElementDirect(i) = FREE_SPACE;
+    }
 }
 
 void Lattice::setFlags(const bool _ignoreColors) {
@@ -52,9 +64,13 @@ void Lattice::AddModule(const Module& mod) {
     adjList.resize(moduleCount + 1);
 }
 
+void Lattice::AddBound(const std::valarray<int>& coords) {
+    coordTensor[coords] = OUT_OF_BOUNDS;
+}
+
 void Lattice::MoveModule(Module &mod, const std::valarray<int>& offset) {
     ClearAdjacencies(mod.id);
-    coordTensor[mod.coords] = -1;
+    coordTensor[mod.coords] = FREE_SPACE;
     mod.coords += offset;
     coordTensor[mod.coords] = mod.id;
 #if LATTICE_RD_EDGECHECK
@@ -418,7 +434,7 @@ void Lattice::UpdateFromModuleInfo(const std::set<ModuleData>& moduleInfo) {
     }
     for (const auto id : modsToMove) {
         auto& mod = ModuleIdManager::GetModule(id);
-        Lattice::coordTensor[mod.coords] = -1;
+        Lattice::coordTensor[mod.coords] = FREE_SPACE;
         mod.coords = destinations.front()->Coords();
         ClearAdjacencies(id);
 #if LATTICE_RD_EDGECHECK
@@ -461,13 +477,16 @@ std::string Lattice::ToString() {
             if (ModuleIdManager::GetModule(id).moduleStatic) {
                 out << '#';
             } else {
-                const auto colorProp = dynamic_cast<ColorProperty*>(ModuleIdManager::Modules()[id].properties.Find(COLOR_PROP_NAME));
-                out << Colors::intToColor[colorProp->GetColorInt()][0];
+                const auto colorProp = (ModuleIdManager::Modules()[id].properties.Find(COLOR_PROP_NAME));
+                colorProp->CallFunction("GetColorInt");
+                out << Colors::intToColor[ResultHolder<int>()][0];
             }
         } else if (id >= 0) {
             out << (ModuleIdManager::GetModule(id).moduleStatic ? '#' : '@');
-        } else {
+        } else if (id == FREE_SPACE) {
             out << '-';
+        } else {
+            out << "⋅";
         }
         if ((i + 1) % axisSize == 0) {
             out << '\n';
