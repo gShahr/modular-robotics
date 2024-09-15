@@ -1,5 +1,5 @@
 {
-  "filename": "libColorProperty",
+  "filename": "ColorPropertyLib",
   "name": "colorProperty",
   "staticFunctions": [
     "Palette"
