@@ -52,7 +52,9 @@ add_executable(Pathfinder
         pathfinder/modules/Colors.h
         pathfinder/modules/Colors.cpp
         pathfinder/search/HeuristicCache.cpp
-        pathfinder/search/HeuristicCache.h)
+        pathfinder/search/HeuristicCache.h
+        pathfinder/modules/ModuleProperties.cpp
+        pathfinder/modules/ModuleProperties.h)
 
 if(NOT "${CMAKE_CURRENT_BINARY_DIR}" STREQUAL "${CMAKE_CURRENT_LIST_DIR}")
     add_dependencies(Pathfinder copy_moves copy_examples)

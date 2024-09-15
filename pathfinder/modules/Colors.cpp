@@ -1,3 +1,4 @@
+#include <iostream>
 #include "Colors.h"
 
 namespace Colors {

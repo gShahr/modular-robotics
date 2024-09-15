@@ -3,7 +3,7 @@
 
 #include <map>
 #include <string>
-#include "../modules/ModuleManager.h"
+#include "../modules/ModuleProperties.h"
 
 // Name of the color property in JSON
 #define COLOR_PROP_NAME "colorProperty"
