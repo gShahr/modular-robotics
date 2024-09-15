@@ -1,8 +1,13 @@
 #include <iostream>
 #include <set>
 #include "ModuleProperties.h"
-#include "../coordtensor/debug_util.h"
 #include "../utility/debug_util.h"
+
+void IModuleProperty::CallFunction(const std::string &funcKey) {
+    if (ModuleProperties::InstFunctions().contains(funcKey)) {
+        ModuleProperties::InstFunctions()[funcKey](this);
+    }
+}
 
 IModuleProperty* PropertyInitializer::GetProperty(const nlohmann::basic_json<> &propertyDef) {
     return ModuleProperties::Constructors()[propertyDef["name"]](propertyDef);
@@ -18,6 +23,29 @@ std::unordered_map<std::string, IModuleProperty* (*)(const nlohmann::basic_json<
     return _constructors;
 }
 
+std::unordered_map<std::string, void (*)()>& ModuleProperties::Functions() {
+    static std::unordered_map<std::string, void (*)()> _functions;
+    return _functions;
+}
+
+std::unordered_map<std::string, void(*)(IModuleProperty*)>& ModuleProperties::InstFunctions() {
+    static std::unordered_map<std::string, void(*)(IModuleProperty*)> _functions;
+    return _functions;
+}
+
+
+// template<typename T, class... Args>
+// std::unordered_map<std::string, T (*)(Args...)>& ModuleProperties::Functions() {
+//     static std::unordered_map<std::string, T (*)(Args...)> _functions;
+//     return _functions;
+// }
+
+// template<typename T, class... Args>
+// std::unordered_map<std::string, T(PropertyFunction<T, Args...>::*)(Args...)>& ModuleProperties::InstFunctions() {
+//     static std::unordered_map<std::string, T(PropertyFunction<T, Args...>::*)(Args...)> _instFunctions;
+//     return _instFunctions;
+// }
+
 ModuleProperties::ModuleProperties(const ModuleProperties& other) {
     _properties.clear();
     for (const auto& property : other._properties) {
@@ -32,7 +60,56 @@ ModuleProperties::ModuleProperties(const ModuleProperties& other) {
     }
 }
 
-void ModuleProperties::InitProperties(const nlohmann::basic_json<> &propertyDefs) {
+void ModuleProperties::LinkProperties() {
+    for (const auto& propertyFile : std::filesystem::directory_iterator("Module Properties/")) {
+        if (propertyFile.path().extension() != ".json") continue;
+        std::ifstream file(propertyFile.path());
+        nlohmann::json propertyClassDef = nlohmann::json::parse(file);
+        std::string propertyLibPath, propertyLibName = propertyClassDef["filename"];
+        for (const auto& libraryFile : std::filesystem::directory_iterator("Module Properties/")) {
+            if (libraryFile.path().stem().string() == propertyLibName) {
+                propertyLibPath = libraryFile.path().string();
+            }
+        }
+        if (propertyLibPath.empty()) continue;
+        boost::dll::shared_library propertyLibrary(propertyLibPath);
+        if (propertyClassDef.contains("staticFunctions")) {
+            for (const auto& functionName : propertyClassDef["staticFunctions"]) {
+                auto function = propertyLibrary.get<void()>(functionName);
+                Functions()[functionName] = function;
+            }
+        }
+        if (propertyClassDef.contains("instanceFunctions")) {
+            for (const auto& functionName : propertyClassDef["instanceFunctions"]) {
+                auto function = propertyLibrary.get<void(IModuleProperty*)>(functionName);
+                InstFunctions()[functionName] = function;
+            }
+        }
+    }
+}
+
+void ModuleProperties::CallFunction(const std::string &funcKey) {
+    if (Functions().contains(funcKey)) {
+        Functions()[funcKey]();
+    }
+}
+
+
+// template<typename T, class... Args>
+// void ModuleProperties::MapStaticFunction(const std::string& key, T (*function)(Args...)) {
+//     Functions<T>()[key] = function;
+// }
+
+// template<typename T>
+// T ModuleProperties::CallFunction(const std::string& propKey, const std::string& funcKey) const {
+//     auto prop = Find(propKey);
+//     if (prop == nullptr) {
+//         return T();
+//     }
+//     return Functions<T>()[funcKey]();
+// }
+
+void ModuleProperties::InitProperties(const nlohmann::basic_json<>& propertyDefs) {
     for (const auto& key : PropertyKeys()) {
         if (propertyDefs.contains(key)) {
             auto property = Constructors()[key](propertyDefs[key]);

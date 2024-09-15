@@ -3,6 +3,7 @@
 #include <string>
 #include <unordered_set>
 #include <boost/container_hash/hash.hpp>
+#include <boost/dll.hpp>
 #include <nlohmann/json.hpp>
 
 // An interface for properties that a module might have, ex: Color, Direction, etc.
@@ -24,8 +25,13 @@ public:
 
     virtual ~IModuleProperty() = default;
 
+    void CallFunction(const std::string& funcKey);
+
     friend class ModuleProperties;
 };
+
+//template<typename T, class C, class... Args>
+//class PropertyFunction;
 
 // These properties can change as a result of certain events, such as moving, or even having a module move adjacent to
 // the affected module.
@@ -39,6 +45,12 @@ protected:
     IModuleDynamicProperty* MakeCopy() const override = 0;
 };
 
+template<typename T>
+T& ResultHolder() {
+    static T result;
+    return result;
+}
+
 // Class used by modules to track and update their properties (other than coordinate info)
 class ModuleProperties {
 private:
@@ -47,6 +59,18 @@ private:
 
     // Static data for mapping JSON keys to constructors
     static std::unordered_map<std::string, IModuleProperty* (*)(const nlohmann::basic_json<>& propertyDef)>& Constructors();
+
+    // Static data for mapping strings to static property functions
+    static std::unordered_map<std::string, void (*)()>& Functions();
+
+    // Static data for mapping strings to dynamic property functions
+    static std::unordered_map<std::string, void (*)(IModuleProperty*)>& InstFunctions();
+//    // Static data for mapping JSON keys to static property functions
+//    template<typename T, class... Args>
+//    static std::unordered_map<std::string, T (*)(Args...)>& Functions();
+
+//    template<typename T, class... Args>
+//    static std::unordered_map<std::string, T(PropertyFunction<T, Args...>::*)(Args...)>& InstFunctions();
 
     // Properties of a module
     std::unordered_set<IModuleProperty*> _properties;
@@ -58,6 +82,16 @@ public:
 
     //ModuleProperties(const ModuleProperties&) = delete;
     ModuleProperties(const ModuleProperties& other);
+
+    static void LinkProperties();
+
+    static void CallFunction(const std::string& funcKey);
+
+//    template<typename T, class... Args>
+//    static void MapStaticFunction(const std::string& key, T (*function)(Args...));
+
+//    template<typename T>
+//    T CallFunction(const std::string& propKey, const std::string& funcKey) const;
 
     void InitProperties(const nlohmann::basic_json<>& propertyDefs);
 
@@ -77,9 +111,25 @@ public:
     ~ModuleProperties();
 
     friend class IModuleProperty;
+//    template<typename T, class C, class... Args>
+//    friend class PropertyFunction;
     friend struct PropertyInitializer;
     friend class boost::hash<ModuleProperties>;
 };
+
+//template<typename T, class C, class... Args>
+//class PropertyFunction {
+//    T (C::*_function)(Args...);
+//public:
+//    PropertyFunction(const std::string &key, T (C::*function)(Args...)) {
+//        _function = function;
+//        ModuleProperties::InstFunctions<T, Args...>()[key] = Call;
+//    }
+//
+//    T Call(void* invoker, Args&&... args) {
+//        return (invoker->*_function)(std::forward<Args>(args)...);
+//    }
+//};
 
 // Used by property classes to add their constructor to the constructor map
 struct PropertyInitializer {
