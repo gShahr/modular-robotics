@@ -50,3 +50,12 @@ int ColorProperty::GetColorInt() const {
 const std::unordered_set<int>& ColorProperty::Palette() {
     return allColors;
 }
+
+void Palette() {
+    ResultHolder<std::unordered_set<int>>() = ColorProperty::Palette();
+}
+
+void GetColorInt(IModuleProperty* prop) {
+    auto colorProp = reinterpret_cast<ColorProperty*>(prop);
+    ResultHolder<int>() = colorProp->GetColorInt();
+}
