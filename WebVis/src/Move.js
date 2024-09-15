@@ -94,7 +94,7 @@ export class Move{
                 this.postTrans = _translationDir.clone().multiplyScalar(this.midsphere);
                 this.preTrans = this.postTrans.clone().negate();
 
-                this.maxAngle = THREE.MathUtils.degToRad(this.deltaPos.toArray().reduce((p,a)=>p+Math.abs(a), 0.0) * this.dihedralAngle);
+                this.maxAngle = THREE.MathUtils.degToRad(this.deltaPos.abs().sum() * this.dihedralAngle);
                 break;
                 } 
             case MoveType.SLIDING: { // No additional attributes needed
