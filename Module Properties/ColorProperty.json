@@ -1,0 +1,10 @@
+{
+  "filename": "libColorProperty",
+  "name": "colorProperty",
+  "staticFunctions": [
+    "Palette"
+  ],
+  "instanceFunctions": [
+    "GetColorInt"
+  ]
+}
