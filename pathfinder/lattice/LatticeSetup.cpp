@@ -7,7 +7,7 @@
 #include "Lattice.h"
 #include "../search/ConfigurationSpace.h"
 #include "../modules/Metamodule.h"
-#include "../modules/Colors.h"
+#include "../properties/Colors.h"
 
 namespace LatticeSetup {
     void setupFromJson(const std::string& filename) {

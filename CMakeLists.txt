@@ -49,8 +49,8 @@ add_executable(Pathfinder
         pathfinder/modules/Metamodule.cpp
         pathfinder/moves/Isometry.h
         pathfinder/moves/Isometry.cpp
-        pathfinder/modules/Colors.h
-        pathfinder/modules/Colors.cpp
+        pathfinder/properties/Colors.h
+        pathfinder/properties/Colors.cpp
         pathfinder/search/HeuristicCache.cpp
         pathfinder/search/HeuristicCache.h
         pathfinder/modules/ModuleProperties.cpp

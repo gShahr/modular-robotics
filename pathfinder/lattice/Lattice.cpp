@@ -4,7 +4,7 @@
 #include <string>
 #include <map>
 #include "../coordtensor/debug_util.h"
-#include "../modules/Colors.h"
+#include "../properties/Colors.h"
 #include "Lattice.h"
 
 std::vector<std::vector<int>> Lattice::adjList;

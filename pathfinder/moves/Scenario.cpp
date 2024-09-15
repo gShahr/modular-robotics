@@ -6,7 +6,7 @@
 #include "MoveManager.h"
 #include "../coordtensor/CoordTensor.h"
 #include "../lattice/Lattice.h"
-#include "../modules/Colors.h"
+#include "../properties/Colors.h"
 
 std::string Scenario::TryGetScenName(const std::string& initialFile) {
     std::ifstream stateFile(initialFile);
