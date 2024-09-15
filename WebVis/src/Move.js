@@ -10,9 +10,6 @@ export class Move{
         this.checkpoint = checkpoint;
 
         this.moduleType = moduleType;
-        let _d_cf, _d_fe;
-        // d_cf = distance from 3d center to 2d/face center
-        // d_fe = distance from 2d/face center to 1d/edge center 
         switch (moduleType) {
             case ModuleType.CUBE: this.dihedralAngle = 90.0; this.inscsphere = 0.5; this.midsphere = 0.7071; break;
             case ModuleType.RHOMBIC_DODECAHEDRON: this.dihedralAngle = 60.0; this.inscsphere = 0.7071; this.midsphere = 0.8165; break;
@@ -66,22 +63,22 @@ export class Move{
         switch(moveType) {
             case MoveType.PIVOT: {
                 // Rotation axis
-                this.rotAxis = deltaPos.clone().cross(anchorDir).normalize();
+                this.rotAxis = this.deltaPos.clone().cross(this.anchorDir).normalize();
 
                 // Determine our start- and end-positions,
                 //  in the coordinate system centered at the origin of the "anchor" shape
                 //  (This happens to be neatly encoded in anchorDir;
                 //   we just need to re-scale it to appropriate length)
-                let _startPos = anchorDir.clone().multiplyScalar(this.inscsphere * 2);
-                let _endPos = _startPos.clone().add(deltaPos);
+                let _startPos = this.anchorDir.clone().multiplyScalar(this.inscsphere * 2);
+                let _endPos = _startPos.clone().add(this.deltaPos);
 
                 // Determine the midpoint of the linear-translation
-                let _linearTranslation = _startPos.clone().multiplyScalar(2).add(deltaPos);
+                let _linearTranslation = _startPos.clone().multiplyScalar(2).add(this.deltaPos);
 
                 // Calculate our initial pass at the arc-correction factor:
                 //  Extract the 0-element of the delta-position
                 let _arcTranslation = new THREE.Vector3(1.0, 1.0, 1.0)
-                    .sub(deltaPos.clone().abs());
+                    .sub(this.deltaPos.clone().abs());
 
                 // Need to determine what sign this arc-correction factor should have
                 //  (opposite the corresponding element in the linear-translation vector)
@@ -93,14 +90,11 @@ export class Move{
                 // Apply our arc correction factor to the linear translation and normalize
                 let _translationDir = _linearTranslation.clone().add(_arcTranslation.multiplyScalar(_arcSign)).normalize();
 
-                console.log({_startPos, _arcSign, _linearTranslation, _arcTranslation, _translationDir});
-
                 // Scale to midsphere length
                 this.postTrans = _translationDir.clone().multiplyScalar(this.midsphere);
                 this.preTrans = this.postTrans.clone().negate();
 
-                // 
-                this.maxAngle = THREE.MathUtils.degToRad(deltaPos.toArray().reduce((p,a)=>p+Math.abs(a), 0.0) * this.dihedralAngle);
+                this.maxAngle = THREE.MathUtils.degToRad(this.deltaPos.toArray().reduce((p,a)=>p+Math.abs(a), 0.0) * this.dihedralAngle);
                 break;
                 } 
             case MoveType.SLIDING: { // No additional attributes needed
@@ -113,27 +107,17 @@ export class Move{
     }
 
     reverse() {
-        let newMove;
         let newDeltaPos = this.deltaPos.clone().negate();
-        let newAnchorDir = this.anchorDir.clone();
         let testVec = new THREE.Vector3(1.0, 1.0, 1.0);
         let manhattanDistance = newDeltaPos.abs().clone().dot(testVec);
 
-        // Test for manhattanDistance < 3.0. Any valid move should have
-        // distance of exactly 1 or 2; if greater, either there's a bug
-        // with the scenario, or it's a deliberately-exaggerated slide 
-        // move for which the anchorDir should be 0 anyway.
-        if (manhattanDistance < 3.0) {
-            // If corner move, calculate new anchor dir
-            if (manhattanDistance > 1.0) { 
-                newAnchorDir = testVec.sub(this.anchorDir.abs()).multiply(newDeltaPos);
-                
-                // Sliding moves use only positive numbers for encoding anchor directions
-                if (this.moveType == MoveType.SLIDING && manhattanDistance < 3.0) { 
-                    newAnchorDir = newAnchorDir.abs(); 
-                }
-            }
-        }
-        return new Move(this.id, newAnchorDir, newDeltaPos, this.moveType, this.checkpoint);
+        // In the coordinate system centered at the origin of the "anchor" shape,
+        //  take our position and subtract the delta-position of the move.
+        //  This results in the end-position of the move, which...
+        //  happens to correspond neatly the anchor direction in this coordinate system.
+        //      (Same property that allows us to identify our position in this coordinate system)
+        let newAnchorDir = this.anchorDir.clone().multiplyScalar(this.inscsphere * 2).sub(this.deltaPos).normalize();
+
+        return new Move(this.id, newAnchorDir, newDeltaPos, this.moveType, this.checkpoint, this.moduleType);
     }
 }
