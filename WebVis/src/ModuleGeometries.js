@@ -20,6 +20,12 @@ const _rhombicDodecahedronGeometryVertices = [
    //  2.0,  0.0,  0.0, // 10 | L
    //  0.0, -2.0,  0.0, // 11 | M
 
+   // Edge length: sqrt(3)/2
+   // Midsphere: sqrt(6)/3 (2*sqrt(2)/3 * edge_length)
+   // Distance from polyhedra-center to face-center: sqrt(2)/2 (sqrt(6) * edge_length / 3)
+   // Distance from face-center to edge-center: sqrt(3)/2 (edge_length)
+   // Dihedral angle: 120 degrees
+
    { pos: [ 0.0,  2.0,  0.0], uv: [0.0, 0.0] }, // 0  | N
    { pos: [-1.0,  1.0, -1.0], uv: [0.0, 1.0] }, // 1  | E
    { pos: [-1.0,  1.0,  1.0], uv: [1.0, 0.0] }, // 2  | F
@@ -30,7 +36,7 @@ const _rhombicDodecahedronGeometryVertices = [
    { pos: [ 0.0,  2.0,  0.0], uv: [0.0, 0.0] }, // 6  | N
    { pos: [-1.0,  1.0,  1.0], uv: [0.0, 1.0] }, // 7  | F
    { pos: [ 1.0,  1.0,  1.0], uv: [1.0, 0.0] }, // 8  | G
-   { pos: [ 1.0,  1.0,  1.0], uv: [1.0, 0.0] }, // 9 | G
+   { pos: [ 1.0,  1.0,  1.0], uv: [1.0, 0.0] }, // 9  | G
    { pos: [-1.0,  1.0,  1.0], uv: [0.0, 1.0] }, // 10 | F
    { pos: [ 0.0,  0.0,  2.0], uv: [1.0, 1.0] }, // 11 | J
 
