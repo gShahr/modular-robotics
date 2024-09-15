@@ -34,7 +34,15 @@ if(NOT "${CMAKE_CURRENT_BINARY_DIR}" STREQUAL "${CMAKE_CURRENT_LIST_DIR}")
     )
 endif()
 
-add_library(ColorProperty SHARED pathfinder/properties/Colors.cpp pathfinder/modules/ModuleProperties.cpp pathfinder/utility/color_util.cpp)
+add_library(PropertyLib SHARED pathfinder/modules/ModuleProperties.cpp)
+
+set_target_properties(PropertyLib PROPERTIES PREFIX "")
+
+add_library(ColorPropertyLib SHARED pathfinder/properties/Colors.cpp pathfinder/modules/ModuleProperties.h pathfinder/utility/color_util.cpp)
+
+set_target_properties(ColorPropertyLib PROPERTIES PREFIX "")
+
+add_dependencies(ColorPropertyLib copy_properties)
 
 add_executable(Pathfinder
         pathfinder/main.cpp
@@ -59,11 +67,11 @@ add_executable(Pathfinder
         pathfinder/moves/Isometry.cpp
         pathfinder/search/HeuristicCache.cpp
         pathfinder/search/HeuristicCache.h
-        pathfinder/modules/ModuleProperties.cpp
         pathfinder/modules/ModuleProperties.h
         pathfinder/utility/color_util.cpp
         pathfinder/utility/color_util.h)
 
+target_link_libraries(Pathfinder PropertyLib)
 target_link_libraries(Pathfinder Boost::system)
 target_link_libraries(Pathfinder Boost::filesystem)
 
