@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { SVGRenderer } from 'three/addons/renderers/SVGRenderer.js';
 import { Module } from "./Module.js";
 import { User } from "./User.js";
 import { ModuleType, MoveType } from "./utils.js";
@@ -18,14 +19,22 @@ THREE.Vector3.prototype.sum = function() {
 
 /* --- setup --- */
 export const gCanvas = document.getElementById("scene");
-export const gRenderer = new THREE.WebGLRenderer({canvas: gCanvas});
+gCanvas.width = 0;
+gCanvas.height = 0;
+//export const gRenderer = new THREE.WebGLRenderer({canvas: gCanvas});
+//gRenderer.shadowMap.enabled = true;
+
 export const gLights = {_fullbright: false};
 export const gScene = new THREE.Scene();
 export const gUser = new User();
+
+export const gRenderer = new SVGRenderer();
 gRenderer.setSize( window.innerWidth, window.innerHeight );
-gRenderer.shadowMap.enabled = true;
-gRenderer.setAnimationLoop( animate );
-gScene._backgroundColors = [new THREE.Color(0x334D4D), new THREE.Color(0xFFFFFF)];
+THREE.ColorManagement.enabled = false;
+document.body.appendChild( gRenderer.domElement );
+requestAnimationFrame(animate);
+
+gScene._backgroundColors = [new THREE.Color(0x334D4D), new THREE.Color(0xFFFFFF), new THREE.Color(0x000000)];
 gScene._backgroundColorSelected = 0;
 gScene.background = gScene._backgroundColors[gScene._backgroundColorSelected];
 
@@ -49,8 +58,8 @@ new Module(ModuleType.RHOMBIC_DODECAHEDRON, 3, new THREE.Vector3(0.0, -1.0, -1.0
 new Module(ModuleType.RHOMBIC_DODECAHEDRON, 4, new THREE.Vector3(-1.0, -1.0, 0.0), 0xFF0000, 0.9);
 
 /* --- lights --- */
-export const lightAmbient = new THREE.AmbientLight(0xFFFFFF, 0.60);
-const lightDirectional = new THREE.DirectionalLight(0xFFFFFF, 0.4);
+export const lightAmbient = new THREE.AmbientLight(0xFFFFFF, 0.00);
+const lightDirectional = new THREE.DirectionalLight(0xFFFFFF, 0.7);
 lightDirectional.position.set(1, 1, 1);
 gScene.add(lightAmbient);
 gScene.add(lightDirectional);
@@ -118,9 +127,11 @@ function animate(time) {
 
     gUser.controls.update();
 
-	gRenderer.render( gScene, gUser.camera );
+	gRenderer.render(gScene, gUser.camera);
 
     if (debugCount > 0) {
         debugCount--;
     }
+
+    requestAnimationFrame(animate);
 }
