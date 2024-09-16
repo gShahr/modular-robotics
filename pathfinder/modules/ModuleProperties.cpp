@@ -33,6 +33,16 @@ std::unordered_map<std::string, boost::any (*)(IModuleProperty*)>& ModulePropert
     return _functions;
 }
 
+std::unordered_map<std::string, boost::any(*)(boost::any...)>& ModuleProperties::ArgFunctions() {
+    static std::unordered_map<std::string, boost::any(*)(boost::any...)> _functions;
+    return _functions;
+}
+
+std::unordered_map<std::string, boost::any(*)(IModuleProperty*, boost::any...)>& ModuleProperties::ArgInstFunctions() {
+    static std::unordered_map<std::string, boost::any(*)(IModuleProperty*, boost::any...)> _functions;
+    return _functions;
+}
+
 int ModuleProperties::_propertiesLinkedCount = 0;
 
 ModuleProperties::ModuleProperties(const ModuleProperties& other) {

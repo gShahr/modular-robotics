@@ -35,6 +35,12 @@ private:
     // Static data for mapping strings to dynamic property functions
     static std::unordered_map<std::string, boost::any (*)(IModuleProperty*)>& InstFunctions();
 
+    // Static data for mapping strings to static property functions with arguments
+    static std::unordered_map<std::string, boost::any (*)(boost::any...)>& ArgFunctions();
+
+    // Static data for mapping strings to dynamic property functions with arguments
+    static std::unordered_map<std::string, boost::any (*)(IModuleProperty*, boost::any...)>& ArgInstFunctions();
+
     // # of properties linked
     static int _propertiesLinkedCount;
 
