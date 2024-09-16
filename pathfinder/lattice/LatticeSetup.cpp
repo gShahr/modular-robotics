@@ -42,11 +42,12 @@ namespace LatticeSetup {
         // Register static modules after non-static modules
         ModuleIdManager::DeferredRegistration();
         ModuleProperties::CallFunction("Palette");
-        if (ResultHolder<std::unordered_set<int>>().empty()) {
-            Lattice::ignoreProperties = true;
-        }
-        if (!Lattice::ignoreProperties && ResultHolder<std::unordered_set<int>>().size() == 1) {
-            std::cout << "Only one color used, recommend rerunning with -i flag to improve performance." << std::endl;
+        if (!Lattice::ignoreProperties) {
+            if (const auto& palette = ModuleProperties::CallFunction<const std::unordered_set<int>&>("Palette"); palette.empty()) {
+                Lattice::ignoreProperties = true;
+            } else if (palette.size() == 1) {
+                std::cout << "Only one color used, recommend rerunning with -i flag to improve performance." << std::endl;
+            }
         }
         for (const auto& mod : ModuleIdManager::Modules()) {
             Lattice::AddModule(mod);

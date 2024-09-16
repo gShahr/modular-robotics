@@ -47,8 +47,7 @@ void Scenario::exportToScen(const std::vector<Configuration *> &path, const Scen
         file << "0, 244, 244, 0, 95\n";
         file << "1, 255, 255, 255, 85\n\n";
     } else {
-        ModuleProperties::CallFunction("Palette");
-        for (auto color: ResultHolder<std::unordered_set<int>>()) {
+        for (auto color: ModuleProperties::CallFunction<const std::unordered_set<int>&>("Palette")) {
             Colors::ColorsRGB rgb(color);
             file << color << ", " << rgb.red << ", " << rgb.green << ", " << rgb.blue << ", 85\n";
         }
@@ -65,8 +64,7 @@ void Scenario::exportToScen(const std::vector<Configuration *> &path, const Scen
                     ? mod.coords[2]
                     : 0);
         } else {
-            (mod.properties.Find(COLOR_PROP_NAME))->CallFunction("GetColorInt");
-            modDef % id % ResultHolder<int>() % mod.
+            modDef % id % (mod.properties.Find(COLOR_PROP_NAME))->CallFunction<int>("GetColorInt") % mod.
                     coords[0] % mod.coords[1] % (mod.coords.size() > 2 ? mod.coords[2] : 0);
         }
         file << modDef.str() << std::endl;

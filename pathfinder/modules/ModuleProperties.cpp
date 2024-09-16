@@ -23,13 +23,13 @@ std::unordered_map<std::string, IModuleProperty* (*)(const nlohmann::basic_json<
     return _constructors;
 }
 
-std::unordered_map<std::string, void (*)()>& ModuleProperties::Functions() {
-    static std::unordered_map<std::string, void (*)()> _functions;
+std::unordered_map<std::string, boost::any (*)()>& ModuleProperties::Functions() {
+    static std::unordered_map<std::string, boost::any (*)()> _functions;
     return _functions;
 }
 
-std::unordered_map<std::string, void(*)(IModuleProperty*)>& ModuleProperties::InstFunctions() {
-    static std::unordered_map<std::string, void(*)(IModuleProperty*)> _functions;
+std::unordered_map<std::string, boost::any (*)(IModuleProperty*)>& ModuleProperties::InstFunctions() {
+    static std::unordered_map<std::string, boost::any (*)(IModuleProperty*)> _functions;
     return _functions;
 }
 
@@ -76,13 +76,13 @@ void ModuleProperties::LinkProperties() {
         boost::dll::shared_library propertyLibrary(propertyLibPath);
         if (propertyClassDef.contains("staticFunctions")) {
             for (const auto& functionName : propertyClassDef["staticFunctions"]) {
-                auto function = propertyLibrary.get<void()>(functionName);
+                auto function = propertyLibrary.get<boost::any ()>(functionName);
                 Functions()[functionName] = function;
             }
         }
         if (propertyClassDef.contains("instanceFunctions")) {
             for (const auto& functionName : propertyClassDef["instanceFunctions"]) {
-                auto function = propertyLibrary.get<void(IModuleProperty*)>(functionName);
+                auto function = propertyLibrary.get<boost::any (IModuleProperty*)>(functionName);
                 InstFunctions()[functionName] = function;
             }
         }
@@ -227,7 +227,18 @@ std::size_t boost::hash<ModuleProperties>::operator()(const ModuleProperties& mo
     return boost::hash_range(hashes.begin(), hashes.end());
 }
 
+// boost::any& ResultInternal() {
+//     static boost::any result;
+//     return result;
+// }
+
 // Templates and shared libraries don't mix well apparently, might want to look into clever ways to automate this
+// template<>
+// boost::any& ResultHolder<boost::any>() {
+//     static boost::any result;
+//     return result;
+// }
+
 template<>
 int& ResultHolder<int>() {
     static int result;

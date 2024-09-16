@@ -478,8 +478,7 @@ std::string Lattice::ToString() {
                 out << '#';
             } else {
                 const auto colorProp = (ModuleIdManager::Modules()[id].properties.Find(COLOR_PROP_NAME));
-                colorProp->CallFunction("GetColorInt");
-                out << Colors::intToColor[ResultHolder<int>()][0];
+                out << Colors::intToColor[colorProp->CallFunction<int>("GetColorInt")][0];
             }
         } else if (id >= 0) {
             out << (ModuleIdManager::GetModule(id).moduleStatic ? '#' : '@');

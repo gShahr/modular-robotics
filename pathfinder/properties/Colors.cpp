@@ -51,11 +51,13 @@ const std::unordered_set<int>& ColorProperty::Palette() {
     return allColors;
 }
 
-void Palette() {
+boost::any Palette() {
     ResultHolder<std::unordered_set<int>>() = ColorProperty::Palette();
+    return std::cref(ColorProperty::Palette());
 }
 
-void GetColorInt(IModuleProperty* prop) {
+boost::any GetColorInt(IModuleProperty* prop) {
     auto colorProp = reinterpret_cast<ColorProperty*>(prop);
     ResultHolder<int>() = colorProp->GetColorInt();
+    return colorProp->GetColorInt();
 }
