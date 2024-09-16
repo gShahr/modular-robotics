@@ -34,12 +34,6 @@ private:
 
     // Static data for mapping strings to dynamic property functions
     static std::unordered_map<std::string, boost::any (*)(IModuleProperty*)>& InstFunctions();
-//    // Static data for mapping JSON keys to static property functions
-//    template<typename T, class... Args>
-//    static std::unordered_map<std::string, T (*)(Args...)>& Functions();
-
-//    template<typename T, class... Args>
-//    static std::unordered_map<std::string, T(PropertyFunction<T, Args...>::*)(Args...)>& InstFunctions();
 
     // # of properties linked
     static int _propertiesLinkedCount;
@@ -52,7 +46,6 @@ private:
 public:
     ModuleProperties() = default;
 
-    //ModuleProperties(const ModuleProperties&) = delete;
     ModuleProperties(const ModuleProperties& other);
 
     static void LinkProperties();
@@ -76,12 +69,6 @@ public:
         return boost::any_cast<std::reference_wrapper<std::remove_reference_t<T>>>(Functions()[funcKey]());
     }
 
-//    template<typename T, class... Args>
-//    static void MapStaticFunction(const std::string& key, T (*function)(Args...));
-
-//    template<typename T>
-//    T CallFunction(const std::string& propKey, const std::string& funcKey) const;
-
     void InitProperties(const nlohmann::basic_json<>& propertyDefs);
 
     void UpdateProperties(const std::valarray<int>& moveInfo) const;
@@ -100,8 +87,6 @@ public:
     ~ModuleProperties();
 
     friend class IModuleProperty;
-//    template<typename T, class C, class... Args>
-//    friend class PropertyFunction;
     friend struct PropertyInitializer;
     friend class boost::hash<ModuleProperties>;
 };
@@ -145,9 +130,6 @@ public:
     friend class ModuleProperties;
 };
 
-//template<typename T, class C, class... Args>
-//class PropertyFunction;
-
 // These properties can change as a result of certain events, such as moving, or even having a module move adjacent to
 // the affected module.
 class IModuleDynamicProperty : public IModuleProperty {
@@ -159,29 +141,6 @@ protected:
     [[nodiscard]]
     IModuleDynamicProperty* MakeCopy() const override = 0;
 };
-
-// extern boost::any& ResultInternal();
-
-template<typename T>
-T& ResultHolder() {
-    static T result;
-    return result;
-    // return boost::any_cast<T&>(ResultInternal());
-}
-
-//template<typename T, class C, class... Args>
-//class PropertyFunction {
-//    T (C::*_function)(Args...);
-//public:
-//    PropertyFunction(const std::string &key, T (C::*function)(Args...)) {
-//        _function = function;
-//        ModuleProperties::InstFunctions<T, Args...>()[key] = Call;
-//    }
-//
-//    T Call(void* invoker, Args&&... args) {
-//        return (invoker->*_function)(std::forward<Args>(args)...);
-//    }
-//};
 
 // Used by property classes to add their constructor to the constructor map
 struct PropertyInitializer {
