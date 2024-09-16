@@ -9,7 +9,7 @@
 
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { gScene, gCanvas, gUser, gRenderer } from "./main.js";
+import { gScene, gCanvas, gUser, gRenderer, gLights } from "./main.js";
 import { CameraType } from "./utils.js";
 
 export class User {
@@ -17,6 +17,8 @@ export class User {
         this.cameraStyle = CameraType.PERSPECTIVE;
         this.headlamp = new THREE.PointLight(0xFFFFFF, 12.0);
         this.headlamp.position.set(0.0, 0.0, 0.0);
+        gLights.headlamp = this.headlamp;
+        gLights._defaultHeadlampIntensity = this.headlamp.intensity;
         this.resetCamera();
     }
 

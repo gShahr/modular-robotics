@@ -48,8 +48,8 @@ export class Module {
         this.parentMesh = new THREE.Object3D(); // Parent object will never rotate
         this.parentMesh.position.set(...pos);
         this.parentMesh.add(this.mesh);
-        //let axesHelper = new THREE.AxesHelper(1.2);
-        //this.parentMesh.add(axesHelper);
+        let axesHelper = new THREE.AxesHelper(1.2);
+        this.parentMesh.add(axesHelper);
         gScene.add(this.parentMesh);
         gModules[id] = this;
     }

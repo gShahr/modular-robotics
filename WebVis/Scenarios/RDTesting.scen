@@ -2,8 +2,8 @@ Scenario NAME on this line
 Scenario DESCRIPTION on this line
 RHOMBIC_DODECAHEDRON
 
-1, 255,255,255, 90      // Group definition: Group ID, r, g, b, size (1-100)
-2, 255,  0,  0, 90      // red
+1, 255,255,255,100      // Group definition: Group ID, r, g, b, size (1-100)
+2, 255,  0,  0,100      // red
 
 01,  1,  0,  0,   0
 02,  2,  0,  1,   1

@@ -19,12 +19,15 @@ THREE.Vector3.prototype.sum = function() {
 /* --- setup --- */
 export const gCanvas = document.getElementById("scene");
 export const gRenderer = new THREE.WebGLRenderer({canvas: gCanvas});
+export const gLights = {_fullbright: false};
 export const gScene = new THREE.Scene();
 export const gUser = new User();
 gRenderer.setSize( window.innerWidth, window.innerHeight );
 gRenderer.shadowMap.enabled = true;
 gRenderer.setAnimationLoop( animate );
-gScene.background = new THREE.Color(0x334D4D);
+gScene._backgroundColors = [new THREE.Color(0x334D4D), new THREE.Color(0xFFFFFF)];
+gScene._backgroundColorSelected = 0;
+gScene.background = gScene._backgroundColors[gScene._backgroundColorSelected];
 
 // Following are global attributes set directly to the window object
 //  This allows them to (more easily) be added to the GUI,
@@ -39,18 +42,22 @@ window.gwMoveSequence = new MoveSequence();
 /* --- objects --- */
 // Module constructor automatically adds modules to this global
 export const gModules = {}
-new Module(ModuleType.RHOMBIC_DODECAHEDRON, 0, new THREE.Vector3(0.0, 0.0, 0.0), 0x808080, 0.9);
-new Module(ModuleType.RHOMBIC_DODECAHEDRON, 1, new THREE.Vector3(0.0, -1.0, 1.0), 0x008000, 0.9);
-new Module(ModuleType.RHOMBIC_DODECAHEDRON, 2, new THREE.Vector3(1.0, -1.0, 0.0), 0x800000, 0.9);
-new Module(ModuleType.RHOMBIC_DODECAHEDRON, 3, new THREE.Vector3(0.0, -1.0, -1.0), 0x008000, 0.9);
-new Module(ModuleType.RHOMBIC_DODECAHEDRON, 4, new THREE.Vector3(-1.0, -1.0, 0.0), 0x800000, 0.9);
+new Module(ModuleType.RHOMBIC_DODECAHEDRON, 0, new THREE.Vector3(0.0, 0.0, 0.0), 0xFFFFFF, 0.9);
+new Module(ModuleType.RHOMBIC_DODECAHEDRON, 1, new THREE.Vector3(0.0, -1.0, 1.0), 0x00FF00, 0.9);
+new Module(ModuleType.RHOMBIC_DODECAHEDRON, 2, new THREE.Vector3(1.0, -1.0, 0.0), 0xFF0000, 0.9);
+new Module(ModuleType.RHOMBIC_DODECAHEDRON, 3, new THREE.Vector3(0.0, -1.0, -1.0), 0x00FF00, 0.9);
+new Module(ModuleType.RHOMBIC_DODECAHEDRON, 4, new THREE.Vector3(-1.0, -1.0, 0.0), 0xFF0000, 0.9);
 
 /* --- lights --- */
-const lightAmbient = new THREE.AmbientLight(0xFFFFFF, 0.60);
+export const lightAmbient = new THREE.AmbientLight(0xFFFFFF, 0.60);
 const lightDirectional = new THREE.DirectionalLight(0xFFFFFF, 0.4);
 lightDirectional.position.set(1, 1, 1);
 gScene.add(lightAmbient);
 gScene.add(lightDirectional);
+gLights.lightAmbient = lightAmbient;
+gLights.lightDirectional = lightDirectional;
+gLights._defaultAmbientIntensity = lightAmbient.intensity;
+gLights._defaultDirectionalIntensity = lightDirectional.intensity;
 
 /* --- debug --- */
 let axesHelper = new THREE.AxesHelper(5);
