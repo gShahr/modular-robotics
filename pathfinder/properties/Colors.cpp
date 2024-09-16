@@ -57,7 +57,7 @@ boost::any Palette() {
 }
 
 boost::any GetColorInt(IModuleProperty* prop) {
-    auto colorProp = reinterpret_cast<ColorProperty*>(prop);
+    const auto colorProp = reinterpret_cast<ColorProperty*>(prop);
     ResultHolder<int>() = colorProp->GetColorInt();
     return colorProp->GetColorInt();
 }
