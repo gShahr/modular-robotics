@@ -10,6 +10,9 @@
 
 namespace LatticeSetup {
     void setupFromJson(const std::string& filename) {
+        if (ModuleProperties::PropertyCount() == 0) {
+            Lattice::ignoreProperties = true;
+        }
         std::ifstream file(filename);
         if (!file) {
             std::cerr << "Unable to open file " << filename << std::endl;

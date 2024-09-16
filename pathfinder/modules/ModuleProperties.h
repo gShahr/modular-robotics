@@ -72,6 +72,9 @@ private:
 //    template<typename T, class... Args>
 //    static std::unordered_map<std::string, T(PropertyFunction<T, Args...>::*)(Args...)>& InstFunctions();
 
+    // # of properties linked
+    static int _propertiesLinkedCount;
+
     // Properties of a module
     std::unordered_set<IModuleProperty*> _properties;
 
@@ -84,6 +87,8 @@ public:
     ModuleProperties(const ModuleProperties& other);
 
     static void LinkProperties();
+
+    static int PropertyCount();
 
     static void CallFunction(const std::string& funcKey);
 

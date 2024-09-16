@@ -33,6 +33,7 @@ std::unordered_map<std::string, void(*)(IModuleProperty*)>& ModuleProperties::In
     return _functions;
 }
 
+int ModuleProperties::_propertiesLinkedCount = 0;
 
 // template<typename T, class... Args>
 // std::unordered_map<std::string, T (*)(Args...)>& ModuleProperties::Functions() {
@@ -85,7 +86,12 @@ void ModuleProperties::LinkProperties() {
                 InstFunctions()[functionName] = function;
             }
         }
+        _propertiesLinkedCount++;
     }
+}
+
+int ModuleProperties::PropertyCount() {
+    return _propertiesLinkedCount;
 }
 
 void ModuleProperties::CallFunction(const std::string &funcKey) {
