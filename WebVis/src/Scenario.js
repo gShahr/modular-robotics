@@ -3,7 +3,7 @@ import { ModuleType, MoveType } from "./utils.js";
 import { Module } from "./Module.js";
 import { Move } from "./Move.js";
 import { MoveSequence } from "./MoveSequence.js";
-import { gModules, gRenderer } from "./main.js";
+import { gModules, gRenderer, cancelActiveMove } from "./main.js";
 
 function Visgroup(r, g, b, scale) {
     this.color = `rgb(${r}, ${g}, ${b})`;
@@ -16,6 +16,7 @@ function Visgroup(r, g, b, scale) {
 export class Scenario {
     constructor(rawString) {
         for (let module in gModules) gModules[module].destroy();
+        cancelActiveMove();
 
         // remove '\r' characters
         rawString = rawString.replace(/\r/g, '');

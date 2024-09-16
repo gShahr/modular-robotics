@@ -72,6 +72,13 @@ let currentAnimProgress = 0.0; // 0.0-1.0
 
 let debugCount = 2;
 
+export function cancelActiveMove() {
+    move = null;
+    currentAnimProgress = 0.0;
+    readyForNewAnimation = true;
+    window.gwNextAnimationRequested = false;
+}
+
 function animate(time) {
     gDeltaTime = time - lastFrameTime;
     lastFrameTime = time;
