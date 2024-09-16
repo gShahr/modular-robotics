@@ -52,6 +52,10 @@ lightDirectional.position.set(1, 1, 1);
 gScene.add(lightAmbient);
 gScene.add(lightDirectional);
 
+/* --- debug --- */
+let axesHelper = new THREE.AxesHelper(5);
+gScene.add(axesHelper);
+
 // TODO Put all this in a better place?
 let move;
 let lastFrameTime = 0;

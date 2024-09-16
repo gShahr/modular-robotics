@@ -48,6 +48,8 @@ export class Module {
         this.parentMesh = new THREE.Object3D(); // Parent object will never rotate
         this.parentMesh.position.set(...pos);
         this.parentMesh.add(this.mesh);
+        //let axesHelper = new THREE.AxesHelper(1.2);
+        //this.parentMesh.add(axesHelper);
         gScene.add(this.parentMesh);
         gModules[id] = this;
     }
@@ -84,7 +86,7 @@ export class Module {
         let trans1 = new THREE.Matrix4().makeTranslation(move.preTrans);
         let rotate = new THREE.Matrix4().makeRotationAxis(move.rotAxis, move.maxAngle * pct);
         let trans2 = new THREE.Matrix4().makeTranslation(move.postTrans);
-        let transform = new THREE.Matrix4().premultiply(trans2).premultiply(rotate).premultiply(trans1);
+        let transform = new THREE.Matrix4().premultiply(trans1).premultiply(rotate).premultiply(trans2);
         this._setMeshMatrix(transform.multiply(this.cumulativeRotationMatrix));
     }
 

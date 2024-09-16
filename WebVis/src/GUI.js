@@ -46,6 +46,10 @@ window._loadExampleScenario4 = async () => {
     const scen = await fetch('./Scenarios/RDTesting.scen').then(response => response.text());
     new Scenario(scen);
 }
+window._loadExampleScenario5 = async () => {
+    const scen = await fetch('./Scenarios/CubeTesting.scen').then(response => response.text());
+    new Scenario(scen);
+}
 document.addEventListener("DOMContentLoaded", function () {
     gGui.add(new GuiGlobalsHelper('gwAnimSpeed', 1.0, SliderType.QUADRATIC), 'value', 0.0, 5.0, 0.1).name("Anim Speed");
     gGui.add(new GuiGlobalsHelper('gwAutoAnimate', false), 'value').name("Auto Animate");
@@ -59,4 +63,5 @@ document.addEventListener("DOMContentLoaded", function () {
     _folder.add(window, '_loadExampleScenario2').name("820");
     _folder.add(window, '_loadExampleScenario3').name("Sliding Moves");
     _folder.add(window, '_loadExampleScenario4').name("RD Testing");
+    _folder.add(window, '_loadExampleScenario5').name("Cube Testing ");
 });

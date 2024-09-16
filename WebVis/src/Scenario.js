@@ -109,7 +109,7 @@ export class Scenario {
                         default: anchorDir = new THREE.Vector3( 0.0,  0.0,  0.0 ); console.log("Unknown rotation code ", anchorDirCode, " -- treating as sliding move"); break;
                     }
                     anchorDir.normalize();
-                    moves.push(new Move(moverId, anchorDir, deltaPos, moveType, checkpointMove));
+                    moves.push(new Move(moverId, anchorDir, deltaPos, moveType, checkpointMove, scenarioModuleType));
                     if (checkpointMove) { checkpointMove = false; }
                     break;
                 }
