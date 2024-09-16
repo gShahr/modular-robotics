@@ -7,8 +7,6 @@
 #include "search/ConfigurationSpace.h"
 #include <boost/functional/hash.hpp>
 #include <boost/format.hpp>
-#include <queue>
-#include <unordered_set>
 #include <nlohmann/json.hpp>
 #include "modules/Metamodule.h"
 #include "lattice/LatticeSetup.h"
@@ -26,7 +24,7 @@ int main(int argc, char* argv[]) {
     std::string analysisFile;
 
     // Define the long options
-    static struct option long_options[] = {
+    static option long_options[] = {
         {"ignore-colors", no_argument, nullptr, 'i'},
         {"initial-file", required_argument, nullptr, 'I'},
         {"final-file", required_argument, nullptr, 'F'},
