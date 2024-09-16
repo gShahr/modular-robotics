@@ -38,9 +38,12 @@ window.gwMoveSequence = new MoveSequence();
 
 /* --- objects --- */
 // Module constructor automatically adds modules to this global
-// Initialize it with one cube so that the user doesn't feel lost
 export const gModules = {}
-new Module(ModuleType.CUBE, 0, new THREE.Vector3(0.0, 0.0, 0.0), 0x808080, 1.0);
+new Module(ModuleType.RHOMBIC_DODECAHEDRON, 0, new THREE.Vector3(0.0, 0.0, 0.0), 0x808080, 0.9);
+new Module(ModuleType.RHOMBIC_DODECAHEDRON, 1, new THREE.Vector3(0.0, -1.0, 1.0), 0x008000, 0.9);
+new Module(ModuleType.RHOMBIC_DODECAHEDRON, 2, new THREE.Vector3(1.0, -1.0, 0.0), 0x800000, 0.9);
+new Module(ModuleType.RHOMBIC_DODECAHEDRON, 3, new THREE.Vector3(0.0, -1.0, -1.0), 0x008000, 0.9);
+new Module(ModuleType.RHOMBIC_DODECAHEDRON, 4, new THREE.Vector3(-1.0, -1.0, 0.0), 0x800000, 0.9);
 
 /* --- lights --- */
 const lightAmbient = new THREE.AmbientLight(0xFFFFFF, 0.60);
@@ -48,6 +51,10 @@ const lightDirectional = new THREE.DirectionalLight(0xFFFFFF, 0.4);
 lightDirectional.position.set(1, 1, 1);
 gScene.add(lightAmbient);
 gScene.add(lightDirectional);
+
+/* --- debug --- */
+let axesHelper = new THREE.AxesHelper(5);
+gScene.add(axesHelper);
 
 // TODO Put all this in a better place?
 let move;

@@ -23,6 +23,11 @@
  */
 #define LATTICE_RD_EDGECHECK false
 
+enum TensorContents {
+    OUT_OF_BOUNDS = -2,
+    FREE_SPACE = -1
+};
+
 class Lattice {
 private:
     // Vector that holds the IDs of adjacent modules, indexed by ID
@@ -46,6 +51,9 @@ public:
     static CoordTensor<bool> stateTensor;
     // Module tensor
     static CoordTensor<int> coordTensor;
+    // Boundary Offset
+    static int boundarySize;
+    static std::valarray<int> boundaryOffset;
     // Color flag
     static bool ignoreProperties;
 
@@ -53,12 +61,15 @@ public:
     Lattice(Lattice&) = delete;
 
     //Lattice(int order, int axisSize);
-    static void InitLattice(int _order, int _axisSize);
+    static void InitLattice(int _order, int _axisSize, int _boundarySize = 5);
 
     static void setFlags(bool _ignoreColors);
 
     // Add a new module
     static void AddModule(const Module& mod);
+
+    // Add a new boundary
+    static void AddBound(const std::valarray<int>& coords);
 
     // Move a module
     static void MoveModule(Module& mod, const std::valarray<int>& offset);

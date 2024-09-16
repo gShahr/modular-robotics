@@ -10,7 +10,7 @@ SOURCES2 = $(wildcard */*.cpp)
 
 OBJECTS = $(SOURCES:.cpp=.o)
 
-EXECUTABLE = main
+EXECUTABLE = Pathfinder
 
 all: $(SOURCES) $(EXECUTABLE)
 

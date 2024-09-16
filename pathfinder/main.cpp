@@ -16,20 +16,14 @@
 #include "search/SearchAnalysis.h"
 
 #define GENERATE_FINAL_STATE false
+#define PRINT_PATH false
 
 int main(int argc, char* argv[]) {
     bool ignoreColors = false;
-    std::string initialFile = "../docs/examples/moves/move_zigzag/zigzag_initial.json";
-    std::string finalFile = "../docs/examples/moves/move_zigzag/zigzag_final.json";
-    std::string exportFile = initialFile.substr(0, initialFile.find_last_of('.')) + ".scen";
-    std::string analysisFile = initialFile.substr(0, initialFile.find_last_of('.')) + "_analysis.json";
-    std::size_t trimPos;
-    if ((trimPos = exportFile.find("_initial")) != std::string::npos) {
-        exportFile.erase(trimPos, 8);
-    }
-    if ((trimPos = analysisFile.find("_initial")) != std::string::npos) {
-        analysisFile.erase(trimPos, 8);
-    }
+    std::string initialFile;
+    std::string finalFile;
+    std::string exportFile;
+    std::string analysisFile;
 
     // Define the long options
     static struct option long_options[] = {
@@ -37,12 +31,13 @@ int main(int argc, char* argv[]) {
         {"initial-file", required_argument, nullptr, 'I'},
         {"final-file", required_argument, nullptr, 'F'},
         {"export-file", required_argument, nullptr, 'e'},
+        {"analysis-file", required_argument, nullptr, 'a'},
         {nullptr, 0, nullptr, 0}
     };
 
     int option_index = 0;
     int c;
-    while ((c = getopt_long(argc, argv, "iI:F:e:", long_options, &option_index)) != -1) {
+    while ((c = getopt_long(argc, argv, "iI:F:e:a:", long_options, &option_index)) != -1) {
         switch (c) {
             case 'i':
                 ignoreColors = true;
@@ -56,12 +51,72 @@ int main(int argc, char* argv[]) {
             case 'e':
                 exportFile = optarg;
                 break;
+            case 'a':
+                analysisFile = optarg;
+                break;
             case '?':
                 break;
             default:
                 abort();
         }
     }
+
+    // Prompt user for names for initial and final state files if they are not given as command line arguments
+    if (initialFile.empty()) {
+        std::cout << "Path to initial state:" << std::endl;
+        int numTries = 0;
+        bool invalidPath = true;
+        while (invalidPath) {
+            std::cin >> initialFile;
+            if (std::filesystem::exists(initialFile)) {
+                invalidPath = false;
+            } else {
+                numTries++;
+                std::cout << "Invalid path!" << std::endl;
+                DEBUG(initialFile << std::endl);
+                if (numTries >= 5) {
+                    exit(1);
+                }
+            }
+        }
+    }
+    if (finalFile.empty()) {
+        std::cout << "Path to final state:" << std::endl;
+        int numTries = 0;
+        bool invalidPath = true;
+        while (invalidPath) {
+            std::cin >> finalFile;
+            if (std::filesystem::exists(finalFile)) {
+                invalidPath = false;
+            } else {
+                numTries++;
+                std::cout << "Invalid path!" << std::endl;
+                DEBUG(finalFile << std::endl);
+                if (numTries >= 5) {
+                    exit(1);
+                }
+            }
+        }
+    }
+
+    // Generate names for export and analysis files if they are not specified
+    std::size_t trimPos;
+    if (exportFile.empty()) {
+        exportFile = std::filesystem::path(initialFile).replace_extension(".scen");
+        if ((trimPos = exportFile.find("_initial")) != std::string::npos) {
+            exportFile.erase(trimPos, 8);
+        }
+    }
+    if (analysisFile.empty()) {
+        auto initialFilePath = std::filesystem::path(initialFile);
+        analysisFile = initialFilePath.replace_filename(initialFilePath.stem().string() + "_analysis");
+        if ((trimPos = analysisFile.find("_initial")) != std::string::npos) {
+            analysisFile.erase(trimPos, 8);
+        }
+    }
+
+    // Dynamically Link Properties
+    ModuleProperties::LinkProperties();
 
     // Set up Lattice
     Lattice::setFlags(ignoreColors);
@@ -93,14 +148,21 @@ int main(int argc, char* argv[]) {
     } catch(BFSExcept& bfsExcept) {
         std::cerr << bfsExcept.what() << std::endl;
     }
-    
+
+#if PRINT_PATH
     std::cout << "Path:\n";
     for (const auto config : path) {
         Lattice::UpdateFromModuleInfo(config->GetModData());
         std::cout << Lattice::ToString();
     }
+#endif
+
+    Scenario::ScenInfo scenInfo;
+    scenInfo.exportFile = exportFile;
+    scenInfo.scenName = Scenario::TryGetScenName(initialFile);
+    scenInfo.scenDesc = Scenario::TryGetScenDesc(initialFile);
     
-    Scenario::exportToScen(path, exportFile);
+    Scenario::exportToScen(path, scenInfo);
     Isometry::CleanupTransforms();
     return 0;
 }

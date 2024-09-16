@@ -7,6 +7,7 @@
 #include <omp.h>
 #include "../moves/MoveManager.h"
 #include "ConfigurationSpace.h"
+#include "HeuristicCache.h"
 #include "SearchAnalysis.h"
 
 const char * BFSExcept::what() const noexcept {
@@ -40,7 +41,7 @@ size_t std::hash<HashedState>::operator()(const HashedState& state) const noexce
     return state.GetSeed();
 }
 
-Configuration::Configuration(const std::set<ModuleData>& modData) : hash(HashedState(modData)) {}
+Configuration::Configuration(const std::set<ModuleData>& modData) : hash(modData) {}
 
 Configuration::~Configuration() {
     for (auto i = next.rbegin(); i != next.rend(); ++i) {
@@ -293,8 +294,8 @@ float Configuration::ManhattanDistance(const Configuration* final) const {
         ++currentIt;
         ++finalIt;
     }
-    //TODO: find out what the right number is
-    return h / 3;
+    //TODO: find out what the right number is (from testing it must be > 4)
+    return h / 5;
 }
 
 int Configuration::SymmetricDifferenceHeuristic(const Configuration* final) const {
@@ -335,6 +336,38 @@ int Configuration::ChebyshevDistance(const Configuration* final) const {
     }
     return h;
 }
+
+float Configuration::TrueChebyshevDistance(const Configuration *final) const {
+    auto currentData = this->GetModData();
+    auto finalData = final->GetModData();
+    auto currentIt = currentData.begin();
+    auto finalIt = finalData.begin();
+    std::valarray<int> dist(0, Lattice::Order());
+    float h = 0;
+    while (currentIt != currentData.end() && finalIt != finalData.end()) {
+        const auto& currentModule = *currentIt;
+        const auto& finalModule = *finalIt;
+        std::valarray<int> diff = currentModule.Coords() - finalModule.Coords();
+        for (int i = 0; i <= Lattice::Order(); ++i) {
+            dist[i] += std::abs(diff[i]);
+        }
+        ++currentIt;
+        ++finalIt;
+    }
+    //TODO: find out what the right number is (from testing it must be > 2)
+    return static_cast<float>(*std::max_element(begin(dist), end(dist))) / 3;
+}
+
+float Configuration::CacheChebyshevDistance(const Configuration *final) const {
+    constexpr int MAX_MOVE_DISTANCE = 2;
+    static ChebyshevHeuristicCache cache(final->GetModData());
+    float h = 0;
+    for (const auto& modData : hash.GetState()) {
+        h += cache[modData.Coords()];
+    }
+    return h / MAX_MOVE_DISTANCE;
+}
+
 
 std::vector<Configuration*> ConfigurationSpace::AStar(Configuration* start, const Configuration* final) {
 #if CONFIG_OUTPUT_JSON

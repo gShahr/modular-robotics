@@ -17,15 +17,31 @@ export class Scenario {
     constructor(rawString) {
         for (let module in gModules) gModules[module].destroy();
 
+        // remove '\r' characters
+        rawString = rawString.replace(/\r/g, '');
+        let _dataStartIndex = rawString.indexOf('\n\n');
+        let metadataString = rawString.substring(0, _dataStartIndex);
+        let dataString = rawString.substring(_dataStartIndex + 2);
+
+        let metadataLines = metadataString.split('\n');
+        let scenarioName = metadataLines[0];
+        let scenarioDescription = metadataLines[1];
+        let scenarioModuleType;
+        switch (metadataLines[2]) {
+            case 'CUBE': scenarioModuleType = ModuleType.CUBE; break;
+            case 'RHOMBIC_DODECAHEDRON': scenarioModuleType = ModuleType.RHOMBIC_DODECAHEDRON; break;
+            default: console.log("Unknown module type ", metadataLines[2], " -- defaulting to CUBE"); scenarioModuleType = ModuleType.CUBE; break;
+        }
+
         let visgroups = {}; // key-value pairs of 'visgroupId: visgroup'
-        let lines = rawString.split('\n');
+        let dataLines = dataString.split('\n');
         let nBlock = 0;
         let checkpointMove = true;
         let moves = [];
-        for (let iLine = 0; iLine < lines.length; iLine++) {
+        for (let iLine = 0; iLine < dataLines.length; iLine++) {
 
-            // sanitize the line: remove spaces, \r characters, and comments
-            let line = lines[iLine].replace(/ /g, '').replace(/\r/g, '').split("//")[0];
+            // sanitize the line: remove spaces,, and comments
+            let line = dataLines[iLine].replace(/ /g, '').split("//")[0];
 
             // if the line is empty, skip it and increment our block counter
             //  also, flag the next move as a checkpoint move
@@ -50,7 +66,7 @@ export class Scenario {
                     let moduleId = lineVals[0];
                     let vg = visgroups[lineVals[1]];
                     let pos = new THREE.Vector3(lineVals[2], lineVals[3], lineVals[4]);
-                    new Module(ModuleType.CUBE, moduleId, pos, vg.color, vg.scale);
+                    new Module(scenarioModuleType, moduleId, pos, vg.color, vg.scale);
                     break;
                 }
                 default: { // Move definitions
@@ -61,15 +77,39 @@ export class Scenario {
                     let moveType = anchorDirCode > 0 ? MoveType.PIVOT : MoveType.SLIDING;
                     let anchorDir;
                     switch (Math.abs(anchorDirCode)) {
-                        case 0: anchorDir = new THREE.Vector3( 0.0,  0.0,  0.0); break; // generic slide
-                        case 1: anchorDir = new THREE.Vector3( 1.0,  0.0,  0.0); break; // +x
-                        case 2: anchorDir = new THREE.Vector3( 0.0,  1.0,  0.0); break; // +y
-                        case 3: anchorDir = new THREE.Vector3( 0.0,  0.0,  1.0); break; // +z
-                        case 4: anchorDir = new THREE.Vector3(-1.0,  0.0,  0.0); break; // -x
-                        case 5: anchorDir = new THREE.Vector3( 0.0, -1.0,  0.0); break; // -y
-                        case 6: anchorDir = new THREE.Vector3( 0.0,  0.0, -1.0); break; // -z
+                        // Generic sliding move
+                        case 0:  anchorDir = new THREE.Vector3( 0.0,  0.0,  0.0 ); break; // generic slide
+
+                        // Cube pivots
+                        case 1:  anchorDir = new THREE.Vector3( 1.0,  0.0,  0.0 ); break; // +x
+                        case 2:  anchorDir = new THREE.Vector3( 0.0,  1.0,  0.0 ); break; // +y
+                        case 3:  anchorDir = new THREE.Vector3( 0.0,  0.0,  1.0 ); break; // +z
+                        case 4:  anchorDir = new THREE.Vector3(-1.0,  0.0,  0.0 ); break; // -x
+                        case 5:  anchorDir = new THREE.Vector3( 0.0, -1.0,  0.0 ); break; // -y
+                        case 6:  anchorDir = new THREE.Vector3( 0.0,  0.0, -1.0 ); break; // -z
+
+                        // Rhombic dodecahedron: faces with normals in xy plane
+                        case 12: anchorDir = new THREE.Vector3( 1.0,  1.0,  0.0 ); break; // +x +y
+                        case 15: anchorDir = new THREE.Vector3( 1.0, -1.0,  0.0 ); break; // +x -y
+                        case 42: anchorDir = new THREE.Vector3(-1.0,  1.0,  0.0 ); break; // -x +y
+                        case 45: anchorDir = new THREE.Vector3(-1.0, -1.0,  0.0 ); break; // -x -y
+
+                        // Rhombic dodecahedron: faces with normals in xz plane
+                        case 13: anchorDir = new THREE.Vector3( 1.0,  0.0,  1.0 ); break; // +x +z
+                        case 16: anchorDir = new THREE.Vector3( 1.0,  0.0, -1.0 ); break; // +x -z
+                        case 43: anchorDir = new THREE.Vector3(-1.0,  0.0,  1.0 ); break; // -x +z
+                        case 46: anchorDir = new THREE.Vector3(-1.0,  0.0, -1.0 ); break; // -x -z
+
+                        // Rhombic dodecahedron: faces with normals in yz plane
+                        case 23: anchorDir = new THREE.Vector3( 0.0,  1.0,  1.0 ); break; // +y +z
+                        case 26: anchorDir = new THREE.Vector3( 0.0,  1.0, -1.0 ); break; // +y -z
+                        case 53: anchorDir = new THREE.Vector3( 0.0, -1.0,  1.0 ); break; // -y +z
+                        case 56: anchorDir = new THREE.Vector3( 0.0, -1.0, -1.0 ); break; // -y -z
+
+                        default: anchorDir = new THREE.Vector3( 0.0,  0.0,  0.0 ); console.log("Unknown rotation code ", anchorDirCode, " -- treating as sliding move"); break;
                     }
-                    moves.push(new Move(moverId, anchorDir, deltaPos, moveType, checkpointMove));
+                    anchorDir.normalize();
+                    moves.push(new Move(moverId, anchorDir, deltaPos, moveType, checkpointMove, scenarioModuleType));
                     if (checkpointMove) { checkpointMove = false; }
                     break;
                 }
@@ -79,7 +119,6 @@ export class Scenario {
         window.gwMoveSequence = new MoveSequence(moves);
     } // end Constructor
 }
-
 
 const scenarioUploadElement = document.getElementById("scenarioUploadButton");
 scenarioUploadElement.onchange = (e) => {

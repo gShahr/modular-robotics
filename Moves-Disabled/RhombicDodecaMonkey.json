@@ -21,7 +21,7 @@
         ]],
       "permGen": true,
       "animSeq": [
-        ["slide", [1, -1, 0]]
+        ["rd+x+z", [1, -1, 0]]
       ]
     }
   ]
