@@ -3,7 +3,7 @@ import { ModuleType, MoveType } from "./utils.js";
 import { Module } from "./Module.js";
 import { Move } from "./Move.js";
 import { MoveSequence } from "./MoveSequence.js";
-import { gModules, gRenderer, cancelActiveMove } from "./main.js";
+import { gModules, gRenderer, gUser, cancelActiveMove } from "./main.js";
 
 function Visgroup(r, g, b, scale) {
     this.color = `rgb(${r}, ${g}, ${b})`;
@@ -39,6 +39,10 @@ export class Scenario {
         let nBlock = 0;
         let checkpointMove = true;
         let moves = [];
+        let numModules = 0;
+        let totalMass = new THREE.Vector3(0.0, 0.0, 0.0);
+        let minCoords, maxCoords;
+        let maxRadius = 1.0;
         for (let iLine = 0; iLine < dataLines.length; iLine++) {
 
             // sanitize the line: remove spaces,, and comments
@@ -68,6 +72,15 @@ export class Scenario {
                     let vg = visgroups[lineVals[1]];
                     let pos = new THREE.Vector3(lineVals[2], lineVals[3], lineVals[4]);
                     new Module(scenarioModuleType, moduleId, pos, vg.color, vg.scale);
+
+                    if (!minCoords) {
+                        minCoords = new THREE.Vector3(lineVals[2], lineVals[3], lineVals[4]);
+                        maxCoords = minCoords.clone();
+                    }
+                    numModules++;
+                    totalMass.add(pos);
+                    minCoords.min(pos);
+                    maxCoords.max(pos);
                     break;
                 }
                 default: { // Move definitions
@@ -118,6 +131,13 @@ export class Scenario {
         } // end For loop (line iteration)
 
         window.gwMoveSequence = new MoveSequence(moves);
+
+        let centroid = totalMass.divideScalar(numModules);
+        let radius = Math.max(...maxCoords.sub(minCoords).toArray());
+        gUser.camera.position.x = centroid.x;
+        gUser.camera.position.y = centroid.y;
+        gUser.camera.position.z = centroid.z + radius + 3.0;
+        gUser.controls.target.set(centroid.x, centroid.y, centroid.z);
     } // end Constructor
 }
 
