@@ -42,7 +42,9 @@ add_library(ColorPropertyLib MODULE pathfinder/properties/Colors.cpp pathfinder/
 
 set_target_properties(ColorPropertyLib PROPERTIES PREFIX "")
 
-add_dependencies(ColorPropertyLib copy_properties)
+target_link_libraries(ColorPropertyLib PropertyLib)
+
+add_dependencies(ColorPropertyLib PropertyLib copy_properties)
 
 add_executable(Pathfinder
         pathfinder/main.cpp
