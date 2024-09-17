@@ -8,6 +8,8 @@
 #include "../search/ConfigurationSpace.h"
 #include "../modules/Metamodule.h"
 
+#define FLIP_Y_COORD true
+
 namespace LatticeSetup {
     void setupFromJson(const std::string& filename) {
         std::ifstream file(filename);
@@ -29,6 +31,9 @@ namespace LatticeSetup {
                         [](const int coord) { return coord; });
             std::valarray<int> coords(position.data(), position.size());
             coords += Lattice::boundaryOffset;
+#if FLIP_Y_COORD
+            coords[1] = Lattice::AxisSize() - coords[1] - 1;
+#endif
             if (!Lattice::ignoreProperties && module.contains("properties")) {
                 ModuleIdManager::RegisterModule(coords, module["static"], module["properties"]);
                 //colors.insert(Colors::colorToInt[module["color"]]);
@@ -81,6 +86,9 @@ namespace LatticeSetup {
                         [](const int coord) { return coord; });
             std::valarray<int> coords(position.data(), position.size());
             coords += Lattice::boundaryOffset;
+#if FLIP_Y_COORD
+            coords[1] = Lattice::AxisSize() - coords[1] - 1;
+#endif
             //desiredState[coords] = true;
             ModuleProperties props;
             if (!Lattice::ignoreProperties && module.contains("properties")) {
