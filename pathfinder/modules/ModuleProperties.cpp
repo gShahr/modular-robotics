@@ -209,15 +209,3 @@ std::size_t boost::hash<ModuleProperties>::operator()(const ModuleProperties& mo
     //return prev;
     return boost::hash_range(hashes.begin(), hashes.end());
 }
-
-template<>
-int& ResultHolder<int>() {
-    static int result;
-    return result;
-}
-
-template<>
-std::unordered_set<int>& ResultHolder<std::unordered_set<int>>() {
-    static std::unordered_set<int> result;
-    return result;
-}
