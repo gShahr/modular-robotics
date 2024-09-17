@@ -45,6 +45,18 @@ std::unordered_map<std::string, boost::any(*)(IModuleProperty*, boost::any...)>&
 
 int ModuleProperties::_propertiesLinkedCount = 0;
 
+// template<typename T, class... Args>
+// std::unordered_map<std::string, T (*)(Args...)>& ModuleProperties::Functions() {
+//     static std::unordered_map<std::string, T (*)(Args...)> _functions;
+//     return _functions;
+// }
+
+// template<typename T, class... Args>
+// std::unordered_map<std::string, T(PropertyFunction<T, Args...>::*)(Args...)>& ModuleProperties::InstFunctions() {
+//     static std::unordered_map<std::string, T(PropertyFunction<T, Args...>::*)(Args...)> _instFunctions;
+//     return _instFunctions;
+// }
+
 ModuleProperties::ModuleProperties(const ModuleProperties& other) {
     _properties.clear();
     for (const auto& property : other._properties) {
@@ -97,6 +109,21 @@ void ModuleProperties::CallFunction(const std::string &funcKey) {
         Functions()[funcKey]();
     }
 }
+
+
+// template<typename T, class... Args>
+// void ModuleProperties::MapStaticFunction(const std::string& key, T (*function)(Args...)) {
+//     Functions<T>()[key] = function;
+// }
+
+// template<typename T>
+// T ModuleProperties::CallFunction(const std::string& propKey, const std::string& funcKey) const {
+//     auto prop = Find(propKey);
+//     if (prop == nullptr) {
+//         return T();
+//     }
+//     return Functions<T>()[funcKey]();
+// }
 
 void ModuleProperties::InitProperties(const nlohmann::basic_json<>& propertyDefs) {
     for (const auto& key : PropertyKeys()) {
@@ -208,4 +235,28 @@ std::size_t boost::hash<ModuleProperties>::operator()(const ModuleProperties& mo
     }
     //return prev;
     return boost::hash_range(hashes.begin(), hashes.end());
+}
+
+// boost::any& ResultInternal() {
+//     static boost::any result;
+//     return result;
+// }
+
+// Templates and shared libraries don't mix well apparently, might want to look into clever ways to automate this
+// template<>
+// boost::any& ResultHolder<boost::any>() {
+//     static boost::any result;
+//     return result;
+// }
+
+template<>
+int& ResultHolder<int>() {
+    static int result;
+    return result;
+}
+
+template<>
+std::unordered_set<int>& ResultHolder<std::unordered_set<int>>() {
+    static std::unordered_set<int> result;
+    return result;
 }
