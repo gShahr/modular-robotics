@@ -34,12 +34,6 @@ private:
 
     // Static data for mapping strings to dynamic property functions
     static std::unordered_map<std::string, boost::any (*)(IModuleProperty*)>& InstFunctions();
-//    // Static data for mapping JSON keys to static property functions
-//    template<typename T, class... Args>
-//    static std::unordered_map<std::string, T (*)(Args...)>& Functions();
-
-//    template<typename T, class... Args>
-//    static std::unordered_map<std::string, T(PropertyFunction<T, Args...>::*)(Args...)>& InstFunctions();
 
     // Static data for mapping strings to static property functions with arguments
     static std::unordered_map<std::string, boost::any (*)(boost::any...)>& ArgFunctions();
@@ -81,12 +75,6 @@ public:
     static T& CallFunction(const std::string& funcKey) {
         return boost::any_cast<std::reference_wrapper<std::remove_reference_t<T>>>(Functions()[funcKey]());
     }
-
-//    template<typename T, class... Args>
-//    static void MapStaticFunction(const std::string& key, T (*function)(Args...));
-
-//    template<typename T>
-//    T CallFunction(const std::string& propKey, const std::string& funcKey) const;
 
     void InitProperties(const nlohmann::basic_json<>& propertyDefs);
 
@@ -174,20 +162,6 @@ T& ResultHolder() {
     return result;
     // return boost::any_cast<T&>(ResultInternal());
 }
-
-//template<typename T, class C, class... Args>
-//class PropertyFunction {
-//    T (C::*_function)(Args...);
-//public:
-//    PropertyFunction(const std::string &key, T (C::*function)(Args...)) {
-//        _function = function;
-//        ModuleProperties::InstFunctions<T, Args...>()[key] = Call;
-//    }
-//
-//    T Call(void* invoker, Args&&... args) {
-//        return (invoker->*_function)(std::forward<Args>(args)...);
-//    }
-//};
 
 // Used by property classes to add their constructor to the constructor map
 struct PropertyInitializer {
