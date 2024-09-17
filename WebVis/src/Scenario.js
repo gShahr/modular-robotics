@@ -130,14 +130,17 @@ export class Scenario {
             }  // end Switch statement
         } // end For loop (line iteration)
 
-        window.gwMoveSequence = new MoveSequence(moves);
-
         let centroid = totalMass.divideScalar(numModules);
         let radius = Math.max(...maxCoords.sub(minCoords).toArray());
         gUser.camera.position.x = centroid.x;
         gUser.camera.position.y = centroid.y;
         gUser.camera.position.z = centroid.z + radius + 3.0;
-        gUser.controls.target.set(centroid.x, centroid.y, centroid.z);
+        gUser.controls.target.set(...centroid);
+
+        window.gwMoveSequence = new MoveSequence(moves);
+        window.gwScenarioCentroid = centroid;
+        window.gwScenarioRadius = radius;
+
     } // end Constructor
 }
 

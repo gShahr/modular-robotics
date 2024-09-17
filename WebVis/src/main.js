@@ -16,6 +16,18 @@ THREE.Vector3.prototype.sum = function() {
     return (this.x + this.y + this.z);
 }
 
+// Following are global attributes set directly to the window object
+//  This allows them to (more easily) be added to the GUI,
+//  or directly modified by other scripts
+window.gwAutoAnimate = false;
+window.gwForward = true;
+window.gwNextAnimationRequested = false;
+window.gwAnimSpeed = 1.0;
+window.gwUser = null;
+window.gwMoveSequence = new MoveSequence();
+window.gwScenarioCentroid = new THREE.Vector3(0.0, 0.0, 0.0);
+window.gwScenarioRadius = 1.0;
+
 /* --- setup --- */
 export const gCanvas = document.getElementById("scene");
 export const gRenderer = new THREE.WebGLRenderer({canvas: gCanvas});
@@ -28,16 +40,6 @@ gRenderer.setAnimationLoop( animate );
 gScene._backgroundColors = [new THREE.Color(0x334D4D), new THREE.Color(0xFFFFFF)];
 gScene._backgroundColorSelected = 0;
 gScene.background = gScene._backgroundColors[gScene._backgroundColorSelected];
-
-// Following are global attributes set directly to the window object
-//  This allows them to (more easily) be added to the GUI,
-//  or directly modified by other scripts
-window.gwAutoAnimate = false;
-window.gwForward = true;
-window.gwNextAnimationRequested = false;
-window.gwAnimSpeed = 1.0;
-window.gwUser = gUser;
-window.gwMoveSequence = new MoveSequence();
 
 /* --- objects --- */
 // Module constructor automatically adds modules to this global

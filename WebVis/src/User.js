@@ -20,6 +20,7 @@ export class User {
         gLights.headlamp = this.headlamp;
         gLights._defaultHeadlampIntensity = this.headlamp.intensity;
         this.resetCamera();
+        window.gwUser = this;
     }
 
     resetCamera() {
@@ -32,8 +33,12 @@ export class User {
                 newCamera = new THREE.OrthographicCamera( -width, width, height, -height, 0.1, 1000.0 ); break;
             }
         }
-        newCamera.position.z = 5.0;
+        newCamera.position.x = window.gwScenarioCentroid.x;
+        newCamera.position.y = window.gwScenarioCentroid.y;
+        newCamera.position.z = window.gwScenarioCentroid.z + window.gwScenarioRadius + 3.0;
+
         this.controls = new OrbitControls(newCamera, gCanvas);
+        this.controls.target.set(...window.gwScenarioCentroid);
         this.camera = newCamera;
         this.camera.add(this.headlamp);
         gScene.add(this.camera);
