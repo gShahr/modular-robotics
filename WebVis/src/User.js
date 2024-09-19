@@ -15,7 +15,7 @@ import { CameraType } from "./utils.js";
 export class User {
     constructor() {
         this.cameraStyle = CameraType.PERSPECTIVE;
-        this.headlamp = new THREE.PointLight(0xFFFFFF, 12.0);
+        this.headlamp = new THREE.PointLight(0xFFFFFF, 50.0);
         this.headlamp.position.set(0.0, 0.0, 0.0);
         gLights.headlamp = this.headlamp;
         gLights._defaultHeadlampIntensity = this.headlamp.intensity;

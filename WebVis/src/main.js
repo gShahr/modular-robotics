@@ -80,8 +80,8 @@ new Module(ModuleType.RHOMBIC_DODECAHEDRON, 3, new THREE.Vector3(0.0, -1.0, -1.0
 new Module(ModuleType.RHOMBIC_DODECAHEDRON, 4, new THREE.Vector3(-1.0, -1.0, 0.0), 0xFF0000, 0.9);
 
 /* --- lights --- */
-export const lightAmbient = new THREE.AmbientLight(0xFFFFFF, 0.60);
-const lightDirectional = new THREE.DirectionalLight(0xFFFFFF, 0.4);
+export const lightAmbient = new THREE.AmbientLight(0xFFFFFF, 1.0);
+const lightDirectional = new THREE.DirectionalLight(0xFFFFFF, 3.0);
 lightDirectional.position.set(1, 1, 1);
 gScene.add(lightAmbient);
 gScene.add(lightDirectional);

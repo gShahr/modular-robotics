@@ -38,7 +38,7 @@ window._toggleBackgroundColor = function() {
 }
 window._toggleFullbright = function() {
     gLights._fullbright = !gLights._fullbright;
-    gLights.lightAmbient.intensity = gLights._fullbright ? 2 : gLights._defaultAmbientIntensity;
+    gLights.lightAmbient.intensity = gLights._fullbright ? 3.0 : gLights._defaultAmbientIntensity;
     gLights.lightDirectional.intensity = gLights._fullbright ? 0 : gLights._defaultDirectionalIntensity;
     gLights.headlamp.intensity = gLights._fullbright ? 0 : gLights._defaultHeadlampIntensity;
 }
