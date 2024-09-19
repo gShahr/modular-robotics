@@ -33,7 +33,8 @@ let renderMode = 'WEBGL';
 function _setupWebGLRenderer() {
     gCanvas.width = window.innerWidth;
     gCanvas.height = window.innerHeight;
-    gRenderer = new THREE.WebGLRenderer( {canvas: gCanvas} );
+    gRenderer = new THREE.WebGLRenderer( {canvas: gCanvas, antialiasing: true} );
+    gRenderer.setPixelRatio(window.devicePixelRatio * 1.5);
     THREE.ColorManagement.enabled = true;
     gRenderer.shadowMap.enabled = true;
     gRenderer.setSize(window.innerWidth, window.innerHeight);
