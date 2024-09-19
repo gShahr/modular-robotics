@@ -150,5 +150,12 @@ function animate(time) {
 
 	gRenderer.render( gScene, gUser.camera );
 
+    // Manually add line strokes to SVG paths, if in SVG rendering mode
+    if (renderMode == 'SVG') {
+        let rawSvg = gRenderer.domElement.innerHTML;
+        let fixedSvg = rawSvg.replace(/style="/g, 'style="stroke-width:1;stroke:black;stroke-linecap:round;');
+        gRenderer.domElement.innerHTML = fixedSvg;
+    }
+
     requestAnimationFrame(animate);
 }

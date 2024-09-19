@@ -60,11 +60,9 @@ export class Module {
         this.cumulativeRotationMatrix = new THREE.Matrix4();
 
         this.mesh = _createModuleMesh(moduleType, color, scale);
-        this.border = _createModuleBorder(moduleType, scale + 0.01);
         this._setMeshMatrix();
         this.parentMesh = new THREE.Object3D(); // Parent object will never rotate
         this.parentMesh.position.set(...pos);
-        this.mesh.add(this.border);
         this.parentMesh.add(this.mesh);
         //let axesHelper = new THREE.AxesHelper(1.2);
         //this.parentMesh.add(axesHelper);
