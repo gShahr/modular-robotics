@@ -82,6 +82,7 @@ function keydown_input_callback(event) {
         case 'ArrowRight': _requestForwardAnim(); break;
         case 'ArrowLeft': _requestBackwardAnim(); break;
         case 'M': toggleRenderMode(); break;
+        case 'P': console.log(gRenderer.domElement); break;
         default: break;
     }
 }
