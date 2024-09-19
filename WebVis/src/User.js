@@ -26,11 +26,11 @@ export class User {
     resetCamera() {
         let newCamera;
         switch (this.cameraStyle) {
-            case CameraType.PERSPECTIVE: newCamera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000.0 ); break;
+            case CameraType.PERSPECTIVE: newCamera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 250.0 ); break;
             case CameraType.ORTHOGRAPHIC: {
                 let width = window.innerWidth / 200;
                 let height = window.innerHeight / 200;
-                newCamera = new THREE.OrthographicCamera( -width, width, height, -height, 0.1, 1000.0 ); break;
+                newCamera = new THREE.OrthographicCamera( -width, width, height, -height, 0.1, 250.0 ); break;
             }
         }
         newCamera.position.x = window.gwScenarioCentroid.x;

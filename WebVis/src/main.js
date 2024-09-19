@@ -33,7 +33,7 @@ let renderMode = 'WEBGL';
 function _setupWebGLRenderer() {
     gCanvas.width = window.innerWidth;
     gCanvas.height = window.innerHeight;
-    gRenderer = new THREE.WebGLRenderer({canvas: gCanvas});
+    gRenderer = new THREE.WebGLRenderer( {canvas: gCanvas} );
     THREE.ColorManagement.enabled = true;
     gRenderer.shadowMap.enabled = true;
     gRenderer.setSize(window.innerWidth, window.innerHeight);
@@ -42,9 +42,10 @@ function _setupSVGRenderer() {
     gCanvas.width = 0;
     gCanvas.height = 0;
     THREE.ColorManagement.enabled = false;
-    gRenderer = new SVGRenderer();
+    gRenderer = new SVGRenderer( {} );
     gRenderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(gRenderer.domElement);
+    gRenderer.domElement.setAttribute('xmlns' ,'http://www.w3.org/2000/svg');
     requestAnimationFrame(animate);
 }
 export function toggleRenderMode() {

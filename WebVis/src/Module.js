@@ -41,6 +41,14 @@ function _createModuleMesh(moduleType, color = 0x808080, scale = 1.0) {
     return mesh;
 }
 
+function _createModuleBorder(moduleType, scale = 1.0) {
+    let geometry = new THREE.EdgesGeometry(ModuleGeometries.get(moduleType), 1);
+    let material = new THREE.LineBasicMaterial( {color: 0x000000, linewidth: 2.0} );
+    let lines = new THREE.LineSegments(geometry, material);
+    lines.scale.set(scale, scale, scale);
+    return lines;
+}
+
 export class Module {
     constructor(moduleType, id, pos, color = 0x808080, scale = 1.0) {
         this.moduleType = moduleType;
@@ -52,9 +60,11 @@ export class Module {
         this.cumulativeRotationMatrix = new THREE.Matrix4();
 
         this.mesh = _createModuleMesh(moduleType, color, scale);
+        this.border = _createModuleBorder(moduleType, scale + 0.02);
         this._setMeshMatrix();
         this.parentMesh = new THREE.Object3D(); // Parent object will never rotate
         this.parentMesh.position.set(...pos);
+        this.mesh.add(this.border);
         this.parentMesh.add(this.mesh);
         //let axesHelper = new THREE.AxesHelper(1.2);
         //this.parentMesh.add(axesHelper);
