@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { SVGRenderer } from 'three/addons/renderers/SVGRenderer.js';
 import { Module } from "./Module.js";
 import { User } from "./User.js";
 import { ModuleType, MoveType } from "./utils.js";
@@ -28,18 +29,46 @@ window.gwMoveSequence = new MoveSequence();
 window.gwScenarioCentroid = new THREE.Vector3(0.0, 0.0, 0.0);
 window.gwScenarioRadius = 1.0;
 
+let renderMode = 'WEBGL';
+function _setupWebGLRenderer() {
+    gCanvas.width = window.innerWidth;
+    gCanvas.height = window.innerHeight;
+    gRenderer = new THREE.WebGLRenderer({canvas: gCanvas});
+    THREE.ColorManagement.enabled = true;
+    gRenderer.shadowMap.enabled = true;
+    gRenderer.setSize(window.innerWidth, window.innerHeight);
+}
+function _setupSVGRenderer() {
+    gCanvas.width = 0;
+    gCanvas.height = 0;
+    THREE.ColorManagement.enabled = false;
+    gRenderer = new SVGRenderer();
+    gRenderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(gRenderer.domElement);
+    requestAnimationFrame(animate);
+}
+export function toggleRenderMode() {
+    if (renderMode == 'SVG') {
+        document.body.removeChild(gRenderer.domElement);
+        renderMode = 'WEBGL';
+        _setupWebGLRenderer();
+    } else {
+        renderMode = 'SVG';
+        _setupSVGRenderer();
+    }
+}
+
 /* --- setup --- */
+export let gRenderer;
 export const gCanvas = document.getElementById("scene");
-export const gRenderer = new THREE.WebGLRenderer({canvas: gCanvas});
 export const gLights = {_fullbright: false};
 export const gScene = new THREE.Scene();
 export const gUser = new User();
-gRenderer.setSize( window.innerWidth, window.innerHeight );
-gRenderer.shadowMap.enabled = true;
-gRenderer.setAnimationLoop( animate );
+_setupWebGLRenderer();
 gScene._backgroundColors = [new THREE.Color(0x334D4D), new THREE.Color(0xFFFFFF), new THREE.Color(0x000000)];
 gScene._backgroundColorSelected = 0;
 gScene.background = gScene._backgroundColors[gScene._backgroundColorSelected];
+requestAnimationFrame(animate);
 
 /* --- objects --- */
 // Module constructor automatically adds modules to this global
@@ -71,8 +100,6 @@ let lastFrameTime = 0;
 let gDeltaTime;
 let readyForNewAnimation = true;
 let currentAnimProgress = 0.0; // 0.0-1.0
-
-let debugCount = 2;
 
 export function cancelActiveMove() {
     move = null;
@@ -122,7 +149,5 @@ function animate(time) {
 
 	gRenderer.render( gScene, gUser.camera );
 
-    if (debugCount > 0) {
-        debugCount--;
-    }
+    requestAnimationFrame(animate);
 }

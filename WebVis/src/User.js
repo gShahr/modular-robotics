@@ -9,7 +9,7 @@
 
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { gScene, gCanvas, gUser, gRenderer, gLights } from "./main.js";
+import { gScene, gCanvas, gUser, gRenderer, gLights, toggleRenderMode } from "./main.js";
 import { CameraType } from "./utils.js";
 
 export class User {
@@ -81,6 +81,7 @@ function keydown_input_callback(event) {
         case 'r': gUser.resetCamera(); break;
         case 'ArrowRight': _requestForwardAnim(); break;
         case 'ArrowLeft': _requestBackwardAnim(); break;
+        case 'M': toggleRenderMode(); break;
         default: break;
     }
 }

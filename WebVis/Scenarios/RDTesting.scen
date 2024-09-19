@@ -1,39 +1,39 @@
-Scenario NAME on this line
-Scenario DESCRIPTION on this line
+Scenario Name
+Scenario Description
 RHOMBIC_DODECAHEDRON
 
-1, 255,255,255,100      // Group definition: Group ID, r, g, b, size (1-100)
-2, 255,  0,  0,100      // red
+40, 255,255,255, 100    // Block 2: Group Definitions
+50, 255,  0,  0,  95    // Group 50 is red, with size 95%
 
-01,  1,  0,  0,   0
-02,  2,  0,  1,   1
+1, 40,  0,  0,   0   	// Block 3: Module Definitions
+2, 50,  0,  1,   1		// Module ID #2 starts at <0, 1, 1> and belongs to group 50
 
-02, 56,   1,  0, -1      // First module
-02, 45,  -1,  0, -1
-02, 53,  -1,  0,  1
-02, 15,   1,  0,  1
+2, 56,   1,  0, -1 		// Block 4: Move definitions
+2, 45,  -1,  0, -1		// Module ID #2 moves by <-1, 0, -1> using anchor code 45 (-y, -z)
+2, 53,  -1,  0,  1
+2, 15,   1,  0,  1
 
-02, 56,   1, -1,  0
-02, 46,   0,  1, -1
-02, 45,   0, -1, -1
-02, 43,  -1,  1,  0
-02, 53,  -1, -1,  0
-02, 13,   0,  1,  1
-02, 15,   0, -1,  1
-02, 16,   1,  1,  0
+2, 56,   1, -1,  0		// Still Block #4. New "checkpoint" -- all of these moves will be grouped together
+2, 46,   0,  1, -1
+2, 45,   0, -1, -1
+2, 43,  -1,  1,  0
+2, 53,  -1, -1,  0
+2, 13,   0,  1,  1
+2, 15,   0, -1,  1
+2, 16,   1,  1,  0
 
-02, 56,  -1, -1,  0
-02, 16,   1, -1,  0
-02, 26,   1,  1,  0
-02, 46,   0, -1, -1
-02, 42,   0,  1, -1
-02, 43,  -1, -1,  0
-02, 23,  -1,  1,  0
-02, 13,   0, -1,  1
-02, 12,   0,  1,  1
-02, 16,   1, -1,  0
+2, 56,  -1, -1,  0		// Still Block #4. New "checkpoint"
+2, 16,   1, -1,  0
+2, 26,   1,  1,  0
+2, 46,   0, -1, -1
+2, 42,   0,  1, -1
+2, 43,  -1, -1,  0
+2, 23,  -1,  1,  0
+2, 13,   0, -1,  1
+2, 12,   0,  1,  1
+2, 16,   1, -1,  0
 
-02, 26,   1,  0, -1
-02, 42,  -1,  0, -1
-02, 23,  -1,  0,  1
-02, 12,   1,  0,  1
+2, 26,   1,  0, -1		// Still Block #4. New "checkpoint"
+2, 42,  -1,  0, -1
+2, 23,  -1,  0,  1
+2, 12,   1,  0,  1
