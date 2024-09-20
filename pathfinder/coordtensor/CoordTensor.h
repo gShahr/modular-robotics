@@ -60,6 +60,8 @@ public:
     // Assign a value to every position in the tensor
     void Fill(const typename std::vector<T>::value_type& value);
 
+    void FillFromVector(const std::vector<T>& vec);
+
     // Comparison Operators
     bool operator==(const CoordTensor<T>& right) const;
     bool operator!=(const CoordTensor<T>& right) const;
@@ -346,6 +348,11 @@ CoordTensor<T>& CoordTensor<T>::operator=(const CoordTensor<T> &right) {
     static_assert(sizeof(_arrayInternal) == sizeof(right._arrayInternal));
     std::memcpy(_arrayInternal.data(), right._arrayInternal.data(), sizeof(_arrayInternal));
     return *this;
+}
+
+template<typename T>
+void CoordTensor<T>::FillFromVector(const std::vector<T> &vec) {
+    _arrayInternal = vec;
 }
 
 // Would only work with C++20
