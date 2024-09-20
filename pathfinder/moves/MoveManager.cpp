@@ -452,7 +452,7 @@ std::vector<std::vector<Module*>> GenerateFreeModulePowerSet() {
 
 bool ParallelMoveCheck(CoordTensor<int>& freeSpace, const Module& mod, const MoveBase* move) {
     if (freeSpace[mod.coords + move->MoveOffset()] == OUT_OF_BOUNDS) return false;
-    return std::all_of(std::execution::par_unseq, move->moves.begin(), move->moves.end(), [&move = std::as_const(move), &mod = std::as_const(mod), &freeSpace](auto& moveCheck) {
+    bool result = std::all_of(std::execution::par_unseq, move->moves.begin(), move->moves.end(), [&move = std::as_const(move), &mod = std::as_const(mod), &freeSpace](auto& moveCheck) {
         if (freeSpace[mod.coords + moveCheck.first] < 0) {
             // Space is not occupied
             if (moveCheck.second) {
@@ -472,6 +472,16 @@ bool ParallelMoveCheck(CoordTensor<int>& freeSpace, const Module& mod, const Mov
         //freeSpace[mod.coords + move->MoveOffset()] = OUT_OF_BOUNDS;
         return true;
     });
+    if (result) {
+        for (const auto& moveCheck : move->moves) {
+            if (moveCheck.second == false) {
+                freeSpace[mod.coords + moveCheck.first] = mod.id;
+            }
+        }
+        freeSpace[mod.coords] = FREE_SPACE;
+        freeSpace[mod.coords + move->MoveOffset()] = OUT_OF_BOUNDS;
+    }
+    return result;
 }
 
 std::vector<std::set<ModuleData>> MoveManager::MakeAllParallelMoves() {
@@ -497,15 +507,13 @@ std::vector<std::set<ModuleData>> MoveManager::MakeAllParallelMoves() {
                 }
             }
             // Set up local free space tensor to match lattice
-            freeSpaceInternal = Lattice::coordTensor;
+            freeSpaceInternal.FillFromVector(Lattice::coordTensor.GetArrayInternal());
+            //freeSpaceInternal = Lattice::coordTensor;
             bool success = true;
             // mod[i] checks move[i]
             for (int i = 0; i < modCount; i++) {
                 auto move = _moves[modMoveIndex[i]];
                 auto mod = mods[i];
-                if (move->MoveCheck(freeSpaceInternal, *mod) && freeSpaceInternal[mod->coords + move->MoveOffset()] != OUT_OF_BOUNDS) {
-                    std::cout << "bruv!" << std::endl;
-                }
                 if (!ParallelMoveCheck(freeSpaceInternal, *mod, move)) {
                     success = false;
                     break;
@@ -517,6 +525,7 @@ std::vector<std::set<ModuleData>> MoveManager::MakeAllParallelMoves() {
                     auto mod = mods[i];
                     Lattice::MoveModule(*mod, move->MoveOffset());
                 }
+                // TODO: Need connectivity check here
                 adjStates.push_back(Lattice::GetModuleInfo());
                 for (int i = 0; i < modCount; i++) {
                     auto move = _moves[modMoveIndex[i]];
