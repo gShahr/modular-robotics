@@ -186,7 +186,11 @@ std::vector<Configuration*> ConfigurationSpace::BFS(Configuration* start, const 
 #endif
             return FindPath(start, current);
         }
+#if !CONFIG_PARALLEL_MOVES
         auto adjList = current->MakeAllMoves();
+#else
+        auto adjList = MoveManager::MakeAllParallelMoves();
+#endif
         for (const auto& moduleInfo : adjList) {
             if (visited.find(HashedState(moduleInfo)) == visited.end()) {
                 auto nextConfiguration = current->AddEdge(moduleInfo);
@@ -227,7 +231,11 @@ std::vector<Configuration*> ConfigurationSpace::BFSParallelized(Configuration* s
 #endif
             return FindPath(start, current);
         }
+#if !CONFIG_PARALLEL_MOVES
         auto adjList = current->MakeAllMoves();
+#else
+        auto adjList = MoveManager::MakeAllParallelMoves();
+#endif
         #pragma omp parallel for
         for (const auto& moduleInfo : adjList) {
             const int thread_id = omp_get_thread_num();
@@ -474,7 +482,11 @@ Configuration ConfigurationSpace::GenerateRandomFinal(const int targetMoves) {
         // Get current configuration
         Configuration current(Lattice::GetModuleInfo());
         // Get adjacent configurations
+#if !CONFIG_PARALLEL_MOVES
         auto adjList = current.MakeAllMoves();
+#else
+        auto adjList = MoveManager::MakeAllParallelMoves();
+#endif
         // Shuffle the adjacent configurations
         std::shuffle(adjList.begin(), adjList.end(), std::mt19937{std::random_device{}()});
         // Search through shuffled configurations until an unvisited one is found

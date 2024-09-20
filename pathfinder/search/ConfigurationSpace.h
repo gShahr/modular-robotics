@@ -14,6 +14,10 @@
  * EVERY_DEPTH: Output current depth and configuration every time BFS depth increases
  */
 #define CONFIG_VERBOSE CS_LOG_EVERY_DEPTH
+/* Parallel Move Configuration
+ * This is for permitting multiple moves in one step, not threading the search!
+ */
+#define CONFIG_PARALLEL_MOVES true
 /* JSON Output Configuration
  * In order to output JSON successfully logging must be enabled for every depth
  */
