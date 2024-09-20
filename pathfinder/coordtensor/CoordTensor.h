@@ -56,6 +56,8 @@ public:
     [[nodiscard]]
     const std::valarray<int>& CoordsFromIndex(int index) const;
 
+    void FillFromVector(const std::vector<T>& vec);
+
     // Comparison Operators
     bool operator==(const CoordTensor<T>& right) const;
     bool operator!=(const CoordTensor<T>& right) const;
@@ -331,6 +333,11 @@ inline typename std::vector<T>::reference CoordTensor<T>::ElemAtNthOrderOffset (
 template <typename T>
 inline typename std::vector<T>::const_reference CoordTensor<T>::ElemAtNthOrderOffsetConst (const std::valarray<int>& coords) const {
     return (this->*IdAtInternalOffsetConst)(coords + _offset);
+}
+
+template<typename T>
+void CoordTensor<T>::FillFromVector(const std::vector<T> &vec) {
+    _arrayInternal = vec;
 }
 
 // Would only work with C++20
