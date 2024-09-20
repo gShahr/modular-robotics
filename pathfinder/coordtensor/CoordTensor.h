@@ -62,6 +62,9 @@ public:
     // Comparison Operators
     bool operator==(const CoordTensor<T>& right) const;
     bool operator!=(const CoordTensor<T>& right) const;
+
+    // Assignment operator
+    CoordTensor<T>& operator=(const CoordTensor<T>& right);
 private:
     int _order;
     // Axis size, useful for bounds checking
@@ -339,6 +342,14 @@ inline typename std::vector<T>::const_reference CoordTensor<T>::ElemAtNthOrderOf
 template<typename T>
 void CoordTensor<T>::Fill(const typename std::vector<T>::value_type &value) {
     std::memset(_arrayInternal.data(), value, sizeof(_arrayInternal));
+}
+
+template<typename T>
+CoordTensor<T>& CoordTensor<T>::operator=(const CoordTensor<T> &right) {
+    assert(this->_order == right._order);
+    assert(this->_axisSize == right._axisSize);
+    std::memcpy(_arrayInternal.data(), right._arrayInternal.data(), sizeof(_arrayInternal));
+    return *this;
 }
 
 // Would only work with C++20
