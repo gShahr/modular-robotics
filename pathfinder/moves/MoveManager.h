@@ -147,6 +147,8 @@ public:
     virtual bool operator==(const MoveBase& rhs) const;
 
     friend class MoveManager;
+
+    friend bool ParallelMoveCheck(CoordTensor<int>& freeSpace, const Module& mod, const MoveBase* move);
 };
 
 class Move2d final : public MoveBase {
@@ -197,6 +199,8 @@ public:
 
     // Get what moves can be made by a module
     static std::vector<MoveBase*> CheckAllMoves(CoordTensor<int>& tensor, Module& mod);
+
+    static std::vector<std::set<ModuleData>> MakeAllParallelMoves();
 
     static std::vector<MoveBase*> CheckAllMovesAndConnectivity(CoordTensor<int>& tensor, Module& mod);
 

@@ -438,6 +438,97 @@ std::vector<MoveBase*> MoveManager::CheckAllMoves(CoordTensor<int> &tensor, Modu
     return legalMoves;
 }
 
+std::vector<std::vector<Module*>> GenerateFreeModulePowerSet() {
+    std::vector<std::vector<Module*>> mods(1 << ModuleIdManager::MinStaticID(), std::vector<Module*>());
+    for (int i = 0; i < 1 << ModuleIdManager::MinStaticID(); ++i) {
+        for (int j = 0; j < sizeof(int) * 8; j++) {
+            if (i & 1 << j) {
+                mods[i].push_back(&ModuleIdManager::GetModule(j));
+            }
+        }
+    }
+    return mods;
+}
+
+bool ParallelMoveCheck(CoordTensor<int>& freeSpace, const Module& mod, const MoveBase* move) {
+    if (freeSpace[mod.coords + move->MoveOffset()] == OUT_OF_BOUNDS) return false;
+    return std::all_of(std::execution::par_unseq, move->moves.begin(), move->moves.end(), [&move = std::as_const(move), &mod = std::as_const(mod), &freeSpace](auto& moveCheck) {
+        if (freeSpace[mod.coords + moveCheck.first] < 0) {
+            // Space is not occupied
+            if (moveCheck.second) {
+                // But we wanted it to be! Invalid move.
+                return false;
+            }
+            // Consider this space to be occupied for other modules
+            // TODO: Add a nice number to the TensorContents enum instead of using mod id
+            //freeSpace[mod.coords + moveCheck.first] = mod.id;
+        } else if (!moveCheck.second) {
+            // Space is occupied, but we don't want it to be! Invalid move.
+            return false;
+        }
+
+        // Adjust initial and final coordinates
+        //freeSpace[mod.coords] = FREE_SPACE;
+        //freeSpace[mod.coords + move->MoveOffset()] = OUT_OF_BOUNDS;
+        return true;
+    });
+}
+
+std::vector<std::set<ModuleData>> MoveManager::MakeAllParallelMoves() {
+    static std::vector<std::vector<Module*>> modsToMove = GenerateFreeModulePowerSet();
+    static CoordTensor<int> freeSpaceInternal(Lattice::Order(), Lattice::AxisSize(), FREE_SPACE);
+    std::vector<std::set<ModuleData>> adjStates;
+    // Iterate over all combinations of movable modules
+    for (const auto& mods : modsToMove) {
+        if (mods.empty()) continue;
+        //freeSpaceInternal.Fill(FREE_SPACE);
+        const int modCount = mods.size();
+        const int moveCount = _moves.size();
+        // Starts at [0, ... , 0], should end at [moveCount - 1, ... , moveCount - 1]
+        std::vector<int> modMoveIndex(modCount, 0);
+        while (modMoveIndex[0] < moveCount - 1) {
+            // Set indices to next batch of moves to check
+            for (int i = modCount - 1; i >= 0; i--) {
+                if (modMoveIndex[i] == moveCount - 1) {
+                    modMoveIndex[i] = 0;
+                } else {
+                    modMoveIndex[i]++;
+                    break;
+                }
+            }
+            // Set up local free space tensor to match lattice
+            freeSpaceInternal = Lattice::coordTensor;
+            bool success = true;
+            // mod[i] checks move[i]
+            for (int i = 0; i < modCount; i++) {
+                auto move = _moves[modMoveIndex[i]];
+                auto mod = mods[i];
+                if (move->MoveCheck(freeSpaceInternal, *mod) && freeSpaceInternal[mod->coords + move->MoveOffset()] != OUT_OF_BOUNDS) {
+                    std::cout << "bruv!" << std::endl;
+                }
+                if (!ParallelMoveCheck(freeSpaceInternal, *mod, move)) {
+                    success = false;
+                    break;
+                }
+            }
+            if (success) {
+                for (int i = 0; i < modCount; i++) {
+                    auto move = _moves[modMoveIndex[i]];
+                    auto mod = mods[i];
+                    Lattice::MoveModule(*mod, move->MoveOffset());
+                }
+                adjStates.push_back(Lattice::GetModuleInfo());
+                for (int i = 0; i < modCount; i++) {
+                    auto move = _moves[modMoveIndex[i]];
+                    auto mod = mods[i];
+                    Lattice::MoveModule(*mod, -move->MoveOffset());
+                }
+            }
+        }
+    }
+    return adjStates;
+}
+
 #define MOVEMANAGER_CHECK_BY_OFFSET true
 std::vector<MoveBase*> MoveManager::CheckAllMovesAndConnectivity(CoordTensor<int> &tensor, Module &mod) {
     std::vector<MoveBase*> legalMoves = {};
