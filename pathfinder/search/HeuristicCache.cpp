@@ -5,11 +5,6 @@
 
 constexpr float INVALID_WEIGHT = 999;
 
-struct SearchCoord {
-    std::valarray<int> coords;
-    float depth;
-};
-
 void ChebyshevEnqueueAdjacent(std::queue<SearchCoord>& coordQueue, const SearchCoord& coordInfo) {
     std::vector<std::valarray<int>> adjCoords;
     adjCoords.push_back(coordInfo.coords);

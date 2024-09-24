@@ -6,6 +6,10 @@
 #include "../coordtensor/CoordTensor.h"
 #include "../modules/ModuleManager.h"
 
+struct SearchCoord {
+    std::valarray<int> coords;
+    float depth;
+};
 
 class IHeuristicCache {
 protected:
