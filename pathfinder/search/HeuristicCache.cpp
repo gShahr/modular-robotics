@@ -116,7 +116,7 @@ MoveOffsetHeuristicCache::MoveOffsetHeuristicCache(const std::set<ModuleData> &d
         if (i % Lattice::AxisSize() == 0) std::cout << std::endl;
         if (weightCache.GetArrayInternal()[i] < 10) {
             std::cout << weightCache.GetArrayInternal()[i];
-        } else if (weightCache.GetArrayInternal()[i] == INVALID_WEIGHT) {
+        } else if (weightCache.GetArrayInternal()[i] == INVALID_WEIGHT && Lattice::coordTensor.GetElementDirect(i) >= ModuleIdManager::MinStaticID()) {
             std::cout << "#";
         } else {
             std::cout << " ";
