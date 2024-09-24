@@ -368,6 +368,15 @@ float Configuration::CacheChebyshevDistance(const Configuration *final) const {
     return h / MAX_MOVE_DISTANCE;
 }
 
+float Configuration::CacheMoveOffsetDistance(const Configuration *final) const {
+    static MoveOffsetHeuristicCache cache(final->GetModData());
+    float h = 0;
+    for (const auto& modData : hash.GetState()) {
+        h += cache[modData.Coords()];
+    }
+    return h;
+}
+
 
 std::vector<Configuration*> ConfigurationSpace::AStar(Configuration* start, const Configuration* final) {
 #if CONFIG_OUTPUT_JSON
