@@ -1,5 +1,6 @@
 #include "HeuristicCache.h"
 #include <queue>
+#include <execution>
 #include "../lattice/Lattice.h"
 #include "../moves/MoveManager.h"
 
@@ -67,10 +68,13 @@ void MoveOffsetHeuristicCache::MoveOffsetEnqueueAdjacent(std::queue<SearchCoord>
     auto adjCoordsTemp = adjCoords;
     for (auto adj : adjCoordsTemp) {
         for (const auto& offset : MoveManager::_offsets) {
-            adj += offset;
-            // should add obstacle detection here, to prevent "jumping" over static modules
-            adjCoords.push_back(adj);
-            adj -= offset;
+            if (std::any_of(std::execution::par_unseq ,MoveManager::_movesByOffset[offset].begin(), MoveManager::_movesByOffset[offset].end(), [&](MoveBase* move) {
+                return move->FreeSpaceCheck(Lattice::coordTensor, adj);
+            })) {
+                adj += offset;
+                adjCoords.push_back(adj);
+                adj -= offset;
+            }
         }
     }
     for (const auto& coord : adjCoords) {
@@ -81,6 +85,11 @@ void MoveOffsetHeuristicCache::MoveOffsetEnqueueAdjacent(std::queue<SearchCoord>
 }
 
 MoveOffsetHeuristicCache::MoveOffsetHeuristicCache(const std::set<ModuleData> &desiredState) {
+    // Temporarily remove non-static modules from lattice
+    for (const auto& mod : ModuleIdManager::FreeModules()) {
+        Lattice::coordTensor[mod.coords] = FREE_SPACE;
+    }
+    // Populate weight tensor
     for (const auto& desiredModuleData : desiredState) {
         std::queue<SearchCoord> coordQueue;
         coordQueue.push({desiredModuleData.Coords(), 0});
@@ -97,6 +106,11 @@ MoveOffsetHeuristicCache::MoveOffsetHeuristicCache(const std::set<ModuleData> &d
             coordQueue.pop();
         }
     }
+    // Restore non-static module to lattice
+    for (const auto& mod : ModuleIdManager::FreeModules()) {
+        Lattice::coordTensor[mod.coords] = mod.id;
+    }
+    // Print weight tensor
     std::cout << "Weight Cache:";
     for (int i = 0; i < weightCache.GetArrayInternal().size(); i++) {
         if (i % Lattice::AxisSize() == 0) std::cout << std::endl;
