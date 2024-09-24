@@ -1,5 +1,6 @@
 #ifndef HEURISTICCACHE_H
 #define HEURISTICCACHE_H
+#include <queue>
 #include <valarray>
 #include <set>
 
@@ -23,11 +24,15 @@ public:
 };
 
 class ChebyshevHeuristicCache final : public IHeuristicCache {
+private:
+    static void ChebyshevEnqueueAdjacent(std::queue<SearchCoord>& coordQueue, const SearchCoord& coordInfo);
 public:
     explicit ChebyshevHeuristicCache(const std::set<ModuleData>& desiredState);
 };
 
 class MoveOffsetHeuristicCache final : public IHeuristicCache {
+private:
+    static void MoveOffsetEnqueueAdjacent(std::queue<SearchCoord>& coordQueue, const SearchCoord& coordInfo);
 public:
     explicit MoveOffsetHeuristicCache(const std::set<ModuleData>& desiredState);
 };

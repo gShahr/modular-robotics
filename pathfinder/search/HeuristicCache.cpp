@@ -5,7 +5,13 @@
 
 constexpr float INVALID_WEIGHT = 999;
 
-void ChebyshevEnqueueAdjacent(std::queue<SearchCoord>& coordQueue, const SearchCoord& coordInfo) {
+IHeuristicCache::IHeuristicCache(): weightCache(Lattice::Order(), Lattice::AxisSize(), INVALID_WEIGHT) {}
+
+float IHeuristicCache::operator[](const std::valarray<int> &coords) const {
+    return weightCache[coords];
+}
+
+void ChebyshevHeuristicCache::ChebyshevEnqueueAdjacent(std::queue<SearchCoord>& coordQueue, const SearchCoord& coordInfo) {
     std::vector<std::valarray<int>> adjCoords;
     adjCoords.push_back(coordInfo.coords);
     for (int i = 0; i < Lattice::Order(); i++) {
@@ -22,12 +28,6 @@ void ChebyshevEnqueueAdjacent(std::queue<SearchCoord>& coordQueue, const SearchC
             ModuleIdManager::MinStaticID()) continue;
         coordQueue.push({coord, coordInfo.depth + 1});
     }
-}
-
-IHeuristicCache::IHeuristicCache(): weightCache(Lattice::Order(), Lattice::AxisSize(), INVALID_WEIGHT) {}
-
-float IHeuristicCache::operator[](const std::valarray<int> &coords) const {
-    return weightCache[coords];
 }
 
 ChebyshevHeuristicCache::ChebyshevHeuristicCache(const std::set<ModuleData>& desiredState) {
@@ -61,12 +61,12 @@ ChebyshevHeuristicCache::ChebyshevHeuristicCache(const std::set<ModuleData>& des
     std::cout << std::endl;
 }
 
-void MoveOffsetEnqueueAdjacent(std::queue<SearchCoord>& coordQueue, const SearchCoord& coordInfo, const std::vector<std::valarray<int>> offsets) {
+void MoveOffsetHeuristicCache::MoveOffsetEnqueueAdjacent(std::queue<SearchCoord>& coordQueue, const SearchCoord& coordInfo) {
     std::vector<std::valarray<int>> adjCoords;
     adjCoords.push_back(coordInfo.coords);
     auto adjCoordsTemp = adjCoords;
     for (auto adj : adjCoordsTemp) {
-        for (const auto& offset : offsets) {
+        for (const auto& offset : MoveManager::_offsets) {
             adj += offset;
             // should add obstacle detection here, to prevent "jumping" over static modules
             adjCoords.push_back(adj);
@@ -93,7 +93,7 @@ MoveOffsetHeuristicCache::MoveOffsetHeuristicCache(const std::set<ModuleData> &d
                 coordQueue.pop();
                 continue;
             }
-            MoveOffsetEnqueueAdjacent(coordQueue, coordQueue.front(), MoveManager::_offsets);
+            MoveOffsetEnqueueAdjacent(coordQueue, coordQueue.front());
             coordQueue.pop();
         }
     }
