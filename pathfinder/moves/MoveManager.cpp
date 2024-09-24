@@ -460,10 +460,12 @@ bool ParallelMoveCheck(CoordTensor<int>& freeSpace, const Module& mod, const Mov
                 return false;
             }
             // Consider this space to be occupied for other modules
-            // TODO: Add a nice number to the TensorContents enum instead of using mod id
-            //freeSpace[mod.coords + moveCheck.first] = mod.id;
+            //freeSpace[mod.coords + moveCheck.first] = OCCUPIED_NO_ANCHOR;
         } else if (!moveCheck.second) {
             // Space is occupied, but we don't want it to be! Invalid move.
+            return false;
+        } else if (freeSpace[mod.coords + moveCheck.first] == OCCUPIED_NO_ANCHOR) {
+            // Space is considered occupied, but not permitted for use as an anchor! Invalid move.
             return false;
         }
 
@@ -475,11 +477,10 @@ bool ParallelMoveCheck(CoordTensor<int>& freeSpace, const Module& mod, const Mov
     if (result) {
         for (const auto& moveCheck : move->moves) {
             if (moveCheck.second == false) {
-                freeSpace[mod.coords + moveCheck.first] = mod.id;
+                freeSpace[mod.coords + moveCheck.first] = OCCUPIED_NO_ANCHOR;
             }
         }
-        freeSpace[mod.coords] = FREE_SPACE;
-        freeSpace[mod.coords + move->MoveOffset()] = OUT_OF_BOUNDS;
+        freeSpace[mod.coords + move->MoveOffset()] = OCCUPIED_NO_ANCHOR;
     }
     return result;
 }
@@ -509,7 +510,12 @@ std::vector<std::set<ModuleData>> MoveManager::MakeAllParallelMoves() {
             // Set up local free space tensor to match lattice
             freeSpaceInternal.FillFromVector(Lattice::coordTensor.GetArrayInternal());
             //freeSpaceInternal = Lattice::coordTensor;
+            // Initial setup
             bool success = true;
+            for (int i = 0; i < modCount; i++) {
+                // Forbid current position of all moving modules to be used as anchor
+                freeSpaceInternal[mods[i]->coords] = OCCUPIED_NO_ANCHOR;
+            }
             // mod[i] checks move[i]
             for (int i = 0; i < modCount; i++) {
                 auto move = _moves[modMoveIndex[i]];
