@@ -23,4 +23,9 @@ public:
     explicit ChebyshevHeuristicCache(const std::set<ModuleData>& desiredState);
 };
 
+class MoveOffsetHeuristicCache final : public IHeuristicCache {
+public:
+    explicit MoveOffsetHeuristicCache(const std::set<ModuleData>& desiredState);
+};
+
 #endif //HEURISTICCACHE_H
