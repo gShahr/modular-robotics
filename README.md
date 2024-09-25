@@ -18,13 +18,13 @@
 
 [Documentation](https://github.com/gShahr/modular-robotics/wiki/3D-Tiler)
 
-[Live Demo](https://gshahr.github.io/modular-robotics/3DTiler/Index.html)
+[Live Demo](https://Modular-Robotics-Group.github.io/modular-robotics/3DTiler/Index.html)
 
 ## Visualization
 
 [Documentation](https://github.com/gShahr/modular-robotics/wiki/Visualization-Tool)
 
-[Live Demo](https://gshahr.github.io/modular-robotics/WebVis/index.html)
+[Live Demo](https://Modular-Robotics-Group.github.io/modular-robotics/WebVis/index.html)
 
 ## Examples
 
