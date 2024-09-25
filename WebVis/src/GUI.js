@@ -43,28 +43,16 @@ window._toggleFullbright = function() {
     gLights.headlamp.intensity = gLights._fullbright ? 0 : gLights._defaultHeadlampIntensity;
 }
 
-window._loadExampleScenario1 = async () => {
-    const scen = await fetch('./Scenarios/3d2rMeta.scen').then(response => response.text());
+let _exampleLoaders = {};
+async function _loadExampleScenario(name) {
+    const scen = await fetch(`./Scenarios/${name}.scen`).then(response => response.text());
     new Scenario(scen);
 }
-window._loadExampleScenario2 = async () => {
-    const scen = await fetch('./Scenarios/820.scen').then(response => response.text());
-    new Scenario(scen);
-}
-window._loadExampleScenario3 = async () => {
-    const scen = await fetch('./Scenarios/SlidingTests.scen').then(response => response.text());
-    new Scenario(scen);
-}
-window._loadExampleScenario4 = async () => {
-    const scen = await fetch('./Scenarios/RDTesting.scen').then(response => response.text());
-    new Scenario(scen);
-}
-window._loadExampleScenario5 = async () => {
-    const scen = await fetch('./Scenarios/CubeTesting.scen').then(response => response.text());
-    new Scenario(scen);
+function _generateExampleLoader(name) {
+    return () => _loadExampleScenario(name);
 }
 
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", async function () {
     gGui.add(new GuiGlobalsHelper('gwAnimSpeed', 1.0, SliderType.QUADRATIC), 'value', 0.0, 5.0, 0.1).name("Anim Speed");
     gGui.add(new GuiGlobalsHelper('gwAutoAnimate', false), 'value').name("Auto Animate");
     gGui.add(window.gwUser, 'toggleCameraStyle').name("Toggle Camera Style");
@@ -73,11 +61,19 @@ document.addEventListener("DOMContentLoaded", function () {
     gGui.add(window, '_requestForwardAnim').name("Step Forward");
     gGui.add(window, '_requestBackwardAnim').name("Step Backward");
 
-    // TODO: Auto-populate this folder based on scenarios present in ../Scenarios
     const _folder = gGui.addFolder("Example Scenarios");
-    _folder.add(window, '_loadExampleScenario1').name("2x2x2 Metamodule");
-    _folder.add(window, '_loadExampleScenario2').name("820");
-    _folder.add(window, '_loadExampleScenario3').name("Sliding Moves");
-    _folder.add(window, '_loadExampleScenario4').name("RD Testing");
-    _folder.add(window, '_loadExampleScenario5').name("Cube Testing ");
+    await fetch("./Scenarios/").then(async response => {
+        let scen, item, name, filepath;
+        let raw = await response.text();
+        let el = document.createElement('html');
+        el.innerHTML = raw;
+        let list = el.getElementsByClassName("file scen");
+        for (item in list) {
+            name = list[item].title;
+            if (!name) { continue; }
+            name = name.split('.')[0];
+            _exampleLoaders[name] = _generateExampleLoader(name);
+            _folder.add(_exampleLoaders, name).name(name);
+        }
+    });
 });
