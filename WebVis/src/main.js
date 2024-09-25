@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { SVGRenderer } from 'three/addons/renderers/SVGRenderer.js';
 import { Module } from "./Module.js";
 import { User } from "./User.js";
 import { ModuleType, MoveType } from "./utils.js";
@@ -16,16 +17,6 @@ THREE.Vector3.prototype.sum = function() {
     return (this.x + this.y + this.z);
 }
 
-/* --- setup --- */
-export const gCanvas = document.getElementById("scene");
-export const gRenderer = new THREE.WebGLRenderer({canvas: gCanvas});
-export const gScene = new THREE.Scene();
-export const gUser = new User();
-gRenderer.setSize( window.innerWidth, window.innerHeight );
-gRenderer.shadowMap.enabled = true;
-gRenderer.setAnimationLoop( animate );
-gScene.background = new THREE.Color(0x334D4D);
-
 // Following are global attributes set directly to the window object
 //  This allows them to (more easily) be added to the GUI,
 //  or directly modified by other scripts
@@ -33,24 +24,73 @@ window.gwAutoAnimate = false;
 window.gwForward = true;
 window.gwNextAnimationRequested = false;
 window.gwAnimSpeed = 1.0;
-window.gwUser = gUser;
+window.gwUser = null;
 window.gwMoveSequence = new MoveSequence();
+window.gwScenarioCentroid = new THREE.Vector3(0.0, 0.0, 0.0);
+window.gwScenarioRadius = 1.0;
+
+let renderMode = 'WEBGL';
+function _setupWebGLRenderer() {
+    gCanvas.width = window.innerWidth;
+    gCanvas.height = window.innerHeight;
+    gRenderer = new THREE.WebGLRenderer( {canvas: gCanvas, antialiasing: true} );
+    gRenderer.setPixelRatio(window.devicePixelRatio * 1.5);
+    THREE.ColorManagement.enabled = true;
+    gRenderer.shadowMap.enabled = true;
+    gRenderer.setSize(window.innerWidth, window.innerHeight);
+}
+function _setupSVGRenderer() {
+    gCanvas.width = 0;
+    gCanvas.height = 0;
+    THREE.ColorManagement.enabled = false;
+    gRenderer = new SVGRenderer( {} );
+    gRenderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(gRenderer.domElement);
+    gRenderer.domElement.setAttribute('xmlns' ,'http://www.w3.org/2000/svg');
+    requestAnimationFrame(animate);
+}
+export function toggleRenderMode() {
+    if (renderMode == 'SVG') {
+        document.body.removeChild(gRenderer.domElement);
+        renderMode = 'WEBGL';
+        _setupWebGLRenderer();
+    } else {
+        renderMode = 'SVG';
+        _setupSVGRenderer();
+    }
+}
+
+/* --- setup --- */
+export let gRenderer;
+export const gCanvas = document.getElementById("scene");
+export const gLights = {_fullbright: false};
+export const gScene = new THREE.Scene();
+export const gUser = new User();
+_setupWebGLRenderer();
+gScene._backgroundColors = [new THREE.Color(0x334D4D), new THREE.Color(0xFFFFFF), new THREE.Color(0x000000)];
+gScene._backgroundColorSelected = 0;
+gScene.background = gScene._backgroundColors[gScene._backgroundColorSelected];
+requestAnimationFrame(animate);
 
 /* --- objects --- */
 // Module constructor automatically adds modules to this global
 export const gModules = {}
-new Module(ModuleType.RHOMBIC_DODECAHEDRON, 0, new THREE.Vector3(0.0, 0.0, 0.0), 0x808080, 0.9);
-new Module(ModuleType.RHOMBIC_DODECAHEDRON, 1, new THREE.Vector3(0.0, -1.0, 1.0), 0x008000, 0.9);
-new Module(ModuleType.RHOMBIC_DODECAHEDRON, 2, new THREE.Vector3(1.0, -1.0, 0.0), 0x800000, 0.9);
-new Module(ModuleType.RHOMBIC_DODECAHEDRON, 3, new THREE.Vector3(0.0, -1.0, -1.0), 0x008000, 0.9);
-new Module(ModuleType.RHOMBIC_DODECAHEDRON, 4, new THREE.Vector3(-1.0, -1.0, 0.0), 0x800000, 0.9);
+new Module(ModuleType.RHOMBIC_DODECAHEDRON, 0, new THREE.Vector3(0.0, 0.0, 0.0), 0xFFFFFF, 0.9);
+new Module(ModuleType.RHOMBIC_DODECAHEDRON, 1, new THREE.Vector3(0.0, -1.0, 1.0), 0x00FF00, 0.9);
+new Module(ModuleType.RHOMBIC_DODECAHEDRON, 2, new THREE.Vector3(1.0, -1.0, 0.0), 0xFF0000, 0.9);
+new Module(ModuleType.RHOMBIC_DODECAHEDRON, 3, new THREE.Vector3(0.0, -1.0, -1.0), 0x00FF00, 0.9);
+new Module(ModuleType.RHOMBIC_DODECAHEDRON, 4, new THREE.Vector3(-1.0, -1.0, 0.0), 0xFF0000, 0.9);
 
 /* --- lights --- */
-const lightAmbient = new THREE.AmbientLight(0xFFFFFF, 0.60);
-const lightDirectional = new THREE.DirectionalLight(0xFFFFFF, 0.4);
+export const lightAmbient = new THREE.AmbientLight(0xFFFFFF, 1.0);
+const lightDirectional = new THREE.DirectionalLight(0xFFFFFF, 3.0);
 lightDirectional.position.set(1, 1, 1);
 gScene.add(lightAmbient);
 gScene.add(lightDirectional);
+gLights.lightAmbient = lightAmbient;
+gLights.lightDirectional = lightDirectional;
+gLights._defaultAmbientIntensity = lightAmbient.intensity;
+gLights._defaultDirectionalIntensity = lightDirectional.intensity;
 
 /* --- debug --- */
 let axesHelper = new THREE.AxesHelper(5);
@@ -63,7 +103,12 @@ let gDeltaTime;
 let readyForNewAnimation = true;
 let currentAnimProgress = 0.0; // 0.0-1.0
 
-let debugCount = 2;
+export function cancelActiveMove() {
+    move = null;
+    currentAnimProgress = 0.0;
+    readyForNewAnimation = true;
+    window.gwNextAnimationRequested = false;
+}
 
 function animate(time) {
     gDeltaTime = time - lastFrameTime;
@@ -106,7 +151,12 @@ function animate(time) {
 
 	gRenderer.render( gScene, gUser.camera );
 
-    if (debugCount > 0) {
-        debugCount--;
+    // Manually add line strokes to SVG paths, if in SVG rendering mode
+    if (renderMode == 'SVG') {
+        let rawSvg = gRenderer.domElement.innerHTML;
+        let fixedSvg = rawSvg.replace(/style="/g, 'style="stroke-width:1;stroke:black;stroke-linecap:round;');
+        gRenderer.domElement.innerHTML = fixedSvg;
     }
+
+    requestAnimationFrame(animate);
 }

@@ -9,29 +9,36 @@
 
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { gScene, gCanvas, gUser, gRenderer } from "./main.js";
+import { gScene, gCanvas, gUser, gRenderer, gLights, toggleRenderMode } from "./main.js";
 import { CameraType } from "./utils.js";
 
 export class User {
     constructor() {
         this.cameraStyle = CameraType.PERSPECTIVE;
-        this.headlamp = new THREE.PointLight(0xFFFFFF, 12.0);
+        this.headlamp = new THREE.PointLight(0xFFFFFF, 50.0);
         this.headlamp.position.set(0.0, 0.0, 0.0);
+        gLights.headlamp = this.headlamp;
+        gLights._defaultHeadlampIntensity = this.headlamp.intensity;
         this.resetCamera();
+        window.gwUser = this;
     }
 
     resetCamera() {
         let newCamera;
         switch (this.cameraStyle) {
-            case CameraType.PERSPECTIVE: newCamera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000.0 ); break;
+            case CameraType.PERSPECTIVE: newCamera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 250.0 ); break;
             case CameraType.ORTHOGRAPHIC: {
                 let width = window.innerWidth / 200;
                 let height = window.innerHeight / 200;
-                newCamera = new THREE.OrthographicCamera( -width, width, height, -height, 0.1, 1000.0 ); break;
+                newCamera = new THREE.OrthographicCamera( -width, width, height, -height, 0.1, 250.0 ); break;
             }
         }
-        newCamera.position.z = 5.0;
+        newCamera.position.x = window.gwScenarioCentroid.x;
+        newCamera.position.y = window.gwScenarioCentroid.y;
+        newCamera.position.z = window.gwScenarioCentroid.z + window.gwScenarioRadius + 3.0;
+
         this.controls = new OrbitControls(newCamera, gCanvas);
+        this.controls.target.set(...window.gwScenarioCentroid);
         this.camera = newCamera;
         this.camera.add(this.headlamp);
         gScene.add(this.camera);
@@ -74,6 +81,8 @@ function keydown_input_callback(event) {
         case 'r': gUser.resetCamera(); break;
         case 'ArrowRight': _requestForwardAnim(); break;
         case 'ArrowLeft': _requestBackwardAnim(); break;
+        case 'M': toggleRenderMode(); break;
+        case 'P': console.log(gRenderer.domElement); break;
         default: break;
     }
 }

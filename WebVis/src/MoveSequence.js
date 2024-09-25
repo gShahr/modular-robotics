@@ -5,6 +5,12 @@ export class MoveSequence {
         this.totalMoves = moves.length;
         this.remainingMoves = moves.length;
         this.currentMove = 0;
+        this.updateMoveProgressString();
+    }
+
+    updateMoveProgressString() {
+        this.moveProgressString = `Move #${this.currentMove} / #${this.totalMoves}`;
+        document.getElementById("infoOverlay").innerHTML = this.moveProgressString;
     }
 
     pop() {
@@ -19,6 +25,7 @@ export class MoveSequence {
 
         this.undostack.push(move);
         
+        this.updateMoveProgressString();
         return move;
     }
 
@@ -34,6 +41,7 @@ export class MoveSequence {
 
         this.moves.unshift(move);
 
+        this.updateMoveProgressString();
         return move.reverse();
     }
 }
