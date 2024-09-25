@@ -391,7 +391,7 @@ std::vector<Configuration*> ConfigurationSpace::AStar(Configuration* start, cons
     SearchAnalysis::StartClock();
 #endif
     int dupesAvoided = 0;
-    auto compare = Configuration::CompareConfiguration(final, &Configuration::ManhattanDistance);
+    auto compare = Configuration::CompareConfiguration(final, &Configuration::CacheMoveOffsetDistance);
     using CompareType = decltype(compare);
     std::priority_queue<Configuration*, std::vector<Configuration*>, CompareType> pq(compare);
     std::unordered_set<HashedState> visited;
