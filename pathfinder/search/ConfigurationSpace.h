@@ -17,7 +17,7 @@
 /* Parallel Move Configuration
  * This is for permitting multiple moves in one step, not threading the search!
  */
-#define CONFIG_PARALLEL_MOVES true
+#define CONFIG_PARALLEL_MOVES false
 /* JSON Output Configuration
  * In order to output JSON successfully logging must be enabled for every depth
  */
