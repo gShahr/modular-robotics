@@ -484,7 +484,7 @@ std::vector<MoveBase*> MoveManager::CheckAllMovesAndConnectivity(CoordTensor<int
 }
 
 bool MoveManager::checkConnected(const CoordTensor<int>& tensor, const Module& mod, const MoveBase* move) {
-
+    return false;
 }
 
 std::pair<Module*, MoveBase*> MoveManager::FindMoveToState(const std::set<ModuleData>& modData) {
