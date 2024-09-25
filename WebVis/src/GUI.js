@@ -1,5 +1,16 @@
+import * as THREE from 'three';
 import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 import { Scenario } from './Scenario.js';
+import { gScene, gLights } from './main.js';
+
+// Exact filenames of example scenarios in /Scenarios/
+let EXAMPLE_SCENARIOS = [
+    '2x2x2 Metamodule',
+    '3x3 Metamodule',
+    'Cube Debugging',
+    'RD Debugging',
+    'Slide Debugging'
+]
 
 const SliderType = Object.freeze({
     LINEAR: 0,
@@ -30,38 +41,57 @@ class GuiGlobalsHelper {
 
 export const gGui = new GUI();
 
-window._loadExampleScenario1 = async () => {
-    const scen = await fetch('./Scenarios/3d2rMeta.scen').then(response => response.text());
+window._toggleBackgroundColor = function() {
+    gScene._backgroundColorSelected = (gScene._backgroundColorSelected + 1) % gScene._backgroundColors.length
+    gScene.background = gScene._backgroundColors[gScene._backgroundColorSelected];
+}
+window._toggleFullbright = function() {
+    gLights._fullbright = !gLights._fullbright;
+    gLights.lightAmbient.intensity = gLights._fullbright ? 3.0 : gLights._defaultAmbientIntensity;
+    gLights.lightDirectional.intensity = gLights._fullbright ? 0 : gLights._defaultDirectionalIntensity;
+    gLights.headlamp.intensity = gLights._fullbright ? 0 : gLights._defaultHeadlampIntensity;
+}
+
+let _exampleLoaders = {};
+async function _loadExampleScenario(name) {
+    const scen = await fetch(`./Scenarios/${name}.scen`).then(response => response.text());
     new Scenario(scen);
 }
-window._loadExampleScenario2 = async () => {
-    const scen = await fetch('./Scenarios/820.scen').then(response => response.text());
-    new Scenario(scen);
+function _generateExampleLoader(name) {
+    return () => _loadExampleScenario(name);
 }
-window._loadExampleScenario3 = async () => {
-    const scen = await fetch('./Scenarios/SlidingTests.scen').then(response => response.text());
-    new Scenario(scen);
-}
-window._loadExampleScenario4 = async () => {
-    const scen = await fetch('./Scenarios/RDTesting.scen').then(response => response.text());
-    new Scenario(scen);
-}
-window._loadExampleScenario5 = async () => {
-    const scen = await fetch('./Scenarios/CubeTesting.scen').then(response => response.text());
-    new Scenario(scen);
-}
-document.addEventListener("DOMContentLoaded", function () {
+
+document.addEventListener("DOMContentLoaded", async function () {
     gGui.add(new GuiGlobalsHelper('gwAnimSpeed', 1.0, SliderType.QUADRATIC), 'value', 0.0, 5.0, 0.1).name("Anim Speed");
     gGui.add(new GuiGlobalsHelper('gwAutoAnimate', false), 'value').name("Auto Animate");
     gGui.add(window.gwUser, 'toggleCameraStyle').name("Toggle Camera Style");
+    gGui.add(window, '_toggleBackgroundColor').name("Toggle Background Color");
+    gGui.add(window, '_toggleFullbright').name("Toggle Fullbright");
     gGui.add(window, '_requestForwardAnim').name("Step Forward");
     gGui.add(window, '_requestBackwardAnim').name("Step Backward");
 
-    // TODO: Auto-populate this folder based on scenarios present in ../Scenarios
     const _folder = gGui.addFolder("Example Scenarios");
-    _folder.add(window, '_loadExampleScenario1').name("2x2x2 Metamodule");
-    _folder.add(window, '_loadExampleScenario2').name("820");
-    _folder.add(window, '_loadExampleScenario3').name("Sliding Moves");
-    _folder.add(window, '_loadExampleScenario4').name("RD Testing");
-    _folder.add(window, '_loadExampleScenario5').name("Cube Testing ");
+    for (let i in EXAMPLE_SCENARIOS) {
+        let ex = EXAMPLE_SCENARIOS[i];
+        _exampleLoaders[ex] = _generateExampleLoader(ex);
+        _folder.add(_exampleLoaders, ex).name(ex);
+    }
+
+    // Following code only works with certain server backends (that allow fetching directories).
+    //  Purpose was to automatically identify all elements in the /Scenarios/ subfolder.
+    //
+    // await fetch("./Scenarios/").then(async response => {
+    //     let scen, item, name, filepath;
+    //     let raw = await response.text();
+    //     let el = document.createElement('html');
+    //     el.innerHTML = raw;
+    //     let list = el.getElementsByClassName("file scen");
+    //     for (item in list) {
+    //         name = list[item].title;
+    //         if (!name) { continue; }
+    //         name = name.split('.')[0];
+    //         _exampleLoaders[name] = _generateExampleLoader(name);
+    //         _folder.add(_exampleLoaders, name).name(name);
+    //     }
+    // });
 });
