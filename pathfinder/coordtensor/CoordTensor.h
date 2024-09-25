@@ -1,7 +1,6 @@
 #include <valarray>
 #include <vector>
 
-#include <cstring>
 #include <iostream>
 #include <cmath>
 #include "../utility/debug_util.h"
@@ -345,7 +344,8 @@ void CoordTensor<T>::Fill(const typename std::vector<T>::value_type &value) {
 
 template<typename T>
 CoordTensor<T>& CoordTensor<T>::operator=(const CoordTensor<T> &right) {
-    static_assert(sizeof(_arrayInternal) == sizeof(right._arrayInternal));
+    assert(this->_order == right._order);
+    assert(this->_axisSize == right._axisSize);
     std::memcpy(_arrayInternal.data(), right._arrayInternal.data(), sizeof(_arrayInternal));
     return *this;
 }
