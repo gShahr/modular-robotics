@@ -1,5 +1,6 @@
 #include <valarray>
 #include <vector>
+#include <cstring>
 
 #include <iostream>
 #include <cmath>
@@ -64,9 +65,6 @@ public:
     // Comparison Operators
     bool operator==(const CoordTensor<T>& right) const;
     bool operator!=(const CoordTensor<T>& right) const;
-
-    // Assignment operator
-    CoordTensor<T>& operator=(const CoordTensor<T>& right);
 private:
     int _order;
     // Axis size, useful for bounds checking
