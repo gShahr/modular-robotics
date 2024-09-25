@@ -68,9 +68,9 @@ public:
     // Assignment operator
     CoordTensor<T>& operator=(const CoordTensor<T>& right);
 private:
-    const int _order;
+    int _order;
     // Axis size, useful for bounds checking
-    const int _axisSize;
+    int _axisSize;
     // Origin offset
     std::valarray<int> _offset;
     // Coordinate multiplier cache for tensors of order > 3
@@ -129,7 +129,9 @@ const std::valarray<int>& CoordTensor<T>::CoordsFromIndex(int index) const {
 }
 
 template <typename T>
-CoordTensor<T>::CoordTensor(int order, int axisSize, const typename std::vector<T>::value_type& value, const std::valarray<int>& originOffset) : _order(order), _axisSize(axisSize) {
+CoordTensor<T>::CoordTensor(int order, int axisSize, const typename std::vector<T>::value_type& value, const std::valarray<int>& originOffset) {
+    _order = order;
+    _axisSize = axisSize;
     // Calculate number of elements in tensor
     int internalSize = (int) std::pow(_axisSize, order);
     // Resize internal array to accommodate all elements
@@ -211,7 +213,9 @@ CoordTensor<T>::CoordTensor(int order, int axisSize, const typename std::vector<
 }
 
 template<>
-inline CoordTensor<bool>::CoordTensor(int order, int axisSize, const typename std::vector<bool>::value_type& value, const std::valarray<int>& originOffset) : _order(order), _axisSize(axisSize) {
+inline CoordTensor<bool>::CoordTensor(int order, int axisSize, const typename std::vector<bool>::value_type& value, const std::valarray<int>& originOffset) {
+    _order = order;
+    _axisSize = axisSize;
     // Calculate number of elements in tensor
     int internalSize = (int) std::pow(_axisSize, order);
     // Resize internal array to accommodate all elements
@@ -343,18 +347,9 @@ void CoordTensor<T>::Fill(const typename std::vector<T>::value_type &value) {
 }
 
 template<typename T>
-CoordTensor<T>& CoordTensor<T>::operator=(const CoordTensor<T> &right) {
-    assert(this->_order == right._order);
-    assert(this->_axisSize == right._axisSize);
-    std::memcpy(_arrayInternal.data(), right._arrayInternal.data(), sizeof(_arrayInternal));
-    return *this;
-}
-
-template<typename T>
 void CoordTensor<T>::FillFromVector(const std::vector<T> &vec) {
     _arrayInternal = vec;
 }
-
 // Would only work with C++20
 /*template <typename T>
 std::vector<T>::size_type CoordTensor<T>::size() const {
