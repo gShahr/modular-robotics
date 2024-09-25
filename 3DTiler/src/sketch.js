@@ -112,7 +112,9 @@ function exportToJson() {
         }
     }
     jsonOutput += "\n    ]\n}";
-    dwnldAsTxt("3Dtiles.json", jsonOutput);
+    var defaultFilename = "3Dtiles.json";
+    var filename = prompt("Enter the filename:", defaultFilename);
+    dwnldAsTxt(filename, jsonOutput);
 }
 
 function exportToScen() {
@@ -125,15 +127,19 @@ function exportToScen() {
 	current_block = blocks[i];
 	ScenOutput += i + "," + "0" + "," + current_block.x + "," + current_block.y + "," + current_block.z + "\n";
     }
-    dwnldAsTxt("3Dtiles.scen", ScenOutput);
+    var defaultFilename = "3Dtiles.scen";
+    var filename = prompt("Enter the filename:", defaultFilename);
+    dwnldAsTxt(filename, ScenOutput);
 }
 
 function exportToObj() {
+    var defaultFilename = "model.obj";
+    var filename = prompt("Enter the filename:", defaultFilename);
     const blob = new Blob([objects], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'model.obj';
+    a.download = filename;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);

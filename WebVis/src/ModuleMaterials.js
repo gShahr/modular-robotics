@@ -5,7 +5,6 @@ import { ModuleType } from "./utils.js";
 
 function _constructGenericMaterial(texture, color) {
     return new THREE.MeshPhongMaterial({
-        flatShading: true,
         map: texture,
         color: color,
         onBeforeCompile: shader => { // Manually update the existing material shader to add borders to modules
@@ -56,13 +55,14 @@ gl_FragColor = vec4(interior + border, 1.0);
 
 function _constructBasicMaterial(texture, color) {
     return new THREE.MeshPhongMaterial({
-        flatShading: true,
         map: texture,
         color: color,
     });
 }
 
 export const ModuleMaterialConstructors = new Map([
+    //[ModuleType.CUBE, _constructBasicMaterial],
+    //[ModuleType.RHOMBIC_DODECAHEDRON, _constructBasicMaterial],
     [ModuleType.CUBE, _constructGenericMaterial],
     [ModuleType.RHOMBIC_DODECAHEDRON, _constructGenericMaterial],
 ]);

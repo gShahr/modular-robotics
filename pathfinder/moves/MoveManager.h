@@ -130,6 +130,8 @@ public:
     virtual void InitMove(const nlohmann::basic_json<>& moveDef) = 0;
     // Check to see if move is possible for a given module
     virtual bool MoveCheck(const CoordTensor<int>& tensor, const Module& mod) = 0;
+    // Check to see if free space requirements are satisfied at a given position
+    virtual bool FreeSpaceCheck(const CoordTensor<int>& tensor, const std::valarray<int>& coords);
 
     [[nodiscard]]
     MoveBase* MakeCopy() const override = 0;
@@ -147,6 +149,8 @@ public:
     virtual bool operator==(const MoveBase& rhs) const;
 
     friend class MoveManager;
+
+    friend bool ParallelMoveCheck(CoordTensor<int>& freeSpace, const Module& mod, const MoveBase* move);
 };
 
 class Move2d final : public MoveBase {
@@ -198,12 +202,16 @@ public:
     // Get what moves can be made by a module
     static std::vector<MoveBase*> CheckAllMoves(CoordTensor<int>& tensor, Module& mod);
 
+    static std::vector<std::set<ModuleData>> MakeAllParallelMoves();
+
     static std::vector<MoveBase*> CheckAllMovesAndConnectivity(CoordTensor<int>& tensor, Module& mod);
 
     static bool checkConnected(const CoordTensor<int>& tensor, const Module& mod, const MoveBase* move);
 
     // Get a pair containing which module has to make what move in order to reach an adjacent state
     static std::pair<Module*, MoveBase*> FindMoveToState(const std::set<ModuleData>& modData);
+
+    friend class MoveOffsetHeuristicCache;
 };
 
 #endif //MODULAR_ROBOTICS_MOVEMANAGER_H

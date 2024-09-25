@@ -1,5 +1,6 @@
 #include <valarray>
 #include <vector>
+#include <cstring>
 
 #include <iostream>
 #include <cmath>
@@ -55,6 +56,11 @@ public:
     // Get a coordinate vector from an index
     [[nodiscard]]
     const std::valarray<int>& CoordsFromIndex(int index) const;
+
+    // Assign a value to every position in the tensor
+    void Fill(const typename std::vector<T>::value_type& value);
+
+    void FillFromVector(const std::vector<T>& vec);
 
     // Comparison Operators
     bool operator==(const CoordTensor<T>& right) const;
@@ -333,6 +339,15 @@ inline typename std::vector<T>::const_reference CoordTensor<T>::ElemAtNthOrderOf
     return (this->*IdAtInternalOffsetConst)(coords + _offset);
 }
 
+template<typename T>
+void CoordTensor<T>::Fill(const typename std::vector<T>::value_type &value) {
+    std::memset(_arrayInternal.data(), value, sizeof(_arrayInternal));
+}
+
+template<typename T>
+void CoordTensor<T>::FillFromVector(const std::vector<T> &vec) {
+    _arrayInternal = vec;
+}
 // Would only work with C++20
 /*template <typename T>
 std::vector<T>::size_type CoordTensor<T>::size() const {
