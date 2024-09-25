@@ -1,7 +1,6 @@
 #include <chrono>
 #include <iostream>
 #include <getopt.h>
-#include <set>
 #include <string>
 #include "moves/MoveManager.h"
 #include "search/ConfigurationSpace.h"
