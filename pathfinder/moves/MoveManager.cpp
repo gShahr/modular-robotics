@@ -68,6 +68,15 @@ void Move::RotateAnim(Move::AnimType& anim, const int a, const int b) {
     }
 }
 
+bool MoveBase::FreeSpaceCheck(const CoordTensor<int> &tensor, const std::valarray<int> &coords) {
+    return std::all_of(std::execution::par_unseq, moves.begin(), moves.end(), [&coords = std::as_const(coords), &tensor = std::as_const(tensor)](auto& move) {
+        if ( !move.second && (tensor[coords + move.first] > FREE_SPACE)) {
+            return false;
+        }
+        return true;
+    });
+}
+
 void MoveBase::Rotate(const int a, const int b) {
     std::swap(initPos[a], initPos[b]);
     std::swap(finalPos[a], finalPos[b]);
@@ -581,7 +590,7 @@ std::vector<MoveBase*> MoveManager::CheckAllMovesAndConnectivity(CoordTensor<int
 }
 
 bool MoveManager::checkConnected(const CoordTensor<int>& tensor, const Module& mod, const MoveBase* move) {
-
+    return false;
 }
 
 std::pair<Module*, MoveBase*> MoveManager::FindMoveToState(const std::set<ModuleData>& modData) {

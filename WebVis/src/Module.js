@@ -15,6 +15,14 @@ const gTexLoader = new THREE.TextureLoader();
 let cubeTexture = gTexLoader.load('./resources/textures/cube_face.png');
 let rdTexture = gTexLoader.load('./resources/textures/cube_face.png');
 
+// Interpolation function used for animation progress: Should map [0.0, 1.0] -> [0.0, 1.0]
+function _animInterp(pct) {
+    //return pct < 0.5 ? 4 * pct * pct * pct : 1 - Math.pow(-2 * pct + 2, 3) / 2; // Cubic ease in-out
+    //return pct < 0.5 ? 2 * pct * pct : 1 - Math.pow(-2 * pct + 2, 2) / 2; // Quadratic ease in-out
+    return -(Math.cos(Math.PI * pct) - 1) / 2; // Sinusodal ease in-out
+    //return pct; // Bypass
+}
+
 function _createModuleMesh(moduleType, color = 0x808080, scale = 1.0) {
     let geometry = ModuleGeometries.get(moduleType);
     let material;
@@ -31,6 +39,14 @@ function _createModuleMesh(moduleType, color = 0x808080, scale = 1.0) {
     mesh.receiveShadow = true;
     mesh.matrixAutoUpdate = false; // We will calculate transformation matrices ourselves
     return mesh;
+}
+
+function _createModuleBorder(moduleType, scale = 1.0) {
+    let geometry = new THREE.EdgesGeometry(ModuleGeometries.get(moduleType), 1);
+    let material = new THREE.LineBasicMaterial( {color: 0x000000, linewidth: 2.0} );
+    let lines = new THREE.LineSegments(geometry, material);
+    lines.scale.set(scale, scale, scale);
+    return lines;
 }
 
 export class Module {
@@ -66,10 +82,11 @@ export class Module {
     }
 
     animateMove(move, pct) {
+        let iPct = _animInterp(pct);
         switch (move.moveType) {
-            case MoveType.PIVOT: this._pivotAnimate(move, pct); break;
-            case MoveType.SLIDING: this._slidingAnimate(move, pct); break;
-            case MoveType.MONKEY: this._monkeyAnimate(move, pct); break;
+            case MoveType.PIVOT: this._pivotAnimate(move, iPct); break;
+            case MoveType.SLIDING: this._slidingAnimate(move, iPct); break;
+            case MoveType.MONKEY: this._monkeyAnimate(move, iPct); break;
         }
     }
 

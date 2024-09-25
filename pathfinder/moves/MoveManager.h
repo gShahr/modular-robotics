@@ -130,6 +130,8 @@ public:
     virtual void InitMove(const nlohmann::basic_json<>& moveDef) = 0;
     // Check to see if move is possible for a given module
     virtual bool MoveCheck(const CoordTensor<int>& tensor, const Module& mod) = 0;
+    // Check to see if free space requirements are satisfied at a given position
+    virtual bool FreeSpaceCheck(const CoordTensor<int>& tensor, const std::valarray<int>& coords);
 
     [[nodiscard]]
     MoveBase* MakeCopy() const override = 0;
@@ -208,6 +210,8 @@ public:
 
     // Get a pair containing which module has to make what move in order to reach an adjacent state
     static std::pair<Module*, MoveBase*> FindMoveToState(const std::set<ModuleData>& modData);
+
+    friend class MoveOffsetHeuristicCache;
 };
 
 #endif //MODULAR_ROBOTICS_MOVEMANAGER_H
