@@ -23,28 +23,27 @@ std::unordered_map<std::string, IModuleProperty* (*)(const nlohmann::basic_json<
     return _constructors;
 }
 
-std::unordered_map<std::string, void (*)()>& ModuleProperties::Functions() {
-    static std::unordered_map<std::string, void (*)()> _functions;
+std::unordered_map<std::string, boost::any (*)()>& ModuleProperties::Functions() {
+    static std::unordered_map<std::string, boost::any (*)()> _functions;
     return _functions;
 }
 
-std::unordered_map<std::string, void(*)(IModuleProperty*)>& ModuleProperties::InstFunctions() {
-    static std::unordered_map<std::string, void(*)(IModuleProperty*)> _functions;
+std::unordered_map<std::string, boost::any (*)(IModuleProperty*)>& ModuleProperties::InstFunctions() {
+    static std::unordered_map<std::string, boost::any (*)(IModuleProperty*)> _functions;
     return _functions;
 }
 
+std::unordered_map<std::string, boost::any(*)(boost::any...)>& ModuleProperties::ArgFunctions() {
+    static std::unordered_map<std::string, boost::any(*)(boost::any...)> _functions;
+    return _functions;
+}
 
-// template<typename T, class... Args>
-// std::unordered_map<std::string, T (*)(Args...)>& ModuleProperties::Functions() {
-//     static std::unordered_map<std::string, T (*)(Args...)> _functions;
-//     return _functions;
-// }
+std::unordered_map<std::string, boost::any(*)(IModuleProperty*, boost::any...)>& ModuleProperties::ArgInstFunctions() {
+    static std::unordered_map<std::string, boost::any(*)(IModuleProperty*, boost::any...)> _functions;
+    return _functions;
+}
 
-// template<typename T, class... Args>
-// std::unordered_map<std::string, T(PropertyFunction<T, Args...>::*)(Args...)>& ModuleProperties::InstFunctions() {
-//     static std::unordered_map<std::string, T(PropertyFunction<T, Args...>::*)(Args...)> _instFunctions;
-//     return _instFunctions;
-// }
+int ModuleProperties::_propertiesLinkedCount = 0;
 
 ModuleProperties::ModuleProperties(const ModuleProperties& other) {
     _properties.clear();
@@ -75,17 +74,22 @@ void ModuleProperties::LinkProperties() {
         boost::dll::shared_library propertyLibrary(propertyLibPath);
         if (propertyClassDef.contains("staticFunctions")) {
             for (const auto& functionName : propertyClassDef["staticFunctions"]) {
-                auto function = propertyLibrary.get<void()>(functionName);
+                auto function = propertyLibrary.get<boost::any ()>(functionName);
                 Functions()[functionName] = function;
             }
         }
         if (propertyClassDef.contains("instanceFunctions")) {
             for (const auto& functionName : propertyClassDef["instanceFunctions"]) {
-                auto function = propertyLibrary.get<void(IModuleProperty*)>(functionName);
+                auto function = propertyLibrary.get<boost::any (IModuleProperty*)>(functionName);
                 InstFunctions()[functionName] = function;
             }
         }
+        _propertiesLinkedCount++;
     }
+}
+
+int ModuleProperties::PropertyCount() {
+    return _propertiesLinkedCount;
 }
 
 void ModuleProperties::CallFunction(const std::string &funcKey) {
@@ -93,21 +97,6 @@ void ModuleProperties::CallFunction(const std::string &funcKey) {
         Functions()[funcKey]();
     }
 }
-
-
-// template<typename T, class... Args>
-// void ModuleProperties::MapStaticFunction(const std::string& key, T (*function)(Args...)) {
-//     Functions<T>()[key] = function;
-// }
-
-// template<typename T>
-// T ModuleProperties::CallFunction(const std::string& propKey, const std::string& funcKey) const {
-//     auto prop = Find(propKey);
-//     if (prop == nullptr) {
-//         return T();
-//     }
-//     return Functions<T>()[funcKey]();
-// }
 
 void ModuleProperties::InitProperties(const nlohmann::basic_json<>& propertyDefs) {
     for (const auto& key : PropertyKeys()) {
@@ -219,17 +208,4 @@ std::size_t boost::hash<ModuleProperties>::operator()(const ModuleProperties& mo
     }
     //return prev;
     return boost::hash_range(hashes.begin(), hashes.end());
-}
-
-// Templates and shared libraries don't mix well apparently, might want to look into clever ways to automate this
-template<>
-int& ResultHolder<int>() {
-    static int result;
-    return result;
-}
-
-template<>
-std::unordered_set<int>& ResultHolder<std::unordered_set<int>>() {
-    static std::unordered_set<int> result;
-    return result;
 }

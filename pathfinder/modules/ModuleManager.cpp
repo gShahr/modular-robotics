@@ -188,6 +188,12 @@ std::vector<Module>& ModuleIdManager::Modules() {
     return _modules;
 }
 
+std::span<Module>& ModuleIdManager::FreeModules() {
+    static std::span<Module> freeModules = std::span(_modules).subspan(0, _staticStart);
+    return freeModules;
+}
+
+
 Module& ModuleIdManager::GetModule(const int id) {
     return _modules[id];
 }

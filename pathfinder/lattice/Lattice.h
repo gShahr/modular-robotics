@@ -25,7 +25,8 @@
 
 enum TensorContents {
     OUT_OF_BOUNDS = -2,
-    FREE_SPACE = -1
+    FREE_SPACE = -1,
+    OCCUPIED_NO_ANCHOR = std::numeric_limits<int>::max()
 };
 
 class Lattice {

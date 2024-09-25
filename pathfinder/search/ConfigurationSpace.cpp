@@ -186,7 +186,11 @@ std::vector<Configuration*> ConfigurationSpace::BFS(Configuration* start, const 
 #endif
             return FindPath(start, current);
         }
+#if !CONFIG_PARALLEL_MOVES
         auto adjList = current->MakeAllMoves();
+#else
+        auto adjList = MoveManager::MakeAllParallelMoves();
+#endif
         for (const auto& moduleInfo : adjList) {
             if (visited.find(HashedState(moduleInfo)) == visited.end()) {
                 auto nextConfiguration = current->AddEdge(moduleInfo);
@@ -227,7 +231,11 @@ std::vector<Configuration*> ConfigurationSpace::BFSParallelized(Configuration* s
 #endif
             return FindPath(start, current);
         }
+#if !CONFIG_PARALLEL_MOVES
         auto adjList = current->MakeAllMoves();
+#else
+        auto adjList = MoveManager::MakeAllParallelMoves();
+#endif
         #pragma omp parallel for
         for (const auto& moduleInfo : adjList) {
             const int thread_id = omp_get_thread_num();
@@ -368,6 +376,15 @@ float Configuration::CacheChebyshevDistance(const Configuration *final) const {
     return h / MAX_MOVE_DISTANCE;
 }
 
+float Configuration::CacheMoveOffsetDistance(const Configuration *final) const {
+    static MoveOffsetHeuristicCache cache(final->GetModData());
+    float h = 0;
+    for (const auto& modData : hash.GetState()) {
+        h += cache[modData.Coords()];
+    }
+    return h;
+}
+
 
 std::vector<Configuration*> ConfigurationSpace::AStar(Configuration* start, const Configuration* final) {
 #if CONFIG_OUTPUT_JSON
@@ -382,7 +399,7 @@ std::vector<Configuration*> ConfigurationSpace::AStar(Configuration* start, cons
     SearchAnalysis::StartClock();
 #endif
     int dupesAvoided = 0;
-    auto compare = Configuration::CompareConfiguration(final, &Configuration::ManhattanDistance);
+    auto compare = Configuration::CompareConfiguration(final, &Configuration::CacheMoveOffsetDistance);
     using CompareType = decltype(compare);
     std::priority_queue<Configuration*, std::vector<Configuration*>, CompareType> pq(compare);
     std::unordered_set<HashedState> visited;
@@ -474,7 +491,11 @@ Configuration ConfigurationSpace::GenerateRandomFinal(const int targetMoves) {
         // Get current configuration
         Configuration current(Lattice::GetModuleInfo());
         // Get adjacent configurations
+#if !CONFIG_PARALLEL_MOVES
         auto adjList = current.MakeAllMoves();
+#else
+        auto adjList = MoveManager::MakeAllParallelMoves();
+#endif
         // Shuffle the adjacent configurations
         std::shuffle(adjList.begin(), adjList.end(), std::mt19937{std::random_device{}()});
         // Search through shuffled configurations until an unvisited one is found

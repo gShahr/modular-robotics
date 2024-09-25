@@ -68,6 +68,15 @@ void Move::RotateAnim(Move::AnimType& anim, const int a, const int b) {
     }
 }
 
+bool MoveBase::FreeSpaceCheck(const CoordTensor<int> &tensor, const std::valarray<int> &coords) {
+    return std::all_of(std::execution::par_unseq, moves.begin(), moves.end(), [&coords = std::as_const(coords), &tensor = std::as_const(tensor)](auto& move) {
+        if ( !move.second && (tensor[coords + move.first] > FREE_SPACE)) {
+            return false;
+        }
+        return true;
+    });
+}
+
 void MoveBase::Rotate(const int a, const int b) {
     std::swap(initPos[a], initPos[b]);
     std::swap(finalPos[a], finalPos[b]);
@@ -436,6 +445,112 @@ std::vector<MoveBase*> MoveManager::CheckAllMoves(CoordTensor<int> &tensor, Modu
     }
 #endif
     return legalMoves;
+}
+
+std::vector<std::vector<Module*>> GenerateFreeModulePowerSet() {
+    std::vector<std::vector<Module*>> mods(1 << ModuleIdManager::MinStaticID(), std::vector<Module*>());
+    for (int i = 0; i < 1 << ModuleIdManager::MinStaticID(); ++i) {
+        for (int j = 0; j < sizeof(int) * 8; j++) {
+            if (i & 1 << j) {
+                mods[i].push_back(&ModuleIdManager::GetModule(j));
+            }
+        }
+    }
+    return mods;
+}
+
+bool ParallelMoveCheck(CoordTensor<int>& freeSpace, const Module& mod, const MoveBase* move) {
+    if (freeSpace[mod.coords + move->MoveOffset()] == OUT_OF_BOUNDS) return false;
+    bool result = std::all_of(std::execution::par_unseq, move->moves.begin(), move->moves.end(), [&move = std::as_const(move), &mod = std::as_const(mod), &freeSpace](auto& moveCheck) {
+        if (freeSpace[mod.coords + moveCheck.first] < 0) {
+            // Space is not occupied
+            if (moveCheck.second) {
+                // But we wanted it to be! Invalid move.
+                return false;
+            }
+            // Consider this space to be occupied for other modules
+            //freeSpace[mod.coords + moveCheck.first] = OCCUPIED_NO_ANCHOR;
+        } else if (!moveCheck.second) {
+            // Space is occupied, but we don't want it to be! Invalid move.
+            return false;
+        } else if (freeSpace[mod.coords + moveCheck.first] == OCCUPIED_NO_ANCHOR) {
+            // Space is considered occupied, but not permitted for use as an anchor! Invalid move.
+            return false;
+        }
+
+        // Adjust initial and final coordinates
+        //freeSpace[mod.coords] = FREE_SPACE;
+        //freeSpace[mod.coords + move->MoveOffset()] = OUT_OF_BOUNDS;
+        return true;
+    });
+    if (result) {
+        for (const auto& moveCheck : move->moves) {
+            if (moveCheck.second == false) {
+                freeSpace[mod.coords + moveCheck.first] = OCCUPIED_NO_ANCHOR;
+            }
+        }
+        freeSpace[mod.coords + move->MoveOffset()] = OCCUPIED_NO_ANCHOR;
+    }
+    return result;
+}
+
+std::vector<std::set<ModuleData>> MoveManager::MakeAllParallelMoves() {
+    static std::vector<std::vector<Module*>> modsToMove = GenerateFreeModulePowerSet();
+    static CoordTensor<int> freeSpaceInternal(Lattice::Order(), Lattice::AxisSize(), FREE_SPACE);
+    std::vector<std::set<ModuleData>> adjStates;
+    // Iterate over all combinations of movable modules
+    for (const auto& mods : modsToMove) {
+        if (mods.empty()) continue;
+        //freeSpaceInternal.Fill(FREE_SPACE);
+        const int modCount = mods.size();
+        const int moveCount = _moves.size();
+        // Starts at [0, ... , 0], should end at [moveCount - 1, ... , moveCount - 1]
+        std::vector<int> modMoveIndex(modCount, 0);
+        while (modMoveIndex[0] < moveCount - 1) {
+            // Set indices to next batch of moves to check
+            for (int i = modCount - 1; i >= 0; i--) {
+                if (modMoveIndex[i] == moveCount - 1) {
+                    modMoveIndex[i] = 0;
+                } else {
+                    modMoveIndex[i]++;
+                    break;
+                }
+            }
+            // Set up local free space tensor to match lattice
+            freeSpaceInternal.FillFromVector(Lattice::coordTensor.GetArrayInternal());
+            //freeSpaceInternal = Lattice::coordTensor;
+            // Initial setup
+            bool success = true;
+            for (int i = 0; i < modCount; i++) {
+                // Forbid current position of all moving modules to be used as anchor
+                freeSpaceInternal[mods[i]->coords] = OCCUPIED_NO_ANCHOR;
+            }
+            // mod[i] checks move[i]
+            for (int i = 0; i < modCount; i++) {
+                auto move = _moves[modMoveIndex[i]];
+                auto mod = mods[i];
+                if (!ParallelMoveCheck(freeSpaceInternal, *mod, move)) {
+                    success = false;
+                    break;
+                }
+            }
+            if (success) {
+                for (int i = 0; i < modCount; i++) {
+                    auto move = _moves[modMoveIndex[i]];
+                    auto mod = mods[i];
+                    Lattice::MoveModule(*mod, move->MoveOffset());
+                }
+                // TODO: Need connectivity check here
+                adjStates.push_back(Lattice::GetModuleInfo());
+                for (int i = 0; i < modCount; i++) {
+                    auto move = _moves[modMoveIndex[i]];
+                    auto mod = mods[i];
+                    Lattice::MoveModule(*mod, -move->MoveOffset());
+                }
+            }
+        }
+    }
+    return adjStates;
 }
 
 #define MOVEMANAGER_CHECK_BY_OFFSET true

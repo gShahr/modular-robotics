@@ -184,6 +184,9 @@ public:
     // Get vector of modules
     static std::vector<Module>& Modules();
 
+    // Get span of non-static modules
+    static std::span<Module>& FreeModules();
+
     // Get module by ID
     static Module& GetModule(int id);
 

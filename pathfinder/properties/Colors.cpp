@@ -51,11 +51,16 @@ const std::unordered_set<int>& ColorProperty::Palette() {
     return allColors;
 }
 
-void Palette() {
-    ResultHolder<std::unordered_set<int>>() = ColorProperty::Palette();
+boost::any Palette() {
+    return std::cref(ColorProperty::Palette());
 }
 
-void GetColorInt(IModuleProperty* prop) {
-    auto colorProp = reinterpret_cast<ColorProperty*>(prop);
-    ResultHolder<int>() = colorProp->GetColorInt();
+boost::any GetColorInt(IModuleProperty* prop) {
+    const auto colorProp = reinterpret_cast<ColorProperty*>(prop);
+    return colorProp->GetColorInt();
+}
+
+// This function is never called but removing it causes runtime crashing on ColorProperty constructor calls
+void Dummy() {
+    ResultHolder<int>() = 4000;
 }

@@ -8,8 +8,13 @@
 #include "../search/ConfigurationSpace.h"
 #include "../modules/Metamodule.h"
 
+#define FLIP_Y_COORD true
+
 namespace LatticeSetup {
     void setupFromJson(const std::string& filename) {
+        if (ModuleProperties::PropertyCount() == 0) {
+            Lattice::ignoreProperties = true;
+        }
         std::ifstream file(filename);
         if (!file) {
             std::cerr << "Unable to open file " << filename << std::endl;
@@ -29,6 +34,9 @@ namespace LatticeSetup {
                         [](const int coord) { return coord; });
             std::valarray<int> coords(position.data(), position.size());
             coords += Lattice::boundaryOffset;
+#if FLIP_Y_COORD
+            coords[1] = Lattice::AxisSize() - coords[1] - 1;
+#endif
             if (!Lattice::ignoreProperties && module.contains("properties")) {
                 ModuleIdManager::RegisterModule(coords, module["static"], module["properties"]);
                 //colors.insert(Colors::colorToInt[module["color"]]);
@@ -39,11 +47,12 @@ namespace LatticeSetup {
         // Register static modules after non-static modules
         ModuleIdManager::DeferredRegistration();
         ModuleProperties::CallFunction("Palette");
-        if (ResultHolder<std::unordered_set<int>>().empty()) {
-            Lattice::ignoreProperties = true;
-        }
-        if (!Lattice::ignoreProperties && ResultHolder<std::unordered_set<int>>().size() == 1) {
-            std::cout << "Only one color used, recommend rerunning with -i flag to improve performance." << std::endl;
+        if (!Lattice::ignoreProperties) {
+            if (const auto& palette = ModuleProperties::CallFunction<const std::unordered_set<int>&>("Palette"); palette.empty()) {
+                Lattice::ignoreProperties = true;
+            } else if (palette.size() == 1) {
+                std::cout << "Only one color used, recommend rerunning with -i flag to improve performance." << std::endl;
+            }
         }
         for (const auto& mod : ModuleIdManager::Modules()) {
             Lattice::AddModule(mod);
@@ -81,6 +90,9 @@ namespace LatticeSetup {
                         [](const int coord) { return coord; });
             std::valarray<int> coords(position.data(), position.size());
             coords += Lattice::boundaryOffset;
+#if FLIP_Y_COORD
+            coords[1] = Lattice::AxisSize() - coords[1] - 1;
+#endif
             //desiredState[coords] = true;
             ModuleProperties props;
             if (!Lattice::ignoreProperties && module.contains("properties")) {

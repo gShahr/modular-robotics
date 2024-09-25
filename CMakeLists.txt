@@ -38,11 +38,13 @@ add_library(PropertyLib SHARED pathfinder/modules/ModuleProperties.cpp)
 
 set_target_properties(PropertyLib PROPERTIES PREFIX "")
 
-add_library(ColorPropertyLib SHARED pathfinder/properties/Colors.cpp pathfinder/modules/ModuleProperties.h pathfinder/utility/color_util.cpp)
+add_library(ColorPropertyLib MODULE pathfinder/properties/Colors.cpp pathfinder/utility/color_util.cpp)
 
 set_target_properties(ColorPropertyLib PROPERTIES PREFIX "")
 
-add_dependencies(ColorPropertyLib copy_properties)
+target_link_libraries(ColorPropertyLib PropertyLib)
+
+add_dependencies(ColorPropertyLib PropertyLib copy_properties)
 
 add_executable(Pathfinder
         pathfinder/main.cpp
