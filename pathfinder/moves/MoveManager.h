@@ -212,6 +212,8 @@ public:
     static std::pair<Module*, MoveBase*> FindMoveToState(const std::set<ModuleData>& modData);
 
     friend class MoveOffsetHeuristicCache;
+
+    friend class MoveOffsetPropertyHeuristicCache;
 };
 
 #endif //MODULAR_ROBOTICS_MOVEMANAGER_H

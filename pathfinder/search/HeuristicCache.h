@@ -37,4 +37,20 @@ public:
     explicit MoveOffsetHeuristicCache(const std::set<ModuleData>& desiredState);
 };
 
+struct SearchCoordProp final : public SearchCoord {
+    std::uint_fast64_t propInt{};
+};
+
+// This cache ONLY works if all module properties remain the same throughout the search
+class MoveOffsetPropertyHeuristicCache final : public IHeuristicCache {
+private:
+    static std::unordered_map<std::uint_fast64_t, int> propConversionMap;
+
+    static void MoveOffsetPropertyEnqueueAdjacent(std::queue<SearchCoordProp>& coordPropQueue, const SearchCoordProp& coordPropInfo);
+public:
+    explicit MoveOffsetPropertyHeuristicCache(const std::set<ModuleData>& desiredState);
+
+    float operator[](const std::valarray<int>& coords, std::uint_fast64_t propInt) const;
+};
+
 #endif //HEURISTICCACHE_H
