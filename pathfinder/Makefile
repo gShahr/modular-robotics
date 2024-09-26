@@ -1,6 +1,6 @@
 CXX = g++
 
-CXXFLAGS = -w -std=c++17 -I $(VCPKG_ROOT)/installed/x64-windows/include
+CXXFLAGS = -w -std=c++23 -I $(VCPKG_ROOT)/installed/x64-windows/include
 
 LDFLAGS = -L $(VCPKG_ROOT)/installed/x64-windows/lib -lgmock -lgtest -lbenchmark -lpthread -fopenmp
 
