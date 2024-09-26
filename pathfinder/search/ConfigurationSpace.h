@@ -121,6 +121,8 @@ public:
     float CacheChebyshevDistance(const Configuration* final) const;
 
     float CacheMoveOffsetDistance(const Configuration* final) const;
+
+    float CacheMoveOffsetPropertyDistance(const Configuration* final) const;
 };
 
 namespace ConfigurationSpace {

@@ -385,6 +385,15 @@ float Configuration::CacheMoveOffsetDistance(const Configuration *final) const {
     return h;
 }
 
+float Configuration::CacheMoveOffsetPropertyDistance(const Configuration *final) const {
+    static MoveOffsetPropertyHeuristicCache cache(final->GetModData());
+    float h = 0;
+    for (const auto& modData : hash.GetState()) {
+        h += cache[modData.Coords(), modData.Properties().AsInt()];
+    }
+    return h;
+}
+
 
 std::vector<Configuration*> ConfigurationSpace::AStar(Configuration* start, const Configuration* final) {
 #if CONFIG_OUTPUT_JSON
