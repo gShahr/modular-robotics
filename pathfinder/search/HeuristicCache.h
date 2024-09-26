@@ -7,6 +7,11 @@
 #include "../coordtensor/CoordTensor.h"
 #include "../modules/ModuleManager.h"
 
+/* Heuristic Cache Optimization Configuration
+ * When set to true, allows heuristic cache creation to adjust coordinate tensor in order to increase move check speed
+ */
+#define CONFIG_HEURISTIC_CACHE_OPTIMIZATION true
+
 struct SearchCoord {
     std::valarray<int> coords;
     float depth;
