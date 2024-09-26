@@ -9,7 +9,10 @@ let EXAMPLE_SCENARIOS = [
     '3x3 Metamodule',
     'Cube Debugging',
     'RD Debugging',
-    'Slide Debugging'
+    'Slide Debugging',
+	'3x3 Metamodule Sub-case 1',
+	'3x3 Metamodule Sub-case 2',
+	'3x3 Metamodule Sub-case 3',
 ]
 
 const SliderType = Object.freeze({
