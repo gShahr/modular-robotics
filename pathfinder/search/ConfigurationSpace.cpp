@@ -150,9 +150,9 @@ std::vector<Configuration*> ConfigurationSpace::BFS(Configuration* start, const 
         if (q.front()->depth != depth) {
             depth++;
 #if CONFIG_VERBOSE > CS_LOG_FINAL_DEPTH
-            std::cout << "bfs depth: " << q.front()->depth << std::endl
-            << "duplicate states avoided: " << dupesAvoided << std::endl
-            << "states visited: " << visited.size() << std::endl
+            std::cout << "BFS Depth: " << q.front()->depth << std::endl
+            << "Duplicate states Avoided: " << dupesAvoided << std::endl
+            << "States Visited: " << visited.size() << std::endl
             << Lattice::ToString() << std::endl;
 #if CONFIG_OUTPUT_JSON
             SearchAnalysis::EnterGraph("BFSDepthOverTime");
@@ -173,9 +173,9 @@ std::vector<Configuration*> ConfigurationSpace::BFS(Configuration* start, const 
 #if CONFIG_OUTPUT_JSON
             SearchAnalysis::PauseClock();
 #endif
-            std::cout << "bfs final depth: " << q.front()->depth << std::endl
-            << "duplicate states avoided: " << dupesAvoided << std::endl
-            << "states visited: " << visited.size() << std::endl
+            std::cout << "BFS Final Depth: " << q.front()->depth << std::endl
+            << "Duplicate states Avoided: " << dupesAvoided << std::endl
+            << "States Visited: " << visited.size() << std::endl
             << Lattice::ToString() << std::endl;
 #if CONFIG_OUTPUT_JSON
             SearchAnalysis::EnterGraph("BFSDepthOverTime");
@@ -220,14 +220,14 @@ std::vector<Configuration*> ConfigurationSpace::BFSParallelized(Configuration* s
         if (q.front()->depth != depth) {
             depth++;
 #if CONFIG_VERBOSE > CS_LOG_FINAL_DEPTH
-            std::cout << "bfs depth: " << q.front()->depth << std::endl << Lattice::ToString() << std::endl;
+            std::cout << "BFS depth: " << q.front()->depth << std::endl << Lattice::ToString() << std::endl;
 #endif
         }
 #endif
         q.pop();
         if (current->GetModData() == final->GetModData()) {
 #if CONFIG_VERBOSE > CS_LOG_FINAL_DEPTH
-            std::cout << "bfs final depth: " << depth << std::endl << Lattice::ToString() << std::endl;
+            std::cout << "BFS final depth: " << depth << std::endl << Lattice::ToString() << std::endl;
 #endif
             return FindPath(start, current);
         }
@@ -426,9 +426,9 @@ std::vector<Configuration*> ConfigurationSpace::AStar(Configuration* start, cons
         if (current->depth != depth) {
             depth = current->depth;
 #if CONFIG_VERBOSE > CS_LOG_FINAL_DEPTH
-            std::cout << "A* depth: " << current->depth << std::endl
-                    << "duplicate states avoided: " << dupesAvoided << std::endl
-                    << "states visited: " << visited.size() << std::endl
+            std::cout << "A* Depth: " << current->depth << std::endl
+                    << "Duplicate states Avoided: " << dupesAvoided << std::endl
+                    << "States Visited: " << visited.size() << std::endl
                     << Lattice::ToString() << std::endl;
 #if CONFIG_OUTPUT_JSON
             SearchAnalysis::EnterGraph("AStarDepthOverTime");
@@ -449,9 +449,9 @@ std::vector<Configuration*> ConfigurationSpace::AStar(Configuration* start, cons
 #if CONFIG_OUTPUT_JSON
             SearchAnalysis::PauseClock();
 #endif
-            std::cout << "A* final depth: " << current->depth << std::endl
-                    << "duplicate states avoided: " << dupesAvoided << std::endl
-                    << "states visited: " << visited.size() << std::endl
+            std::cout << "A* Final Depth: " << current->depth << std::endl
+                    << "Duplicate states Avoided: " << dupesAvoided << std::endl
+                    << "States Visited: " << visited.size() << std::endl
                     << Lattice::ToString() << std::endl;
 #if CONFIG_OUTPUT_JSON
             SearchAnalysis::EnterGraph("AStarDepthOverTime");
