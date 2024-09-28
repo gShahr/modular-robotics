@@ -74,12 +74,10 @@ requestAnimationFrame(animate);
 
 /* --- objects --- */
 // Module constructor automatically adds modules to this global
+// Create a dummy module just to have something on the screen
+//  Once the page is loaded, it should automatically fetch an example scenario anyway
 export const gModules = {}
 new Module(ModuleType.RHOMBIC_DODECAHEDRON, 0, new THREE.Vector3(0.0, 0.0, 0.0), 0xFFFFFF, 0.9);
-new Module(ModuleType.RHOMBIC_DODECAHEDRON, 1, new THREE.Vector3(0.0, -1.0, 1.0), 0x00FF00, 0.9);
-new Module(ModuleType.RHOMBIC_DODECAHEDRON, 2, new THREE.Vector3(1.0, -1.0, 0.0), 0xFF0000, 0.9);
-new Module(ModuleType.RHOMBIC_DODECAHEDRON, 3, new THREE.Vector3(0.0, -1.0, -1.0), 0x00FF00, 0.9);
-new Module(ModuleType.RHOMBIC_DODECAHEDRON, 4, new THREE.Vector3(-1.0, -1.0, 0.0), 0xFF0000, 0.9);
 
 /* --- lights --- */
 export const lightAmbient = new THREE.AmbientLight(0xFFFFFF, 1.0);
@@ -95,6 +93,11 @@ gLights._defaultDirectionalIntensity = lightDirectional.intensity;
 /* --- debug --- */
 let axesHelper = new THREE.AxesHelper(5);
 gScene.add(axesHelper);
+
+// On page loaded
+document.addEventListener("DOMContentLoaded", async function () {
+    new Scenario(await fetch('./Scenarios/3x3 Metamodule.scen').then(response => response.text()));
+});
 
 // TODO Put all this in a better place?
 let move;

@@ -14,7 +14,7 @@ import { CameraType } from "./utils.js";
 
 export class User {
     constructor() {
-        this.cameraStyle = CameraType.PERSPECTIVE;
+        this.cameraStyle = CameraType.ORTHOGRAPHIC;
         this.headlamp = new THREE.PointLight(0xFFFFFF, 50.0);
         this.headlamp.position.set(0.0, 0.0, 0.0);
         gLights.headlamp = this.headlamp;
@@ -28,8 +28,8 @@ export class User {
         switch (this.cameraStyle) {
             case CameraType.PERSPECTIVE: newCamera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 250.0 ); break;
             case CameraType.ORTHOGRAPHIC: {
-                let width = window.innerWidth / 200;
-                let height = window.innerHeight / 200;
+                let width = window.innerWidth / 100;
+                let height = window.innerHeight / 100;
                 newCamera = new THREE.OrthographicCamera( -width, width, height, -height, 0.1, 250.0 ); break;
             }
         }
