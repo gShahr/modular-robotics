@@ -20,6 +20,7 @@ int main(int argc, char* argv[]) {
     std::string finalFile;
     std::string exportFile;
     std::string analysisFile;
+    std::string searchMethod;
 
     // Define the long options
     static option long_options[] = {
@@ -28,12 +29,13 @@ int main(int argc, char* argv[]) {
         {"final-file", required_argument, nullptr, 'F'},
         {"export-file", required_argument, nullptr, 'e'},
         {"analysis-file", required_argument, nullptr, 'a'},
+        {"search-method", required_argument, nullptr, 's'},
         {nullptr, 0, nullptr, 0}
     };
 
     int option_index = 0;
     int c;
-    while ((c = getopt_long(argc, argv, "iI:F:e:a:", long_options, &option_index)) != -1) {
+    while ((c = getopt_long(argc, argv, "iI:F:e:a:s:", long_options, &option_index)) != -1) {
         switch (c) {
             case 'i':
                 ignoreColors = true;
@@ -50,6 +52,8 @@ int main(int argc, char* argv[]) {
             case 'a':
                 analysisFile = optarg;
                 break;
+            case 's':
+                searchMethod = optarg;
             case '?':
                 break;
             default:
@@ -123,8 +127,7 @@ int main(int argc, char* argv[]) {
     MoveManager::InitMoveManager(Lattice::Order(), Lattice::AxisSize());
     MoveManager::RegisterAllMoves("../Moves");
     
-    // BFS
-    std::cout << "BFS Testing:\n";
+    // Pathfinding
     Configuration start(Lattice::GetModuleInfo());
 #if GENERATE_FINAL_STATE
     Configuration end = ConfigurationSpace::GenerateRandomFinal();
@@ -134,7 +137,11 @@ int main(int argc, char* argv[]) {
     std::vector<Configuration*> path;
     try {
         const auto timeBegin = std::chrono::high_resolution_clock::now();
-        path = ConfigurationSpace::BFS(&start, &end);
+        if (searchMethod.empty() || searchMethod == "A*" || searchMethod == "a*") {
+            path = ConfigurationSpace::AStar(&start, &end);
+        } else if (searchMethod == "BFS" || searchMethod == "bfs") {
+            path = ConfigurationSpace::BFS(&start, &end);
+        }
         const auto timeEnd = std::chrono::high_resolution_clock::now();
         const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(timeEnd - timeBegin);
         std::cout << "Search completed in " << duration.count() << " ms" << std::endl;
