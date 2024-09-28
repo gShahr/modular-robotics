@@ -287,28 +287,30 @@ bool Configuration::ValarrayComparator::operator()(const std::valarray<int>& lhs
 }
 
 float Configuration::ManhattanDistance(const Configuration* final) const {
-    auto currentData = this->GetModData();
-    auto finalData = final->GetModData();
+    auto& currentData = this->GetModData();
+    auto& finalData = final->GetModData();
     auto currentIt = currentData.begin();
     auto finalIt = finalData.begin();
     float h = 0;
+    std::valarray<int> diff(0, Lattice::Order());
     while (currentIt != currentData.end() && finalIt != finalData.end()) {
         const auto& currentModule = *currentIt;
         const auto& finalModule = *finalIt;
-        std::valarray<int> diff = currentModule.Coords() - finalModule.Coords();
-        for (auto& val : diff) {
-            h += std::abs(val);
-        }
+        //std::valarray<int> diff = currentModule.Coords() - finalModule.Coords();
+        diff += currentModule.Coords() - finalModule.Coords();
         ++currentIt;
         ++finalIt;
     }
-    //TODO: find out what the right number is (from testing it must be > 4)
-    return h / 5;
+    for (auto& val : diff) {
+        h += std::abs(val);
+    }
+    //TODO: find out what the right number is (from testing it must be > 4) (testing was wrong)
+    return h / 2;
 }
 
 int Configuration::SymmetricDifferenceHeuristic(const Configuration* final) const {
-    auto currentData = this->GetModData();
-    auto finalData = final->GetModData();
+    auto& currentData = this->GetModData();
+    auto& finalData = final->GetModData();
     auto currentIt = currentData.begin();
     auto finalIt = finalData.begin();
     std::set<std::valarray<int>, ValarrayComparator> unionCoords;
@@ -325,8 +327,8 @@ int Configuration::SymmetricDifferenceHeuristic(const Configuration* final) cons
 }
 
 int Configuration::ChebyshevDistance(const Configuration* final) const {
-    auto currentData = this->GetModData();
-    auto finalData = final->GetModData();
+    auto& currentData = this->GetModData();
+    auto& finalData = final->GetModData();
     auto currentIt = currentData.begin();
     auto finalIt = finalData.begin();
     int h = 0;
@@ -346,24 +348,25 @@ int Configuration::ChebyshevDistance(const Configuration* final) const {
 }
 
 float Configuration::TrueChebyshevDistance(const Configuration *final) const {
-    auto currentData = this->GetModData();
-    auto finalData = final->GetModData();
+    auto& currentData = this->GetModData();
+    auto& finalData = final->GetModData();
     auto currentIt = currentData.begin();
     auto finalIt = finalData.begin();
     std::valarray<int> dist(0, Lattice::Order());
     float h = 0;
+    std::valarray<int> diff(0, Lattice::Order());
     while (currentIt != currentData.end() && finalIt != finalData.end()) {
         const auto& currentModule = *currentIt;
         const auto& finalModule = *finalIt;
-        std::valarray<int> diff = currentModule.Coords() - finalModule.Coords();
-        for (int i = 0; i <= Lattice::Order(); ++i) {
-            dist[i] += std::abs(diff[i]);
-        }
+        diff += currentModule.Coords() - finalModule.Coords();
         ++currentIt;
         ++finalIt;
     }
-    //TODO: find out what the right number is (from testing it must be > 2)
-    return static_cast<float>(*std::max_element(begin(dist), end(dist))) / 3;
+    for (int i = 0; i <= Lattice::Order(); ++i) {
+        dist[i] += std::abs(diff[i]);
+    }
+    //TODO: find out what the right number is (from testing it must be > 2) (testing was wrong)
+    return static_cast<float>(*std::max_element(begin(dist), end(dist))) / 2;
 }
 
 float Configuration::CacheChebyshevDistance(const Configuration *final) const {
