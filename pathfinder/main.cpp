@@ -105,7 +105,7 @@ int main(int argc, char* argv[]) {
     }
     if (analysisFile.empty()) {
         auto initialFilePath = std::filesystem::path(initialFile);
-        analysisFile = initialFilePath.replace_filename(initialFilePath.stem().string() + "_analysis");
+        analysisFile = initialFilePath.replace_filename(initialFilePath.stem().string() + "_analysis.json");
         if ((trimPos = analysisFile.find("_initial")) != std::string::npos) {
             analysisFile.erase(trimPos, 8);
         }
