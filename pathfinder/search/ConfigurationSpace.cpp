@@ -287,8 +287,8 @@ bool Configuration::ValarrayComparator::operator()(const std::valarray<int>& lhs
 }
 
 float Configuration::ManhattanDistance(const Configuration* final) const {
-    auto currentData = this->GetModData();
-    auto finalData = final->GetModData();
+    auto& currentData = this->GetModData();
+    auto& finalData = final->GetModData();
     auto currentIt = currentData.begin();
     auto finalIt = finalData.begin();
     float h = 0;
@@ -307,8 +307,8 @@ float Configuration::ManhattanDistance(const Configuration* final) const {
 }
 
 int Configuration::SymmetricDifferenceHeuristic(const Configuration* final) const {
-    auto currentData = this->GetModData();
-    auto finalData = final->GetModData();
+    auto& currentData = this->GetModData();
+    auto& finalData = final->GetModData();
     auto currentIt = currentData.begin();
     auto finalIt = finalData.begin();
     std::set<std::valarray<int>, ValarrayComparator> unionCoords;
@@ -325,8 +325,8 @@ int Configuration::SymmetricDifferenceHeuristic(const Configuration* final) cons
 }
 
 int Configuration::ChebyshevDistance(const Configuration* final) const {
-    auto currentData = this->GetModData();
-    auto finalData = final->GetModData();
+    auto& currentData = this->GetModData();
+    auto& finalData = final->GetModData();
     auto currentIt = currentData.begin();
     auto finalIt = finalData.begin();
     int h = 0;
@@ -346,8 +346,8 @@ int Configuration::ChebyshevDistance(const Configuration* final) const {
 }
 
 float Configuration::TrueChebyshevDistance(const Configuration *final) const {
-    auto currentData = this->GetModData();
-    auto finalData = final->GetModData();
+    auto& currentData = this->GetModData();
+    auto& finalData = final->GetModData();
     auto currentIt = currentData.begin();
     auto finalIt = finalData.begin();
     std::valarray<int> dist(0, Lattice::Order());
