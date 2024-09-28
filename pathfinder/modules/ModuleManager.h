@@ -95,6 +95,8 @@ private:
     std::uint_fast64_t modInt;
 
     static std::unordered_map<std::uint_fast64_t, ModuleProperties> propertyMap;
+
+    static std::unordered_map<std::uint_fast64_t, std::valarray<int>> coordMap;
 public:
     ModuleInt64(const std::valarray<int>& coords, const ModuleProperties& properties);
 

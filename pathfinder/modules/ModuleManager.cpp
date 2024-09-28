@@ -38,6 +38,8 @@ bool ModuleBasic::operator<(const IModuleBasic& right) const {
 
 std::unordered_map<std::uint_fast64_t, ModuleProperties> ModuleInt64::propertyMap;
 
+std::unordered_map<std::uint_fast64_t, std::valarray<int>> ModuleInt64::coordMap;
+
 ModuleInt64::ModuleInt64(const std::valarray<int> &coords, const ModuleProperties &properties) {
     constexpr std::uint_fast64_t propertyMask = 0xFFFFFFFFFF000000;
     modInt = 0;
@@ -51,12 +53,14 @@ ModuleInt64::ModuleInt64(const std::valarray<int> &coords, const ModulePropertie
 }
 
 const std::valarray<int>& ModuleInt64::Coords() const {
-    constexpr std::uint_fast64_t coordMask = 0xFF;
-    static std::valarray<int> result(0, Lattice::Order());
-    for (int i = 0; i < result.size(); i++) {
-        result[i] = (modInt >> (i * 8)) & coordMask; // NOLINT(*-narrowing-conversions) (Mask should handle it)
+    constexpr std::uint_fast64_t coordMask = 0x0000000000FFFFFF;
+    if (!coordMap.contains(modInt & coordMask)) {
+        coordMap[modInt & coordMask] = std::valarray<int>(0, Lattice::Order());
+        for (int i = 0; i < Lattice::Order(); i++) {
+            coordMap[modInt & coordMask][i] = (modInt >> (i * 8)) & 0xFF; // NOLINT(*-narrowing-conversions) (Mask should handle it)
+        }
     }
-    return result;
+    return coordMap[modInt & coordMask];
 }
 
 const ModuleProperties& ModuleInt64::Properties() const {
