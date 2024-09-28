@@ -292,18 +292,20 @@ float Configuration::ManhattanDistance(const Configuration* final) const {
     auto currentIt = currentData.begin();
     auto finalIt = finalData.begin();
     float h = 0;
+    std::valarray<int> diff(0, Lattice::Order());
     while (currentIt != currentData.end() && finalIt != finalData.end()) {
         const auto& currentModule = *currentIt;
         const auto& finalModule = *finalIt;
-        std::valarray<int> diff = currentModule.Coords() - finalModule.Coords();
-        for (auto& val : diff) {
-            h += std::abs(val);
-        }
+        //std::valarray<int> diff = currentModule.Coords() - finalModule.Coords();
+        diff += currentModule.Coords() - finalModule.Coords();
         ++currentIt;
         ++finalIt;
     }
-    //TODO: find out what the right number is (from testing it must be > 4)
-    return h / 5;
+    for (auto& val : diff) {
+        h += std::abs(val);
+    }
+    //TODO: find out what the right number is (from testing it must be > 4) (testing was wrong)
+    return h / 2;
 }
 
 int Configuration::SymmetricDifferenceHeuristic(const Configuration* final) const {
