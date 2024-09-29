@@ -24,6 +24,9 @@ you need a local modified version. The process for building and running Pathfind
 
 ## 3DTiler
 
+3DTiler can be used to set up configurations for modular robots, plan out possible configurations,
+or just make stuff out of cubes (or rhombic dodecahedra).
+
 <p align="center">
   <img src="https://github.com/user-attachments/assets/d0e8ca45-8fe5-437e-8750-eacd78040120" width="640">
 
@@ -38,11 +41,15 @@ you need a local modified version. The process for building and running Pathfind
 
 ## Pathfinder
 
+Pathfinder will find the shortest path between two configurations, if such a path exists.
+
 [Documentation](https://github.com/Modular-Robotics-Group/modular-robotics/wiki/Pathfinder)
 
 [How to compile](https://github.com/Modular-Robotics-Group/modular-robotics/wiki/Pathfinder#compiling)
 
 ## Visualization
+
+WebVis helps validate paths found using Pathfinder by animating the sequence of moves found.
 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/a5a6754b-7876-4b19-a570-a5dc63a21dd3" width="640">
