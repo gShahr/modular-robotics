@@ -24,6 +24,14 @@ you need a local modified version. The process for building and running Pathfind
 
 ## 3DTiler
 
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/d0e8ca45-8fe5-437e-8750-eacd78040120" width="640">
+
+  <p align="center">
+    <em>3DTiler UI</em>
+  </p>
+</p>
+
 [Documentation](https://github.com/gShahr/modular-robotics/wiki/3D-Tiler)
 
 [Open 3DTiler](https://Modular-Robotics-Group.github.io/modular-robotics/3DTiler/Index.html)
@@ -35,6 +43,14 @@ you need a local modified version. The process for building and running Pathfind
 [How to compile](https://github.com/Modular-Robotics-Group/modular-robotics/wiki/Pathfinder#compiling)
 
 ## Visualization
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/a5a6754b-7876-4b19-a570-a5dc63a21dd3" width="640">
+
+  <p align="center">
+    <em>WebVis UI</em>
+  </p>
+</p>
 
 [Documentation](https://github.com/gShahr/modular-robotics/wiki/Visualization-Tool)
 
