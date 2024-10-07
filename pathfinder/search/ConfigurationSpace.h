@@ -130,8 +130,6 @@ namespace ConfigurationSpace {
 
     std::vector<Configuration*> BFS(Configuration* start, const Configuration* final);
 
-    std::vector<Configuration*> BFSParallelized(Configuration* start, const Configuration* final);
-
     std::vector<Configuration*> AStar(Configuration* start, const Configuration* final);
 
     std::vector<Configuration*> FindPath(Configuration* start, Configuration* final);
