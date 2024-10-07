@@ -12,8 +12,6 @@ if(Boost_FOUND)
     add_definitions("-DHAS_BOOST")
 endif()
 
-find_package(nlohmann_json REQUIRED)
-
 if(NOT "${CMAKE_CURRENT_BINARY_DIR}" STREQUAL "${CMAKE_CURRENT_LIST_DIR}")
     if(EXISTS ${CMAKE_CURRENT_BINARY_DIR}/Moves)
         add_custom_target(clear_moves
