@@ -134,6 +134,7 @@ std::vector<Configuration*> ConfigurationSpace::BFS(Configuration* start, const 
     SearchAnalysis::StartClock();
 #endif
     int dupesAvoided = 0;
+    int statesProcessed = 0;
     std::queue<Configuration*> q;
     std::unordered_set<HashedState> visited;
     //start->SetStateAndHash(start->GetModData());
@@ -152,7 +153,8 @@ std::vector<Configuration*> ConfigurationSpace::BFS(Configuration* start, const 
 #if CONFIG_VERBOSE > CS_LOG_FINAL_DEPTH
             std::cout << "BFS Depth: " << q.front()->depth << std::endl
             << "Duplicate states Avoided: " << dupesAvoided << std::endl
-            << "States Visited: " << visited.size() << std::endl
+            << "States Discovered: " << visited.size() << std::endl
+            << "States Processed: " << statesProcessed << std::endl
             << Lattice::ToString() << std::endl;
 #if CONFIG_OUTPUT_JSON
             SearchAnalysis::EnterGraph("BFSDepthOverTime");
@@ -175,7 +177,8 @@ std::vector<Configuration*> ConfigurationSpace::BFS(Configuration* start, const 
 #endif
             std::cout << "BFS Final Depth: " << q.front()->depth << std::endl
             << "Duplicate states Avoided: " << dupesAvoided << std::endl
-            << "States Visited: " << visited.size() << std::endl
+            << "States Discovered: " << visited.size() << std::endl
+            << "States Processed: " << statesProcessed << std::endl
             << Lattice::ToString() << std::endl;
 #if CONFIG_OUTPUT_JSON
             SearchAnalysis::EnterGraph("BFSDepthOverTime");
@@ -189,19 +192,24 @@ std::vector<Configuration*> ConfigurationSpace::BFS(Configuration* start, const 
 #if !CONFIG_PARALLEL_MOVES
         auto adjList = current->MakeAllMoves();
 #else
-        auto adjList = MoveManager::MakeAllParallelMoves();
+        auto adjList = MoveManager::MakeAllParallelMoves(visited);
 #endif
+        statesProcessed++;
         for (const auto& moduleInfo : adjList) {
+#if !CONFIG_PARALLEL_MOVES
             if (visited.find(HashedState(moduleInfo)) == visited.end()) {
+#endif
                 auto nextConfiguration = current->AddEdge(moduleInfo);
                 nextConfiguration->SetParent(current);
                 //nextConfiguration->SetStateAndHash(moduleInfo);
                 q.push(nextConfiguration);
                 nextConfiguration->depth = current->depth + 1;
+#if !CONFIG_PARALLEL_MOVES
                 visited.insert(HashedState(moduleInfo));
             } else {
                 dupesAvoided++;
             }
+#endif
         }
     }
     throw BFSExcept();
@@ -234,7 +242,7 @@ std::vector<Configuration*> ConfigurationSpace::BFSParallelized(Configuration* s
 #if !CONFIG_PARALLEL_MOVES
         auto adjList = current->MakeAllMoves();
 #else
-        auto adjList = MoveManager::MakeAllParallelMoves();
+        auto adjList = MoveManager::MakeAllParallelMoves(visited);
 #endif
         #pragma omp parallel for
         for (const auto& moduleInfo : adjList) {
@@ -272,8 +280,13 @@ void Configuration::SetCost(const int cost) {
 template <typename Heuristic>
 auto Configuration::CompareConfiguration(const Configuration* final, Heuristic heuristic) {
     return [final, heuristic](Configuration* c1, Configuration* c2) {
-        const int cost1 = c1->GetCost() + (c1->*heuristic)(final);
-        const int cost2 = c2->GetCost() + (c2->*heuristic)(final);
+#if CONFIG_PARALLEL_MOVES
+        const float cost1 = c1->GetCost() + (c1->*heuristic)(final) / ModuleIdManager::MinStaticID();
+        const float cost2 = c2->GetCost() + (c2->*heuristic)(final) / ModuleIdManager::MinStaticID();
+#else
+        const float cost1 = c1->GetCost() + (c1->*heuristic)(final);
+        const float cost2 = c2->GetCost() + (c2->*heuristic)(final);
+#endif
         return (cost1 == cost2) ? c1->GetCost() > c2->GetCost() : cost1 > cost2;
     };
 }
@@ -411,7 +424,8 @@ std::vector<Configuration*> ConfigurationSpace::AStar(Configuration* start, cons
     SearchAnalysis::StartClock();
 #endif
     int dupesAvoided = 0;
-    auto compare = Configuration::CompareConfiguration(final, &Configuration::CacheMoveOffsetDistance);
+    int statesProcessed = 0;
+    auto compare = Configuration::CompareConfiguration(final, &Configuration::CacheMoveOffsetPropertyDistance);
     using CompareType = decltype(compare);
     std::priority_queue<Configuration*, std::vector<Configuration*>, CompareType> pq(compare);
     std::unordered_set<HashedState> visited;
@@ -431,7 +445,8 @@ std::vector<Configuration*> ConfigurationSpace::AStar(Configuration* start, cons
 #if CONFIG_VERBOSE > CS_LOG_FINAL_DEPTH
             std::cout << "A* Depth: " << current->depth << std::endl
                     << "Duplicate states Avoided: " << dupesAvoided << std::endl
-                    << "States Visited: " << visited.size() << std::endl
+                    << "States Discovered: " << visited.size() << std::endl
+                    << "States Processed: " << statesProcessed << std::endl
                     << Lattice::ToString() << std::endl;
 #if CONFIG_OUTPUT_JSON
             SearchAnalysis::EnterGraph("AStarDepthOverTime");
@@ -454,7 +469,8 @@ std::vector<Configuration*> ConfigurationSpace::AStar(Configuration* start, cons
 #endif
             std::cout << "A* Final Depth: " << current->depth << std::endl
                     << "Duplicate states Avoided: " << dupesAvoided << std::endl
-                    << "States Visited: " << visited.size() << std::endl
+                    << "States Discovered: " << visited.size() << std::endl
+                    << "States Processed: " << statesProcessed << std::endl
                     << Lattice::ToString() << std::endl;
 #if CONFIG_OUTPUT_JSON
             SearchAnalysis::EnterGraph("AStarDepthOverTime");
@@ -465,18 +481,27 @@ std::vector<Configuration*> ConfigurationSpace::AStar(Configuration* start, cons
 #endif
             return FindPath(start, current);
         }
+#if !CONFIG_PARALLEL_MOVES
         auto adjList = current->MakeAllMoves();
+#else
+        auto adjList = MoveManager::MakeAllParallelMoves(visited);
+#endif
+        statesProcessed++;
         for (const auto& moduleInfo : adjList) {
+#if !CONFIG_PARALLEL_MOVES
             if (HashedState hashedState(moduleInfo); visited.find(hashedState) == visited.end()) {
+#endif
                 auto nextConfiguration = current->AddEdge(moduleInfo);
                 nextConfiguration->SetParent(current);
                 nextConfiguration->SetCost(current->GetCost() + 1);
                 pq.push(nextConfiguration);
                 nextConfiguration->depth = current->depth + 1;
+#if !CONFIG_PARALLEL_MOVES
                 visited.insert(hashedState);
             } else {
                 dupesAvoided++;
             }
+#endif
         }
     }
     throw BFSExcept();
@@ -503,21 +528,27 @@ Configuration ConfigurationSpace::GenerateRandomFinal(const int targetMoves) {
         // Get current configuration
         Configuration current(Lattice::GetModuleInfo());
         // Get adjacent configurations
-#if !CONFIG_PARALLEL_MOVES
-        auto adjList = current.MakeAllMoves();
+#if CONFIG_PARALLEL_MOVES
+        auto adjList = MoveManager::MakeAllParallelMoves(visited);
 #else
-        auto adjList = MoveManager::MakeAllParallelMoves();
+        auto adjList = current.MakeAllMoves();
 #endif
         // Shuffle the adjacent configurations
         std::shuffle(adjList.begin(), adjList.end(), std::mt19937{std::random_device{}()});
         // Search through shuffled configurations until an unvisited one is found
         nextState = {};
+#if CONFIG_PARALLEL_MOVES
+        if (!adjList.empty()) {
+            nextState = adjList.front();
+        }
+#else
         for (const auto& state: adjList) {
             if (visited.find(HashedState(state)) == visited.end()) {
                 nextState = state;
                 break;
             }
         }
+#endif
         // Check to see if a valid adjacent state was found
         if (nextState.empty()) {
             // If no adjacent state was found, return early
