@@ -212,6 +212,8 @@ namespace ConfigurationSpace
 
     std::vector<const Configuration *> DFSTT1(Configuration *start, const Configuration *final, const std::string &heuristic);
 
+    std::vector<const Configuration *> DFSTT3( Configuration *start, const Configuration *final, const std::string &heuristic);
+
     Configuration GenerateRandomFinal(int targetMoves = 8);
 }
 

@@ -10,7 +10,7 @@
 TTEntry::TTEntry(const HashedState& s, double est, double g)
     : state(s),
       estimate(est),
-      gCost(0),
+      gCost(g),
       subtreeSize(0),
       accessCount(0),
       lastAccess(std::chrono::steady_clock::now())

@@ -1715,5 +1715,244 @@ std::vector<const Configuration *> ConfigurationSpace::DFSTT1( Configuration *st
     }
 }
 
+struct DFSTT3Result
+{
+    double estimate;
+    double bound;
+};
 
 
+template <typename Heuristic>
+DFSTT3Result Search_DFSTT3(
+    std::vector<Configuration *> &Path,
+    int g,
+    double bound,
+    std::unordered_set<HashedState> &hash_table,
+    HashTranspositionTable &TT,
+    Heuristic hFunc,
+    const Configuration *final,
+    double esti)
+{
+    Configuration *current = Path.back();
+    HashedState currentHash = current->GetHash();
+
+    current->SetCost(g);
+    current->depth = g;
+
+    // Goal
+    if (currentHash == final->GetHash())
+    {
+        return {0, 0};
+    }
+
+    hash_table.insert(currentHash);
+
+    auto adjList = current->MakeAllMoves();
+
+    // Dead end
+    if (adjList.empty())
+    {
+        hash_table.erase(currentHash);
+
+        TT.store(TTEntry(currentHash, INT_MAX, g));
+
+        return {INT_MAX, INT_MAX};
+    }
+
+    double newEstimate = INT_MAX;
+    double newBound = INT_MAX;
+
+    for (const auto &moduleInfo : adjList)
+    {
+        HashedState nextHash(moduleInfo);
+
+        /*
+         * Lookup2:
+         * returns (estimate, gCost) if the state is in the TT.
+         */
+        auto lookup = TT.lookupWithGCost(nextHash);
+
+        double nextEstimate;
+
+        if (lookup.has_value())
+        {
+            nextEstimate = lookup->first;
+        }
+        else
+        {
+            // We need the actual configuration to calculate h.
+            Configuration *next = current->AddEdge(moduleInfo);
+
+            nextEstimate = (next->*hFunc)(final);
+
+            current->RemoveLastChild();
+        }
+
+        /*
+         * A successor is suboptimal if:
+         *
+         * 1. It forms a cycle, OR
+         * 2. It has already been reached at a lower g-cost.
+         */
+        bool suboptimal = false;
+
+        if (hash_table.find(nextHash) != hash_table.end())
+        {
+            //std::cout<<"cycle detected\n";
+            suboptimal = true;
+        }
+        else if (lookup.has_value() && (lookup->second < g+1) && lookup->second)
+        {
+
+            suboptimal = true;
+        }
+
+        /*
+         * Case 1:
+         * The path is suboptimal.
+         */
+        if (suboptimal)
+        {
+            if (esti < newEstimate)
+                newEstimate = esti;
+
+            continue;
+        }
+
+        /*
+         * Case 2 / Case 3:
+         */
+        double edgeCost = 1;
+        double nextCost = edgeCost + nextEstimate;
+
+        if (nextCost <= bound)
+        {
+            Path.push_back(current->AddEdge(moduleInfo));
+
+            DFSTT3Result result = Search_DFSTT3(
+                Path,
+                g + 1,
+                bound - edgeCost,
+                hash_table,
+                TT,
+                hFunc,
+                final,
+                nextEstimate);
+
+            if (result.estimate == 0)
+            {
+                return {0, 0};
+            }
+
+            double estimate =
+                edgeCost + result.estimate;
+
+            double childBound =
+                edgeCost + result.bound;
+
+            if (estimate < newEstimate)
+                newEstimate = estimate;
+
+            if (childBound < newBound)
+                newBound = childBound;
+
+            Path.pop_back();
+            current->RemoveLastChild();
+        }
+        else
+        {
+            /*
+             * Case 3:
+             * The successor itself exceeds the bound.
+             */
+            if (nextCost < newEstimate)
+                newEstimate = nextCost;
+
+            if (nextCost < newBound)
+                newBound = nextCost;
+        }
+    }
+
+    hash_table.erase(currentHash);
+
+    /*
+     * DFSTT3 stores:
+     *
+     *   (state, new estimate, g(path))
+     */
+    TT.store(
+        TTEntry(
+            currentHash,
+            newEstimate,
+            g));
+
+    return {newEstimate, newBound};
+}
+
+
+std::vector<const Configuration *> ConfigurationSpace::DFSTT3(
+    Configuration *start,
+    const Configuration *final,
+    const std::string &heuristic)
+{
+    float (Configuration::*hFunc)(const Configuration *final) const;
+
+    if (heuristic == "Symmetric Difference" || heuristic == "symmetric difference" || heuristic == "SymDiff" || heuristic == "symdiff")
+    {
+        hFunc = &Configuration::SymmetricDifferenceHeuristic;
+    }
+    else if (heuristic == "Manhattan" || heuristic == "manhattan")
+    {
+        hFunc = &Configuration::ManhattanDistance;
+    }
+    else if (heuristic == "Chebyshev" || heuristic == "chebyshev")
+    {
+        hFunc = &Configuration::TrueChebyshevDistance;
+    }
+    else if (heuristic == "Nearest Chebyshev" || heuristic == "nearest chebyshev")
+    {
+        hFunc = &Configuration::CacheChebyshevDistance;
+    }
+    else if (Lattice::ignoreProperties || ModuleProperties::AnyDynamicPropertiesLinked())
+    {
+        hFunc = &Configuration::CacheMoveOffsetDistance;
+    }
+    else
+    {
+        hFunc = &Configuration::CacheMoveOffsetPropertyDistance;
+    }
+
+    start->SetCost(0);
+
+    double initialEstimate = (start->*hFunc)(final);
+
+    double bound = initialEstimate;
+
+    std::vector<Configuration *> Path;
+    Path.push_back(start);
+
+    std::unordered_set<HashedState> hash_table;
+
+    HashTranspositionTable TT( 1000000, std::make_unique<NoReplacement>());
+
+    while (true)
+    {
+        DFSTT3Result result = Search_DFSTT3( Path, 0, bound, hash_table, TT, hFunc, final, initialEstimate);
+
+        if (result.estimate == 0)
+        {
+            std::cout << "DFSTT3 Final Depth: " << Path.size() - 1 << std::endl;
+
+            std::cout << "DFSTT3 Path length: " << Path.size() << " configurations" << std::endl;
+
+            return std::vector<const Configuration *>( Path.begin(), Path.end());
+        }
+
+        if (result.bound == INT_MAX)
+        {
+            throw SearchExcept();
+        }
+
+        bound = result.bound;
+    }
+}
